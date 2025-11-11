@@ -1,0 +1,118 @@
+import AOS from 'aos';
+import 'aos/dist/aos.css';
+import { useEffect } from "react";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/effect-fade';
+import 'swiper/css/navigation';
+import Button from '../common/Button';
+import Servcies from './Services';
+import ProductGrid from '@/components/ProductGrid';
+import DesignConcept from './DesignConcept';
+import ContactStyling from '../common/ContactStyling';
+import SliderWithFade from './Achivement';
+function Index() {
+    const slides = [
+        {
+            front: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/services/LANDMARK-001.jpg",
+        },
+        {
+            front: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/home/addnew.jpg",
+        },
+        {
+            front: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/services/ServicesPhoto.jpg",
+        },
+        {
+            front: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/work/Cadmax.jpg",
+        },
+
+
+    ]
+    useEffect(() => {
+        AOS.init();
+        AOS.refresh();
+    }, []);
+
+    const sampleProducts = [
+        {
+            id: 1,
+            title: "BELMONT DEEP-SEAT CONTEMPORARY SOFA",
+            price: "₹68,500",
+            image: "https://images.unsplash.com/photo-1549187774-b4e9f04428b0?auto=format&fit=crop&w=1200&q=60",
+        },
+        {
+            id: 2,
+            title: "MONARCH BRUSHED-BRASS ARCHED FLOOR LAMP",
+            price: "₹22,300",
+            image: "https://images.unsplash.com/photo-1505691723518-36a3f3b0bd8b?auto=format&fit=crop&w=1200&q=60",
+        },
+        {
+            id: 3,
+            title: "HERITAGE HANDWOVEN TEXTURED UPHOLSTERY CUSHION SET",
+            price: "₹35,750",
+            image: "https://images.unsplash.com/photo-1598300054635-9b3a2c2a7f5d?auto=format&fit=crop&w=1200&q=60",
+        },
+        {
+            id: 4,
+            title: "AURELUM LARGE-FORM SCULPTED CERAMIC CENTERPIECE VASE",
+            price: "₹85,000",
+            image: "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=60",
+        },
+    ];
+    return (<>
+
+        <div
+            className="relative h-[425px] md:h-[560px] lg:h-[860px] md:mt-[-150px]"
+        >
+            <Swiper
+                slidesPerView={1}
+                autoplay={{ delay: 2500, disableOnInteraction: false }}
+                loop={true} // Enable looping
+                breakpoints={{
+                    300: { slidesPerView: 1 },
+                    480: { slidesPerView: 1 },
+                    768: { slidesPerView: 1 },
+                    1024: { slidesPerView: 1 },
+                }}
+                modules={[Autoplay]}
+                className="w-full h-full"
+            >
+
+                {slides?.map((slide, index) => (
+                    <SwiperSlide key={index} >
+                        <div className="relative w-full h-full">
+                            <img
+                                src={slide.front}
+                                alt="Slide"
+                                className="object-cover w-full h-full"
+                            />
+                            {/* <div className="absolute inset-0 bg-black/40"></div> */}
+                            <div className='absolute  left-[0] right-[0] bottom-[50px] w-full max-w-[1320px] m-auto px-[15px]'>
+                                <h1 className='mb-[15px] fontspring text-[30px] md:text-[60px] lg:text-[80px] text-white leading-[35px] md:leading-[65px] lg:leading-[85px] pe-[10px] md:pe-[100px] lg:pe-[160px] '>Your Dreams, Our Design</h1>
+                                <p className='text-[15px] md:text-[18px] lg:text-[20px] text-[#ffffffd1] pe-[0px] md:pe-[150px] lg:pe-[300px]'>
+                                    Elevate Every Room with Built-to-Last Furniture and End-to-End Interior Design
+                                </p>
+                                <div className='flex flex-wrap gap-[15px] mt-[20px]'>
+
+                                    <Button title={"Shop product"} classes={"bg-white text-black"} />
+                                    <Button title={"Request concept"} classes={"bg-transpart text-black border-1 border-[#ffffff]"} />
+                                </div>
+                            </div>
+                        </div>
+
+                    </SwiperSlide>
+                ))}
+            </Swiper>
+        </div>
+
+        <Servcies />
+
+        <ProductGrid products={sampleProducts} />
+        <DesignConcept />
+        <ContactStyling />
+        <SliderWithFade/>
+    </>);
+}
+
+export default Index;
