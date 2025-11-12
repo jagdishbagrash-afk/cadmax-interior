@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import FooterLogo from "../../Assets/Images/footer-logo.png";
+import FooterLogo from "../../Assets/Images/CADMAX.png";
 import Image from "next/image";
 export default function Footer() {
      return (

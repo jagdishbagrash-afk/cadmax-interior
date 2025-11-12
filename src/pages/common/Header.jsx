@@ -4,6 +4,7 @@ import Image from "next/image";
 
 import { IoIosArrowDown } from "react-icons/io";
 import { useRole } from "@/context/RoleContext";
+import Cadmax from "../../Assets/Images/CADMAX.png"
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 
@@ -54,12 +55,12 @@ export default function Header() {
                         <div className="flex-shrink-0">
                             <Link href="/">
                                    <Image
-                                    className="w-[100px] h-[85px]"
+                                    className="w-[100px] h-[80px] "
                                     height={1000}
                                     width={1000}
                                     layout="fixed"
-                                    src={"/Logo.png"}
-                                    alt="japanese for me logo"
+                                    src={Cadmax}
+                                    alt="Cadmax logo"
                                 />
                             </Link>
                         </div>

@@ -62,13 +62,11 @@ function Index() {
     ];
     return (<>
 
-        <div
-            className="relative h-[425px] md:h-[560px] lg:h-[860px] md:mt-[-150px]"
-        >
+        <div className="relative h-[425px] md:h-[560px] lg:h-[860px] md:mt-[-150px]">
             <Swiper
                 slidesPerView={1}
                 autoplay={{ delay: 2500, disableOnInteraction: false }}
-                loop={true} // Enable looping
+                loop={true}
                 breakpoints={{
                     300: { slidesPerView: 1 },
                     480: { slidesPerView: 1 },
@@ -78,40 +76,55 @@ function Index() {
                 modules={[Autoplay]}
                 className="w-full h-full"
             >
-
                 {slides?.map((slide, index) => (
-                    <SwiperSlide key={index} >
+                    <SwiperSlide key={index}>
                         <div className="relative w-full h-full">
                             <img
                                 src={slide.front}
                                 alt="Slide"
                                 className="object-cover w-full h-full"
                             />
-                            {/* <div className="absolute inset-0 bg-black/40"></div> */}
-                            <div className='absolute  left-[0] right-[0] bottom-[50px] w-full max-w-[1320px] m-auto px-[15px]'>
-                                <h1 className='mb-[15px] fontspring text-[30px] md:text-[60px] lg:text-[80px] text-white leading-[35px] md:leading-[65px] lg:leading-[85px] pe-[10px] md:pe-[100px] lg:pe-[160px] '>Your Dreams, Our Design</h1>
-                                <p className='text-[15px] md:text-[18px] lg:text-[20px] text-[#ffffffd1] pe-[0px] md:pe-[150px] lg:pe-[300px]'>
-                                    Elevate Every Room with Built-to-Last Furniture and End-to-End Interior Design
-                                </p>
-                                <div className='flex flex-wrap gap-[15px] mt-[20px]'>
+                            <div className="absolute inset-0 bg-black/50"></div>
 
-                                    <Button title={"Shop product"} classes={"bg-white text-black"} />
-                                    <Button title={"Request concept"} classes={"bg-transpart text-black border-1 border-[#ffffff]"} />
+                            {/* Overlay content centered */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center w-full m-auto px-[15px] text-center">
+                                <h1
+                                    className="
+      font-[900]
+      text-[20px] 
+      md:text-[22px] 
+      lg:text-[25px]
+      text-white 
+      uppercase 
+      leading-[100%]
+      tracking-[-0.02em]
+      max-w-[700px]
+    "
+
+                                >
+                                    Elevate Every Room with Built-to-Last Furniture and End-to-End Interior Design
+                                </h1>
+
+                                <div className="flex flex-wrap justify-center gap-[15px] mt-[20px]">
+                                    <Button title={"Shop product"} classes={"bg-white text-[#171717]"} />
+                                    <Button title={"Request concept"} classes={"bg-transparent text-white border border-white"} />
                                 </div>
                             </div>
-                        </div>
 
+
+                        </div>
                     </SwiperSlide>
                 ))}
             </Swiper>
         </div>
+
 
         <Servcies />
 
         <ProductGrid products={sampleProducts} />
         <DesignConcept />
         <ContactStyling />
-        <SliderWithFade/>
+        <SliderWithFade />
     </>);
 }
 

@@ -1,5 +1,12 @@
 @import "tailwindcss";
 
+
+@font-face {
+  font-family: 'Creato Display';
+  src: url('/fonts/CreatoDisplay-Bold.woff2') format('woff2'),
+    url('/fonts/CreatoDisplay-Bold.woff') format('woff');
+}
+
 :root {
   --background: #ffffff;
   --foreground: #171717;
@@ -22,7 +29,8 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Creato Display', sans-serif;
+
 }
 
 
@@ -34,7 +42,8 @@ body {
   filter: blur(5px);
   opacity: 0.3;
   transform: scale(0.85);
-  overflow: hidden; /* important - prevents image cutoff on zoom */
+  overflow: hidden;
+  /* important - prevents image cutoff on zoom */
   border-radius: 1rem;
 }
 
