@@ -21,7 +21,7 @@ export default function Header() {
 
     const [DropDown, setDropDown] = useState(false);
     const ToggleDropdown = () => {
-            setDropDown(!DropDown);
+        setDropDown(!DropDown);
     }
     // const [selectLang, setSelectLang] = useState('English');
     const handleLanguageSelect = (lang) => {
@@ -54,7 +54,7 @@ export default function Header() {
                     <div className="relative flex items-center justify-between">
                         <div className="flex-shrink-0">
                             <Link href="/">
-                                   <Image
+                                <Image
                                     className="w-[100px] h-[80px] "
                                     height={1000}
                                     width={1000}
@@ -78,23 +78,23 @@ export default function Header() {
                                     <Link
                                         href="/find-teacher"
                                         className="py-3 lg:py-0 inline-block px-4 lg:px-0 capitalize text-base xl:text-lg tracking-[-0.04em] font-medium text-[#ffffff] hover:text-[#ad0e0e]">
-                                       Project 
+                                        Project
                                     </Link>
                                 </li>
-                              
+
                                 <li className="w-full lg:w-auto relative cursor-pointer [&:not(:last-child)]:border-b lg:border-none border-[#ddd] ">
                                     <Link
                                         href="/become-teacher"
                                         className="py-3 lg:py-0 inline-block px-4 lg:px-0 capitalize text-base xl:text-lg tracking-[-0.04em] font-medium text-[#ffffff] hover:text-[#ad0e0e]">
-                                       Services
+                                        Services
                                     </Link>
                                 </li>
 
-                                  <li className="w-full lg:w-auto relative cursor-pointer [&:not(:last-child)]:border-b lg:border-none border-[#ddd] ">
+                                <li className="w-full lg:w-auto relative cursor-pointer [&:not(:last-child)]:border-b lg:border-none border-[#ddd] ">
                                     <Link
                                         href="/become-teacher"
                                         className="py-3 lg:py-0 inline-block px-4 lg:px-0 capitalize text-base xl:text-lg tracking-[-0.04em] font-medium text-[#ffffff] hover:text-[#ad0e0e]">
-                                       Booking 
+                                        Booking
                                     </Link>
                                 </li>
                             </ul>
@@ -125,15 +125,15 @@ export default function Header() {
                         </div>
                         <div className="flex flex-wrap space-x-4 items-center ml-auto lg:ml-0 mr-2 lg:mr-0">
                             {router?.pathname == "/become-teacher" &&
-                            <div className="group relative mr-0 lg:mr-4 xl:mr-5">
-                                <div onClick={ToggleDropdown} className="relative cursor-pointer border border-[#CC2828] text-base tracking-[-0.03em] rounded-[6px] text-[#ffffff] py-1.5 pl-4 pr-8 min-w-[126px] text-center">
-                                    {language == "en" ? "English" : "Japanese"} <IoIosArrowDown size="16" className="absolute right-2 top-1/2 -translate-y-1/2" />
-                                </div>
-                                <div className={`absolute border-b border-l border-r border-[#ddd] bg-white top-full left-0 rounded-b ${DropDown ? 'block' : 'hidden'}`}>
-                                    <button onClick={() => (handleLanguageSelect('en'))} className="w-full cursor-pointer bg-transparent py-.5 px-2 [&:not(:last-child)]:border-b py-2 border-[#ddd] hover:text-[#ffffff]">English</button>
-                                    <button onClick={() => (handleLanguageSelect('ja'))} className="w-full cursor-pointer bg-transparent py-.5 px-2 py-2 [&:not(:last-child)]:border-b hover:text-[#ffffff]">Japanese</button>
-                                </div>
-                            </div>}
+                                <div className="group relative mr-0 lg:mr-4 xl:mr-5">
+                                    <div onClick={ToggleDropdown} className="relative cursor-pointer border border-[#CC2828] text-base tracking-[-0.03em] rounded-[6px] text-[#ffffff] py-1.5 pl-4 pr-8 min-w-[126px] text-center">
+                                        {language == "en" ? "English" : "Japanese"} <IoIosArrowDown size="16" className="absolute right-2 top-1/2 -translate-y-1/2" />
+                                    </div>
+                                    <div className={`absolute border-b border-l border-r border-[#ddd] bg-white top-full left-0 rounded-b ${DropDown ? 'block' : 'hidden'}`}>
+                                        <button onClick={() => (handleLanguageSelect('en'))} className="w-full cursor-pointer bg-transparent py-.5 px-2 [&:not(:last-child)]:border-b py-2 border-[#ddd] hover:text-[#ffffff]">English</button>
+                                        <button onClick={() => (handleLanguageSelect('ja'))} className="w-full cursor-pointer bg-transparent py-.5 px-2 py-2 [&:not(:last-child)]:border-b hover:text-[#ffffff]">Japanese</button>
+                                    </div>
+                                </div>}
                             {/* {user && user?.role ?
                                 <>
                                     <Link
