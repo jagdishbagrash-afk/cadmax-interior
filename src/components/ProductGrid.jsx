@@ -8,8 +8,8 @@ import React from "react";
 export default function ProductGrid({ products = [] }) {
     console.log("Products in ProductGrid:", products);
     return (
+            <section className="bg-[#fffff] py-4 md:py-8 ">
         <div className="container mx-auto px-4 max-w-[1430px]">
-            <section className="bg-gray-50 py-8">
                 <div className="flex items-center justify-between mb-6">
                     <h2 className="text-[24px] font-bold tracking-wide text-[#171717] uppercase cartera">OUR BEST SELLER</h2>
                     <button
@@ -46,7 +46,7 @@ export default function ProductGrid({ products = [] }) {
                         </article>
                     ))}
                 </div>
-            </section>
         </div>
+            </section>
     );
 }

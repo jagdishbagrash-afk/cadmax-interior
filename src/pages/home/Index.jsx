@@ -60,9 +60,9 @@ function Index() {
       <Servcies />
       <ProductGrid products={sampleProducts} />
       <DesignConcept />
+      <About/>
       <ContactStyling />
       <SliderWithFade />
-      <About/>
     </>
   );
 }

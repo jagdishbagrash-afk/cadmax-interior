@@ -35,7 +35,7 @@ const DesignConcept = () => {
     ];
 
     return (
-        <section className="bg-white py-8">
+        <section className="bg-white py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
                 <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera">
                     3D DESIGN CONCEPT

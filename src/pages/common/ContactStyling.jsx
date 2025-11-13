@@ -33,15 +33,15 @@ const ContactStyling = () => {
   ];
 
   return (
-    <section className="bg-white py-10">
+    <section className="bg-white py-4 md:py-8">
       <div className="container mx-auto px-4 max-w-[1430px]">
         {/* Heading */}
-        <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%]  mb-6 tracking-[-0.02em] text-center uppercase cartera">
+        <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] mb-[32px] tracking-[-0.02em] text-center uppercase cartera">
           CONTACT US FOR INTERIOR STYLING
         </h2>
 
         {/* Icons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 text-center ">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center ">
           {items.map((item) => (
             <div
               key={item.id}
