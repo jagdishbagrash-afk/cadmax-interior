@@ -14,9 +14,6 @@ const Achivement = () => {
     { img: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/about/image19.png" },
     { img: "https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/about/image17.png" },
   ];
-
-
-
   return (
     <div className="py-4 md:py-8 bg-[#F6F6F6] overflow-hidden">
       {/* Title and Description Section */}
