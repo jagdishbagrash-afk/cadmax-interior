@@ -1,47 +1,54 @@
 "use client";
+import end from "../../Assets/Images/end.jpg";
+import ligithing from "../../Assets/Images/ligithing.jpg";
+import Button from "../common/Button";
 
 export default function Services() {
   return (
-    <div className="flex flex-col lg:flex-row min-h-screen">
+    <div className="flex flex-col lg:flex-row gap-1 mt-1">
       {/* LEFT SECTION */}
       <div
-        className="flex-1 bg-cover bg-center h-96 lg:h-auto"
+        className="relative flex-1 bg-cover bg-center h-96 lg:h-[450px]"
         style={{
-          backgroundImage:
-            "url('https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/about/image19.png')",
+          backgroundImage: `url(${end?.src})`,
         }}
       >
-        <div className="flex flex-col items-center justify-center h-full p-8 text-white text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold leading-snug tracking-wider mb-8 uppercase max-w-xl">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Content */}
+        <div className="relative flex flex-col items-center justify-center h-full p-8 text-white text-center">
+          <h2 className="text-[#ffffff] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera max-w-[550px] mx-auto">
             CONTEMPORARY FURNITURE, LIGHTING, AND DECOR FOR DAILY USE.
           </h2>
-          <a
-            href="#"
-            className="border-2 border-white text-white py-3 px-8 text-sm font-medium tracking-widest hover:bg-white hover:text-black transition duration-300"
-          >
-            SHOP NOW
-          </a>
+          <Button
+            title={" SHOP NOW"}
+            classes={"bg-transparent text-white border border-white"}
+          />
+
         </div>
       </div>
 
       {/* RIGHT SECTION */}
       <div
-        className="flex-1 bg-cover bg-center h-96 lg:h-auto"
+        className="relative flex-1 bg-cover bg-center h-96 lg:h-[450px]"
         style={{
-          backgroundImage:
-            "url('https://cadmaxpro-buket.s3.ap-south-1.amazonaws.com/assets/about/image18.png')",
+          backgroundImage: `url(${ligithing?.src})`,
         }}
       >
-        <div className="flex flex-col items-center justify-center h-full p-8 text-white text-center">
-          <h2 className="text-3xl md:text-4xl font-semibold leading-snug tracking-wider mb-8 uppercase max-w-xl">
+        {/* Overlay */}
+        <div className="absolute inset-0 bg-black/40"></div>
+
+        {/* Content */}
+        <div className="relative flex flex-col items-center justify-center h-full p-8 text-white text-center">
+          <h2 className="text-[#ffffff] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera max-w-[550px] mx-auto">
+
             RESIDENTIAL AND COMMERCIAL INTERIORS DELIVERED END-TO-END.
           </h2>
-          <a
-            href="#"
-            className="border-2 border-white text-white py-3 px-8 text-sm font-medium tracking-widest hover:bg-white hover:text-black transition duration-300"
-          >
-            VIEW SERVICES
-          </a>
+          <Button
+            title={"VIEW SERVICES"}
+            classes={"bg-transparent text-white border border-white"}
+          />
         </div>
       </div>
     </div>

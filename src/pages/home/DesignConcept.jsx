@@ -19,13 +19,12 @@ const DesignConcept = () => {
             id: 3,
             title: "OFFICE",
             image:
-                "https://images.unsplash.com/photo-1507209696998-3c532be9b2b9?auto=format&fit=crop&w=1200&q=60",
+                "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1200&q=60",
         },
         {
             id: 4,
             title: "KITCHEN",
-            image:
-                "https://images.unsplash.com/photo-1588854337221-4fd3c1d0d6e8?auto=format&fit=crop&w=1200&q=60",
+            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
         },
         {
             id: 5,
@@ -38,7 +37,7 @@ const DesignConcept = () => {
     return (
         <section className="bg-white py-8">
             <div className="container mx-auto px-4 max-w-[1430px]">
-                <h2 className="text-sm font-bold tracking-wide text-gray-900 mb-6">
+                <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera">
                     3D DESIGN CONCEPT
                 </h2>
 
@@ -49,12 +48,15 @@ const DesignConcept = () => {
                         <img
                             src={items[0].image}
                             alt={items[0].title}
-                            className="w-full h-full object-cover transform hover:scale-105 transition duration-500"
+                            className="w-full h-full md:h-[605px] object-cover transform hover:scale-105 transition duration-500"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                            <h3 className="text-white font-semibold text-sm tracking-wide">
+                            <h3
+                                className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase cartera"
+                            >
                                 {items[0].title}
                             </h3>
+
                         </div>
                     </div>
 
@@ -62,15 +64,18 @@ const DesignConcept = () => {
                     {items.slice(1).map((item) => (
                         <div
                             key={item.id}
-                            className="relative overflow-hidden group h-48 sm:h-56 lg:h-[220px]"
+                            className="relative overflow-hidden group h-48 sm:h-56 lg:h-[300px]"
                         >
                             <img
                                 src={item.image}
                                 alt={item.title}
-                                className="w-full h-full object-cover transform group-hover:scale-105 transition duration-500"
+                                className="w-full h-full lg:h-[300px] object-cover transform group-hover:scale-105 transition duration-500"
                             />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <h3 className="text-white font-semibold text-sm tracking-wide">
+                                <h3
+                                    className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase cartera"
+
+                                >
                                     {item.title}
                                 </h3>
                             </div>

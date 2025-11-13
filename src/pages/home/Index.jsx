@@ -10,6 +10,12 @@ import DesignConcept from "./DesignConcept";
 import ContactStyling from "../common/ContactStyling";
 import SliderWithFade from "./Achivement";
 import Slider from "./Slider";
+import Sliderimage from "../../Assets/Images/seller.png";
+import Sliderimage1 from "../../Assets/Images/seller2.png";
+import Sliderimage2 from "../../Assets/Images/seller3.jpg";
+import Sliderimage3 from "../../Assets/Images/seller4.jpg";
+import About from "./About";
+
 
 function Index() {
 
@@ -23,40 +29,40 @@ function Index() {
       id: 1,
       title: "BELMONT DEEP-SEAT CONTEMPORARY SOFA",
       price: "₹68,500",
-      image:
-        "https://images.unsplash.com/photo-1549187774-b4e9f04428b0?auto=format&fit=crop&w=1200&q=60",
+      image: Sliderimage2?.src
+
     },
     {
       id: 2,
       title: "MONARCH BRUSHED-BRASS ARCHED FLOOR LAMP",
       price: "₹22,300",
-      image:
-        "https://images.unsplash.com/photo-1505691723518-36a3f3b0bd8b?auto=format&fit=crop&w=1200&q=60",
+      image: Sliderimage?.src
+      ,
     },
     {
       id: 3,
       title: "HERITAGE HANDWOVEN TEXTURED UPHOLSTERY CUSHION SET",
       price: "₹35,750",
-      image:
-        "https://images.unsplash.com/photo-1598300054635-9b3a2c2a7f5d?auto=format&fit=crop&w=1200&q=60",
+      image: Sliderimage1?.src
     },
     {
       id: 4,
       title: "AURELUM LARGE-FORM SCULPTED CERAMIC CENTERPIECE VASE",
       price: "₹85,000",
-      image:
-        "https://images.unsplash.com/photo-1493666438817-866a91353ca9?auto=format&fit=crop&w=1200&q=60",
+      image: Sliderimage3?.src
+
     },
   ];
 
   return (
     <>
-      <Slider/>
+      <Slider />
       <Servcies />
       <ProductGrid products={sampleProducts} />
       <DesignConcept />
       <ContactStyling />
       <SliderWithFade />
+      <About/>
     </>
   );
 }
