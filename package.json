@@ -12,6 +12,7 @@
     "@netlify/plugin-nextjs": "^5.14.5",
     "aos": "^2.3.4",
     "axios": "^1.13.2",
+    "moment": "^2.30.1",
     "next": "16.0.1",
     "react": "19.2.0",
     "react-dom": "19.2.0",
