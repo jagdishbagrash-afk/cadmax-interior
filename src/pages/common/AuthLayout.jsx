@@ -7,76 +7,76 @@ import { MdLogout } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import Listing from "@/pages/api/Listing";
 import { FaRegUser } from "react-icons/fa6";
-import { useRole } from "@/context/RoleContext";
+// import { useRole } from "@/context/RoleContext";
 
 export default function AuthLayout({ children, page, sidebar }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const { user, setUser } = useRole();
-  const router = useRouter();
+  // const { user, setUser } = useRole();
+  // const router = useRouter();
 
-  const handleLogout = () => {
-    localStorage && localStorage.removeItem("token");
-    router.push("/login");
-    toast.success("Logout Successfully");
-    setUser(null);
-  };
+  // const handleLogout = () => {
+  //   localStorage && localStorage.removeItem("token");
+  //   router.push("/login");
+  //   toast.success("Logout Successfully");
+  //   setUser(null);
+  // };
 
-  const fetchData = async (signal) => {
-    try {
-      const main = new Listing();
-      const response = await main.profileVerify(signal);
-      if (response.data) {
-        setUser(response.data.data.user);
-      }
-      if (!response?.data?.data?.user?.email_verify) {
-        router.push("/verify");
-      }
-    } catch (error) {
-      console.log("error", error);
-      localStorage?.removeItem("token");
-      setUser(null);
-      router.push("/login");
-      toast.error("Please log in first.");
-    }
-  };
+  // const fetchData = async (signal) => {
+  //   try {
+  //     const main = new Listing();
+  //     const response = await main.profileVerify(signal);
+  //     if (response.data) {
+  //       setUser(response.data.data.user);
+  //     }
+  //     if (!response?.data?.data?.user?.email_verify) {
+  //       router.push("/verify");
+  //     }
+  //   } catch (error) {
+  //     console.log("error", error);
+  //     localStorage?.removeItem("token");
+  //     setUser(null);
+  //     router.push("/login");
+  //     toast.error("Please log in first.");
+  //   }
+  // };
 
   // 🔒 New function to check role-based access
-  const checkRoleAccess = (user) => {
-    if (!user) return;
+  // const checkRoleAccess = (user) => {
+  //   if (!user) return;
 
-    const { pathname } = router;
+  //   const { pathname } = router;
 
-    const restrictedRoutes = {
-      student: ["/teacher-dashboard", "/admin"],
-      teacher: ["/admin", "/student"],
-      admin: ["/student", "/teacher-dashboard"],
-    };
+  //   const restrictedRoutes = {
+  //     student: ["/teacher-dashboard", "/admin"],
+  //     teacher: ["/admin", "/student"],
+  //     admin: ["/student", "/teacher-dashboard"],
+  //   };
 
-    const role = user.role;
-    const forbiddenPaths = restrictedRoutes[role] || [];
+  //   const role = user.role;
+  //   const forbiddenPaths = restrictedRoutes[role] || [];
 
-    const isRestricted = forbiddenPaths.some((path) =>
-      pathname.startsWith(path)
-    );
+  //   const isRestricted = forbiddenPaths.some((path) =>
+  //     pathname.startsWith(path)
+  //   );
 
-    if (isRestricted) {
-      router.push("/forbidden");
-    }
-  };
+  //   if (isRestricted) {
+  //     router.push("/forbidden");
+  //   }
+  // };
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-    fetchData(signal);
-    return () => controller.abort();
-  }, []);
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   const { signal } = controller;
+  //   fetchData(signal);
+  //   return () => controller.abort();
+  // }, []);
 
   // Check role-based access after user is set
-  useEffect(() => {
-    if (user) {
-      checkRoleAccess(user);
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     checkRoleAccess(user);
+  //   }
+  // }, [user]);
 
   return (
     <div className="md:flex flex-wrap bg-black items-start">
@@ -92,7 +92,7 @@ export default function AuthLayout({ children, page, sidebar }) {
                 <button className="border border-[rgba(0,0,0,0.1)] rounded-md lg:rounded-xl w-[44px] lg:w-[48px] h-[34px] lg:h-[38px] flex items-center justify-center text-[#ffffff] bg-[rgba(204,40,40,0.1)] hover:bg-[#CC2828] hover:text-white cursor-pointer" onClick={() => setDropdownOpen(!dropdownOpen)}>
                   <FaRegUser size={18} />
                 </button>
-                {dropdownOpen && (
+                {/* {dropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50">
                     <ul className="py-1">
                       <Link
@@ -105,7 +105,7 @@ export default function AuthLayout({ children, page, sidebar }) {
                       </li>
                     </ul>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </div>
