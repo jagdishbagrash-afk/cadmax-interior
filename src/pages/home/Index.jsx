@@ -15,6 +15,7 @@ import Sliderimage1 from "../../Assets/Images/seller2.png";
 import Sliderimage2 from "../../Assets/Images/seller3.jpg";
 import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import About from "./About";
+import Slider2 from "./Slider2";
 
 
 function Index() {
@@ -62,6 +63,7 @@ function Index() {
       <DesignConcept />
       <About/>
       <ContactStyling />
+      <Slider2/>
       {/* <SliderWithFade /> */}
     </>
   );

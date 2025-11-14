@@ -16,7 +16,6 @@ const geistMono = Geist_Mono({
 export default function Home() {
   return (
     <Layout>
-
       <Index />
     </Layout>
   );

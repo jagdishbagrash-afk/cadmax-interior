@@ -11,7 +11,7 @@ export default function Footer() {
         <Image src={FooterLogo} alt="CADMAX Logo" className="w-[600px]" />
       </div>
 
-<div className="relative z-10 mx-auto px-2 sm:px-4 max-w-[1430px]">
+<div className="relative z-10 mx-auto px-2 sm:px-4 max-w-[1350px]">
         {/* Top Section */}
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 text-center md:text-left">
           {/* SHOP */}

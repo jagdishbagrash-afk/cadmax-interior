@@ -1,5 +1,23 @@
 @import "tailwindcss";
 
+:root {
+  --background: #ffffff; /* Light background */
+  --foreground: #171717; /* Dark text */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* Remove or comment out dark mode override */
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
 @font-face {
   font-family: 'Creato Display';
   src: url('/fonts/CreatoDisplay-Bold.woff2') format('woff2'),
