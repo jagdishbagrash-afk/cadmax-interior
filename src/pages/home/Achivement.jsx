@@ -18,7 +18,7 @@ const Achivement = () => {
     <div className="py-4 md:py-8 bg-[#F6F6F6] overflow-hidden">
       {/* Title and Description Section */}
       <div className="max-w-6xl mx-auto mb-10 md:mb-16 flex flex-col md:flex-row items-start md:items-end justify-between">
-        <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera">
+        <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase Creato">
           VERIFIED RESULTS, PHOTOGRAPHED AFTER COMPLETION
         </h2>
         <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed md:w-2/3 md:pl-8">

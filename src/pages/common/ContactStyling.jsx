@@ -36,30 +36,33 @@ const ContactStyling = () => {
     <section className="bg-white py-4 md:py-8">
       <div className="container mx-auto px-4 max-w-[1430px]">
         {/* Heading */}
-        <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] mb-[32px] tracking-[-0.02em] text-center uppercase cartera">
+        <h2 className="text-[#171717] font-[900] text-[22px] md:text-[26px] lg:text-[30px] leading-[100%] 
+          mb-8 md:mb-12 lg:mb-14 tracking-[-0.02em] text-center uppercase Creato">
           CONTACT US FOR INTERIOR STYLING
         </h2>
 
         {/* Icons Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center ">
-          {items.map((item) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {items && items?.map((item) => (
             <div
               key={item.id}
-              className="flex flex-col items-center justify-center px-4"
+              className="flex flex-col items-center justify-start px-4"
             >
               <img
                 src={item.icon}
                 alt={item.title}
-                className="w-[60px] h-[60px] mb-4 object-contain"
+                className="w-[60px] h-[60px] mb-4  object-cover"
               />
-              <h3 className="text-[#171717] font-[700] text-[20px] leading-[100%] tracking-[-0.02em] text-center cartera">
+
+              <h3 className="text-[#171717] font-[700] text-[16px] md:text-[18px]
+                tracking-[-0.01em] text-center mb-2 Creato">
                 {item.title}
               </h3>
 
-              <p className="mt-2 text-[#4D5466] font-[500] text-[16px] leading-[100%] tracking-[-0.02em] text-center cartera">
+              <p className="text-[#4D5466] font-[500] text-[14px]  
+                tracking-[-0.01em] text-center Creato">
                 {item.desc}
               </p>
-
             </div>
           ))}
         </div>

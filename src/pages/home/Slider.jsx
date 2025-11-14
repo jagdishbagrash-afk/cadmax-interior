@@ -52,24 +52,24 @@ export default function Slider() {
                 <h1
                   className="
                       font-[900]
-                      text-[20px] 
-                      md:text-[22px] 
-                      lg:text-[25px]
+                      text-[18px] 
+                      lg:text-[20px]
                       text-white 
                       uppercase 
+                      Creato
                       leading-[100%]
                       tracking-[-0.02em]
-                      max-w-[700px]
+                      max-w-[650px]
                     "
                 >
                   Elevate Every Room with Built-to-Last Furniture and
                   End-to-End Interior Design
                 </h1>
 
-                <div className="flex flex-wrap justify-center gap-[15px] mt-[20px]">
+                <div className="flex flex-wrap justify-center gap-[10px] md:gap-[15px] mt-[10px] md:mt-[20px]">
                   <Button
                     title={"Shop product"}
-                    classes={"bg-white text-[#171717]"}
+                    classes={"bg-white text-[#171717] "}
                   />
                   <Button
                     title={"Request concept"}

@@ -1,27 +1,20 @@
 import React from "react";
+import Button from "../pages/common/Button";
 
-/**
- * ProductGrid
- * Props:
- *  - products: [{ id, title, price, image }]
- */
 export default function ProductGrid({ products = [] }) {
     console.log("Products in ProductGrid:", products);
     return (
-            <section className="bg-[#fffff] py-4 md:py-8 ">
-        <div className="container mx-auto px-4 max-w-[1430px]">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-[24px] font-bold tracking-wide text-[#171717] uppercase cartera">OUR BEST SELLER</h2>
-                    <button
-                        type="button"
-                        className="w-[168px] h-[37px] border border-[#17171733] px-[50px] py-[14px] rounded-sm text-sm hover:bg-gray-100 flex items-center justify-center gap-[10px] opacity-100"
-                    >
-                        VIEW ALL
-                    </button>
-
+        <section className="bg-[#fffff] py-4 md:py-8 ">
+            <div className="container mx-auto px-4 max-w-[1430px]">
+                <div className="flex items-center justify-between mb-3 md:mb-6">
+                    <h2 className="text-[#171717] font-[900] text-[18px] md:text-[24px] leading-[100%] tracking-[-0.02em] uppercase Creato">OUR BEST SELLER</h2>
+                    <Button
+                        title={"VIEW ALL"}
+                        classes={"bg-transparent text-black border border-[#17171733]"}
+                    />
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {products &&  products?.map((p, idx) => (
+                    {products && products?.map((p, idx) => (
                         <article
                             key={p.id ?? idx}
                             className="overflow-hidden "
@@ -35,18 +28,25 @@ export default function ProductGrid({ products = [] }) {
                                 />
                             </div>
                             <div className="pt-2 ">
-                                <h3 className="text-[14px] uppercase  text-[#262A33] mb-2 font-medium cartera">
+                                <h3
+                                    className="text-[14px] uppercase text-[#262A33] mb-2 font-medium Creato  tracking-[0.05em]"
+                                >
                                     {p.title}
                                 </h3>
+
                                 <div className="flex items-center justify-between">
-                                    <span className="text-[16px] font-[800] text-[#171717] cartera">{p.price}</span>
-                                    {/* You can place rating / wishlist icon here */}
+                                    <p
+                                        className="text-[16px] font-extrabold  tracking-[0em] uppercase text-[#171717] Creato"
+                                    >
+                                        {p.price}
+                                    </p>
+
                                 </div>
                             </div>
                         </article>
                     ))}
                 </div>
-        </div>
-            </section>
+            </div>
+        </section>
     );
 }

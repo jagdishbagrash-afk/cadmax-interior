@@ -17,27 +17,28 @@ const DesignConcept = () => {
         },
         {
             id: 3,
+            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
             title: "OFFICE",
-            image:
-                "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1200&q=60",
         },
         {
             id: 4,
             title: "KITCHEN",
-            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
+            image:
+                "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
         },
         {
             id: 5,
             title: "CAFE",
             image:
-                "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
+                "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1200&q=60",
+
         },
     ];
 
     return (
         <section className="bg-white py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
-                <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase cartera">
+                <h2 className="text-[#171717] font-[900] text-[18px] md:text-[24px] leading-[100%] tracking-[-0.02em] mb-4 md:mb-6 uppercase Creato">
                     3D DESIGN CONCEPT
                 </h2>
 
@@ -52,7 +53,7 @@ const DesignConcept = () => {
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                             <h3
-                                className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase cartera"
+                                className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato"
                             >
                                 {items[0].title}
                             </h3>
@@ -73,7 +74,7 @@ const DesignConcept = () => {
                             />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                 <h3
-                                    className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase cartera"
+                                    className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato"
 
                                 >
                                     {item.title}

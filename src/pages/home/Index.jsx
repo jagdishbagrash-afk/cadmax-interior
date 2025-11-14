@@ -62,7 +62,7 @@ function Index() {
       <DesignConcept />
       <About/>
       <ContactStyling />
-      <SliderWithFade />
+      {/* <SliderWithFade /> */}
     </>
   );
 }
