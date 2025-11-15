@@ -33,7 +33,7 @@ const ContactStyling = () => {
   ];
 
   return (
-    <section className="bg-white py-4 md:py-8">
+    <section className="bg-[#F6F6F6] py-4 md:py-8">
       <div className="container mx-auto px-4 max-w-[1430px]">
         {/* Heading */}
         <h2 className="text-[#171717] font-[900] text-[22px] md:text-[26px] lg:text-[30px] leading-[100%] 

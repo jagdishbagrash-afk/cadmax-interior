@@ -5,8 +5,10 @@ import { Navigation } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import Result from "../../Assets/Images/Result.png";
+import ligithing from "../../Assets/Images/ligithing.jpg";
 
-const images = [Result?.src, Result?.src, Result?.src];
+
+const images = [Result?.src, ligithing?.src, Result?.src];
 
 export default function Slider2() {
   return (
