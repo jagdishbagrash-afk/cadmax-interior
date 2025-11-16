@@ -1,5 +1,5 @@
+import Button from '@/pages/common/Button';
 import React from 'react';
-import Button from "../common/Button";
 
 export default function Banner({title ,button ,Slider1}) {
 
