@@ -1,6 +1,5 @@
 import ProductGrid from "@/components/ProductGrid";
 import Layout from "../common/Layout";
-import Slider from "./Slider";
 import Sliderimage from "../../Assets/Images/seller.png";
 import Sliderimage1 from "../../Assets/Images/seller2.png";
 import Sliderimage2 from "../../Assets/Images/seller3.jpg";
@@ -8,6 +7,7 @@ import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import Shop from "./Shop";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
+import Banner from "@/components/Banner";
 function Index() {
     const sampleOfferProducts = [
         {
@@ -72,7 +72,7 @@ function Index() {
     return (
         <>
             <Layout>
-                <Slider />
+                <Banner Slider1={Sliderimage} title={""} button={"shop product"}/>
                 <FeaturedCategories/>
                 <ProductGrid products={sampleProducts} title={"OUR BEST SELLER"} />
                 <ProductGrid products={sampleProducts} title={"New Arrival"} />
