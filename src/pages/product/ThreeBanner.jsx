@@ -10,23 +10,21 @@ export default function ThreeBanner() {
   const banners = [
     {
       id: 1,
-      title: "Modern Furniture. Curated Lighting. Defined Living.",
-      button: "Shop Now",
+      title: "Modern",
       image: Slider1.src,
     },
     {
       id: 2,
-      title: "Contemporary Designs For Every Home",
-      button: "Explore",
+      title: "Contemporary",
       image: Slider2.src,
     },
     {
       id: 3,
-      title: "Luxury Interiors. Crafted Elegance.",
-      button: "Discover",
+      title: "neoclassic",
       image: Slider3.src,
     },
   ];
+
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-1 ">
@@ -51,11 +49,11 @@ export default function ThreeBanner() {
             <h1 className="text-white text-[18px] md:text-[20px] font-[900] uppercase leading-[110%] tracking-[-0.02em] Creato max-w-[300px]">
               {item.title}
             </h1>
-
+{/* 
             <Button
               title={item.button}
               classes="bg-white text-[#171717] mt-4"
-            />
+            /> */}
           </div>
         </div>
       ))}
