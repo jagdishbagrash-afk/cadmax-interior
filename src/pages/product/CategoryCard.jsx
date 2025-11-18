@@ -1,31 +1,46 @@
 import React from 'react';
-import Slider1 from "../../Assets/Images/Slider1.png";
+import c1 from "../../Assets/Images/c1.jpg";
+import c2 from "../../Assets/Images/c2.jpg";
+import c3 from "../../Assets/Images/c3.jpg";
+import c4 from "../../Assets/Images/c4.jpg";
+import c5 from "../../Assets/Images/c5.jpg";
 
 const categories = [
-    { id: 1, title: 'FURNITURE', image: Slider1?.src },
-    { id: 2, title: 'SOFA & SEATING', image: Slider1?.src },
-    { id: 3, title: 'LAMPS & LIGHTNING', image: Slider1?.src },
-    { id: 4, title: 'UPHOLSTERY', image: Slider1?.src },
-    { id: 5, title: 'HOME DECOR', image: Slider1?.src },
+    { id: 1, title: 'FURNITURE', image: c4?.src },
+    { id: 2, title: 'SOFA & SEATING', image: c3?.src },
+    { id: 3, title: 'LAMPS & LIGHTNING', image: c5?.src },
+    { id: 4, title: 'UPHOLSTERY', image: c1?.src },
+    { id: 5, title: 'HOME DECOR', image: c2?.src },
 ];
 
 const CategoryCard = ({ title, image }) => (
-    <div className={`flex-shrink-0 w-[180px] sm:w-[230px] text-center p-1`}>
-        <div className="w-[180px] h-[250px] sm:w-[250px] sm:h-[350px] rounded-full overflow-hidden relative group mx-auto">
+    <div className="flex-shrink-0 w-[180px] sm:w-[230px] text-center p-1">
+
+        <div className="w-[180px] h-[250px] sm:w-[250px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
+
             <img
                 src={image}
                 alt={title}
-                className="w-full h-full object-cover object-center transition-opacity duration-300"
+                className="w-full h-full object-cover object-center"
             />
-         <h2 className="text-[#171717] font-[900] text-[18px] md:text-[24px] leading-[100%] tracking-[-0.02em] mb-4 md:mb-6 uppercase Creato">
 
+            <div className="
+        absolute inset-0 
+        flex items-center justify-center 
+        text-white text-[18px] sm:text-[22px] 
+        font-[900] uppercase
+        bg-black/40
+      ">
                 {title}
-                </h2>
-            <span className="absolute inset-0 flex items-center justify-center text-[18px] font-[900] text-white  uppercase bg-black/50  ">
-            </span>
+            </div>
+
         </div>
+
     </div>
 );
+
+
+
 
 
 const FeaturedCategories = () => {

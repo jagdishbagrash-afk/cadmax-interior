@@ -7,7 +7,7 @@ import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import Shop from "./Shop";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
-import Banner from "@/components/Banner";
+import ThreeBanner from "./ThreeBanner";
 function Index() {
     const sampleOfferProducts = [
         {
@@ -72,7 +72,8 @@ function Index() {
     return (
         <>
             <Layout>
-                <Banner Slider1={Sliderimage} title={""} button={"shop product"}/>
+                {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
+                <ThreeBanner />
                 <FeaturedCategories/>
                 <ProductGrid products={sampleProducts} title={"OUR BEST SELLER"} />
                 <ProductGrid products={sampleProducts} title={"New Arrival"} />
