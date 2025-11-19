@@ -30,7 +30,6 @@ export default function Services() {
             style={{ backgroundImage: `url(${productservices1?.src})` }}
           >
             <div className="absolute inset-0 bg-black/40"></div>
-
             {/* CENTER THE TEXT */}
             <div className="relative flex flex-col items-start justify-start h-full w-full p-8 text-white text-left">
               <h2 className="text-[#ffffff] font-[900] text-[15px] md:text-[20px] leading-[100%] tracking-[-0.02em] mb-3 md:mb-6 uppercase Creato max-w-[550px]">
