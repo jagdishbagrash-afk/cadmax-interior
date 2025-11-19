@@ -1,17 +1,18 @@
 import Button from '@/pages/common/Button';
 import React from 'react';
+// import Button from "../common/Button";
 
 export default function Banner({title ,button ,Slider1}) {
 
   return (
-    <div className="relative h-[380px] md:h-[400px] lg:h-[450px] md:mt-[-150px]">
+    <div className="relative h-[380px] md:h-[400px] lg:h-[450px] md:mt-[-80px]">
       <div className="relative w-full h-full">
         <img
           src={Slider1?.src}
           alt="Slide"
           className="object-cover w-full h-full"
         />
-        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="absolute inset-0 bg-black/20"></div>
 
         {/* Overlay content centered */}
         <div className="absolute inset-0 flex flex-col items-center justify-center w-full m-auto px-[15px] text-center">
