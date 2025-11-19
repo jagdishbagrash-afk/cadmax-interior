@@ -8,6 +8,7 @@ import Shop from "./Shop";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
 import ThreeBanner from "./ThreeBanner";
+import Services from "./Services";
 function Index() {
     const sampleOfferProducts = [
         {
@@ -74,8 +75,9 @@ function Index() {
             <Layout>
                 {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
                 <ThreeBanner />
-                <FeaturedCategories/>
+                <FeaturedCategories />
                 <ProductGrid products={sampleProducts} title={"OUR BEST SELLER"} />
+                <Services />
                 <ProductGrid products={sampleProducts} title={"New Arrival"} />
                 <Shop />
                 <ProductGrid products={sampleOfferProducts} title={"top sales products "} />

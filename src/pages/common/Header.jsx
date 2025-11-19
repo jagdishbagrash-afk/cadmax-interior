@@ -28,8 +28,13 @@ export default function Header() {
               CADMAX
             </Link>
           </li>
-          <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
-            PRODUCT <IoIosArrowDown size={14} />
+          <li>
+            <Link
+              href="/product"
+              className="flex items-center gap-1 text-sm font-medium text-black hover:text-gray-500 transition"
+            >
+              PRODUCT <IoIosArrowDown size={14} />
+            </Link>
           </li>
           <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
             CONCEPT <IoIosArrowDown size={14} />

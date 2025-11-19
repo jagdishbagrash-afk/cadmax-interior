@@ -14,9 +14,9 @@ const categories = [
 ];
 
 const CategoryCard = ({ title, image }) => (
-    <div className="flex-shrink-0 w-[180px] sm:w-[230px] text-center p-1">
+    <div className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1">
 
-        <div className="w-[180px] h-[250px] sm:w-[250px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
+        <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
 
             <img
                 src={image}
@@ -51,8 +51,8 @@ const FeaturedCategories = () => {
 
                     FEATURED CATEGORIES
                 </h2>
-                <div className="flex space-x-8 sm:space-x-12 overflow-x-auto pb-4 scrollbar-hide md:scrollbar-default -mx-4 sm:mx-0 px-4 sm:px-0         ">
-                    {categories.map((category, index) => (
+                <div className="flex space-x-8 sm:space-x-12 overflow-x-auto pb-4 scrollbar-hide md:scrollbar-default -mx-4 sm:mx-0 px-4 sm:px-0">
+                    {categories && categories.map((category, index) => (
                         <CategoryCard
                             key={category.id}
                             title={category.title}
