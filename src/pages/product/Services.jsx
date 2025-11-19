@@ -25,7 +25,6 @@ export default function Services() {
               <Button title="Shop Collections" classes="bg-white text-black border border-white" />
             </div>
           </div>
-
           <div
             className="relative bg-cover bg-center h-[550px] lg:h-[420px]"
             style={{ backgroundImage: `url(${productservices1?.src})` }}
