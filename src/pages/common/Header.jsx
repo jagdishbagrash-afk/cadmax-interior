@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
 import { FiSearch, FiUser, FiShoppingBag } from "react-icons/fi";
+import MegaMenu from "./MegaMenu";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,14 +29,8 @@ export default function Header() {
               CADMAX
             </Link>
           </li>
-          <li>
-            <Link
-              href="/product"
-              className="flex items-center gap-1 text-sm font-medium text-black hover:text-gray-500 transition"
-            >
-              PRODUCT <IoIosArrowDown size={14} />
-            </Link>
-          </li>
+
+<MegaMenu/>
           <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
             CONCEPT <IoIosArrowDown size={14} />
           </li>
@@ -115,11 +110,59 @@ export default function Header() {
                 CADMAX
               </Link>
             </li>
-            <li>
-              <Link href="/product" className="text-black text-sm font-medium">
+            <li className="group relative">
+              {/* CLICK → /product */}
+              <Link
+                href="/product"
+                className="text-black text-sm font-medium flex items-center gap-1"
+              >
                 PRODUCT
+                {/* <span className="text-xs">▼</span> */}
               </Link>
+
+              {/* HOVER → MEGA MENU */}
+              <div
+                className="
+      absolute left-1/2 -translate-x-1/2 
+      w-[90vw] 
+      bg-white shadow-2xl rounded-xl 
+      p-8 mt-5 hidden group-hover:block 
+      animate-[topToCenter_0.45s_ease-out]
+      z-50
+    "
+              >
+                <div className="grid grid-cols-5 gap-6">
+
+                  <Link href="/product?cat=furniture" className="block">
+                    <img src="/productImages/furniture.jpg" className="rounded-xl h-48 w-full object-cover" />
+                    <p className="text-center mt-2 font-medium">FURNITURE</p>
+                  </Link>
+
+                  <Link href="/product?cat=sofa" className="block">
+                    <img src="/productImages/sofa.jpg" className="rounded-xl h-48 w-full object-cover" />
+                    <p className="text-center mt-2 font-medium">SOFA & SEATING</p>
+                  </Link>
+
+                  <Link href="/product?cat=lamps" className="block">
+                    <img src="/productImages/lamps.jpg" className="rounded-xl h-48 w-full object-cover" />
+                    <p className="text-center mt-2 font-medium">LAMPS & LIGHTING</p>
+                  </Link>
+
+                  <Link href="/product?cat=upholstery" className="block">
+                    <img src="/productImages/upholstery.jpg" className="rounded-xl h-48 w-full object-cover" />
+                    <p className="text-center mt-2 font-medium">UPHOLSTERY</p>
+                  </Link>
+
+                  <Link href="/product?cat=decor" className="block">
+                    <img src="/productImages/decor.jpg" className="rounded-xl h-48 w-full object-cover" />
+                    <p className="text-center mt-2 font-medium">HOME DÉCOR</p>
+                  </Link>
+
+                </div>
+              </div>
             </li>
+
+
             <li>
               <Link href="/concept" className="text-black text-sm font-medium">
                 CONCEPT
