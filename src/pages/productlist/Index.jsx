@@ -3,7 +3,7 @@ import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
 import Layout from "../common/Layout";
 import ProductGrid from "./ProductGrid.jsx";
 
-function Index() {
+export default function Index() {
     return (
         <Layout>
             <Banner Slider1={ProductListBanner} 
@@ -13,5 +13,3 @@ function Index() {
         </Layout>
     );
 }
-
-export default Index;

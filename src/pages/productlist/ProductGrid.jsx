@@ -3,6 +3,7 @@ import ProductList1 from "../../Assets/Images/ProductList1.png";
 import ProductList2 from "../../Assets/Images/ProductList2.png";
 import ProductList3 from "../../Assets/Images/ProductList3.png";
 import ProductList4 from "../../Assets/Images/ProductList4.png";
+import ProductCard from "../common/ProductCard";
 
 const products = [
   {
@@ -117,25 +118,7 @@ const ProductGrid = () => {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products &&
           products?.map((item) => (
-            <div key={item?.id} className="group cursor-pointer">
-              <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
-                <img
-                  src={item?.image}
-                  alt={item?.title}
-                  className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-                />
-              </div>
-
-              {/* Product title */}
-              <h3 className="mt-3 text-sm font-medium text-[#262A33] uppercase Creato">
-                {item?.title}
-              </h3>
-
-              {/* Price */}
-              <p className="mt-1 text-base text-[#171717] font-extrabold uppercase Creato">
-                {item?.price}
-              </p>
-            </div>
+            <ProductCard item={item} />
           ))}
       </div>
       <div className="w-full flex justify-center mt-8">
