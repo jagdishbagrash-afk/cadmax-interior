@@ -5,6 +5,7 @@ import Link from "next/link";
 import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
 import AddSuperCategory from "./add";
+import Listing from "@/pages/api/Listing";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -12,7 +13,7 @@ export default function Index() {
   const fetchData = async () => {
     try {
       const main = new Listing();
-      const response = await main.Supercategory();
+      const response = await main.SupercategoryList();
 
       if (response.data?.data) {
         setData(response.data.data);
@@ -21,20 +22,17 @@ export default function Index() {
       console.log("Error:", error);
     }
   };
-
   useEffect(() => {
     fetchData();
   }, []);
-
   return (
-    <AdminLayout page={"SuperCategory List"}>
+    <AdminLayout page={"Super Category List"}>
       <div className="min-h-screen p-5 lg:p-[30px]">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
-            SuperCategory List
+            Super Category List
           </h2>
-
           <AddSuperCategory />
         </div>
 
@@ -54,9 +52,8 @@ export default function Index() {
                 data.map((item) => (
                   <tr key={item._id} className="hover:bg-[rgba(204,40,40,0.1)] border-t border-[rgba(204,40,40,0.2)]">
                     <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-
                       <img
-                        src={item.image}
+                        src={item.Image}
                         className="w-14 h-14 object-cover rounded-md border"
                         alt="SuperCategory"
                       />

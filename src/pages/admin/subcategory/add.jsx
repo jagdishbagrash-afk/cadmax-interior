@@ -1,105 +1,158 @@
 "use client";
+
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Popup from "@/pages/common/Popup";
 import { MdAdd, MdClose } from "react-icons/md";
+import Listing from "@/pages/api/Listing";
+import { toast } from "react-hot-toast";
 
 export default function AddSuperCategory() {
-  const [name, setName] = useState("");
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [superCategories, setSuperCategories] = useState([]);
-  const [superCategory, setSuperCategory] = useState("");
-  const [isOpen, setIsOpen] = useState(false);  // Popup state
-
+  const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  const handleClose = () => {
-    setIsOpen(false);
-  };
 
-  const handleopen = () => {
-    setIsOpen(true);
-  };
+  // Single state for form data
+  const [formData, setFormData] = useState({
+    name: "",
+    file: null,
+    preview: "",
+    superCategory: "",
+    Category: ""
+  });
+  const [data, setData] = useState([]);
+  const fetchData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.SupercategoryList();
 
-  // Fetch Super Categories
+      if (response.data?.data) {
+        setData(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
   useEffect(() => {
-    axios
-      .get("/api/supercategory")
-      .then((res) => setSuperCategories(res.data))
-      .catch((err) => console.log(err));
+    fetchData();
   }, []);
 
-  // Handle Image Preview
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+  const [datacategiroes, setDatacategiroes] = useState([]);
+
+  const fetchCaData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.categoryList();
+
+      if (response.data?.data) {
+        setDatacategiroes(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
   };
 
-  // Submit Form
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  useEffect(() => {
+    fetchCaData();
+  }, []);
 
-    const formData = new FormData();
-    formData.append("name", name);
-    if (image) formData.append("Image", image);
-    formData.append("SuperCategory", superCategory);
 
-    try {
-      await axios.post("/api/category", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      alert("Category Created Successfully!");
-      setName("");
-      setImage(null);
-      setPreview("");
-      setSuperCategory("");
-    } catch (error) {
-      console.log(error);
-      alert("Error creating category");
+  const handleOpen = () => setIsOpen(true);
+  const handleClose = () => setIsOpen(false);
+
+  // Handle form data changes
+  const handleInputChange = (field, value) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Image Change Handler
+  const handleImageChange = (e) => {
+    const selectedFile = e.target.files[0];
+
+    if (!selectedFile) return;
+
+    // Allowed File Types
+    const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(selectedFile.type)) {
+      toast.error("Only JPG, PNG, or WEBP images are allowed");
+      return;
     }
+
+    // File Size Validation
+    if (selectedFile.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    handleInputChange("file", selectedFile);
+    handleInputChange("preview", URL.createObjectURL(selectedFile));
+  };
+
+  // Submit Handler
+  const handleSubmit = async (e) => {
+    console.log("Hello")
+    e.preventDefault();
+    if (processing) return;
+    setProcessing(true);
+    console.log("Hell2o")
+    try {
+      const main = new Listing();
+      const submitFormData = new FormData();
+      submitFormData.append("name", formData.name);
+      submitFormData.append("Image", formData.file);
+      submitFormData.append("SuperCategory", formData.superCategory);
+      submitFormData.append("category", formData.Category);
+      const response = await main.subcategory(submitFormData);
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+        // Reset form data
+        setFormData({
+          name: "",
+          file: null,
+          preview: ""
+        });
+        handleClose();
+      } else {
+        toast.error(response?.data?.message || "Error occurred");
+      }
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    }
+
+    setProcessing(false);
   };
 
   return (
     <>
+      {/* Add Button */}
       <div className="flex justify-center items-center">
         <button
-          onClick={handleopen}
-          className="cursor-pointer  text-[#000000] bg-[#fff000]/10 hover:bg-[#fff446]/30 rounded-md shadow-md inline-flex items-center gap-2 px-4 py-2 font-medium"
+          onClick={handleOpen}
+          className="cursor-pointer text-black bg-yellow-400/20 hover:bg-yellow-400/40 rounded-md shadow-md inline-flex items-center gap-2 px-4 py-2 font-medium"
         >
           <MdAdd size={18} />
-          Add Sub Category
+          Add  Category
         </button>
       </div>
 
-
+      {/* Popup Modal */}
       {isOpen && (
         <Popup
           isOpen={isOpen}
           onClose={handleClose}
-          className="shadow-none"
-          dialogClassName="custom-dialog-width"
           size={"max-w-2xl"}
-
+          className="shadow-none"
         >
-          <style>
-            {`
-                            /* CSS for modal width */
-                            #modal .sm\\:max-w-2xl {
-                                margin: auto;
-                                box-shadow: none;
-                                max-width: 561px !important;
-                            }
-                        `}
-          </style>
           <div className="relative bg-white w-full rounded-[30px] lg:rounded-[40px] h-auto mx-auto">
 
-
-            <div className="border-b border-black border-opacity-10 px-4 py-4 lg:px-6 lg:py-5 relative flex items-center justify-between">
-              <h2 className="text-xl lg:text-2xl text-[#212121] tracking-[-0.04em] font-semibold m-0">
-                Add Sub Category
+            {/* Header */}
+            <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+              <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
+                Add Category
               </h2>
-
               <button
                 type="button"
                 onClick={handleClose}
@@ -108,89 +161,85 @@ export default function AddSuperCategory() {
                 <MdClose size={24} />
               </button>
             </div>
-            <div className="py-6 md:py-8">
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4  lg:mb-5">
-                {/* Main Category */}
-                <div>
-                  <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
-                    Main Category
-                  </label>
+            {/* Body */}
+            <div className="py-6 lg:py-8 px-6 lg:px-10">
+              {/* Category Name */}
+              <div className="mb-6 lg:mb-10">
+                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
+                  Main Category
+                </label>
 
-                  <select
-                    className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                    value={superCategory}
-                    onChange={(e) => setSuperCategory(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {superCategories.map((item) => (
-                      <option value={item._id} key={item._id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
-                    Category
-                  </label>
-
-                  <select
-                    className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                    value={superCategory}
-                    onChange={(e) => setSuperCategory(e.target.value)}
-                    required
-                  >
-                    <option value="">Select Category</option>
-                    {superCategories.map((item) => (
-                      <option value={item._id} key={item._id}>
-                        {item.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
+                <select
+                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  value={formData?.superCategory}
+                  onChange={(e) => handleInputChange("superCategory", e.target.value)}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {data?.map((item) => (
+                    <option value={item._id} key={item._id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
               </div>
 
+              <div className="mb-6 lg:mb-10">
+                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
+                  Category
+                </label>
 
-              <div className="mb-4  lg:mb-5 ">
-                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">Category Name</label>
+                <select
+                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  value={formData?.Category}
+                  onChange={(e) => handleInputChange("Category", e.target.value)}
+                  required
+                >
+                  <option value="">Select Category</option>
+                  {datacategiroes?.map((item) => (
+                    <option value={item._id} key={item._id}>
+                      {item.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="mb-6 lg:mb-10">
+                <label className="block text-base font-medium text-[#727272] mb-1">
+                  Category Name
+                </label>
                 <input
                   type="text"
-                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8] focus:ring-1 focus:ring-gray-300 outline-none"
                   placeholder="Enter category name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  required
+                  value={formData.name}
+                  onChange={(e) => handleInputChange("name", e.target.value)}
                 />
               </div>
 
-              {/* Image Upload */}
-              <div className="mb-4  lg:mb-5 ">
-
-                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">Category Image</label>
+              {/* Category Image */}
+              <div className="mb-6 lg:mb-10">
+                <label className="block text-base font-medium text-[#727272] mb-1">
+                  Category Image
+                </label>
                 <input
                   type="file"
                   accept="image/*"
-                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-
-                  onChange={handleImage}
+                  className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8]"
+                  onChange={handleImageChange}
                 />
 
-                {preview && (
+                {formData.preview && (
                   <img
-                    src={preview}
+                    src={formData.preview}
                     alt="Preview"
                     className="w-32 h-32 object-cover mt-3 rounded border"
                   />
                 )}
               </div>
 
-
-              <div className="flex justify-end px-6 lg:px-10 py-4 space-x-4">
+              {/* Footer Buttons */}
+              <div className="flex justify-end space-x-4">
                 <button
                   onClick={handleClose}
                   className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
@@ -199,11 +248,10 @@ export default function AddSuperCategory() {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+                  className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
                 >
                   {processing ? "Processing..." : "Yes"}
                 </button>
-
               </div>
             </div>
           </div>

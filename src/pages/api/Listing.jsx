@@ -17,10 +17,28 @@ class Listing extends Component {
   async AdminDashboard() {
     return Api.get("/admin/dasboard")
   }
-  async Supercategory() {
-    return Api.get("/admin/supercategory")
+  async Supercategory(data) {
+    return Api.post("/supercategory/add", data)
+  }
+  
+ async SupercategoryList() {
+    return Api.get("/supercategory/get")
   }
 
+    async category(data) {
+    return Api.post("/category/add", data)
+  }
+    async categoryList() {
+    return Api.get("/category/get", )
+  }
+
+    async subcategory(data) {
+    return Api.post("/subcategory/add", data)
+  }
+
+     async subcategoryList() {
+    return Api.get("/subcategory/get", )
+  }
   render() {
     return (
       <div>
