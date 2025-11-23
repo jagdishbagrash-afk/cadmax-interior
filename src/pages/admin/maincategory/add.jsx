@@ -1,22 +1,30 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import axios from "axios";
 import Popup from "@/pages/common/Popup";
-import { MdAdd, MdClose } from "react-icons/md";
+import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 
-export default function AddSuperCategory() {
+export default function AddSuperCategory({ fetchData, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
-  // Single state for form data
   const [formData, setFormData] = useState({
-    name: "",
+    name: item?.name || "",
     file: null,
-    preview: ""
+    preview: item?.Image || ""
   });
+
+  useEffect(() => {
+    if (isEdit && item) {
+      setFormData({
+        name: item.name || "",
+        file: null,
+        preview: item.Image || ""
+      });
+    }
+  }, [isEdit, item]);
 
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
@@ -54,37 +62,43 @@ export default function AddSuperCategory() {
 
   // Submit Handler
   const handleSubmit = async (e) => {
-    console.log("Hello")
     e.preventDefault();
     if (processing) return;
     setProcessing(true);
-    console.log("Hell2o")
 
     try {
       const main = new Listing();
       const submitFormData = new FormData();
       submitFormData.append("name", formData.name);
-      submitFormData.append("Image", formData.file);
-      const response = await main.Supercategory(submitFormData);
+
+      if (formData.file) {
+        submitFormData.append("Image", formData.file);
+      }
+
+      let response;
+
+      if (isEdit) {
+        response = await main.SupercategoryUpdate(item._id, submitFormData);
+      } else {
+        response = await main.Supercategory(submitFormData);
+      }
+
       if (response?.data?.status) {
         toast.success(response.data.message);
-        // Reset form data
-        setFormData({
-          name: "",
-          file: null,
-          preview: ""
-        });
+        setFormData({ name: "", file: null, preview: "" });
         handleClose();
+        fetchData();
       } else {
         toast.error(response?.data?.message || "Error occurred");
       }
+
     } catch (err) {
-      console.log(err);
       toast.error(err?.response?.data?.message || "Something went wrong");
     }
 
     setProcessing(false);
   };
+
 
   return (
     <>
@@ -94,8 +108,13 @@ export default function AddSuperCategory() {
           onClick={handleOpen}
           className="cursor-pointer text-black bg-yellow-400/20 hover:bg-yellow-400/40 rounded-md shadow-md inline-flex items-center gap-2 px-4 py-2 font-medium"
         >
-          <MdAdd size={18} />
-          Add Main Category
+          {isEdit ? (
+            <MdEdit size={18} />
+
+          ) : (
+            <MdAdd size={18} />
+          )}
+
         </button>
       </div>
 

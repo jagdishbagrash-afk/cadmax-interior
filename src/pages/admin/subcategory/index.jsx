@@ -6,6 +6,7 @@ import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
 import AddSubCategory from "./add";
 import Listing from "@/pages/api/Listing";
+import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -48,6 +49,8 @@ export default function Index() {
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Image</th>
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Name</th>
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Created Date</th>
+                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Action</th>
+          
               </tr>
             </thead>
 
@@ -55,12 +58,12 @@ export default function Index() {
               {data.length > 0 ? (
                 data.map((item) => (
                   <tr key={item._id} className="hover:bg-[rgba(204,40,40,0.1)] border-t border-[rgba(204,40,40,0.2)]">
-                   
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
+
+                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
 
                       {item?.SuperCategory?.name}
                     </td>
-                       <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
+                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
 
                       {item?.category?.name}
                     </td>
@@ -80,6 +83,11 @@ export default function Index() {
 
                       {moment(item.createdAt).format("DD-MM-YYYY")}
                     </td>
+                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
+
+                      <BlockUnblock Id={item._id} fetchData={fetchData} step={3} status={item?.status} />
+                    </td>
+
                   </tr>
                 ))
               ) : (

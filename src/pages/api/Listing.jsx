@@ -20,25 +20,43 @@ class Listing extends Component {
   async Supercategory(data) {
     return Api.post("/supercategory/add", data)
   }
-  
- async SupercategoryList() {
+
+  async SupercategoryList() {
     return Api.get("/supercategory/get")
   }
 
-    async category(data) {
-    return Api.post("/category/add", data)
-  }
-    async categoryList() {
-    return Api.get("/category/get", )
+  async Supercategorydelete(id) {
+    return Api.get(`/supercategory/status/${id}`)
   }
 
-    async subcategory(data) {
+  async SupercategoryUpdate(id, formData) {
+    return Api.post(`/supercategory/update/${id}`, formData);
+  }
+
+  async category(data) {
+    return Api.post("/category/add", data)
+  }
+  async categoryList() {
+    return Api.get("/category/get",)
+  }
+
+  async categorydelete(id) {
+    return Api.get(`/category/status/${id}`)
+  }
+
+  async subcategory(data) {
     return Api.post("/subcategory/add", data)
   }
 
-     async subcategoryList() {
-    return Api.get("/subcategory/get", )
+  async subcategoryList() {
+    return Api.get("/subcategory/get",)
   }
+
+
+  async Subcategorydelete(id) {
+    return Api.get(`/subcategory/status/${id}`)
+  }
+
   render() {
     return (
       <div>
