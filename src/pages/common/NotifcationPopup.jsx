@@ -15,7 +15,7 @@ export default function NotificationPopup() {
         <div className="relative">
             <div>
                 <div
-                    className="border border-[rgba(0,0,0,0.1)] rounded-md lg:rounded-xl w-[44px] lg:w-[48px] h-[34px] lg:h-[38px] flex items-center justify-center text-[#ffffff] bg-[rgba(204,40,40,0.1)] hover:bg-[#CC2828] hover:text-white cursor-pointer"
+                    className="border border-[rgba(0,0,0,0.1)] rounded-md lg:rounded-xl w-[44px] lg:w-[48px] h-[34px] lg:h-[38px] flex items-center justify-center text-[#ffffff] bg-[rgba(204,40,40,0.1)] hover:bg-[#000000] hover:text-white cursor-pointer"
                     onClick={() => setIsPopupOpen(!isPopupOpen)}
                     aria-label="Toggle Notifications"
                 >

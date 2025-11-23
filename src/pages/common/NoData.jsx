@@ -29,7 +29,7 @@ export default function NoData({ Heading, content, className }) {
             router.back();
           }
         }}
-        className="flex mx-auto bg-[#CC2828] hover:bg-[#ad0e0e] text-white text-base py-3.5 px-8 xl:px-10 font-medium cursor-pointer rounded-full"
+        className="flex mx-auto bg-[#000000] hover:bg-[#ad0e0e] text-white text-base py-3.5 px-8 xl:px-10 font-medium cursor-pointer rounded-full"
       >
         Take me there!
       </button> */}
