@@ -3,11 +3,11 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import Popup from "@/pages/common/Popup";
-import { MdAdd, MdClose } from "react-icons/md";
+import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 
-export default function AddSuperCategory() {
+export default function AddSubCategory({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
@@ -16,10 +16,11 @@ export default function AddSuperCategory() {
     name: "",
     file: null,
     preview: "",
-    superCategory: "",
+    SuperCategory: "",
     Category: ""
   });
   const [data, setData] = useState([]);
+
   const fetchData = async () => {
     try {
       const main = new Listing();
@@ -32,9 +33,22 @@ export default function AddSuperCategory() {
       console.log("Error:", error);
     }
   };
+
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (isEdit && item) {
+      setFormData({
+        name: item.name || "",
+        file: null,
+        preview: item.Image || "",
+        SuperCategory: item?.SuperCategory?._id || "",
+        Category: item?.category?._id || ""
+      });
+    }
+  }, [isEdit, item]);
 
   const [datacategiroes, setDatacategiroes] = useState([]);
 
@@ -102,9 +116,15 @@ export default function AddSuperCategory() {
       const submitFormData = new FormData();
       submitFormData.append("name", formData.name);
       submitFormData.append("Image", formData.file);
-      submitFormData.append("SuperCategory", formData.superCategory);
+      submitFormData.append("SuperCategory", formData.SuperCategory);
       submitFormData.append("category", formData.Category);
-      const response = await main.subcategory(submitFormData);
+      let response;
+      if (isEdit) {
+        response = await main.SubcategoryUpdate(item._id, submitFormData);
+      } else {
+        response = await main.subcategory(submitFormData);
+      }
+      // const response = await main.subcategory(submitFormData);
       if (response?.data?.status) {
         toast.success(response.data.message);
         // Reset form data
@@ -114,6 +134,7 @@ export default function AddSuperCategory() {
           preview: ""
         });
         handleClose();
+        fetchDatas();
       } else {
         toast.error(response?.data?.message || "Error occurred");
       }
@@ -133,8 +154,12 @@ export default function AddSuperCategory() {
           onClick={handleOpen}
           className="cursor-pointer text-black bg-yellow-400/20 hover:bg-yellow-400/40 rounded-md shadow-md inline-flex items-center gap-2 px-4 py-2 font-medium"
         >
-          <MdAdd size={18} />
-          Add  Category
+          {isEdit ? (
+            <MdEdit size={18} />
+
+          ) : (
+            <MdAdd size={18} />
+          )}
         </button>
       </div>
 
@@ -151,7 +176,7 @@ export default function AddSuperCategory() {
             {/* Header */}
             <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
               <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
-                Add Category
+                {isEdit ? ("Edit") : ("Add")}  Sub  Category
               </h2>
               <button
                 type="button"
@@ -161,51 +186,50 @@ export default function AddSuperCategory() {
                 <MdClose size={24} />
               </button>
             </div>
-
             {/* Body */}
-            <div className="py-6 lg:py-8 px-6 lg:px-10">
+            <div className="py-6 lg:py-8 px-6 lg:px-8">
               {/* Category Name */}
-              <div className="mb-6 lg:mb-10">
-                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
-                  Main Category
-                </label>
-
-                <select
-                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                  value={formData?.superCategory}
-                  onChange={(e) => handleInputChange("superCategory", e.target.value)}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {data?.map((item) => (
-                    <option value={item._id} key={item._id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2  gap-3 mb-2 ">
+                <div className="">
+                  <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+                    Category
+                  </label>
+                  <select
+                    className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                    value={formData?.Category}
+                    onChange={(e) => handleInputChange("Category", e.target.value)}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {datacategiroes?.map((item) => (
+                      <option value={item._id} key={item._id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="">
+                  <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+                    Main Category
+                  </label>
+                  <select
+                    className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                    value={formData?.SuperCategory}
+                    onChange={(e) => handleInputChange("SuperCategory", e.target.value)}
+                    required
+                  >
+                    <option value="">Select Category</option>
+                    {data?.map((item) => (
+                      <option value={item._id} key={item._id}>
+                        {item.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
+              <div className="mb-2">
+                <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
 
-              <div className="mb-6 lg:mb-10">
-                <label className="block text-base font-medium text-[#727272] tracking-[-0.06em] mb-1">
-                  Category
-                </label>
-
-                <select
-                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                  value={formData?.Category}
-                  onChange={(e) => handleInputChange("Category", e.target.value)}
-                  required
-                >
-                  <option value="">Select Category</option>
-                  {datacategiroes?.map((item) => (
-                    <option value={item._id} key={item._id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="mb-6 lg:mb-10">
-                <label className="block text-base font-medium text-[#727272] mb-1">
                   Category Name
                 </label>
                 <input
@@ -216,10 +240,10 @@ export default function AddSuperCategory() {
                   onChange={(e) => handleInputChange("name", e.target.value)}
                 />
               </div>
-
               {/* Category Image */}
-              <div className="mb-6 lg:mb-10">
-                <label className="block text-base font-medium text-[#727272] mb-1">
+              <div className="mb-2">
+                <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+
                   Category Image
                 </label>
                 <input

@@ -53,9 +53,6 @@ body {
 
 /* Add in globals.css or tailwind.css */
 
-.input {
-  @apply w-full border rounded-xl px-4 py-3 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-black/20;
-}
 /* Mega menu full block animation (top → center) */
 
 /* Each image fade-down animation */

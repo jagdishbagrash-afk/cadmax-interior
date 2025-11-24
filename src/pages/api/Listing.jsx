@@ -44,6 +44,10 @@ class Listing extends Component {
     return Api.get(`/category/status/${id}`)
   }
 
+
+  async categoryUpdate(id, formData) {
+    return Api.post(`/category/update/${id}`, formData);
+  }
   async subcategory(data) {
     return Api.post("/subcategory/add", data)
   }
@@ -55,6 +59,10 @@ class Listing extends Component {
 
   async Subcategorydelete(id) {
     return Api.get(`/subcategory/status/${id}`)
+  }
+
+    async SubcategoryUpdate(id, formData) {
+    return Api.post(`/subcategory/update/${id}`, formData);
   }
 
   render() {

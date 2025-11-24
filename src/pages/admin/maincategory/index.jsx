@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
-import AddSuperCategory from "./add";
+import AddSuperCategory from "./AddSuperCategory";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../common/BlockUnblock";
 

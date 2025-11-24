@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
-import CategoryAdd from "./add";
+import CategoryAdd from "./CategoryAdd";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../common/BlockUnblock";
 
@@ -38,7 +38,7 @@ export default function Index() {
             Category List
           </h2>
 
-          <CategoryAdd />
+          <CategoryAdd fetchDatas={fetchData} />
         </div>
 
         {/* Table */}
@@ -52,7 +52,7 @@ export default function Index() {
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Name</th>
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Created Date</th>
                 <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Action</th>
-                
+
               </tr>
             </thead>
 
@@ -82,8 +82,13 @@ export default function Index() {
                     </td>
 
                     <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-                      <BlockUnblock Id={item._id} fetchData={fetchData} step={2} status={item?.status} />
+                     <div className="flex justify-center items-center text-center gap-3">
+                       <BlockUnblock Id={item._id} fetchData={fetchData} step={2} status={item?.status} />
+                      <CategoryAdd item={item} isEdit={true} fetchDatas={fetchData} />
+                     </div>
                     </td>
+
+
                   </tr>
                 ))
               ) : (
