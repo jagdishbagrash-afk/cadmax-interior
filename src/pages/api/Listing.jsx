@@ -25,6 +25,10 @@ class Listing extends Component {
     return Api.get("/supercategory/get")
   }
 
+  async SupercategoryStatus() {
+    return Api.get("/supercategory/get-status")
+  }
+
   async Supercategorydelete(id) {
     return Api.get(`/supercategory/status/${id}`)
   }
@@ -36,8 +40,14 @@ class Listing extends Component {
   async category(data) {
     return Api.post("/category/add", data)
   }
+
+
   async categoryList() {
     return Api.get("/category/get",)
+  }
+
+  async categoryStatus() {
+    return Api.get("/category/get-status",)
   }
 
   async categorydelete(id) {
@@ -56,12 +66,15 @@ class Listing extends Component {
     return Api.get("/subcategory/get",)
   }
 
+  async subcategoryStatus() {
+    return Api.get("/subcategory/get-status",)
+  }
 
   async Subcategorydelete(id) {
     return Api.get(`/subcategory/status/${id}`)
   }
 
-    async SubcategoryUpdate(id, formData) {
+  async SubcategoryUpdate(id, formData) {
     return Api.post(`/subcategory/update/${id}`, formData);
   }
 
