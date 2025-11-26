@@ -79,34 +79,6 @@ function SideBar() {
                                 <MdReviews size={20} />
                                 Sub  Category
                             </Link>
-                            <Link
-                                href="/admin/reviews"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/reviews" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <MdOutlineReviews size={20} />
-                                Reviews
-                            </Link>
-                            <Link
-                                href="/admin/home"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/home" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <FaEdit size={20} />
-                                Edit Home
-                            </Link>
-                            <Link
-                                href="/admin/payment"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/payment" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
-                            >
-                                <MdPayments size={20} />
-                                Earnings and Payments
-                            </Link>
-                            <Link
-                                href="/admin/payout"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/payout" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
-                            >
-                                <MdOutlineRateReview size={20} />
-                                Payouts
-                            </Link>
 
                             <Link
                                 href="/admin/setting"
