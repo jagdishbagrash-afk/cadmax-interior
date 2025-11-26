@@ -47,7 +47,7 @@ export default function Login() {
         toast.success(response.data.message);
         localStorage && localStorage.setItem("token", response?.data?.token);
         // setUser(response?.data);
-          router.push("/admin");
+          router.push("/admin/category");
       }
       else {
         toast.error(response.data.message);
