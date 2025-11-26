@@ -2,7 +2,7 @@ import Button from '@/pages/common/Button';
 import React from 'react';
 // import Button from "../common/Button";
 
-export default function Banner({title ,button ,Slider1}) {
+export default function Banner({ title, button, Slider1 }) {
 
   return (
     <div className="relative h-[380px] md:h-[400px] lg:h-[450px] md:mt-[-80px]">
@@ -29,16 +29,18 @@ export default function Banner({title ,button ,Slider1}) {
                       max-w-[450px]
                     "
           >
-           {title || " Modern Furniture. Curated Lighting. Defined Living."}
+            {title || " Modern Furniture. Curated Lighting. Defined Living."}
           </h1>
+          {button && (
 
-          <div className="flex flex-wrap justify-center gap-[10px] md:gap-[15px] mt-[10px] md:mt-[20px]">
-            <Button
-              title={button || "Shop product"}
-              classes={"bg-white text-[#171717] "}
-            />
-          
-          </div>
+            <div className="flex flex-wrap justify-center gap-[10px] md:gap-[15px] mt-[10px] md:mt-[20px]">
+              <Button
+                title={button || "Shop product"}
+                classes={"bg-white text-[#171717] "}
+              />
+
+            </div>
+          )}
         </div>
       </div>
     </div>

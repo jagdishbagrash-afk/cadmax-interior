@@ -104,18 +104,32 @@ export default function AddSuperCategory({ fetchData, isEdit, item }) {
     <>
       {/* Add Button */}
       <div className="flex justify-center items-center">
+
+
+
         <button
           onClick={handleOpen}
-          className="cursor-pointer text-black bg-yellow-400/20 hover:bg-yellow-400/40 rounded-md shadow-md inline-flex items-center gap-2 px-4 py-2 font-medium"
+          className="cursor-pointer m-auto flex items-center justify-center
+             w-[42px] h-[42px]
+             rounded-lg border border-gray-200 shadow-sm 
+             bg-white hover:bg-gray-50
+             transition-all duration-200"
         >
           {isEdit ? (
-            <MdEdit size={18} />
+            <MdEdit
+              size={22}
+              className="text-blue-600 group-hover:text-blue-700 transition"
 
+            />
           ) : (
-            <MdAdd size={18} />
+            <MdAdd
+              size={22}
+              className="text-blue-600 group-hover:text-blue-700 transition"
+            />
           )}
 
         </button>
+
       </div>
 
       {/* Popup Modal */}
@@ -126,75 +140,73 @@ export default function AddSuperCategory({ fetchData, isEdit, item }) {
           size={"max-w-2xl"}
           className="shadow-none"
         >
-          <div className="relative bg-white w-full rounded-[30px] lg:rounded-[40px] h-auto mx-auto">
 
-            {/* Header */}
-            <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
-              <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
-                  {isEdit ? ("Edit") : ("Add")} Main Category
-              </h2>
-              <button
-                type="button"
-                onClick={handleClose}
-                className="text-gray-700 hover:text-gray-900"
-              >
-                <MdClose size={24} />
-              </button>
+          <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+            <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
+              {isEdit ? ("Edit") : ("Add")}  Main Category
+            </h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="text-gray-700 hover:text-gray-900"
+            >
+              <MdClose size={24} />
+            </button>
+          </div>
+
+          {/* Header */}
+          {/* Body */}
+          <div className="px-4 py-4">
+            {/* Category Name */}
+            <div className="mb-4">
+              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
+                Category Name
+              </label>
+              <input
+                type="text"
+                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8] focus:ring-1 focus:ring-gray-300 outline-none"
+                placeholder="Enter category name"
+                value={formData.name}
+                onChange={(e) => handleInputChange("name", e.target.value)}
+              />
             </div>
 
-            {/* Body */}
-            <div className="py-6 lg:py-8 px-6 lg:px-8">
-              {/* Category Name */}
-              <div className="mb-4">
-                <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
-                  Category Name
-                </label>
-                <input
-                  type="text"
-                  className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8] focus:ring-1 focus:ring-gray-300 outline-none"
-                  placeholder="Enter category name"
-                  value={formData.name}
-                  onChange={(e) => handleInputChange("name", e.target.value)}
+            {/* Category Image */}
+            <div className="mb-4">
+              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
+
+                Category Image
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8]"
+                onChange={handleImageChange}
+              />
+
+              {formData.preview && (
+                <img
+                  src={formData.preview}
+                  alt="Preview"
+                  className="w-32 h-32 object-cover mt-3 rounded border"
                 />
-              </div>
+              )}
+            </div>
 
-              {/* Category Image */}
-              <div className="mb-4">
-                <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
-
-                  Category Image
-                </label>
-                <input
-                  type="file"
-                  accept="image/*"
-                  className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8]"
-                  onChange={handleImageChange}
-                />
-
-                {formData.preview && (
-                  <img
-                    src={formData.preview}
-                    alt="Preview"
-                    className="w-32 h-32 object-cover mt-3 rounded border"
-                  />
-                )}
-              </div>
-
-              {/* Footer Buttons */}
-              <div className="flex justify-end space-x-4">
-                <button
-                  onClick={handleClose}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
-                >
-                  No
-                </button>
-                <button
-                  onClick={handleSubmit}
-                  className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
-                >
-                  {processing ? "Processing..." : "Yes"}
-                </button>
-              </div>
+            {/* Footer Buttons */}
+            <div className="flex justify-end space-x-4">
+              <button
+                onClick={handleClose}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                No
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
+              >
+                {processing ? "Processing..." : "Submit"}
+              </button>
             </div>
           </div>
         </Popup>

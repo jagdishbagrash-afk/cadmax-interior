@@ -38,7 +38,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     const handlecategroyDelete = () => {
         setLoading(true);
         const main = new Listing();
-        const response = main.categorydelete( Id );
+        const response = main.categorydelete(Id);
         response
             .then((res) => {
                 console.log(res.data)
@@ -61,7 +61,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     const handleSubcategroyDelete = () => {
         setLoading(true);
         const main = new Listing();
-        const response = main.Subcategorydelete( Id );
+        const response = main.Subcategorydelete(Id);
         response
             .then((res) => {
                 console.log(res.data)
@@ -88,7 +88,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
         } else if (step === 2) {
             handlecategroyDelete(e)
         }
-         else if (step === 3) {
+        else if (step === 3) {
             handleSubcategroyDelete(e)
         }
         else {
@@ -101,15 +101,25 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
             {/* Block/Unblock Button */}
             <button
                 onClick={toggleModal}
-                className="cursor-pointer gap-[10px] m-auto font-[600] text-white text-[18px] bg-white p-2 rounded-lg"
+                className="cursor-pointer m-auto flex items-center justify-center
+             w-[42px] h-[42px]
+             rounded-lg border border-gray-200 shadow-sm 
+             bg-white hover:bg-gray-50
+             transition-all duration-200"
             >
                 {status === true ? (
-                    <MdLockOpen size={22} className="text-green-600 hover:text-green-700" />
+                    <MdBlock
+                        size={22}
+                        className="text-red-600 group-hover:text-red-700 transition"
+                    />
                 ) : (
-                    <MdBlock size={22} className="text-red-600 hover:text-red-700" />
+                    <MdLockOpen
+                        size={22}
+                        className="text-green-600 group-hover:text-green-700 transition"
+                    />
                 )}
-
             </button>
+
 
             {/* Popup */}
             {isOpen && (
@@ -119,22 +129,28 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
                     size={"max-w-lg"}
                     className="shadow-none"
                 >
-                    {/* Header */}
-                    <div className="border-b px-6 py-5 flex justify-between items-center">
-                        <h2 className="text-xl font-semibold">
+
+
+                    <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+                        <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
                             {status === true ? "Block User" : "Unblock User"}
+
                         </h2>
-                        <button onClick={handleClose} className="text-gray-700 hover:text-gray-900">
+                        <button
+                            type="button"
+                            onClick={handleClose}
+                            className="text-gray-700 hover:text-gray-900"
+                        >
                             <MdClose size={24} />
                         </button>
                     </div>
 
                     {/* Body */}
-                    <div className="py-6 px-10">
-                        <p className="text-black mb-2 text-[15px]">
+                    <div className="py-4 px-4">
+                        <p className="text-[16px] font-medium text-[#3E3E3E] Creato">
                             Are you sure you want to {status === true ? "block" : "unblock"} this user?
                         </p>
-                        <p className="text-red-600 text-[13px]">
+                        <p className="text-red-600 text-[16px] font-medium  Creato">
                             (This action can be changed later.)
                         </p>
                     </div>
@@ -151,7 +167,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
                             onClick={handleClick}
                             className="cursor-pointer bg-black hover:bg-white font-[700] text-[14px] px-[20px] py-[10px] text-white hover:text-black rounded-[5px]"
                         >
-                            {loading ? "Processing..." : status === true  ? "Block" : "Unblock"}
+                            {loading ? "Processing..." : status === true ? "Block" : "Unblock"}
                         </button>
                     </div>
                 </Popup>

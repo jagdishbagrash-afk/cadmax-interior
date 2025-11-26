@@ -87,7 +87,7 @@ export default function Footer() {
 
         {/* Divider */}
         <div className="border-t border-gray-700 mt-10 pt-5 text-center text-sm text-gray-400 flex flex-col md:flex-row justify-between items-center">
-          <p>© 2025 Cadmax Interior</p>
+          <p className="text-[16px] font-[500] text-white Creato text-center">© 2026 Cadmax Interior</p>
           <div className="flex space-x-4 mt-2 md:mt-0">
             <a href="#" className="hover:underline text-[16px] font-[500] text-white Creato text-center">Privacy Policy</a>
             <span>|</span>

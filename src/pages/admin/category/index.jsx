@@ -31,77 +31,113 @@ export default function Index() {
 
   return (
     <AdminLayout page={"Category List"}>
-      <div className="min-h-screen p-5 lg:p-[30px]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
-            Category List
-          </h2>
+      <div className="px-4 py-2 lg:px-4 lg:py-2.5">
+        <div className="bg-white rounded-[20px] mb-[10px] p-2">
+          {/* Header */}
+          <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
 
-          <CategoryAdd fetchDatas={fetchData} />
-        </div>
+            <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
+              Category  Listing
+            </h2>
 
-        {/* Table */}
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse rounded-lg overflow-hidden">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Main Category </th>
-
-                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Image</th>
-                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Name</th>
-                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Created Date</th>
-                <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">Action</th>
-
-              </tr>
-            </thead>
-
-            <tbody>
-              {data.length > 0 ? (
-                data.map((item) => (
-                  <tr key={item._id} className="hover:bg-[rgba(204,40,40,0.1)] border-t border-[rgba(204,40,40,0.2)]">
-                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-
-                      {item?.SuperCategory?.name}
-                    </td>
-                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-
-                      <img
-                        src={item.image}
-                        className="w-14 h-14 object-cover rounded-md border"
-                        alt="SuperCategory"
-                      />
-                    </td>
-
-                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-                      {item.name}</td>
-
-                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-
-                      {moment(item.createdAt).format("DD-MM-YYYY")}
-                    </td>
-
-                    <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter whitespace-nowrap">
-                     <div className="flex justify-center items-center text-center gap-3">
-                       <BlockUnblock Id={item._id} fetchData={fetchData} step={2} status={item?.status} />
-                      <CategoryAdd item={item} isEdit={true} fetchDatas={fetchData} />
-                     </div>
-                    </td>
+            <CategoryAdd fetchData={fetchData} />
 
 
-                  </tr>
-                ))
-              ) : (
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-4">
+            <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan={3} className="text-center p-4">
-                    No Categories Found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Main Category
+                  </th>
 
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Image
+                  </th>
+
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Name
+                  </th>
+
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Created Date
+                  </th>
+
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+
+              <tbody className="bg-white divide-y divide-gray-100">
+                {data.length > 0 ? (
+                  data.map((item) => (
+                    <tr
+                      key={item?._id}
+                      className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
+                        }`}
+                    >
+                      {/* Main Category */}
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
+                        {item?.SuperCategory?.name}
+                      </td>
+
+                      {/* Image */}
+                      <td className="px-6 py-4 text-center">
+                        <img
+                          src={item.image}
+                          className="w-14 h-14 object-cover rounded-md border shadow-sm"
+                          alt="Category"
+                        />
+                      </td>
+
+                      {/* Name */}
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                        {item.name}
+                      </td>
+
+                      {/* Created Date */}
+                      <td className="px-6 py-4 text-center text-[14px] text-gray-600">
+                        {moment(item.createdAt).format("DD-MM-YYYY")}
+                      </td>
+
+                      {/* Action */}
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center items-center gap-3">
+                          <BlockUnblock
+                            Id={item._id}
+                            fetchData={fetchData}
+                            step={2}
+                            status={item?.status}
+                          />
+                          <CategoryAdd
+                            item={item}
+                            isEdit={true}
+                            fetchDatas={fetchData}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td
+                      colSpan={5}
+                      className="px-6 py-8 text-center text-gray-500 text-[15px]"
+                    >
+                      No Categories Found
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+
+        </div>
       </div>
     </AdminLayout>
   );
