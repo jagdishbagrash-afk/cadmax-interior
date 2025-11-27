@@ -7,6 +7,7 @@ import AdminLayout from "../common/AdminLayout";
 import CategoryAdd from "./CategoryAdd";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../common/BlockUnblock";
+import dataimage from "../../../Assets/Images/c1.jpg"
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -50,9 +51,9 @@ export default function Index() {
             <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  {/* <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Main Category
-                  </th>
+                  </th> */}
 
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Image
@@ -81,16 +82,16 @@ export default function Index() {
                         }`}
                     >
                       {/* Main Category */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
+                      {/* <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
                         {item?.SuperCategory?.name}
-                      </td>
+                      </td> */}
 
                       {/* Image */}
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item.image}
-                          className="w-14 h-14 object-cover rounded-md border shadow-sm"
-                          alt="Category"
+                          src={item.Image?.src ? item.Image?.src : dataimage?.src || dataimage?.src}
+                          className="w-[100px] h-[100px] object-cover text-center  rounded-md  shadow-sm"
+                          alt="SubCategory"
                         />
                       </td>
 
@@ -111,7 +112,7 @@ export default function Index() {
                             Id={item._id}
                             fetchData={fetchData}
                             step={2}
-                            status={item?.status}
+                            status={item?.status === true ? false : true}
                           />
                           <CategoryAdd
                             item={item}

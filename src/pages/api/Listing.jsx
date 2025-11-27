@@ -54,7 +54,6 @@ class Listing extends Component {
     return Api.get(`/category/status/${id}`)
   }
 
-
   async categoryUpdate(id, formData) {
     return Api.post(`/category/update/${id}`, formData);
   }

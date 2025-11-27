@@ -198,10 +198,9 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
           {/* Body */}
           <div className="py-4 px-4">
             {/* Category Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
               <div className="mb-4">
                 <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
-                  Category
+                  Category Name
                 </label>
                 <select
                   className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
@@ -217,7 +216,7 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
                   ))}
                 </select>
               </div>
-              <div className="mb-4">
+              {/* <div className="mb-4">
                 <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
                   Main Category
                 </label>
@@ -234,12 +233,11 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
                     </option>
                   ))}
                 </select>
-              </div>
-            </div>
+              </div> */}
             <div className="mb-2">
               <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
 
-                Category Name
+              Sub  Category Name
               </label>
               <input
                 type="text"

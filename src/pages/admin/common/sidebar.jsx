@@ -59,13 +59,6 @@ function SideBar() {
                                 Dashboard
                             </Link>
                             <Link
-                                href="/admin/maincategory"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6  gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/maincategory" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <PiChalkboardTeacherFill size={20} />
-                                Main Category
-                            </Link>
-                            <Link
                                 href="/admin/category"
                                 className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6  gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                             >

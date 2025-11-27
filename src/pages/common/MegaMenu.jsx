@@ -6,15 +6,37 @@ import c2 from "../../Assets/Images/c2.jpg";
 import c3 from "../../Assets/Images/c3.jpg";
 import c4 from "../../Assets/Images/c4.jpg";
 import c5 from "../../Assets/Images/c5.jpg";
+import Listing from "../api/Listing";
+import { useEffect, useState } from "react";
 
 const MegaMenu = () => {
-  const categories = [
-    { id: 1, title: "FURNITURE", image: c4.src },
-    { id: 2, title: "SOFA & SEATING", image: c3.src },
-    { id: 3, title: "LAMPS & LIGHTNING", image: c5.src },
-    { id: 4, title: "UPHOLSTERY", image: c1.src },
-    { id: 5, title: "HOME DECOR", image: c2.src },
-  ];
+  // const categories = [
+  //   { id: 1, name: "FURNITURE", image: c4.src },
+  //   { id: 2, name: "SOFA & SEATING", image: c3.src },
+  //   { id: 3, name: "LAMPS & LIGHTNING", image: c5.src },
+  //   { id: 4, name: "UPHOLSTERY", image: c1.src },
+  //   { id: 5, name: "HOME DECOR", image: c2.src },
+  // ];
+
+  const [categories, setCategories] = useState([]);
+
+  const fetchData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.categoryStatus();
+
+      if (response.data?.data) {
+        setCategories(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
 
   return (
     <li className="relative">
@@ -54,20 +76,20 @@ const MegaMenu = () => {
     "
           >
             <div className="mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {categories.map((item) => (
-                <div key={item.id} className="group cursor-pointer">
+              {categories?.map((item) => (
+                <Link href={`/productlist/${item.name?.replaceAll(" ", "-")}`} key={item._id} className="group cursor-pointer">
                   <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
                     <img
-                      src={item.image}
-                      alt={item.title}
+                      src={c1?.src || item.Image?.src}
+                      alt={item.name}
                       className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
                     />
                   </div>
 
                   <h3 className="mt-3 text-sm font-medium text-[#262A33] uppercase">
-                    {item.title}
+                    {item.name}
                   </h3>
-                </div>
+                </Link>
               ))}
             </div>
           </div>

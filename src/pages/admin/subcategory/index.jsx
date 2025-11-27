@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
 import AddSubCategory from "./AddSubCategory";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../common/BlockUnblock";
+import dataimage from "../../../Assets/Images/c1.jpg"
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -49,15 +49,17 @@ export default function Index() {
               {/* Header */}
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  {/* <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Main Category
+                  </th> */}
+
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Image
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Category
                   </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
-                    Image
-                  </th>
+
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Name
                   </th>
@@ -79,24 +81,21 @@ export default function Index() {
                       className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
                         }`}
                     >
-                      {/* Main Category */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
-                        {item?.SuperCategory?.name}
-                      </td>
 
+                      <td className="px-6 py-4 text-center">
+                        <img
+                          src={item.Image?.src ? item.Image?.src : dataimage?.src || dataimage?.src}
+                          className="w-[100px] h-[100px] object-cover text-center  rounded-md  shadow-sm"
+                          alt="SubCategory"
+                        />
+                      </td>
                       {/* Category */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
                         {item?.category?.name}
                       </td>
 
                       {/* Image */}
-                      <td className="px-6 py-4 text-center">
-                        <img
-                          src={item.image}
-                          className="w-14 h-14 object-cover rounded-md border shadow-sm"
-                          alt="SubCategory"
-                        />
-                      </td>
+
 
                       {/* Name */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
@@ -120,7 +119,7 @@ export default function Index() {
                             Id={item._id}
                             fetchData={fetchData}
                             step={3}
-                            status={item?.status}
+                            status={item?.status === true ? false : true}
                           />
                         </div>
                       </td>

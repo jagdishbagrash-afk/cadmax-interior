@@ -131,7 +131,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
     <>
       {/* Add Button */}
       <div className="flex justify-center items-center">
-          <button
+        <button
           onClick={handleOpen}
           className="cursor-pointer m-auto flex items-center justify-center
              w-[42px] h-[42px]
@@ -181,7 +181,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
           {/* Body */}
           <div className="py-4 px-4">
             {/* Category Name */}
-            <div className="mb-4">
+            {/* <div className="mb-4">
               <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
 
                 Main Category
@@ -199,7 +199,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
             <div className="mb-4">
               <label className="block text-[14px] font-medium text-[#3E3E3E] Creato mb-1 text-left">
                 Category Name

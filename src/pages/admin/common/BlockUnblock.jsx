@@ -5,173 +5,141 @@ import Listing from '@/pages/api/Listing';
 import Popup from '@/pages/common/Popup';
 
 export default function BlockUnblock({ Id, status, fetchData, step }) {
-    console.log("status", status)
-    console.log("id", Id)
+
     const [isOpen, setIsOpen] = useState(false);
     const [loading, setLoading] = useState(false);
-
     const toggleModal = () => setIsOpen(!isOpen);
     const handleClose = () => setIsOpen(false);
 
-    const handleSubperDelete = () => {
-        setLoading(true);
+
+    const handleSuperCategory = () => {
         const main = new Listing();
-        const response = main.Supercategorydelete(Id);
-        response
-            .then((res) => {
-                if (res && res?.data?.status) {
-                    toast.success(res.data.message);
-                } else {
-                    toast.error(res.data?.message || "Something went wrong.");
-                }
-                setLoading(false);
-                fetchData();
-                toggleModal();
-            })
-            .catch((error) => {
-                console.log("error", error);
-                toast.error(error?.response?.data?.message);
-                setLoading(false);
-            });
+        return main.Supercategorydelete(Id);
     };
 
-    const handlecategroyDelete = () => {
-        setLoading(true);
+    const handleCategory = () => {
         const main = new Listing();
-        const response = main.categorydelete(Id);
-        response
-            .then((res) => {
-                console.log(res.data)
-                if (res && res?.data?.status) {
-                    toast.success(res.data.message);
-                } else {
-                    toast.error(res.data?.message || "Something went wrong.");
-                }
-                setLoading(false);
-                fetchData();
-                toggleModal();
-            })
-            .catch((error) => {
-                console.log("error", error);
-                toast.error(error?.response?.data?.message);
-                setLoading(false);
-            });
+        return main.categorydelete(Id);
     };
 
-    const handleSubcategroyDelete = () => {
-        setLoading(true);
+    const handleSubcategory = () => {
         const main = new Listing();
-        const response = main.Subcategorydelete(Id);
-        response
-            .then((res) => {
-                console.log(res.data)
-                if (res && res?.data?.status) {
-                    toast.success(res.data.message);
-                } else {
-                    toast.error(res.data?.message || "Something went wrong.");
-                }
-                setLoading(false);
-                fetchData();
-                toggleModal();
-            })
-            .catch((error) => {
-                console.log("error", error);
-                toast.error(error?.response?.data?.message);
-                setLoading(false);
-            });
+        return main.Subcategorydelete(Id);
     };
 
-    const handleClick = (e) => {
+    /* -------------------- MAIN HANDLER -------------------- */
+
+    const handleClick = async (e) => {
         e.preventDefault();
-        if (step === 1) {
-            handleSubperDelete(e);
-        } else if (step === 2) {
-            handlecategroyDelete(e)
-        }
-        else if (step === 3) {
-            handleSubcategroyDelete(e)
-        }
-        else {
-            console.warn('Invalid step');
+        setLoading(true);
+
+        try {
+            let response;
+
+            // Step Based API Calling
+            if (step === 1) response = await handleSuperCategory();
+            else if (step === 2) response = await handleCategory();
+            else if (step === 3) response = await handleSubcategory();
+            else throw new Error("Invalid Step");
+
+            // Success Handling
+            if (response && response?.data?.status) {
+                toast.success(response.data.message || "Status Updated Successfully");
+            } else {
+                toast.error(response?.data?.message || "Something went wrong");
+            }
+
+            fetchData();      // Refresh list
+            toggleModal();    // Close popup
+
+        } catch (error) {
+            console.error(error);
+            toast.error(error?.response?.data?.message || "Server Error");
+        } finally {
+            setLoading(false);
         }
     };
+
+    /* -------------------- UI -------------------- */
 
     return (
         <div className="flex flex-col">
-            {/* Block/Unblock Button */}
+
+            {/* Block / Unblock Button */}
             <button
                 onClick={toggleModal}
+                title={status === true ? "Block User" : "Unblock User"}
                 className="cursor-pointer m-auto flex items-center justify-center
-             w-[42px] h-[42px]
-             rounded-lg border border-gray-200 shadow-sm 
-             bg-white hover:bg-gray-50
-             transition-all duration-200"
+                    w-[42px] h-[42px] rounded-lg 
+                    border border-gray-200 shadow-sm 
+                    bg-white hover:bg-gray-50 transition-all duration-200"
             >
+
                 {status === true ? (
-                    <MdBlock
-                        size={22}
-                        className="text-red-600 group-hover:text-red-700 transition"
-                    />
+                    <MdLockOpen size={22} className="text-green-600 hover:text-green-700 transition" />
                 ) : (
-                    <MdLockOpen
-                        size={22}
-                        className="text-green-600 group-hover:text-green-700 transition"
-                    />
+                    <MdBlock size={22} className="text-red-600 hover:text-red-700 transition" />
                 )}
+
             </button>
 
 
-            {/* Popup */}
+            {/* Popup Modal */}
             {isOpen && (
-                <Popup
-                    isOpen={isOpen}
-                    onClose={handleClose}
-                    size={"max-w-lg"}
-                    className="shadow-none"
-                >
+                <Popup isOpen={isOpen} onClose={handleClose} size="max-w-lg">
 
-
+                    {/* Header */}
                     <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
                         <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
                             {status === true ? "Block User" : "Unblock User"}
-
                         </h2>
-                        <button
-                            type="button"
-                            onClick={handleClose}
-                            className="text-gray-700 hover:text-gray-900"
-                        >
+
+                        <button onClick={handleClose} className="text-gray-700 hover:text-gray-900">
                             <MdClose size={24} />
                         </button>
                     </div>
+
 
                     {/* Body */}
                     <div className="py-4 px-4">
                         <p className="text-[16px] font-medium text-[#3E3E3E] Creato">
                             Are you sure you want to {status === true ? "block" : "unblock"} this user?
                         </p>
-                        <p className="text-red-600 text-[16px] font-medium  Creato">
+                        <p className="text-red-600 text-[16px] font-medium Creato">
                             (This action can be changed later.)
                         </p>
                     </div>
 
+
                     {/* Buttons */}
                     <div className="flex justify-end gap-3 px-6 pb-6">
+
                         <button
                             onClick={toggleModal}
                             className="text-black px-4 py-2 border border-gray-300 rounded-md"
                         >
                             Cancel
                         </button>
+
                         <button
                             onClick={handleClick}
-                            className="cursor-pointer bg-black hover:bg-white font-[700] text-[14px] px-[20px] py-[10px] text-white hover:text-black rounded-[5px]"
+                            disabled={loading}
+                            className={`cursor-pointer font-[700] text-[14px] px-[20px] py-[10px] rounded-[5px]
+                            ${loading ? "bg-gray-400" : "bg-black hover:bg-white"}
+                            text-white hover:text-black`}
                         >
-                            {loading ? "Processing..." : status === true ? "Block" : "Unblock"}
+                            {loading
+                                ? "Processing..."
+                                : status === true
+                                    ? "Block"
+                                    : "Unblock"}
                         </button>
+
                     </div>
+
                 </Popup>
             )}
+
         </div>
     );
 }
