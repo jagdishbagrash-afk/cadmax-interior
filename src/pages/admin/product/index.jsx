@@ -1,6 +1,8 @@
 import React from "react";
 import AdminLayout from "../common/AdminLayout";
-import AddProduct from "./AddProduct";
+// import AddProduct from "./AddProduct";
+import { MdAdd } from "react-icons/md";
+import Link from "next/link";
 
 export default function index() {
   return (
@@ -11,7 +13,12 @@ export default function index() {
                 <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
                   Product List
                 </h2>
-                <AddProduct />
+                <Link
+                  href="/admin/product/add"
+                  className="bg-yellow-400/20 hover:bg-yellow-400/40 px-4 py-2 rounded flex gap-2"
+                >
+                <MdAdd/> Product
+                </Link>
               </div>
        </div>
     </AdminLayout>
