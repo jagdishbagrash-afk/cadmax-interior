@@ -65,6 +65,10 @@ class Listing extends Component {
     return Api.get("/subcategory/get",)
   }
 
+  async getSubcategorybyCategory(id) {
+    return Api.get(`/subcategory/category/${id}`)
+  }
+
   async subcategoryStatus() {
     return Api.get("/subcategory/get-status",)
   }
@@ -75,6 +79,26 @@ class Listing extends Component {
 
   async SubcategoryUpdate(id, formData) {
     return Api.post(`/subcategory/update/${id}`, formData);
+  }
+
+  async productAdd(data) {
+    return Api.post(`/product/add`, data);
+  }
+
+  async getAllproducts(data) {
+    return Api.get(`/product/list`, data);
+  }
+
+  async deleteProduct(data) {
+    return Api.post(`/product/delete/${data}`);
+  }
+
+  async getProductbyId(data) {
+    return Api.get(`/product/${data}`);
+  }
+
+  async editProduct(id, data) {
+    return Api.post(`/product/edit/${id}`, data);
   }
 
   render() {
