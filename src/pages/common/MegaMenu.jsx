@@ -37,7 +37,7 @@ const MegaMenu = () => {
     fetchData();
   }, []);
 
-
+console.log("categories" ,categories)
   return (
     <li className="relative">
       {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
@@ -80,7 +80,7 @@ const MegaMenu = () => {
                 <Link href={`/productlist/${item.name?.replaceAll(" ", "-")}`} key={item._id} className="group cursor-pointer">
                   <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
                     <img
-                      src={c1?.src || item.Image?.src}
+                      src={item.Image  ? item.Image : c1?.src  || c1?.src }
                       alt={item.name}
                       className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
                     />

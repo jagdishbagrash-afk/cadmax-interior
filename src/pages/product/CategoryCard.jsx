@@ -1,17 +1,6 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import c1 from "../../Assets/Images/c1.jpg";
-import c2 from "../../Assets/Images/c2.jpg";
-import c3 from "../../Assets/Images/c3.jpg";
-import c4 from "../../Assets/Images/c4.jpg";
-import c5 from "../../Assets/Images/c5.jpg";
-
-const categories = [
-    { id: 1, title: 'FURNITURE', image: c4?.src },
-    { id: 2, title: 'SOFA & SEATING', image: c3?.src },
-    { id: 3, title: 'LAMPS & LIGHTNING', image: c5?.src },
-    { id: 4, title: 'UPHOLSTERY', image: c1?.src },
-    { id: 5, title: 'HOME DECOR', image: c2?.src },
-];
+import Listing from '../api/Listing';
 
 const CategoryCard = ({ title, image }) => (
     <div className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1">
@@ -44,6 +33,28 @@ const CategoryCard = ({ title, image }) => (
 
 
 const FeaturedCategories = () => {
+
+
+    const [categories, setCategories] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.categoryStatus();
+
+            if (response.data?.data) {
+                setCategories(response.data.data);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    console.log("categories", categories)
     return (
         <section className="bg-[#F6F6F6] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -55,8 +66,8 @@ const FeaturedCategories = () => {
                     {categories && categories.map((category, index) => (
                         <CategoryCard
                             key={category.id}
-                            title={category.title}
-                            image={category.image}
+                            title={category.name}
+                            image={category.Image}
                         />
                     ))}
                 </div>

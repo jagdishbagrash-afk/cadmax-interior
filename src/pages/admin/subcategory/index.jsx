@@ -27,6 +27,8 @@ export default function Index() {
     fetchData();
   }, []);
 
+  console.log("data")
+
   return (
     <AdminLayout page={"SubCategory List"}>
 
@@ -84,7 +86,7 @@ export default function Index() {
 
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item.Image?.src ? item.Image?.src : dataimage?.src || dataimage?.src}
+                          src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
                           className="w-[100px] h-[100px] object-cover text-center  rounded-md  shadow-sm"
                           alt="SubCategory"
                         />
@@ -93,9 +95,6 @@ export default function Index() {
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
                         {item?.category?.name}
                       </td>
-
-                      {/* Image */}
-
 
                       {/* Name */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">

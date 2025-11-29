@@ -130,22 +130,22 @@ export default function Index() {
 
                                     <button
                                         className="
-                                    mt-8
-                                    w-full sm:w-[440px]
-                                    h-[56px]
-                                    px-[70px]
-                                    py-[23px]
-                                    flex items-center justify-center gap-[10px]
-                                    border border-[#171717]
-                                    font-Creato font-bold
-                                    text-[14px]
-                                    leading-[1]
-                                    tracking-[0.08em]
-                                    uppercase
-                                    hover:text-[#171717]
-                                    hover:bg-white
-                                    transition
-                                    bg-black text-white
+                                                    mt-8
+                                                    w-full sm:w-[440px]
+                                                    h-[56px]
+                                                    px-[70px]
+                                                    py-[23px]
+                                                    flex items-center justify-center gap-[10px]
+                                                    border border-[#171717]
+                                                    font-Creato font-bold
+                                                    text-[14px]
+                                                    leading-[1]
+                                                    tracking-[0.08em]
+                                                    uppercase
+                                                    hover:text-[#171717]
+                                                    hover:bg-white
+                                                    transition
+                                                    bg-black text-white
                                                                               "
                                     >
                                         {item.button}
