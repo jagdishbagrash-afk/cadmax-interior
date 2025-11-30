@@ -27,7 +27,6 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
         return main.Subcategorydelete(Id);
     };
 
-    /* -------------------- MAIN HANDLER -------------------- */
 
     const handleClick = async (e) => {
         e.preventDefault();

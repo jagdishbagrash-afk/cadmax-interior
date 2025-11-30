@@ -1,9 +1,9 @@
 import React from "react";
-import ProductList1 from "../../Assets/Images/ProductList1.png";
-import ProductList2 from "../../Assets/Images/ProductList2.png";
-import ProductList3 from "../../Assets/Images/ProductList3.png";
-import ProductList4 from "../../Assets/Images/ProductList4.png";
-import ProductCard from "../common/ProductCard";
+import ProductList1 from "../../../Assets/Images/ProductList2.png";
+import ProductList2 from "../../../Assets/Images/ProductList2.png";
+import ProductList3 from "../../../Assets/Images/ProductList3.png";
+import ProductList4 from "../../../Assets/Images/ProductList4.png";
+import ProductCard from "../../common/ProductCard";
 
 const products = [
   {
@@ -80,10 +80,10 @@ const products = [
   },
 ];
 
-const ProductGrid = () => {
+const ProductGrid = ({ categoryId , id}) => {
   return (
     <div className="w-full px-6 md:px-10 lg:px-16 py-10">
-      <div className="flex items-center justify-between mb-8">
+      {/* <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2 cursor-pointer">
             <svg
@@ -114,7 +114,7 @@ const ProductGrid = () => {
             <option value="high">Price: High to Low</option>
           </select>
         </div>
-      </div>
+      </div> */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products &&
           products?.map((item) => (
@@ -122,10 +122,10 @@ const ProductGrid = () => {
           ))}
       </div>
       <div className="w-full flex justify-center mt-8">
-      <button className="px-10 py-3 border border-[#171717] text-sm text-[#171717] font-bold tracking-wide hover:bg-black hover:text-white transition Creato cursor-pointer">
-        LOAD MORE
-      </button>
-    </div>
+        <button className="px-10 py-3 border border-[#171717] text-sm text-[#171717] font-bold tracking-wide hover:bg-black hover:text-white transition Creato cursor-pointer">
+          LOAD MORE
+        </button>
+      </div>
     </div>
   );
 };

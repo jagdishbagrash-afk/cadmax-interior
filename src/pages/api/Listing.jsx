@@ -77,6 +77,10 @@ class Listing extends Component {
     return Api.post(`/subcategory/update/${id}`, formData);
   }
 
+    async SubcategoryList(id) {
+    return Api.get(`/subcategory/category_name/${id}`, );
+  }
+
   render() {
     return (
       <div>

@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import c1 from "../../Assets/Images/c1.jpg";
 import Listing from '../api/Listing';
+import Link from 'next/link';
 
 const CategoryCard = ({ title, image }) => (
-    <div className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1">
+    <Link
+        href={`/product/list/${title?.replaceAll(" ", "-")}`}
+        className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1"
+    >
 
         <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
 
@@ -25,7 +28,7 @@ const CategoryCard = ({ title, image }) => (
 
         </div>
 
-    </div>
+    </Link>
 );
 
 
