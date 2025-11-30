@@ -14,7 +14,7 @@ export default function Index() {
   const router = useRouter();
   const id = router?.query?.slug;
   const [categories, setCategories] = useState([]);
-  const [selectedId, setSelectedId] = useState(null); 
+  const [selectedId, setSelectedId] = useState(null);
 
   const fetchData = async (id) => {
     try {
@@ -36,9 +36,8 @@ export default function Index() {
   useEffect(() => {
     if (id) fetchData(id);
   }, [id]);
-      console.log("selectedId:", selectedId);
+  console.log("selectedId:", selectedId);
 
-  
   return (
     <Layout>
       <div className="w-full overflow-hidden bg-black">
@@ -59,7 +58,7 @@ export default function Index() {
           {categories.map((item) => (
             <SwiperSlide key={item._id}>
               <div
-                onClick={() => setSelectedId(item._id)} 
+                onClick={() => setSelectedId(item._id)}
                 className={`relative h-[280px] md:h-[320px] lg:h-[500px] cursor-pointer overflow-hidden
                   ${selectedId === item._id ? "ring-1 ring-blue-600" : ""}
                 `}
