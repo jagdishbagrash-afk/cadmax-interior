@@ -14,12 +14,12 @@ const CategoryCard = ({ title, image }) => (
             />
 
             <div className="
-        absolute inset-0 
-        flex items-center justify-center 
-        text-white text-[18px] sm:text-[22px] 
-        font-[900] uppercase
-        bg-black/40
-      ">
+                    absolute inset-0 
+                    flex items-center justify-center 
+                    text-white text-[18px] sm:text-[22px] 
+                    font-[900] uppercase
+                    bg-black/40
+                ">
                 {title}
             </div>
 
