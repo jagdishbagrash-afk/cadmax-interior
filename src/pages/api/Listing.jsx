@@ -105,6 +105,14 @@ class Listing extends Component {
     return Api.get(`/subcategory/category_name/${id}`, );
   }
 
+  async getProductbyCategory(id) {
+    return Api.get(`/product/category/${id}`);
+  }
+
+  async getProductbySubcategory(id) {
+    return Api.get(`/product/subcategory/${id}`);
+  }
+
   render() {
     return (
       <div>
