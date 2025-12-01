@@ -41,7 +41,7 @@ export default function Index() {
               Category  Listing
             </h2>
 
-            <CategoryAdd fetchData={fetchData} />
+            <CategoryAdd fetchDatas={fetchData} />
 
 
           </div>
@@ -51,10 +51,6 @@ export default function Index() {
             <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
               <thead className="bg-gray-50">
                 <tr>
-                  {/* <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
-                    Main Category
-                  </th> */}
-
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Image
                   </th>
@@ -81,15 +77,10 @@ export default function Index() {
                       className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
                         }`}
                     >
-                      {/* Main Category */}
-                      {/* <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
-                        {item?.SuperCategory?.name}
-                      </td> */}
-
                       {/* Image */}
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item.Image?.src ? item.Image?.src : dataimage?.src || dataimage?.src}
+                          src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
                           className="w-[100px] h-[100px] object-cover text-center  rounded-md  shadow-sm"
                           alt="SubCategory"
                         />

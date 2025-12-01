@@ -1,23 +1,12 @@
-import React from 'react';
-import c1 from "../../Assets/Images/c1.jpg";
-import c2 from "../../Assets/Images/c2.jpg";
-import c3 from "../../Assets/Images/c3.jpg";
-import c4 from "../../Assets/Images/c4.jpg";
-import c5 from "../../Assets/Images/c5.jpg";
-
-const categories = [
-    { id: 1, title: 'FURNITURE', image: c4?.src },
-    { id: 2, title: 'SOFA & SEATING', image: c3?.src },
-    { id: 3, title: 'LAMPS & LIGHTNING', image: c5?.src },
-    { id: 4, title: 'UPHOLSTERY', image: c1?.src },
-    { id: 5, title: 'HOME DECOR', image: c2?.src },
-];
-
+import React, { useEffect, useState } from 'react';
+import Listing from '../api/Listing';
+import Link from 'next/link';
 const CategoryCard = ({ title, image }) => (
-    <div className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1">
-
+    <Link
+        href={`/product/list/${title?.replaceAll(" ", "-")}`}
+        className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1"
+    >
         <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
-
             <img
                 src={image}
                 alt={title}
@@ -25,18 +14,18 @@ const CategoryCard = ({ title, image }) => (
             />
 
             <div className="
-        absolute inset-0 
-        flex items-center justify-center 
-        text-white text-[18px] sm:text-[22px] 
-        font-[900] uppercase
-        bg-black/40
-      ">
+                    absolute inset-0 
+                    flex items-center justify-center 
+                    text-white text-[18px] sm:text-[22px] 
+                    font-[900] uppercase
+                    bg-black/40
+                ">
                 {title}
             </div>
 
         </div>
 
-    </div>
+    </Link>
 );
 
 
@@ -44,6 +33,28 @@ const CategoryCard = ({ title, image }) => (
 
 
 const FeaturedCategories = () => {
+
+
+    const [categories, setCategories] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.categoryStatus();
+
+            if (response.data?.data) {
+                setCategories(response.data.data);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    console.log("categories", categories)
     return (
         <section className="bg-[#F6F6F6] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -55,8 +66,8 @@ const FeaturedCategories = () => {
                     {categories && categories.map((category, index) => (
                         <CategoryCard
                             key={category.id}
-                            title={category.title}
-                            image={category.image}
+                            title={category.name}
+                            image={category.Image}
                         />
                     ))}
                 </div>

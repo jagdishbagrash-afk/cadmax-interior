@@ -101,6 +101,10 @@ class Listing extends Component {
     return Api.post(`/product/edit/${id}`, data);
   }
 
+  async SubcategoryList(id) {
+    return Api.get(`/subcategory/category_name/${id}`, );
+  }
+
   render() {
     return (
       <div>
