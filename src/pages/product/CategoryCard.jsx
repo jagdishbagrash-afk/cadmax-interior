@@ -25,13 +25,7 @@ const CategoryCard = ({ title, image }) => (
     </Link>
 );
 
-
-
-
-
 const FeaturedCategories = () => {
-
-
     const [categories, setCategories] = useState([]);
 
     const fetchData = async () => {

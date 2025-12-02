@@ -102,7 +102,7 @@ class Listing extends Component {
   }
 
   async SubcategoryList(id) {
-    return Api.get(`/subcategory/category_name/${id}`, );
+    return Api.get(`/subcategory/category_name/${id}`,);
   }
 
   async getProductbyCategory(id) {
@@ -112,6 +112,11 @@ class Listing extends Component {
   async getProductbySubcategory(id) {
     return Api.get(`/product/subcategory/${id}`);
   }
+
+  async getAllServices(data) {
+    return Api.get(`/product/list`, data);
+  }
+
 
   render() {
     return (
