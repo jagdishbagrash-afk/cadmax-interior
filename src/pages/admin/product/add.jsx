@@ -33,7 +33,7 @@ const AVAILABLE_COLORS = [
     subcategory: "",
     dimensions: "",
     material: "",
-    product: "",
+    type: "",
     terms: "",
   });
   const [categories, setCategories] = useState([]);
@@ -69,7 +69,7 @@ const AVAILABLE_COLORS = [
           subcategory: data.subcategory?._id || "",
           dimensions: data.dimensions || "",
           material: data.material || "",
-          product: data.product || "",
+          type: data.type || "",
           terms: data.terms || "",
         });
       setImagePreview(data.image || "");
@@ -216,7 +216,7 @@ const AVAILABLE_COLORS = [
       fd.append("subcategory", form.subcategory);
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
-      fd.append("product", form.product);
+      fd.append("type", form.type);
       fd.append("terms", form.terms);
       if (image instanceof File) {
         fd.append("image", image);
@@ -234,7 +234,7 @@ const AVAILABLE_COLORS = [
           subcategory: "",
           dimensions: "",
           material: "",
-          product: "",
+          type: "",
           terms: "",
         });
         setImage(null);
@@ -263,7 +263,7 @@ const AVAILABLE_COLORS = [
       fd.append("subcategory", form.subcategory);
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
-      fd.append("product", form.product);
+      fd.append("type", form.type);
       fd.append("terms", form.terms);
       if (image instanceof File) {
         fd.append("image", image);
@@ -281,7 +281,7 @@ const AVAILABLE_COLORS = [
           subcategory: "",
           dimensions: "",
           material: "",
-          product: "",
+          type: "",
           terms: "",
         });
         setImage(null);
@@ -416,9 +416,9 @@ const AVAILABLE_COLORS = [
 
           <textarea
             type="text"
-            name="product"
+            name="type"
             placeholder="Product Type"
-            value={form.product}
+            value={form.type}
             onChange={handleChange}
             rows="3"
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
