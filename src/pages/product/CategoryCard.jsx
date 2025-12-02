@@ -6,13 +6,12 @@ const CategoryCard = ({ title, image }) => (
         href={`/product/list/${title?.replaceAll(" ", "-")}`}
         className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1"
     >
-        <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[350px] rounded-full overflow-hidden relative mx-auto">
+        <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[ ] rounded-full overflow-hidden relative mx-auto">
             <img
                 src={image}
                 alt={title}
                 className="w-full h-full object-cover object-center"
             />
-
             <div className="
                     absolute inset-0 
                     flex items-center justify-center 
@@ -22,9 +21,7 @@ const CategoryCard = ({ title, image }) => (
                 ">
                 {title}
             </div>
-
         </div>
-
     </Link>
 );
 
