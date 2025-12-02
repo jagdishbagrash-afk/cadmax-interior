@@ -113,11 +113,24 @@ class Listing extends Component {
     return Api.get(`/product/subcategory/${id}`);
   }
 
-  async getAllServices(data) {
-    return Api.get(`/product/list`, data);
+  async getAllProject(data) {
+    return Api.get(`/project/list`, data);
   }
 
-
+    async AddProject(data) {
+    return Api.post(`/project/add`, data);
+  }
+  
+ async getAllProjectId(id) {
+    return Api.get(`/project/details/${id}`, );
+  }
+ async editProject(id, data) {
+    return Api.post(`/project/edit/${id}`, data);
+  }
+ async deleteProject(data) {
+    return Api.post(`/project/status/${data}`);
+  }
+  
   render() {
     return (
       <div>

@@ -206,7 +206,6 @@ export default function AddProduct({ fetchDatas, isEdit = false, item }) {
       >
         {isEdit ? <MdEdit /> : <MdAdd />} Product
       </button>
-
       {isOpen && (
         <Popup isOpen={isOpen} onClose={handleClose} size="max-w-2xl">
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
