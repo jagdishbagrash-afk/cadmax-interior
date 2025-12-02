@@ -10,7 +10,6 @@ import BlockUnblock from "../common/BlockUnblock";
 
 export default function index() {
   const [data, setData] = useState([]);
-
   const fetchData = async () => {
     try {
       const main = new Listing();
@@ -41,10 +40,10 @@ export default function index() {
             Product List
           </h2>
           <Link
-            href="/admin/product/add"
+            href="/admin/services/add"
             className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
           >
-            <MdAdd size={18} /> Add Product
+            <MdAdd size={18} /> Services
           </Link>
         </div>
 
@@ -61,16 +60,13 @@ export default function index() {
                     Title
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Category
+                    content
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    SubCategory
+                    Scope
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Stock
+                    Area
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
                     Created Date

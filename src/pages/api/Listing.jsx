@@ -17,25 +17,25 @@ class Listing extends Component {
   async AdminDashboard() {
     return Api.get("/admin/dasboard")
   }
-  async Supercategory(data) {
-    return Api.post("/supercategory/add", data)
-  }
+  // async Supercategory(data) {
+  //   return Api.post("/supercategory/add", data)
+  // }
 
-  async SupercategoryList() {
-    return Api.get("/supercategory/get")
-  }
+  // async SupercategoryList() {
+  //   return Api.get("/supercategory/get")
+  // }
 
-  async SupercategoryStatus() {
-    return Api.get("/supercategory/get-status")
-  }
+  // async SupercategoryStatus() {
+  //   return Api.get("/supercategory/get-status")
+  // }
 
-  async Supercategorydelete(id) {
-    return Api.get(`/supercategory/status/${id}`)
-  }
+  // async Supercategorydelete(id) {
+  //   return Api.get(`/supercategory/status/${id}`)
+  // }
 
-  async SupercategoryUpdate(id, formData) {
-    return Api.post(`/supercategory/update/${id}`, formData);
-  }
+  // async SupercategoryUpdate(id, formData) {
+  //   return Api.post(`/supercategory/update/${id}`, formData);
+  // }
 
   async category(data) {
     return Api.post("/category/add", data)
