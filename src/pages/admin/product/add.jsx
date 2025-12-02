@@ -6,6 +6,22 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 
 export default function Add() {
+  
+const AVAILABLE_COLORS = [
+    { name: "red", hex: "#ef4444" },
+    { name: "blue", hex: "#3b82f6" },
+    { name: "green", hex: "#22c55e" },
+    { name: "yellow", hex: "#eab308" },
+    { name: "pink", hex: "#ec4899" },
+    { name: "purple", hex: "#a855f7" },
+    { name: "black", hex: "#000000" },
+    { name: "white", hex: "#ffffff" },
+    { name: "gray", hex: "#6b7280" },
+    { name: "orange", hex: "#f97316" },
+    { name: "teal", hex: "#14b8a6" },
+    { name: "brown", hex: "#92400e" }
+  ];
+
   const router = useRouter();
   const { id } = router.query;
   const [form, setForm] = useState({
@@ -25,6 +41,17 @@ export default function Add() {
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [variants, setVariants] = useState(
+    AVAILABLE_COLORS.map(c => ({
+      color: c.name,
+      hex: c.hex,
+      selected: false,
+      stock: "",
+      images: [],
+      previews: []
+    }))
+  );
 
   const fetchProductData = async () => {
     try {
@@ -111,6 +138,35 @@ export default function Add() {
     });
   };
 
+  const toggleVariant = (index) => {
+    setVariants(prev =>
+      prev.map((v, i) =>
+        i === index ? { ...v, selected: !v.selected } : v
+      )
+    );
+  };
+
+  const updateVariantStock = (index, value) => {
+    setVariants(prev =>
+      prev.map((v, i) =>
+        i === index ? { ...v, stock: value } : v
+      )
+    );
+  };
+
+  const handleVariantImages = (index, files) => {
+    const fileArr = Array.from(files);
+    const previews = fileArr.map(f => URL.createObjectURL(f));
+
+    setVariants(prev =>
+      prev.map((v, i) =>
+        i === index
+          ? { ...v, images: fileArr, previews }
+          : v
+      )
+    );
+  };
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -121,9 +177,37 @@ export default function Add() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const selectedVariants = variants
+      .filter(v => v.selected)
+      .map(({ color, stock, images }) => ({
+        color,
+        stock,
+        images
+      }));
+
+    if (!selectedVariants.length) {
+      toast.error("Select at least one color variant");
+      return;
+    }
     setLoading(true);
     try {
       const fd = new FormData();
+      Object.entries(form).forEach(([key, value]) => {
+        fd.append(key, value);
+      });
+
+      fd.append("variants", JSON.stringify(
+        selectedVariants.map(({ color, stock }) => ({
+          color,
+          stock
+        }))
+      ));
+
+      selectedVariants.forEach(v => {
+        v.images.forEach(img => {
+          fd.append(`variantImages_${v.color}`, img);
+        });
+      });
       fd.append("title", form.title);
       fd.append("description", form.description);
       fd.append("stock", form.stock);
@@ -245,7 +329,7 @@ export default function Add() {
 
           {/* Stock & Price */}
           <div className="grid grid-cols-2 gap-4">
-            <input
+            {/* <input
               type="number"
               name="stock"
               placeholder="Stock"
@@ -253,12 +337,21 @@ export default function Add() {
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
               required
-            />
+            /> */}
             <input
               type="number"
               name="amount"
               placeholder="Price (₹)"
               value={form.amount}
+              onChange={handleChange}
+              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              required
+            />
+            <input
+              type="text"
+              name="dimensions"
+              placeholder="Dimensions"
+              value={form.dimensions}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
               required
@@ -309,16 +402,6 @@ export default function Add() {
           </div>
 
           {/* New String Fields */}
-          <textarea
-            type="text"
-            name="dimensions"
-            placeholder="Dimensions"
-            value={form.dimensions}
-            onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
 
           <textarea
             type="text"
@@ -352,25 +435,33 @@ export default function Add() {
             required
           />
 
-          {/* Image Upload */}
-          <label className="block text-gray-700 font-medium mt-4">
-            Product Image
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-            required
-          />
+          <div className="border p-4 rounded space-y-4">
+            <h2 className="font-semibold text-lg">Color Variants</h2>
 
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-3 w-32 h-32 object-cover rounded-md border border-gray-200"
-            />
-          )}
+            {variants.map((v, i) => (
+              <div key={v.color} className="border p-3 rounded">
+
+                <div className="flex items-center gap-3">
+                  <input type="checkbox" checked={v.selected} onChange={() => toggleVariant(i)} />
+                  <span className="w-5 h-5 rounded border" style={{ backgroundColor: v.hex }} />
+                  <span className="capitalize">{v.color}</span>
+                </div>
+
+                {v.selected && (
+                  <div className="mt-3 pl-6 space-y-3">
+                    <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => updateVariantStock(i, e.target.value)} className="input" required />
+                    <input type="file" multiple onChange={(e) => handleVariantImages(i, e.target.files)} />
+
+                    <div className="flex gap-2 flex-wrap">
+                      {v.previews.map((src, idx) => (
+                        <img key={idx} src={src} className="w-20 h-20 object-cover rounded border" />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>          
 
           {/* Submit Button */}
           <button
