@@ -117,9 +117,7 @@ export default function Index() {
                                     >
                                         GET A QUOTE
                                     </button>
-
                                 </div>
-
                             </div>
                         );
                     })}
