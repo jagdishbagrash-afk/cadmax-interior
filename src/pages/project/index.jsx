@@ -83,15 +83,12 @@ export default function Index() {
 
                                     <div className="space-y-5">
                                         <div className="space-y-2">
-
                                             <h3 className="Creato font-bold text-[16px] sm:text-[17px] md:text-[18px] leading-[1] tracking-[-0.02em] text-[#171717]">
                                                 Design Solution
                                             </h3>
-
                                             <p className="Creato font-medium text-[14px] sm:text-[15px] md:text-[16px] leading-[1.4] tracking-[-0.02em] text-[#4D5466]">
                                                 {section.solution}
                                             </p>
-
                                         </div>
                                     </div>
 
