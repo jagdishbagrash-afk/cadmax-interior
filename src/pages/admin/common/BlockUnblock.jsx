@@ -32,6 +32,11 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     return main.deleteProduct(Id);
   };
 
+    const handleProject = () => {
+    const main = new Listing();
+    return main.deleteProject(Id);
+  };
+
   /* -------------------- MAIN HANDLER -------------------- */
 
   const handleClick = async (e) => {
@@ -46,6 +51,8 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       else if (step === 2) response = await handleCategory();
       else if (step === 3) response = await handleSubcategory();
       else if (step === 4) response = await handleProduct();
+      else if (step === 5) response = await handleProject();
+
       else throw new Error("Invalid Step");
 
       // Success Handling

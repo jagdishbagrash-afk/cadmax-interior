@@ -8,49 +8,47 @@ import { useRouter } from "next/router";
 export default function Add() {
   const router = useRouter();
   const { id } = router.query;
+  console.log("id", id)
   const [form, setForm] = useState({
     title: "",
     content: "",
-    scope: "",
-    area: "",
+    brief: "",
+    solution: "",
+    designed: ""
   });
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // const fetchServicesData = async () => {
-  //   try {
-  //     const main = new Listing();
-  //     const response = await main.getServicesbyId(id);
-
-  //     const data = response?.data?.data;
-  //     if (data) {
-  //       setForm({
-  //         title: data.title || "",
-  //         description: data.description || "",
-  //         stock: data.stock ?? "",
-  //         amount: data.amount ?? "",
-  //         category: data.category?._id || "",
-  //         subcategory: data.subcategory?._id || "",
-  //         dimensions: data.dimensions || "",
-  //         material: data.material || "",
-  //         Services: data.Services || "",
-  //         terms: data.terms || "",
-  //       });
-  //     setImagePreview(data.image || "");
-  //     setImage(null);
-  //     }
-  //   } catch (error) {
-  //     console.log("Error:", error);
-  //   }
-  // };
+  const fetchProjectData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.getAllProjectId(id);
+      const data = response?.data?.data;
+      console.log("data", data)
+      if (data) {
+        setForm({
+          title: data.title || "",
+          content: data.content || "",
+          brief: data.brief || "",
+          material: data.material || "",
+          solution: data.solution || "",
+          designed: data.designed || "",
+        });
+        setImagePreview(data.Image || "");
+        setImage(null);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
 
 
-  // useEffect(() => {
-  //   if(id){
-  //     fetchServicesData();
-  //   }
-  // }, [id]);
+  useEffect(() => {
+    if (id) {
+      fetchProjectData();
+    }
+  }, [id]);
 
   // console.log("id", id);
 
@@ -76,20 +74,15 @@ export default function Add() {
       const fd = new FormData();
       fd.append("title", form.title);
       fd.append("content", form.content);
-      fd.append("area", form.area);
-      fd.append("scope", form.scope);
-      fd.append("category", form.category); // must be _id
-      fd.append("subcategory", form.subcategory);
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("Services", form.Services);
-      fd.append("terms", form.terms);
+      fd.append("solution", form.solution);
+      fd.append("brief", form.brief);
+      fd.append("designed", form.designed);
       if (image instanceof File) {
         fd.append("image", image);
       }
       const main = new Listing();
-      const res = await main.ServicesAdd(fd);
-      if(res?.data?.status){
+      const res = await main.AddProject(fd);
+      if (res?.data?.status) {
         toast.success(res?.data?.message);
         setForm({
           title: "",
@@ -100,13 +93,13 @@ export default function Add() {
           subcategory: "",
           dimensions: "",
           material: "",
-          Services: "",
+          Project: "",
           terms: "",
         });
         setImage(null);
-        router.push("/admin/Services");
+        router.push("/admin/project");
       } else {
-        toast.error(data.message || "Failed to add Services");
+        toast.error(data.message || "Failed to add Project");
       }
     } catch (error) {
       toast.error("Internal Server Error");
@@ -122,21 +115,17 @@ export default function Add() {
     try {
       const fd = new FormData();
       fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock);
-      fd.append("amount", form.amount);
-      fd.append("category", form.category); // must be _id
-      fd.append("subcategory", form.subcategory);
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("Services", form.Services);
-      fd.append("terms", form.terms);
+      fd.append("content", form.content);
+      fd.append("solution", form.solution);
+      fd.append("brief", form.brief);
+      fd.append("designed", form.designed);
       if (image instanceof File) {
         fd.append("image", image);
       }
       const main = new Listing();
-      const res = await main.editServices(id, fd);
-      if(res?.data?.status){
+      const res = await main.editProject(id, fd);
+      if (res?.data?.status) {
+        router.push("/admin/project");
         toast.success(res?.data?.message);
         setForm({
           title: "",
@@ -147,13 +136,12 @@ export default function Add() {
           subcategory: "",
           dimensions: "",
           material: "",
-          Services: "",
+          Project: "",
           terms: "",
         });
         setImage(null);
-        router.push("/admin/Services");
       } else {
-        toast.error(data.message || "Failed to edit Services");
+        toast.error(data.message || "Failed to edit Project");
       }
     } catch (error) {
       toast.error("Internal Server Error");
@@ -166,59 +154,77 @@ export default function Add() {
   // console.log("form", form);
 
   return (
-    <AdminLayout page={"Services List"}>
+    <AdminLayout page={"Project List"}>
       <div className="bg-white p-8 border border-blue-100">
-        <h1 className="text-2xl font-bold text-blue-600 mb-6">{id ? "Edit" : "Add"} Services</h1>
+        <h1 className="text-2xl font-bold text-blue-600 mb-6">{id ? "Edit" : "Add"} Project</h1>
 
         <form className="space-y-4" onSubmit={id ? handleEdit : handleSubmit}>
           {/* Title */}
+          <label className="block text-gray-700 font-medium mt-4">
+            Project Title
+          </label>
           <input
             type="text"
             name="title"
-            placeholder="Services Title"
+            placeholder="Project Title"
             value={form.title}
             onChange={handleChange}
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
             required
           />
 
-          {/* Description */}
+          <label className="block text-gray-700 font-medium mt-4">
+            Project Designed
+          </label>
+          <input
+            type="text"
+            name="designed"
+            placeholder="Project Designed"
+            value={form.designed}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+            required
+          />
+          {/* <label className="block text-gray-700 font-medium mt-4">
+            Project Description
+          </label>
           <textarea
-            name="description"
-            placeholder="Services Description"
+            name="content"
+            placeholder="Project Description"
             value={form.content}
             onChange={handleChange}
             rows="3"
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
             required
-          />
-
-           <textarea
-            name="area"
-            placeholder="Services Area"
-            value={form.area}
+          /> */}
+          <label className="block text-gray-700 font-medium mt-4">
+            Project Brieft
+          </label>
+          <textarea
+            name="brief"
+            placeholder="Project brief"
+            value={form.brief}
             onChange={handleChange}
             rows="3"
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
             required
           />
-
-
-           <textarea
-            name="scope"
-            placeholder="Services Scope"
-            value={form.scope}
+          <label className="block text-gray-700 font-medium mt-4">
+            Project Solution
+          </label>
+          <textarea
+            name="solution"
+            placeholder="Project Solution"
+            value={form.solution}
             onChange={handleChange}
             rows="3"
             className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
             required
           />
-
-
 
           {/* Image Upload */}
           <label className="block text-gray-700 font-medium mt-4">
-            Services Image
+            Project Image
           </label>
           <input
             type="file"
@@ -227,7 +233,6 @@ export default function Add() {
             className="border border-gray-300 rounded-lg p-2 w-full"
             required
           />
-
           {imagePreview && (
             <img
               src={imagePreview}
@@ -235,7 +240,6 @@ export default function Add() {
               className="mt-3 w-32 h-32 object-cover rounded-md border border-gray-200"
             />
           )}
-
           {/* Submit Button */}
           <button
             type="submit"
