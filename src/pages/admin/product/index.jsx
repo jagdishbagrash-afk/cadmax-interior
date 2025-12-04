@@ -7,6 +7,7 @@ import moment from "moment";
 import { MdEdit, MdDelete } from "react-icons/md";
 import { FaUndo } from 'react-icons/fa'; 
 import BlockUnblock from "../common/BlockUnblock";
+import { formatMultiPrice } from "@/components/ValueDataHook";
 
 export default function index() {
   const [data, setData] = useState([]);
@@ -30,7 +31,7 @@ export default function index() {
     fetchData();
   }, []);
 
-  console.log("data", data);
+  // console.log("data", data);
 
   return (
     <AdminLayout page={"Product List"}>
@@ -90,37 +91,48 @@ export default function index() {
                       {/* Image */}
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item?.image}
+                          src={item?.variants[0]?.images[0]}
                           className="w-20 h-20 object-cover rounded-md shadow-sm mx-auto"
                           alt="Product"
                         />
                       </td>
 
                       {/* Title */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium">
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium capitalize">
                         {item?.title}
                       </td>
 
                       {/* Category */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 capitalize">
                         {item?.category?.name}
                       </td>
 
                       {/* SubCategory */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 capitalize">
                         {item?.subcategory?.name}
                       </td>
 
                       {/* Price */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-600">
-                        ₹{item?.amount}
+                        {formatMultiPrice(item?.amount, "INR")}
                       </td>
 
                       {/* Stock */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
-                        {item?.stock}
-                      </td>
+                      <td className="px-6 py-4 text-left text-[14px] text-gray-800">
+                        {item?.variants?.map((v) => (
+                          <div key={v.color} className="capitalize">
+                            {v.color}: {v.stock}
+                          </div>
+                        ))}
 
+                        <div className="mt-1 pt-1 border-t text-[13px] font-medium">
+                          Total:{" "}
+                          {item?.variants?.reduce(
+                            (sum, v) => sum + (Number(v.stock) || 0),
+                            0
+                          )}
+                        </div>
+                      </td>
                       {/* Created Date */}
                       <td className="px-6 py-4 text-center text-[14px] text-gray-600">
                         {moment(item?.createdAt).format("DD-MM-YYYY")}
@@ -132,7 +144,7 @@ export default function index() {
                           {/* Edit */}
                           <Link
                             className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                            href={`/admin/product/add?id=${item?._id}`}
+                            href={`/admin/product/edit?id=${item?._id}`}
                           >
                             <MdEdit size={22}/>
                           </Link>

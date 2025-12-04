@@ -6,8 +6,7 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 
 export default function Add() {
-  
-const AVAILABLE_COLORS = [
+  const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
     { name: "blue", hex: "#3b82f6" },
     { name: "green", hex: "#22c55e" },
@@ -19,7 +18,7 @@ const AVAILABLE_COLORS = [
     { name: "gray", hex: "#6b7280" },
     { name: "orange", hex: "#f97316" },
     { name: "teal", hex: "#14b8a6" },
-    { name: "brown", hex: "#92400e" }
+    { name: "brown", hex: "#92400e" },
   ];
 
   const router = useRouter();
@@ -43,41 +42,49 @@ const AVAILABLE_COLORS = [
   const [loading, setLoading] = useState(false);
 
   const [variants, setVariants] = useState(
-    AVAILABLE_COLORS.map(c => ({
+    AVAILABLE_COLORS.map((c) => ({
       color: c.name,
       hex: c.hex,
       selected: false,
       stock: "",
-      images: [],
-      previews: []
+      images: [], // ✅ existing URLs
+      newImages: [], // ✅ new File objects
     }))
   );
 
-  const fetchProductData = async () => {
-    try {
-      const main = new Listing();
-      const response = await main.getProductbyId(id);
+  const fetchProduct = async () => {
+    const res = await new Listing().getProductbyId(id);
+    const data = res?.data?.data;
+    if (!data) return;
 
-      const data = response?.data?.data;
-      if (data) {
-        setForm({
-          title: data.title || "",
-          description: data.description || "",
-          stock: data.stock ?? "",
-          amount: data.amount ?? "",
-          category: data.category?._id || "",
-          subcategory: data.subcategory?._id || "",
-          dimensions: data.dimensions || "",
-          material: data.material || "",
-          type: data.type || "",
-          terms: data.terms || "",
-        });
-        setImagePreview(data.image || "");
-        setImage(null);
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
+    setForm({
+      title: data.title,
+      description: data.description,
+      amount: data.amount,
+      category: data.category?._id || "",
+      subcategory: data.subcategory?._id || "",
+      dimensions: data.dimensions,
+      material: data.material,
+      type: data.type,
+      terms: data.terms,
+    });
+
+    setImagePreview(data.image || "");
+
+    setVariants((prev) =>
+      prev.map((v) => {
+        const found = data.variants?.find((x) => x.color === v.color);
+        return found
+          ? {
+              ...v,
+              selected: true,
+              stock: found.stock,
+              images: found.images || [],
+              newImages: [],
+            }
+          : v;
+      })
+    );
   };
 
   const fetchCategories = async () => {
@@ -116,16 +123,15 @@ const AVAILABLE_COLORS = [
     fetchCategories();
   }, []);
 
-
   useEffect(() => {
-    if(form?.category){
+    if (form?.category) {
       fetchSubCategories();
     }
   }, [form?.category]);
 
   useEffect(() => {
-    if(id){
-      fetchProductData();
+    if (id) {
+      fetchProduct();
     }
   }, [id]);
 
@@ -139,139 +145,41 @@ const AVAILABLE_COLORS = [
   };
 
   const toggleVariant = (index) => {
-    setVariants(prev =>
-      prev.map((v, i) =>
-        i === index ? { ...v, selected: !v.selected } : v
-      )
+    setVariants((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, selected: !v.selected } : v))
     );
   };
 
   const updateVariantStock = (index, value) => {
-    setVariants(prev =>
-      prev.map((v, i) =>
-        i === index ? { ...v, stock: value } : v
+    setVariants((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, stock: value } : v))
+    );
+  };
+
+  const addNewImages = (i, files) =>
+    setVariants((v) =>
+      v.map((x, idx) =>
+        idx === i ? { ...x, newImages: [...x.newImages, ...files] } : x
       )
     );
-  };
 
-  const handleVariantImages = (index, files) => {
-    const fileArr = Array.from(files);
-    const previews = fileArr.map(f => URL.createObjectURL(f));
-
-    setVariants(prev =>
-      prev.map((v, i) =>
-        i === index
-          ? { ...v, images: fileArr, previews }
-          : v
+  const removeExistingImage = (i, imgIndex) =>
+    setVariants((v) =>
+      v.map((x, idx) =>
+        idx === i
+          ? { ...x, images: x.images.filter((_, k) => k !== imgIndex) }
+          : x
       )
     );
-  };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const removeVariantImage = (variantIndex, imageIndex) => {
-    setVariants(prev =>
-      prev.map((v, i) => {
-        if (i !== variantIndex) return v;
-
-        const newImages = [...v.images];
-        const newPreviews = [...v.previews];
-
-        // revoke object URL to avoid memory leak
-        URL.revokeObjectURL(newPreviews[imageIndex]);
-
-        newImages.splice(imageIndex, 1);
-        newPreviews.splice(imageIndex, 1);
-
-        return {
-          ...v,
-          images: newImages,
-          previews: newPreviews
-        };
-      })
+  const removeNewImage = (i, imgIndex) =>
+    setVariants((v) =>
+      v.map((x, idx) =>
+        idx === i
+          ? { ...x, newImages: x.newImages.filter((_, k) => k !== imgIndex) }
+          : x
+      )
     );
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const selectedVariants = variants
-      .filter(v => v.selected)
-      .map(({ color, stock, images }) => ({
-        color,
-        stock,
-        images
-      }));
-
-    if (!selectedVariants.length) {
-      toast.error("Select at least one color variant");
-      return;
-    }
-    setLoading(true);
-    try {
-      const fd = new FormData();
-      Object.entries(form).forEach(([key, value]) => {
-        fd.append(key, value);
-      });
-
-      fd.append("variants", JSON.stringify(
-        selectedVariants.map(({ color, stock }) => ({
-          color,
-          stock
-        }))
-      ));
-
-      selectedVariants.forEach(v => {
-        v.images.forEach(img => {
-          fd.append(`variantImages_${v.color}`, img);
-        });
-      });
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock);
-      fd.append("amount", form.amount);
-      fd.append("category", form.category); // must be _id
-      fd.append("subcategory", form.subcategory);
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("type", form.type);
-      fd.append("terms", form.terms);
-      if (image instanceof File) {
-        fd.append("image", image);
-      }
-      const main = new Listing();
-      const res = await main.productAdd(fd);
-      if(res?.data?.status){
-        toast.success(res?.data?.message);
-        setForm({
-          title: "",
-          description: "",
-          stock: "",
-          amount: "",
-          category: "",
-          subcategory: "",
-          dimensions: "",
-          material: "",
-          type: "",
-          terms: "",
-        });
-        setImage(null);
-        router.push("/admin/product");
-      } else {
-        toast.error(data.message || "Failed to add product");
-      }
-    } catch (error) {
-      toast.error("Internal Server Error");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleEdit = async (e) => {
     e.preventDefault();
@@ -288,12 +196,26 @@ const AVAILABLE_COLORS = [
       fd.append("material", form.material);
       fd.append("type", form.type);
       fd.append("terms", form.terms);
-      if (image instanceof File) {
-        fd.append("image", image);
-      }
+      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
+      const selectedVariants = variants.filter(v => v.selected);
+      fd.append(
+        "variants",
+        JSON.stringify(
+          selectedVariants.map(v => ({
+            color: v.color,
+            stock: v.stock,
+            images: v.images
+          }))
+        )
+      );
+      selectedVariants.forEach(v =>
+        v.newImages.forEach(img =>
+          fd.append(`variantImages_${v.color}`, img)
+        )
+      );
       const main = new Listing();
       const res = await main.editProduct(id, fd);
-      if(res?.data?.status){
+      if (res?.data?.status) {
         toast.success(res?.data?.message);
         setForm({
           title: "",
@@ -325,9 +247,11 @@ const AVAILABLE_COLORS = [
   return (
     <AdminLayout page={"Product List"}>
       <div className="bg-white p-8 border border-blue-100">
-        <h1 className="text-2xl font-bold text-blue-600 mb-6">{id ? "Edit" : "Add"} Product</h1>
+        <h1 className="text-2xl font-bold text-blue-600 mb-6">
+          {"Edit"} Product
+        </h1>
 
-        <form className="space-y-4" onSubmit={id ? handleEdit : handleSubmit}>
+        <form className="space-y-4" onSubmit={handleEdit}>
           {/* Title */}
           <input
             type="text"
@@ -394,25 +318,32 @@ const AVAILABLE_COLORS = [
                 Select Category
               </option>
 
-              {categories && categories?.map((cat) => (
-                <option key={cat?._id} value={cat?._id}>
-                  {cat?.name}
-                </option>
-              ))}
+              {categories &&
+                categories?.map((cat) => (
+                  <option key={cat?._id} value={cat?._id}>
+                    {cat?.name}
+                  </option>
+                ))}
             </select>
 
-           <select
+            <select
               name="subcategory"
               value={form.subcategory}
               onChange={handleChange}
               disabled={!form.category} // 🔹 Disable if category is empty
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
-                ${!form.category ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}
+                ${
+                  !form.category
+                    ? "bg-gray-200 cursor-not-allowed"
+                    : "focus:ring-blue-400"
+                }
               `}
               required
             >
               <option value="" disabled>
-                {form.category ? "Select SubCategory" : "Select a Category first"}
+                {form.category
+                  ? "Select SubCategory"
+                  : "Select a Category first"}
               </option>
 
               {subCategories &&
@@ -458,46 +389,50 @@ const AVAILABLE_COLORS = [
             required
           />
 
-          <div className="border p-4 rounded space-y-4">
-            <h2 className="font-semibold text-lg">Color Variants</h2>
+          <div className="border p-4 rounded">
+            <h2 className="font-semibold">Color Variants</h2>
 
             {variants.map((v, i) => (
-              <div key={v.color} className="border p-3 rounded">
-
-                <div className="flex items-center gap-3">
+              <div key={v.color} className="border p-3 mt-3 rounded">
+                <label className="flex gap-2 items-center">
                   <input type="checkbox" checked={v.selected} onChange={() => toggleVariant(i)} />
-                  <span className="w-5 h-5 rounded border" style={{ backgroundColor: v.hex }} />
-                  <span className="capitalize">{v.color}</span>
-                </div>
+                  <span className="w-4 h-4 rounded" style={{ background: v.hex }} />
+                  {v.color}
+                </label>
 
                 {v.selected && (
-                  <div className="mt-3 pl-6 space-y-3">
-                    <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => updateVariantStock(i, e.target.value)} className="input" required />
-                    <input type="file" multiple onChange={(e) => handleVariantImages(i, e.target.files)} />
+                  <>
+                    <input
+                      type="number"
+                      value={v.stock}
+                      onChange={e => updateVariantStock(i, e.target.value)}
+                      className="input mt-2"
+                    />
 
-                    <div className="flex gap-3 flex-wrap">
-                      {v.previews.map((src, idx) => (
+                    <input type="file" multiple onChange={e => addNewImages(i, [...e.target.files])} />
+
+                    <div className="flex flex-wrap gap-2 mt-2">
+                      {v.images.map((img, idx) => (
                         <div key={idx} className="relative">
-                          <img
-                            src={src}
-                            className="w-20 h-20 object-cover rounded border"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeVariantImage(i, idx)}
-                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-600 text-white text-sm flex items-center justify-center hover:bg-red-700 cursor-pointer"
-                            title="Remove image"
-                          >
-                            ✕
-                          </button>
+                          <img src={img} className="w-20 h-20 rounded border" />
+                          <button type="button" onClick={() => removeExistingImage(i, idx)}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full">×</button>
+                        </div>
+                      ))}
+
+                      {v.newImages.map((img, idx) => (
+                        <div key={idx} className="relative">
+                          <img src={URL.createObjectURL(img)} className="w-20 h-20 rounded border" />
+                          <button type="button" onClick={() => removeNewImage(i, idx)}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full">×</button>
                         </div>
                       ))}
                     </div>
-                  </div>
+                  </>
                 )}
               </div>
             ))}
-          </div>          
+          </div>
 
           {/* Submit Button */}
           <button

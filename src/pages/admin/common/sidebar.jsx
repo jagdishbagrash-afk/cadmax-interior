@@ -40,13 +40,13 @@ function SideBar() {
                     </button>}
 
                 <div className="px-4 lg:px-6 text-center py-46 lg:py-6">
-                    <Image
+                    {/* <Image
                         src="/Logo.png"
                         width={120}
                         height={120}
                         alt="Logo"
                         className="mx-auto h-[70px] w-auto"
-                    />
+                    /> */}
                 </div>
 
                 <div className=" py-4 lg:py-5">
