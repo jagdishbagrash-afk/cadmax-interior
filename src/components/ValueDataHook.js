@@ -1,13 +1,14 @@
 import React from 'react';
 
 export const formatMultiPrice = (amount, currency) => {
-  return new Intl.NumberFormat("en-GB", {
+  const formattedValue = new Intl.NumberFormat("en-GB", {
     style: "currency",
     currency: currency,
-    currencyDisplay: "code", // Show 'USD' instead of '$'
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   }).format(amount);
+
+  return formattedValue.replace(/(\D+)(\d)/, '$1 $2');
 };
 
 const Valuedata = () => {
@@ -15,6 +16,6 @@ const Valuedata = () => {
     <>
     </>
   );
-}
+};
 
 export default Valuedata;
