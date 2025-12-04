@@ -74,20 +74,17 @@ export default function Index() {
                                             </h3>
 
                                             <p className="Creato font-medium text-[14px] sm:text-[15px] md:text-[16px] leading-[1.4] tracking-[-0.02em] text-[#4D5466]">
-                                                {section.brief}
+                                                {item?.brief}
                                             </p>
-
                                         </div>
                                     </div>
-
-
                                     <div className="space-y-5">
                                         <div className="space-y-2">
                                             <h3 className="Creato font-bold text-[16px] sm:text-[17px] md:text-[18px] leading-[1] tracking-[-0.02em] text-[#171717]">
                                                 Design Solution
                                             </h3>
                                             <p className="Creato font-medium text-[14px] sm:text-[15px] md:text-[16px] leading-[1.4] tracking-[-0.02em] text-[#4D5466]">
-                                                {section.solution}
+                                                {item?.solution}
                                             </p>
                                         </div>
                                     </div>
