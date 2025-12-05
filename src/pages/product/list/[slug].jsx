@@ -38,51 +38,94 @@ export default function Index() {
   }, [id]);
   console.log("selectedId:", selectedId);
 
+  const [loading, setLoading] = useState(false);
+  const [project, setProject] = useState([])
+  const fetchProjectData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.getAllProductSubCategroy(selectedId);
+      const data = response?.data?.data;
+      console.log("data", data)
+      if (data) {
+        setProject(data)
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (selectedId) {
+      fetchProjectData(selectedId);
+    }
+  }, [selectedId]);
   return (
     <Layout>
-      <div className="w-full overflow-hidden bg-black">
+      <div className="w-full bg-black py-3">
         <Swiper
-          spaceBetween={20}
+          spaceBetween={14}
           loop={true}
-          speed={1200}
-          autoplay={{ delay: 1000, disableOnInteraction: false }}
+          speed={1000}
+          autoplay={{ delay: 1800, disableOnInteraction: false }}
           modules={[Autoplay]}
           grabCursor={true}
           breakpoints={{
-            320: { slidesPerView: 1 },
-            640: { slidesPerView: 2 },
-            768: { slidesPerView: 3 },
-            1024: { slidesPerView: 4 },
+            320: { slidesPerView: 2 },
+            640: { slidesPerView: 3 },
+            768: { slidesPerView: 4 },
           }}
         >
           {categories.map((item) => (
             <SwiperSlide key={item._id}>
               <div
                 onClick={() => setSelectedId(item._id)}
-                className={`relative h-[280px] md:h-[320px] lg:h-[500px] cursor-pointer overflow-hidden
-                  ${selectedId === item._id ? "ring-1 ring-blue-600" : ""}
-                `}
+                className={`
+            relative h-[120px] md:h-[140px] lg:h-[150px]
+            rounded-md overflow-hidden cursor-pointer
+            transition-all duration-300
+          `}
               >
+
+                {/* Image */}
                 <img
                   src={item.Image || ProductListBanner?.src}
                   alt={item.name}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-300"
                 />
 
-                <div className="absolute inset-0 bg-black/40"></div>
+                {/* Overlay */}
+                <div
+                  className={`absolute inset-0 transition-all duration-300
+              ${selectedId === item._id
+                      ? "bg-black/20"
+                      : "bg-black/55 hover:bg-black/30"
+                    }
+            `}
+                ></div>
 
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                  <h1 className="text-white text-[18px] md:text-[20px] font-[900] uppercase leading-[110%] tracking-[-0.02em] Creato max-w-[300px]">
+                {/* Text */}
+                <div className="absolute inset-0 flex items-center justify-center px-2">
+                  <h1
+                    className={`text-white text-[11px] md:text-[12px] lg:text-[13px]
+              font-bold uppercase tracking-wide leading-tight text-center
+              ${selectedId === item._id
+                        ? "text-yellow-300 scale-105"
+                        : "text-gray-200"
+                      }
+            `}
+                  >
                     {item.name}
                   </h1>
                 </div>
+
               </div>
             </SwiperSlide>
           ))}
         </Swiper>
       </div>
 
-      <ProductGrid categoryId={selectedId} id={id} />
+      <ProductGrid categoryId={selectedId} id={id} products={project} />
 
     </Layout>
   );

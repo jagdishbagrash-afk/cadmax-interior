@@ -130,6 +130,10 @@ class Listing extends Component {
  async deleteProject(data) {
     return Api.post(`/project/status/${data}`);
   }
+async getAllProductSubCategroy(id) {
+    return Api.get(`/product/subcategory/${id}`, );
+  }
+
   
   render() {
     return (

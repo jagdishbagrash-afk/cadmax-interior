@@ -6,8 +6,8 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 
 export default function Add() {
-  
-const AVAILABLE_COLORS = [
+
+  const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
     { name: "blue", hex: "#3b82f6" },
     { name: "green", hex: "#22c55e" },
@@ -118,13 +118,13 @@ const AVAILABLE_COLORS = [
 
 
   useEffect(() => {
-    if(form?.category){
+    if (form?.category) {
       fetchSubCategories();
     }
   }, [form?.category]);
 
   useEffect(() => {
-    if(id){
+    if (id) {
       fetchProductData();
     }
   }, [id]);
@@ -246,7 +246,7 @@ const AVAILABLE_COLORS = [
       }
       const main = new Listing();
       const res = await main.productAdd(fd);
-      if(res?.data?.status){
+      if (res?.data?.status) {
         toast.success(res?.data?.message);
         setForm({
           title: "",
@@ -293,7 +293,7 @@ const AVAILABLE_COLORS = [
       }
       const main = new Listing();
       const res = await main.editProduct(id, fd);
-      if(res?.data?.status){
+      if (res?.data?.status) {
         toast.success(res?.data?.message);
         setForm({
           title: "",
@@ -401,7 +401,7 @@ const AVAILABLE_COLORS = [
               ))}
             </select>
 
-           <select
+            <select
               name="subcategory"
               value={form.subcategory}
               onChange={handleChange}
@@ -458,46 +458,97 @@ const AVAILABLE_COLORS = [
             required
           />
 
-          <div className="border p-4 rounded space-y-4">
-            <h2 className="font-semibold text-lg">Color Variants</h2>
+          <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
+            <h2 className="text-xl font-semibold text-gray-800">🎨 Color Variants</h2>
 
             {variants.map((v, i) => (
-              <div key={v.color} className="border p-3 rounded">
+              <div
+                key={v.color}
+                className="border rounded-lg p-4 bg-gray-50 hover:shadow transition"
+              >
+                {/* Header Row */}
+                <div className="flex items-center justify-between">
 
-                <div className="flex items-center gap-3">
-                  <input type="checkbox" checked={v.selected} onChange={() => toggleVariant(i)} />
-                  <span className="w-5 h-5 rounded border" style={{ backgroundColor: v.hex }} />
-                  <span className="capitalize">{v.color}</span>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={v.selected}
+                      onChange={() => toggleVariant(i)}
+                      className="w-4 h-4"
+                    />
+
+                    <span
+                      className="w-6 h-6 rounded-full border shadow"
+                      style={{ backgroundColor: v.hex }}
+                    />
+
+                    <span className="capitalize font-medium text-gray-700">
+                      {v.color}
+                    </span>
+                  </label>
+
                 </div>
 
+                {/* Expanded Section */}
                 {v.selected && (
-                  <div className="mt-3 pl-6 space-y-3">
-                    <input type="number" placeholder="Stock" value={v.stock} onChange={(e) => updateVariantStock(i, e.target.value)} className="input" required />
-                    <input type="file" multiple onChange={(e) => handleVariantImages(i, e.target.files)} />
+                  <div className="mt-4 pl-6 space-y-4">
 
-                    <div className="flex gap-3 flex-wrap">
-                      {v.previews.map((src, idx) => (
-                        <div key={idx} className="relative">
-                          <img
-                            src={src}
-                            className="w-20 h-20 object-cover rounded border"
-                          />
-                          <button
-                            type="button"
-                            onClick={() => removeVariantImage(i, idx)}
-                            className="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-red-600 text-white text-sm flex items-center justify-center hover:bg-red-700 cursor-pointer"
-                            title="Remove image"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      ))}
+                    {/* Stock Input */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">
+                        Stock Quantity
+                      </label>
+                      <input
+                        type="number"
+                        placeholder="Enter stock"
+                        value={v.stock}
+                        onChange={(e) => updateVariantStock(i, e.target.value)}
+                        className="w-full mt-1 rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+                        required
+                      />
                     </div>
+
+                    {/* File Upload */}
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">
+                        Upload Images
+                      </label>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={(e) => handleVariantImages(i, e.target.files)}
+                        className="mt-1 block w-full text-sm file:bg-blue-600 file:text-white file:px-4 file:py-1 file:border-none file:rounded cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Image Preview */}
+                    {v.previews.length > 0 && (
+                      <div className="flex gap-3 flex-wrap mt-2">
+                        {v.previews.map((src, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={src}
+                              className="w-20 h-20 object-cover rounded-lg border shadow-sm"
+                            />
+
+                            <button
+                              type="button"
+                              onClick={() => removeVariantImage(i, idx)}
+                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs hidden group-hover:flex items-center justify-center"
+                              title="Remove Image"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             ))}
-          </div>          
+          </div>
+
 
           {/* Submit Button */}
           <button

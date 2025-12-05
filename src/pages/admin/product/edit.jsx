@@ -76,12 +76,12 @@ export default function Add() {
         const found = data.variants?.find((x) => x.color === v.color);
         return found
           ? {
-              ...v,
-              selected: true,
-              stock: found.stock,
-              images: found.images || [],
-              newImages: [],
-            }
+            ...v,
+            selected: true,
+            stock: found.stock,
+            images: found.images || [],
+            newImages: [],
+          }
           : v;
       })
     );
@@ -332,10 +332,9 @@ export default function Add() {
               onChange={handleChange}
               disabled={!form.category} // 🔹 Disable if category is empty
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
-                ${
-                  !form.category
-                    ? "bg-gray-200 cursor-not-allowed"
-                    : "focus:ring-blue-400"
+                ${!form.category
+                  ? "bg-gray-200 cursor-not-allowed"
+                  : "focus:ring-blue-400"
                 }
               `}
               required
@@ -389,50 +388,118 @@ export default function Add() {
             required
           />
 
-          <div className="border p-4 rounded">
-            <h2 className="font-semibold">Color Variants</h2>
+          <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+
+            <h2 className="text-lg font-semibold text-gray-800">🎨 Color Variants</h2>
 
             {variants.map((v, i) => (
-              <div key={v.color} className="border p-3 mt-3 rounded">
-                <label className="flex gap-2 items-center">
-                  <input type="checkbox" checked={v.selected} onChange={() => toggleVariant(i)} />
-                  <span className="w-4 h-4 rounded" style={{ background: v.hex }} />
-                  {v.color}
-                </label>
+              <div
+                key={v.color}
+                className={`rounded-lg border p-4 transition 
+      ${v.selected ? "bg-blue-50 border-blue-400" : "bg-gray-50"}`}
+              >
 
-                {v.selected && (
-                  <>
+                {/* Header */}
+                <label className="flex items-center justify-between cursor-pointer">
+
+                  <div className="flex items-center gap-3">
                     <input
-                      type="number"
-                      value={v.stock}
-                      onChange={e => updateVariantStock(i, e.target.value)}
-                      className="input mt-2"
+                      type="checkbox"
+                      checked={v.selected}
+                      onChange={() => toggleVariant(i)}
+                      className="w-4 h-4 accent-blue-600"
                     />
 
-                    <input type="file" multiple onChange={e => addNewImages(i, [...e.target.files])} />
+                    <span
+                      className="w-6 h-6 rounded-full border shadow-sm"
+                      style={{ background: v.hex }}
+                    />
 
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {v.images.map((img, idx) => (
-                        <div key={idx} className="relative">
-                          <img src={img} className="w-20 h-20 rounded border" />
-                          <button type="button" onClick={() => removeExistingImage(i, idx)}
-                            className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full">×</button>
-                        </div>
-                      ))}
+                    <span className="capitalize font-medium text-gray-700">
+                      {v.color}
+                    </span>
+                  </div>
 
-                      {v.newImages.map((img, idx) => (
-                        <div key={idx} className="relative">
-                          <img src={URL.createObjectURL(img)} className="w-20 h-20 rounded border" />
-                          <button type="button" onClick={() => removeNewImage(i, idx)}
-                            className="absolute -top-2 -right-2 bg-red-600 text-white w-5 h-5 rounded-full">×</button>
-                        </div>
-                      ))}
+                </label>
+
+                {/* Expanded Section */}
+                {v.selected && (
+                  <div className="mt-4 ml-7 space-y-4">
+
+                    {/* Stock */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600">
+                        Stock Quantity
+                      </label>
+                      <input
+                        type="number"
+                        value={v.stock}
+                        onChange={e => updateVariantStock(i, e.target.value)}
+                        className="w-full mt-1 rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        placeholder="Enter stock"
+                      />
                     </div>
-                  </>
+
+                    {/* Upload */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600">
+                        Upload Images
+                      </label>
+                      <input
+                        type="file"
+                        multiple
+                        onChange={e => addNewImages(i, [...e.target.files])}
+                        className="mt-1 block w-full text-sm 
+                file:bg-blue-600 file:text-white 
+                file:px-4 file:py-1 
+                file:rounded file:border-none 
+                hover:file:bg-blue-700 cursor-pointer"
+                      />
+                    </div>
+
+                    {/* Images */}
+                    {(v.images.length > 0 || v.newImages.length > 0) && (
+                      <div className="flex flex-wrap gap-3">
+
+                        {v.images.map((img, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={img}
+                              className="w-20 h-20 rounded-lg border object-cover shadow"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeExistingImage(i, idx)}
+                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs hidden group-hover:flex items-center justify-center"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+
+                        {v.newImages.map((img, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={URL.createObjectURL(img)}
+                              className="w-20 h-20 rounded-lg border object-cover shadow"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeNewImage(i, idx)}
+                              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-red-600 text-white text-xs hidden group-hover:flex items-center justify-center"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             ))}
           </div>
+
 
           {/* Submit Button */}
           <button

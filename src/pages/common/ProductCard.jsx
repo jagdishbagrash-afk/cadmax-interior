@@ -1,11 +1,17 @@
 import React from "react";
 
-export default function ProductCard({item}) {
+export default function ProductCard({ item }) {
+
+  // ✅ get first available image safely
+  const image =
+    item?.variants?.find(v => v.images?.length)?.images[0];
+
   return (
-    <div key={item?.id} className="group cursor-pointer">
-      <div className="w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden">
+    <div key={item?._id} className="group cursor-pointer">
+
+      <div className="w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
         <img
-          src={item?.image}
+          src={image || "/no-image.png"}   // fallback if no image
           alt={item?.title}
           className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
         />
@@ -18,8 +24,10 @@ export default function ProductCard({item}) {
 
       {/* Price */}
       <p className="mt-1 text-base text-[#171717] font-extrabold uppercase Creato">
-        {item?.price}
+        ₹{item?.amount}
       </p>
+
     </div>
   );
 }
+
