@@ -1,7 +1,5 @@
 import React, { useState } from "react";
 import AdminLayout from "../common/AdminLayout";
-import Profile from "@/pages/student/setting/Profile";
-import Password from "@/pages/student/setting/Password";
 import AdminManage from "./AdminManage";
 import Terms from "./Terms";
 import Privacy from "./Privacy";
@@ -71,8 +69,6 @@ export default function Index() {
       </div>
       <div className="px-3 md:px-8 lg:px-8 xl:px-12 pb-6 lg:pb-[30px] min-h-[75vh]">
         <div className="mt-0">
-          {activeTab === "Profile" && <Profile />}
-          {activeTab === "password" && <Password />}
           {activeTab === "admin" && <AdminManage />}
           {activeTab === "term" && <Terms />}
           {activeTab === "privacy" && <Privacy />}

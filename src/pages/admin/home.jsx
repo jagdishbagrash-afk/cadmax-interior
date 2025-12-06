@@ -7,7 +7,6 @@ import { IoCloseSharp } from 'react-icons/io5';
 import { IoMdEye } from 'react-icons/io';
 import Link from 'next/link';
 import FaqManager from './FaqManager';
-import TeacherFaq from './TeacherFaq';
 import Featured from './Featured';
 
 export default function Home() {
@@ -267,7 +266,6 @@ export default function Home() {
             </form>
             <Featured />
             <FaqManager />
-            <TeacherFaq />
         </AdminLayout>
     );
 }
