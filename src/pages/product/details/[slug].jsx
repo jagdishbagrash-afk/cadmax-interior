@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Layout from "../../common/Layout";
-import ProductImage from "../../Assets/Images/ProductDetail.png";
+import ProductImage from "../../../Assets/Images/ProductDetail.png";
 import Image from "next/image";
 import { FiTruck } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
