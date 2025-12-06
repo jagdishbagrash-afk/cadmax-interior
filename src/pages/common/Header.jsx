@@ -5,6 +5,7 @@ import { IoIosArrowDown } from "react-icons/io";
 import { FiSearch, FiUser, FiShoppingBag } from "react-icons/fi";
 import MegaMenu from "./MegaMenu";
 
+
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
