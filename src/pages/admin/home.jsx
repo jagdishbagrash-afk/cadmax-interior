@@ -249,7 +249,6 @@ export default function Home() {
                             className="w-full h-11 lg:h-[54px] font-medium appearance-none block bg-[#F4F6F8] text-[#727272] border border-[#F4F6F8] rounded-[10px] py-3 px-6 focus:outline-none"
                         />
                     </div>
-                    {/* Submit Button */}
                     <div className="flex justify-center w-full">
                         <button
                             type="submit"
