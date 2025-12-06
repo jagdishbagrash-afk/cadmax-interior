@@ -1,3 +1,4 @@
+import Link from "next/link";
 import React from "react";
 
 export default function ProductCard({ item }) {
@@ -7,7 +8,8 @@ export default function ProductCard({ item }) {
     item?.variants?.find(v => v.images?.length)?.images[0];
 
   return (
-    <div key={item?._id} className="group cursor-pointer">
+   <Link href="/product/details/aaj">
+     <div key={item?._id} className="group cursor-pointer">
 
       <div className="w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
         <img
@@ -28,6 +30,7 @@ export default function ProductCard({ item }) {
       </p>
 
     </div>
+   </Link>
   );
 }
 
