@@ -76,7 +76,7 @@ export default function Index() {
             768: { slidesPerView: 4 },
           }}
         >
-          {categories.map((item) => (
+          {categories?.map((item) => (
             <SwiperSlide key={item._id}>
               <div
                 onClick={() => setSelectedId(item._id)}

@@ -117,24 +117,26 @@ class Listing extends Component {
     return Api.get(`/project/list`, data);
   }
 
-    async AddProject(data) {
+  async AddProject(data) {
     return Api.post(`/project/add`, data);
   }
-  
- async getAllProjectId(id) {
-    return Api.get(`/project/details/${id}`, );
+
+  async getAllProjectId(id) {
+    return Api.get(`/project/details/${id}`,);
   }
- async editProject(id, data) {
+  async editProject(id, data) {
     return Api.post(`/project/edit/${id}`, data);
   }
- async deleteProject(data) {
+  async deleteProject(data) {
     return Api.post(`/project/status/${data}`);
   }
-async getAllProductSubCategroy(id) {
-    return Api.get(`/product/subcategory/${id}`, );
+  async getAllProductSubCategroy(id) {
+    return Api.get(`/product/subcategory/${id}`,);
   }
 
-  
+  async GetAllProductsId(id) {
+    return Api.get(`/product/details/${id}`,);
+  }
   render() {
     return (
       <div>

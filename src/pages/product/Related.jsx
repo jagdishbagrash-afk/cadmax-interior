@@ -1,11 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ProductList1 from "../../Assets/Images/ProductList1.png";
 import ProductList2 from "../../Assets/Images/ProductList2.png";
 import ProductList3 from "../../Assets/Images/ProductList3.png";
 import ProductList4 from "../../Assets/Images/ProductList4.png";
 import ProductCard from "../common/ProductCard";
+import Listing from "../api/Listing";
 
-export default function Related() {
+export default function Related({ selectedId }) {
+const[Project ,setProject] = useState([])
+  const fetchProjectData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.getAllProductSubCategroy(selectedId);
+      const data = response?.data?.data;
+      console.log("data", data)
+      if (data) {
+        setProject(data)
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+
+  useEffect(() => {
+    if (selectedId) {
+      fetchProjectData(selectedId);
+    }
+  }, [selectedId]);
 
   const products = [
     {
@@ -47,8 +69,8 @@ export default function Related() {
         </p>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
-        {products &&
-          products?.map((item) => (
+        {Project &&
+          Project?.map((item) => (
             <ProductCard item={item} />
           ))}
       </div>

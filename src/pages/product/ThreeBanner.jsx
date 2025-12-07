@@ -28,8 +28,7 @@ export default function ThreeBanner() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-1 ">
-
-      {banners.map((item) => (
+      {banners?.map((item) => (
         <div
           key={item.id}
           className="relative h-[300px] md:h-[380px] lg:h-[550px]  overflow-hidden"
