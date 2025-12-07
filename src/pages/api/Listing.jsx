@@ -137,6 +137,14 @@ class Listing extends Component {
   async GetAllProductsId(id) {
     return Api.get(`/product/details/${id}`,);
   }
+  async AddBooking(data) {
+    return Api.post(`/add-booking`, data);
+  }
+ async GetBooking(data) {
+    return Api.get(`/get-booking`, data);
+  }
+
+
   render() {
     return (
       <div>
