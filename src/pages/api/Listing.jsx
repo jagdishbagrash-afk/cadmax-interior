@@ -133,17 +133,25 @@ class Listing extends Component {
   async getAllProductSubCategroy(id) {
     return Api.get(`/product/subcategory/${id}`,);
   }
-
   async GetAllProductsId(id) {
     return Api.get(`/product/details/${id}`,);
   }
   async AddBooking(data) {
     return Api.post(`/add-booking`, data);
   }
- async GetBooking(data) {
+  async GetBooking(data) {
     return Api.get(`/get-booking`, data);
   }
+ async AddBanner(data) {
+    return Api.post(`/admin/banner/add`, data);
+  }
+  async GetBanner(data) {
+    return Api.get(`/admin/banner/get`, data);
+  }
 
+   async EditBanner(id, data) {
+    return Api.post(`/admin/banner/edit/${id}`, data);
+  }
 
   render() {
     return (

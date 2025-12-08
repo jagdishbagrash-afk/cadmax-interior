@@ -1,11 +1,12 @@
 "use client";
+
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import moment from "moment";
 import AdminLayout from "../common/AdminLayout";
-import CategoryAdd from "./CategoryAdd";
 import Listing from "@/pages/api/Listing";
-import BlockUnblock from "../common/BlockUnblock";
 import dataimage from "../../../Assets/Images/c1.jpg"
+import BannerAdd from "./BannerAdd";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -13,8 +14,8 @@ export default function Index() {
   const fetchData = async () => {
     try {
       const main = new Listing();
-      const response = await main.categoryList();
-
+      const response = await main.GetBanner();
+      console.log("response", response)
       if (response.data?.data) {
         setData(response.data.data);
       }
@@ -29,17 +30,16 @@ export default function Index() {
   console.log("data", data)
 
   return (
-    <AdminLayout page={"Category List"}>
+    <AdminLayout page={"Banner List"}>
       <div className="px-4 py-2 lg:px-4 lg:py-2.5">
         <div className="bg-white rounded-[20px] mb-[10px] p-2">
           {/* Header */}
           <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
 
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-              Category  Listing
+              Banner Listing
             </h2>
-
-            <CategoryAdd fetchDatas={fetchData} />
+            <BannerAdd fetchDatas={fetchData} />
 
 
           </div>
@@ -56,7 +56,8 @@ export default function Index() {
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Name
                   </th>
-
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Link                  </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Created Date
                   </th>
@@ -88,7 +89,9 @@ export default function Index() {
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
                         {item.name}
                       </td>
-
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                        {item.link}
+                      </td>
                       {/* Created Date */}
                       <td className="px-6 py-4 text-center text-[14px] text-gray-600">
                         {moment(item.createdAt).format("DD-MM-YYYY")}
@@ -97,13 +100,7 @@ export default function Index() {
                       {/* Action */}
                       <td className="px-6 py-4">
                         <div className="flex justify-center items-center gap-3">
-                          <BlockUnblock
-                            Id={item._id}
-                            fetchData={fetchData}
-                            step={2}
-                            status={item?.status === true ? false : true}
-                          />
-                          <CategoryAdd
+                          <BannerAdd
                             item={item}
                             isEdit={true}
                             fetchDatas={fetchData}
@@ -125,8 +122,6 @@ export default function Index() {
               </tbody>
             </table>
           </div>
-
-
         </div>
       </div>
     </AdminLayout>

@@ -20,7 +20,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.SubcategoryList(id);
-
       if (response.data?.data) {
         const list = response.data.data;
         setCategories(list);
@@ -36,7 +35,6 @@ export default function Index() {
   useEffect(() => {
     if (id) fetchData(id);
   }, [id]);
-  console.log("selectedId:", selectedId);
 
   const [loading, setLoading] = useState(false);
   const [project, setProject] = useState([])
