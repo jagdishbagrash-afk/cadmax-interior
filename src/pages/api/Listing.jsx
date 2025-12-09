@@ -153,6 +153,10 @@ class Listing extends Component {
     return Api.post(`/admin/banner/edit/${id}`, data);
   }
 
+  async Register (data){
+    
+  }
+
   render() {
     return (
       <div>
