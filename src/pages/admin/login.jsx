@@ -47,7 +47,12 @@ export default function Login() {
         toast.success(response.data.message);
         localStorage && localStorage.setItem("token", response?.data?.token);
         // setUser(response?.data);
-        router.push("/admin/category");
+        if (response?.data?.user?.role === "admin") {
+          router.push("/admin/category");
+
+        } else {
+          router.push("/");
+        }
       }
       else {
         toast.error(response.data.message);
@@ -67,18 +72,18 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white sm:bg-gray-100 p-4">
-      <div className="sm:bg-white px-4 lg:px-10 pt-5 pb-10 lg:pb-20 sm:rounded-[20px] md:rounded-[20px] lg:rounded-[40px] sm:shadow lg:shadow-lg w-full max-w-[653px] sm:login_custom">
+             <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+      <div className="bg-white px-4 md:px-6 lg:px-16 pt-5 pb-10 lg:pb-20  rounded-[20px] md:rounded-[20px] lg:rounded-[40px] shadow lg:shadow-lg w-full max-w-[976px] login_custom">
         {/* Logo */}
-        <div className="flex justify-center mb-6 lg:mb-10">
-          <Link href="/" className="">
+             <div className="flex justify-center mb-6">
+          <Link href="/">
             <Image
-              className="h-[100px] w-[117px]"
-              height={1000}
-              width={1000}
-              layout="fixed"
-              src={"/Logo.png"}
-              alt="japanese for me logo"
+              src="/Logo.png"
+              alt="CADMAX Interior Logo"
+              width={200}
+              height={400}
+              className="object-cover"
+              priority
             />
           </Link>
         </div>
@@ -152,7 +157,7 @@ export default function Login() {
           <p className="text-center text-base text-[#727272] mt-6 lg:mt-12 tracking-[-0.03em] font-medium">
             Not registered?{" "}
             <Link
-              href="/student/register"
+              href="/register"
               className="text-[#000000] hover:underline"
             >
               Register.

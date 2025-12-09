@@ -88,6 +88,23 @@ function SideBar() {
                                 <AiFillProduct size={20} />
                                 Banners
                             </Link>
+                                   <Link
+                                href="/admin/user"
+                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/user" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                            >
+                                <AiFillProduct size={20} />
+                                User
+                            </Link>
+
+                              {/*      <Link
+                                href="/admin/project"
+                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/project" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                            >
+                                <AiFillProduct size={20} />
+                                Project
+                            </Link> */}
                             <Link
                                 href="/admin/setting"
                                 className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}

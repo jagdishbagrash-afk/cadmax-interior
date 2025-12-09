@@ -2,14 +2,12 @@ import { Component } from "react";
 import { Api, ApiallowFile } from "./Api";
 
 class Listing extends Component {
-  async Register(data) {
-    return Api.post("/user/register", data);
-  }
+
   async TeacherRegister(data) {
     return Api.post("/user/teacher-register", data);
   }
   async Login(data) {
-    return Api.post("/user/login", data);
+    return Api.post("/admin/login", data);
   }
   async profileVerify() {
     return Api.get("/user/profile")
@@ -142,21 +140,36 @@ class Listing extends Component {
   async GetBooking(data) {
     return Api.get(`/get-booking`, data);
   }
- async AddBanner(data) {
+  async AddBanner(data) {
     return Api.post(`/admin/banner/add`, data);
   }
   async GetBanner(data) {
     return Api.get(`/admin/banner/get`, data);
   }
 
-   async EditBanner(id, data) {
+  async EditBanner(id, data) {
     return Api.post(`/admin/banner/edit/${id}`, data);
   }
 
-  async Register (data){
-    
+  async Register(data) {
+    return Api.post("/user/signup", data)
   }
 
+  async SendOTP(data) {
+    return Api.post("/user/send_otp", data)
+  }
+
+  async VerifyOTP(data) {
+    return Api.post("/user/otp_verify", data)
+  }
+
+  async GetUser() {
+    return Api.get(`/admin/alluser`,);
+  }
+
+  async VerifyLogin(data) {
+    return Api.post("/user/login", data)
+  }
   render() {
     return (
       <div>
