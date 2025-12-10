@@ -11,19 +11,27 @@ import Listing from "@/pages/api/Listing";
 
 export default function Index() {
   const router = useRouter();
-  console.log("router", router)
+  // console.log("router", router)
   const id = router?.query?.slug;
-  const [qty, setQty] = useState(1);
+  const [qty, setQty] = useState(2);
+  const [selectedVariant, setSelectedVariant] = useState(null);
   const [open, setOpen] = useState(null);
+  const [ProductDetails, setProductDetails] = useState(null);
+
   const toggle = (id) => {
     setOpen(open === id ? null : id);
   };
-  const [ProductDetails, setProductDetails] = useState(null);
+    
+  const increaseQty = () => setQty((prev) => prev + 1);
+
+  const decreaseQty = () =>
+    setQty((prev) => (prev > 1 ? prev - 1 : 1));
+  
   const fetchData = async (id) => {
     try {
       const main = new Listing();
       const response = await main.GetAllProductsId(id);
-      console.log("response", response)
+      // console.log("response", response)
       if (response.data?.data) {
         setProductDetails(response.data?.data)
       }
@@ -31,10 +39,16 @@ export default function Index() {
       console.log("Error:", error);
     }
   };
-  console.log("ProductDetails", ProductDetails)
+
   useEffect(() => {
     if (id) fetchData(id);
   }, [id]);
+
+    useEffect(() => {
+    if (ProductDetails && ProductDetails?.variants?.length) {
+      setSelectedVariant(ProductDetails.variants[0]);
+    }
+  }, [ProductDetails]);
 
   console.log("ProductDetails", ProductDetails)
   return (
@@ -51,12 +65,11 @@ export default function Index() {
               <div className="w-full">
                 <div className="w-full aspect-[4/5] relative rounded-lg overflow-hidden">
                   <Image
-                    src={ProductDetails?.variants?.[0]?.images?.[0]}
+                    src={selectedVariant?.images?.[0]}
                     alt="Product"
                     fill
                     className="object-cover"
                   />
-
                 </div>
               </div>
 
@@ -75,22 +88,73 @@ export default function Index() {
                 </h2>
 
                 {/* Qty */}
-                <div className="mt-6 w-full border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between cursor-pointer">
-                  <span>{qty}</span>
-                  <span className="text-xl">▾</span>
+               <div className="mt-6 w-full border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between">
+                  <button
+                    onClick={decreaseQty}
+                    className="text-xl w-8 h-8 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                  >
+                    −
+                  </button>
+                  <span className="text-lg font-medium">{qty}</span>
+                  <button
+                    onClick={increaseQty}
+                    className="text-xl w-8 h-8 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
+                  >
+                    +
+                  </button>
                 </div>
 
                 <p className="text-base font-medium text-[#4D5466] mt-2 Creato">
                   Deliver in approximately 8–12 days
                 </p>
 
+                {/* Color Variants */}
+{ProductDetails?.variants?.length > 0 && (
+  <div className="mt-6">
+    <p className="text-sm font-medium text-[#4D5466] mb-3">
+      Colour: <span className="capitalize text-[#171717]">{selectedVariant?.color}</span>
+    </p>
+
+    <div className="flex gap-4">
+      {ProductDetails.variants.map((variant, idx) => {
+              const isActive = selectedVariant?.color === variant.color;
+
+              return (
+                <div
+                  key={idx}
+                  onClick={() => setSelectedVariant(variant)}
+                  className={`w-[110px] border rounded-md p-2 cursor-pointer transition
+                    ${isActive ? "border-black" : "border-gray-200 hover:border-gray-400"}
+                  `}
+                >
+                  {/* Image */}
+                  <div className="w-full aspect-square relative rounded overflow-hidden">
+                    <Image
+                      src={variant.images?.[0]}
+                      alt={variant.color}
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+
+                  {/* Color label */}
+                  <p className="mt-2 text-center text-sm font-medium capitalize">
+                    {variant.color}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
                 {/* Buttons */}
                 <div className="mt-6 flex flex-col gap-3">
-                  <button className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800">
+                  <button className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer">
                     ADD TO CART
                   </button>
 
-                  <button className="w-full border border-black py-3 font-medium rounded-md hover:bg-gray-100">
+                  <button className="w-full border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer">
                     BUY NOW
                   </button>
                 </div>

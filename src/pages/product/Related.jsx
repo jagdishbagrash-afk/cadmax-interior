@@ -13,7 +13,7 @@ const[Project ,setProject] = useState([])
       const main = new Listing();
       const response = await main.getAllProductSubCategroy(selectedId);
       const data = response?.data?.data;
-      console.log("data", data)
+      // console.log("data", data)
       if (data) {
         setProject(data)
       }
