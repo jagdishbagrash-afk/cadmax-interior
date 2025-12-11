@@ -23,13 +23,41 @@ function BookingForm() {
     total_amount: 8700 || ""
   });
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setData((prevState) => ({
-      ...prevState,
-      [name]: value,
-    }));
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+
+  let updated = {
+    ...data,
+    [name]: value,
   };
+
+  // ---- SET RATE BASED ON BUDGET ----
+  let rate = data.rate;
+
+  if (name === "budget_range") {
+    if (value === "low") rate = 1500;
+    if (value === "medium") rate = 2500;
+    if (value === "HIGH") rate = 3500;
+    updated.rate = rate;
+  }
+
+  // ---- CALCULATE PRICE ----
+  const area = name === "area" ? Number(value) : Number(updated.area);
+  const finalRate = name === "budget_range" ? rate : Number(updated.rate);
+
+  if (area > 0 && finalRate > 0) {
+    const subtotal = area * finalRate;
+    const taxes = Math.round(subtotal * 0.18);
+    const total = subtotal + taxes;
+
+    updated.subtotal = subtotal;
+    updated.taxes = taxes;
+    updated.total_amount = total;
+  }
+
+  setData(updated);
+};
+
   console.log("data", data)
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -130,10 +158,8 @@ function BookingForm() {
                   className="w-full h-11 lg:h-[56px] font-semibold block bg-white text-[#46494D] border border-gray-300 rounded-lg px-3 lg:px-5 leading-tight focus:outline-none"
                 >
                   <option value="">Select Service Model</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                  <option value="commercial">Commercial</option>
+                  <option value="Design Consultancy (Design + 3D + Material Plan)">Design Consultancy (Design + 3D + Material Plan)</option>
+                  <option value="Design Consultancy (Design + 3D + Material Plan)">Design Consultancy (Design + 3D + Material Plan)</option>
                 </select>
               </div>
               <div className="mb-3">
@@ -141,8 +167,6 @@ function BookingForm() {
                 <label className="block Creato text-[14px] font-medium leading-[140%] tracking-[0.08em] uppercase text-[#4D5466] mb-1">
                   Built-Up Area
                 </label>
-
-
                 <input type="text" placeholder="Built-Up Area"
                   name="area"
                   onChange={handleChange}
@@ -155,58 +179,23 @@ function BookingForm() {
                 <label className="block Creato text-[14px] font-medium leading-[140%] tracking-[0.08em] uppercase text-[#4D5466] mb-1">
                   Estimated Budget Range
                 </label>
-                <input type="text" placeholder="Estimated Budget Range"
+                 <select
                   name="budget_range"
+                  required
                   onChange={handleChange}
                   value={data?.budget_range}
+                  placeholder ="Estimated Budget Range"
                   className="w-full h-11 lg:h-[56px] font-semibold block bg-white text-[#46494D] border border-gray-300 rounded-lg px-3 lg:px-5 leading-tight focus:outline-none"
-                />
+                >
+                  <option value="0">Select Budget Range </option>
+                  <option value="low">low </option>
+                  <option value="medium">medium </option>
+                  <option value="HIGH">HIGH </option>
+                </select>
+               
               </div>
             </div>
 
-            {/* MATERIAL & FINISH */}
-            <div className="">
-              <h2 className=" mb-5 Creato text-[18px] font-black leading-[100%] tracking-[-0.02em] uppercase text-[#171717] mb-5">
-                MATERIAL & FINISH PREFERENCES
-              </h2>
-
-              <div className="mb-3">
-                <label className="block Creato text-[14px] font-medium leading-[140%] tracking-[0.08em] uppercase text-[#4D5466] mb-1">
-                  Finish Level
-                </label>
-
-                <select
-                  name="finish_level"
-                  onChange={handleChange}
-                  value={data?.finish_level}
-                  className="w-full h-11 lg:h-[56px] font-semibold block bg-white text-[#46494D] border border-gray-300 rounded-lg px-3 lg:px-5 leading-tight focus:outline-none"
-                >
-                  <option value="">Select Finish Level</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                  <option value="commercial">Commercial</option>
-                </select>
-              </div>
-
-              <div className="mb-3">
-                <label className="block Creato text-[14px] font-medium leading-[140%] tracking-[0.08em] uppercase text-[#4D5466] mb-1">
-                  Furniture & Fixture Scope
-                </label>
-                <select
-                  name="scope"
-                  onChange={handleChange}
-                  value={data?.scope}
-                  className="w-full h-11 lg:h-[56px] font-semibold block bg-white text-[#46494D] border border-gray-300 rounded-lg px-3 lg:px-5 leading-tight focus:outline-none"
-                >
-                  <option value="">Select  Furniture & Fixture Scope</option>
-                  <option value="apartment">Apartment</option>
-                  <option value="villa">Villa</option>
-                  <option value="plot">Plot</option>
-                  <option value="commercial">Commercial</option>
-                </select>
-              </div>
-            </div>
             <div className="">
               <h2 className=" mb-5 Creato text-[18px] font-black leading-[100%] tracking-[-0.02em] uppercase text-[#171717] mb-5">
 
@@ -339,7 +328,7 @@ function BookingForm() {
                     Rate (₹ / sq. ft.)
                   </span>
                   <span className="Creato text-[16px] font-medium text-[#171717]">
-                    ₹2,500
+                     ₹{data.rate || 0}
                   </span>
                 </div>
 
@@ -348,7 +337,7 @@ function BookingForm() {
                     Subtotal
                   </span>
                   <span className="Creato text-[16px] font-medium text-[#171717]">
-                    ₹30,00,000
+                    ₹{data.subtotal?.toLocaleString() || 0}
                   </span>
                 </div>
 
@@ -357,7 +346,8 @@ function BookingForm() {
                     Taxes & Fees
                   </span>
                   <span className="Creato text-[16px] font-medium text-[#171717]">
-                    ₹90,000
+                     ₹{data.taxes?.toLocaleString() || 0}
+
                   </span>
                 </div>
 
@@ -366,7 +356,7 @@ function BookingForm() {
                     Estimated Total
                   </span>
                   <span className="Creato text-[16px] font-bold text-[#171717]">
-                    ₹30,90,000
+                    ₹{data.total_amount?.toLocaleString() || 0}
                   </span>
                 </div>
               </div>
@@ -374,7 +364,7 @@ function BookingForm() {
                 disabled={loading}
                 onClick={handleSubmit}
                 className="w-full h-[56px] Creato text-[14px] font-bold leading-[100%] tracking-[0.08em] uppercase text-white bg-black mt-6 hover:bg-gray-900 transition">
-                {loading ? "Processing..." : "CONFIRM BOOKING"}
+                {loading ? "Processing..." : "Proceed"}
               </button>
             </div>
           </div>
