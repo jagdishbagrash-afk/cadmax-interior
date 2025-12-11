@@ -37,7 +37,7 @@ const MegaMenu = () => {
     fetchData();
   }, []);
 
-console.log("categories" ,categories)
+// console.log("categories" ,categories)
   return (
     <li className="relative">
       {/* ONLY PRODUCT IS THE HOVER TRIGGER */}

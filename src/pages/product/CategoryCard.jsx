@@ -45,7 +45,7 @@ const FeaturedCategories = () => {
         fetchData();
     }, []);
 
-    console.log("categories", categories)
+    // console.log("categories", categories)
     return (
         <section className="bg-[#F6F6F6] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">

@@ -7,7 +7,7 @@ class Listing extends Component {
     return Api.post("/user/teacher-register", data);
   }
   async Login(data) {
-    return Api.post("/admin/login", data);
+    return Api.post("/user/login", data);
   }
   async profileVerify() {
     return Api.get("/user/profile")
