@@ -13,12 +13,12 @@ export default function Header() {
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <nav className="max-w-[1350px] mx-auto flex items-center justify-between px-6 xl:px-0 py-3">
         {/* Left Logo */}
-        {/* <Link
+        <Link
           href="/"
           className="text-xl font-extrabold tracking-tight text-black"
         >
           CADMAX
-        </Link> */}
+        </Link>
 
         {/* Center Menu */}
         <ul className="hidden md:flex items-center gap-8">

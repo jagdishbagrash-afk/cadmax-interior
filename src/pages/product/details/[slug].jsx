@@ -43,8 +43,9 @@ export default function Index() {
   };
 
   const handleAdd = (redirect) => {
+    const id=`${selectedVariant?.color}_${ProductDetails?._id}`;
     const newItem = {
-      id: ProductDetails?._id,
+      id: id,
       name: ProductDetails?.title,
       price: ProductDetails?.amount,
       quantity: qty,
@@ -70,7 +71,7 @@ export default function Index() {
   return (
     <Layout>
       <div className="w-full py-14 flex flex-col justify-center">
-        <div className="w-[92%] lg:w-[85%] mx-auto">
+        <div className="w-full max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
           <div className="bg-white">
             <p className="text-base text-[#4D5466] tracking-widest mb-6  uppercase">
               <span className="text-[#171717]">
