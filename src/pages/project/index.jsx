@@ -37,7 +37,6 @@ export default function Index() {
             <div
                 className="bg-[#FFFFFF] py-4 md:py-8 ">
                 <div className="container mx-auto px-4 max-w-[1430px]">
-
                     {data && data?.map((item, index) => {
                         const isReverse = index % 2 !== 0; // alternate layout
                         return (
