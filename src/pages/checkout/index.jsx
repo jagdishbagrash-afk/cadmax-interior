@@ -8,8 +8,10 @@ import { FiPlus, FiMinus } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
+import { useRouter } from "next/router";
 
 export default function Index() {
+  const router = useRouter();
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
 
@@ -65,13 +67,14 @@ export default function Index() {
        });
       if (res?.data?.status) {
         toast.success(res?.data?.message);
+        router.push("/");
+        dispatch(clearCart());
       } else {
         toast.error(res?.data?.message || "Failed to place order");
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "An unknown error occured");
     }
-    // dispatch(clearCart());
   };
 
   return (
