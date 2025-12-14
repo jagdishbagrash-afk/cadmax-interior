@@ -97,14 +97,14 @@ function SideBar() {
                                 User
                             </Link>
 
-                              {/*      <Link
-                                href="/admin/project"
+                                 <Link
+                                href="/admin/booking"
                                 className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/project" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                                     ${pathname === "/admin/booking" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                             >
                                 <AiFillProduct size={20} />
-                                Project
-                            </Link> */}
+                                Booking
+                            </Link> 
                             <Link
                                 href="/admin/setting"
                                 className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
