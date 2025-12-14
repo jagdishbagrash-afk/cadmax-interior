@@ -17,6 +17,22 @@ const cartSlice = createSlice({
         state.cartItems.push(newItem);
       }
     },
+    incrementQty: (state, action) => {
+      const item = state.cartItems.find(
+        (i) => i.id === action.payload
+      );
+      if (item) {
+        item.quantity += 1;
+      }
+    },
+    decrementQty: (state, action) => {
+      const item = state.cartItems.find(
+        (i) => i.id === action.payload
+      );
+      if (item && item.quantity > 1) {
+        item.quantity -= 1;
+      }
+    },
     removeItem: (state, action) => {
       const id = action.payload; // We now expect the item's id to be passed as the payload
       state.cartItems = state.cartItems.filter(item => item.id !== id);
@@ -27,6 +43,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { addItem, removeItem, clearCart } = cartSlice.actions;
+export const { addItem, incrementQty, decrementQty, removeItem, clearCart } = cartSlice.actions;
 export default cartSlice.reducer;
-

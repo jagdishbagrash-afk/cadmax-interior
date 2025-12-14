@@ -170,6 +170,10 @@ class Listing extends Component {
   async VerifyLogin(data) {
     return Api.post("/user/login", data)
   }
+
+  async AddOrder(data) {
+    return Api.post("/order/add", data)
+  }
   render() {
     return (
       <div>

@@ -2,14 +2,18 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { useDispatch, useSelector } from "react-redux";
 import { formatMultiPrice } from "@/components/ValueDataHook";
-import { clearCart, removeItem } from "@/redux/cartSlice";
+import { incrementQty, decrementQty, clearCart, removeItem } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
+import { FiPlus, FiMinus } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Layout from "../common/Layout";
+import Listing from "../api/Listing";
 
 export default function Index() {
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
+
+  console.log("cartItemsRedux", cartItemsRedux);
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);
@@ -39,16 +43,35 @@ export default function Index() {
     dispatch(removeItem(id));
   };
 
-  const handleSubmit = () => {
-    if (!formData.name || !formData.mobile || !formData.address) {
-      toast.error("Please fill all fields");
-      return;
+  const handleSubmit = async(e) => {
+    e.preventDefault();
+    // console.log("Form Submitted:", formData);
+    // toast.success("Submitted in console");
+    try {
+      const products = cartItemsRedux.map((item) => ({
+        id: item?.product?._id,
+        price: item?.price,
+        quantity: item?.quantity,
+        total: item?.price * item?.quantity,
+        variant: item?.selectedVariant,
+      }));
+      const main = new Listing();
+      const res = await main.AddOrder({ 
+        name: formData?.name, 
+        mobile: formData?.mobile, 
+        address: formData?.address, 
+        product: products, 
+        amount: totalPrice,
+       });
+      if (res?.data?.status) {
+        toast.success(res?.data?.message);
+      } else {
+        toast.error(res?.data?.message || "Failed to place order");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "An unknown error occured");
     }
-
-    console.log("Form Submitted:", formData);
-    toast.success("Submitted in console");
-
-    dispatch(clearCart());
+    // dispatch(clearCart());
   };
 
   return (
@@ -172,11 +195,27 @@ export default function Index() {
                       </td>
 
                       <td className="text-center text-black">
-                        {item?.quantity}
+                        <div className="flex items-center justify-center gap-3">
+                          <button
+                            onClick={() => dispatch(decrementQty(item?.id))}
+                            className="border border-gray-400 p-1 hover:bg-gray-200 transition cursor-pointer"
+                            disabled={item.quantity === 1}
+                          >
+                            <FiMinus size={14} />
+                          </button>
+                          <span className="min-w-[20px] text-center font-medium">
+                            {item?.quantity}
+                          </span>
+                          <button
+                            onClick={() => dispatch(incrementQty(item?.id))}
+                            className="border border-gray-400 p-1 hover:bg-gray-200 transition cursor-pointer"
+                          >
+                            <FiPlus size={14} />
+                          </button>
+                        </div>
                       </td>
-
                       <td className="text-right font-medium text-black">
-                        {formatMultiPrice(item?.price, "INR")}
+                        {formatMultiPrice(item.price * item.quantity, "INR")}
                       </td>
                     </tr>
                   ))}
