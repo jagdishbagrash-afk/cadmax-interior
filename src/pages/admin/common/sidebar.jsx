@@ -50,70 +50,79 @@ function SideBar() {
                 </div>
 
                 <div className=" py-4 lg:py-5">
-                        <div className="px-3 md:px-4 lg:px-6 uppercase text-[#727272] text-sm font-medium mb-4 lg:mb-5">MAIN MENU</div>
-                        <ul className="mt-2 space-y-1 mb-10">
-                            <Link
-                                href="/admin"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <MdSpaceDashboard size={20} />
-                                Dashboard
-                            </Link>
-                            <Link
-                                href="/admin/category"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6  gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <PiStudentFill size={20} />
-                                Category
-                            </Link>
-                            <Link
-                                href="/admin/subcategory"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/subcategory" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <MdReviews size={20} />
-                                Sub  Category
-                            </Link>
-                            <Link
-                                href="/admin/product"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/product" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <AiFillProduct size={20} />
-                                Products
-                            </Link>
-                              <Link
-                                href="/admin/banner"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                    <div className="px-3 md:px-4 lg:px-6 uppercase text-[#727272] text-sm font-medium mb-4 lg:mb-5">MAIN MENU</div>
+                    <ul className="mt-2 space-y-1 mb-10">
+                        <Link
+                            href="/admin"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <MdSpaceDashboard size={20} />
+                            Dashboard
+                        </Link>
+                        <Link
+                            href="/admin/category"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6  gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <PiStudentFill size={20} />
+                            Category
+                        </Link>
+                        <Link
+                            href="/admin/subcategory"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/subcategory" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <MdReviews size={20} />
+                            Sub  Category
+                        </Link>
+                        <Link
+                            href="/admin/product"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/product" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <AiFillProduct size={20} />
+                            Products
+                        </Link>
+                        <Link
+                            href="/admin/banner"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/banner" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <AiFillProduct size={20} />
-                                Banners
-                            </Link>
-                                   <Link
-                                href="/admin/user"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                        >
+                            <AiFillProduct size={20} />
+                            Banners
+                        </Link>
+                        <Link
+                            href="/admin/user"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/user" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <AiFillProduct size={20} />
-                                User
-                            </Link>
+                        >
+                            <AiFillProduct size={20} />
+                            User
+                        </Link>
 
-                                 <Link
-                                href="/admin/booking"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                        <Link
+                            href="/admin/booking"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/booking" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                            >
-                                <AiFillProduct size={20} />
-                                Booking
-                            </Link> 
-                            <Link
-                                href="/admin/setting"
-                                className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
-                            >
-                                <IoSettingsOutline size={20} />
-                                Settings
-                            </Link>
+                        >
+                            <AiFillProduct size={20} />
+                            Booking
+                        </Link>
 
-                        </ul>
+                        <Link
+                            href="/admin/project"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/project" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <AiFillProduct size={20} />
+                            Project
+                        </Link>
+                        <Link
+                            href="/admin/setting"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
+                        >
+                            <IoSettingsOutline size={20} />
+                            Settings
+                        </Link>
+
+                    </ul>
                 </div>
             </div>
         </>
