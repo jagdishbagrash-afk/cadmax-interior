@@ -140,6 +140,10 @@ class Listing extends Component {
   async GetBooking(data) {
     return Api.get(`/get-booking`, data);
   }
+
+   async GetContact(data) {
+    return Api.get(`/contact-get`, data);
+  }
   async AddBanner(data) {
     return Api.post(`/admin/banner/add`, data);
   }
@@ -174,6 +178,10 @@ class Listing extends Component {
   async AddOrder(data) {
     return Api.post("/order/add", data)
   }
+ async AddContact(data) {
+    return Api.post("/contact-add", data)
+  }
+
   render() {
     return (
       <div>
