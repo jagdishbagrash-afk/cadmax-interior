@@ -37,7 +37,7 @@ export default function Header() {
           </li>
           <li>
             <Link
-              href="/projects"
+              href="/project"
               className="text-sm font-medium text-black hover:text-gray-500 transition"
             >
               PROJECTS
@@ -170,7 +170,7 @@ export default function Header() {
               </Link>
             </li>
             <li>
-              <Link href="/projects" className="text-black text-sm font-medium">
+              <Link href="/project" className="text-black text-sm font-medium">
                 PROJECTS
               </Link>
             </li>

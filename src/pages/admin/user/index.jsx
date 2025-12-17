@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import Image from "next/image";
+import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
     const [data, setData] = useState([]);
@@ -24,7 +25,7 @@ export default function Index() {
     useEffect(() => {
         fetchData();
     }, []);
-
+console.log("data" ,data)
     return (
         <AdminLayout page={"User Listing"}>
 
@@ -50,6 +51,8 @@ export default function Index() {
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Gender</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Status</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Created</th>
+                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Action</th>
+
                                 </tr>
                             </thead>
 
@@ -100,14 +103,15 @@ export default function Index() {
                                         </td>
 
                                         {/* GENDER */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">                      {item.gender || "N/A"}
+                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
+                                            {item.gender || "N/A"}
                                         </td>
 
 
                                         {/* STATUS */}
                                         <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            <span className={`px-3 py-1 rounded-full text-xs font-semibold
-                        ${item.status === "active"
+                                            <span className={`uppercase px-3 py-1 rounded-full text-xs font-semibold
+                                           ${item.status === "active"
                                                     ? "bg-green-100 text-green-700"
                                                     : "bg-red-100 text-red-600"}`}
                                             >
@@ -120,6 +124,15 @@ export default function Index() {
                                         <td className="px-4 py-3 text-[14px] font-semibold text-black ">
 
                                             {new Date(item.createdAt).toLocaleDateString()}
+                                        </td>
+
+                                        <td>
+                                            <BlockUnblock
+                                                Id={item._id}
+                                                fetchData={fetchData}
+                                                step={6}
+                                                status={item?.deleted_at ? true : false}
+                                            />
                                         </td>
 
                                     </tr>

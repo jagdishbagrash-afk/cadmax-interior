@@ -32,9 +32,19 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     return main.deleteProduct(Id);
   };
 
-    const handleProject = () => {
+  const handleProject = () => {
     const main = new Listing();
     return main.deleteProject(Id);
+  };
+
+  const handleBanner = () => {
+    const main = new Listing();
+    return main.deleteBanner(Id);
+  };
+
+  const handleUser = () => {
+    const main = new Listing();
+    return main.deleteUser(Id);
   };
 
   /* -------------------- MAIN HANDLER -------------------- */
@@ -52,6 +62,10 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       else if (step === 3) response = await handleSubcategory();
       else if (step === 4) response = await handleProduct();
       else if (step === 5) response = await handleProject();
+      else if (step === 6) response = await handleUser();
+      else if (step === 7) response = await handleBanner();
+
+
 
       else throw new Error("Invalid Step");
 
@@ -78,7 +92,6 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       {/* Block / Unblock Button */}
       <button
         onClick={toggleModal}
-        title={status === true ? "Block User" : "Unblock User"}
         className="cursor-pointer m-auto flex items-center justify-center
                     w-[42px] h-[42px] rounded-lg 
                     border border-gray-200 shadow-sm 
@@ -138,18 +151,17 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
               onClick={handleClick}
               disabled={loading}
               className={`cursor-pointer font-[700] text-[14px] px-[20px] py-[10px] rounded-[5px]
-                            ${
-                              loading
-                                ? "bg-gray-400"
-                                : "bg-black hover:bg-white"
-                            }
+                            ${loading
+                  ? "bg-gray-400"
+                  : "bg-black hover:bg-white"
+                }
                             text-white hover:text-black cursor-pointer`}
             >
               {loading
                 ? "Processing..."
                 : status === true
-                ? "Restore"
-                : "Delete"}
+                  ? "Restore"
+                  : "Delete"}
             </button>
           </div>
         </Popup>

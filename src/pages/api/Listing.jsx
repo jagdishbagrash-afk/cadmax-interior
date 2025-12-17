@@ -126,8 +126,16 @@ class Listing extends Component {
     return Api.post(`/project/edit/${id}`, data);
   }
   async deleteProject(data) {
-    return Api.post(`/project/status/${data}`);
+    return Api.post(`/project/delete/${data}`);
   }
+ async deleteUser(data) {
+    return Api.post(`/user/delete/${data}`);
+  }
+
+   async deleteBanner(data) {
+    return Api.post(`/banner/delete/${data}`);
+  }
+
   async getAllProductSubCategroy(id) {
     return Api.get(`/product/subcategory/${id}`,);
   }

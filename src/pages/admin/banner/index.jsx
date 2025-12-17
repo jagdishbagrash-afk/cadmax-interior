@@ -7,6 +7,7 @@ import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import dataimage from "../../../Assets/Images/c1.jpg"
 import BannerAdd from "./BannerAdd";
+import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -105,8 +106,16 @@ export default function Index() {
                             isEdit={true}
                             fetchDatas={fetchData}
                           />
+                          <BlockUnblock
+                            Id={item._id}
+                            fetchData={fetchData}
+                            step={7}
+                            status={item?.deleted_at ? true : false}
+                          />
                         </div>
                       </td>
+
+
                     </tr>
                   ))
                 ) : (

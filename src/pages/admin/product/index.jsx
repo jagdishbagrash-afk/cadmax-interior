@@ -31,7 +31,7 @@ export default function index() {
     fetchData();
   }, []);
 
-  // console.log("data", data);
+  console.log("data", data);
 
   return (
     <AdminLayout page={"Product List"}>
