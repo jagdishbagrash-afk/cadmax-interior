@@ -3,6 +3,7 @@ import AdminLayout from '../common/AdminLayout'
 import Listing from '@/pages/api/Listing';
 import { MdInfoOutline } from "react-icons/md";
 import OrderDetail from './OrderDetail';
+import toast from 'react-hot-toast';
 
 export default function Index() {
     const [data, setData] = useState([]);
@@ -19,6 +20,21 @@ export default function Index() {
         } catch (error) {
           console.log("Error:", error);
           setData([]);
+        }
+      };
+
+      const handleStatusChange = async (id, value) => {
+        try {
+          const main = new Listing();
+          const response = await main.updateOrderStatus(id, {status: value});
+          if (response.data?.status) {
+            toast.success(response?.data?.message);
+          } else {
+            toast.error(response?.data?.message);
+          }
+        } catch (error) {
+          console.log("Error:", error);
+          toast.error(error?.response?.data?.message || "An unknown error occured");
         }
       };
     
@@ -94,11 +110,25 @@ export default function Index() {
 
                       {/* Status */}
                       <td className="px-6 py-4 text-center">
-                        <span className="px-3 py-1 text-[13px] font-semibold rounded-full bg-yellow-100 text-yellow-700">
-                          Pending
-                        </span>
+                        <select
+                          value={order?.status || "pending"}
+                          onChange={(e) => handleStatusChange(order?._id, e.target.value)}
+                          className={`
+                            px-3 py-1 text-[13px] font-semibold rounded-full border outline-none cursor-pointer
+                            ${order?.status === "pending" && "bg-yellow-100 text-yellow-700 border-yellow-200"}
+                            ${order?.status === "confirmed" && "bg-blue-100 text-blue-700 border-blue-200"}
+                            ${order?.status === "shipped" && "bg-purple-100 text-purple-700 border-purple-200"}
+                            ${order?.status === "delivered" && "bg-green-100 text-green-700 border-green-200"}
+                            ${order?.status === "cancelled" && "bg-red-100 text-red-700 border-red-200"}
+                          `}
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="confirmed">Confirmed</option>
+                          <option value="shipped">Shipped</option>
+                          <option value="delivered">Delivered</option>
+                          <option value="cancelled">Cancelled</option>
+                        </select>
                       </td>
-
                       {/* Details */}
                       <td className="px-6 py-4">
                         <OrderDetail data={order?.product}/>
