@@ -15,41 +15,46 @@ class Listing extends Component {
   async AdminDashboard() {
     return Api.get("/admin/dasboard")
   }
-  // async Supercategory(data) {
-  //   return Api.post("/supercategory/add", data)
-  // }
-
-  // async SupercategoryList() {
-  //   return Api.get("/supercategory/get")
-  // }
-
-  // async SupercategoryStatus() {
-  //   return Api.get("/supercategory/get-status")
-  // }
-
-  // async Supercategorydelete(id) {
-  //   return Api.get(`/supercategory/status/${id}`)
-  // }
-
-  // async SupercategoryUpdate(id, formData) {
-  //   return Api.post(`/supercategory/update/${id}`, formData);
-  // }
-
   async category(data) {
     return Api.post("/category/add", data)
   }
 
+  async vendorcategory(data) {
+    return Api.post("/vendor/category/add", data)
+  }
 
+  async vendorcategoryList() {
+    return Api.get("/vendor/category/list",)
+  }
+
+  async vendorList() {
+    return Api.get("/vendor/list",)
+  }
   async categoryList() {
     return Api.get("/category/get",)
   }
 
+  async vednorcategoryUpdate(id, formData) {
+    return Api.post(`/vendor/category/edit/${id}`, formData);
+  }
+
+  async vendorCreate(data) {
+    return Api.post("/vendor/add", data)
+  }
+
+  async vendorUpdate(id, formData) {
+    return Api.post(`/vendor/edit/${id}`, formData)
+  }
   async categoryStatus() {
     return Api.get("/category/get-status",)
   }
 
   async categorydelete(id) {
     return Api.get(`/category/status/${id}`)
+  }
+
+  async vendordelete(id) {
+    return Api.get(`/vendor/delete/${id}`)
   }
 
   async categoryUpdate(id, formData) {
@@ -61,6 +66,10 @@ class Listing extends Component {
 
   async subcategoryList() {
     return Api.get("/subcategory/get",)
+  }
+
+  async VendorGet() {
+    return Api.get("/vendor/get",)
   }
 
   async getSubcategorybyCategory(id) {
@@ -128,11 +137,11 @@ class Listing extends Component {
   async deleteProject(data) {
     return Api.post(`/project/delete/${data}`);
   }
- async deleteUser(data) {
+  async deleteUser(data) {
     return Api.post(`/user/delete/${data}`);
   }
 
-   async deleteBanner(data) {
+  async deleteBanner(data) {
     return Api.post(`/banner/delete/${data}`);
   }
 
@@ -149,7 +158,7 @@ class Listing extends Component {
     return Api.get(`/get-booking`, data);
   }
 
-   async GetContact(data) {
+  async GetContact(data) {
     return Api.get(`/contact-get`, data);
   }
   async AddBanner(data) {
@@ -186,10 +195,13 @@ class Listing extends Component {
   async AddOrder(data) {
     return Api.post("/order/add", data)
   }
- async AddContact(data) {
+  async AddContact(data) {
     return Api.post("/contact-add", data)
   }
 
+  async AddVendorcate(data) {
+    return Api.post("/contact-add", data)
+  }
   render() {
     return (
       <div>

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import imagesrc from "../../Assets/Images/swiper.jpg"
+import Listing from "../api/Listing";
+import { useEffect, useState } from "react";
 
 export default function Vendor() {
     const Products = [
@@ -9,28 +11,53 @@ export default function Vendor() {
         { title: "CAFÉS, SALONS & SERVICE STUDIOS", image: imagesrc?.src },
     ];
 
+
+    const [data, setData] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.VendorGet();
+            if (response.data?.data) {
+                setData(response.data.data);
+            } else {
+                setData([]);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+            setData([]);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    console.log("data", data)
     return (
         <div
             className="bg-[#FFFFFF] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
                 {/* Heading */}
-                <div className="     mx-auto mb-10 md:mb-16 flex flex-col md:flex-row items-start md:items-end justify-between">
-                    <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase Creato">
+
+                <div className="max-w-7xl mx-auto mb-10 md:mb-16 flex flex-col md:flex-row items-center justify-between gap-5">
+                    <h2 className="text-[#171717] font-[900] text-[18px] md:text-[24px] tracking-[-0.02em] uppercase Creato">
                         Book a vendor
                     </h2>
-                    <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed md:w-2/3 md:pl-8">
-                        Every Cadmax project includes detailed 3D renders that depict scale, lighting, and material texture — eliminating uncertainty and enabling clients to make informed decisions before execution begins.
+
+                    <p className="text-[#4D5466] font-[500] text-[16px] md:text-[18px] leading-[100%] tracking-[-0.02em] md:max-w-[55%] text-center md:text-left Creato">
+                       Every Cadmax project includes detailed 3D renders that depict scale, lighting, and material texture — eliminating uncertainty and enabling clients to make informed decisions before execution begins.
                     </p>
                 </div>
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {Products?.map((p, idx) => (
+                    {data && data?.map((p, idx) => (
                         <article key={p.id ?? idx} className="overflow-hidden">
                             {/* IMAGE + OFFER */}
-                            <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
+                            <div className="relative w-full h-[290px] md:h-[340px] overflow-hidden bg-gray-100">
                                 <img
-                                    src={p.image}
+                                    src={p.Image}
                                     alt={p.title}
                                     className="w-full h-full object-cover object-center"
                                 />
@@ -38,8 +65,12 @@ export default function Vendor() {
                             {/* TITLE + PRICE */}
                             <div className="pt-2">
                                 <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium Creato tracking-[0.05em]">
-                                    {p.title}
+                                    {p.name}
                                 </h3>
+
+                                <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed capitalize">
+
+                                    {p.VendorCategory.name}                    </p>
                             </div>
                         </article>
                     ))}

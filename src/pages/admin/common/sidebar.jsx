@@ -122,6 +122,24 @@ function SideBar() {
                             <AiFillProduct size={20} />
                             contact
                         </Link>
+
+                            <Link
+                            href="/admin/vendor/category"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/vendor/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <AiFillProduct size={20} />
+                            Vendor  Categroy
+                        </Link>
+      <Link
+                            href="/admin/vendor/vendor"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/vendor/vendor" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                            <AiFillProduct size={20} />
+                            Vendor  
+                        </Link>
+                      
                         <Link
                             href="/admin/setting"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}

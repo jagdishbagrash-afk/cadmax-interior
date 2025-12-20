@@ -36,14 +36,16 @@ const Predictable = () => {
         <section className="bg-[#F6F6F6] py-4 md:py-8">
             <div className="container mx-auto px-4 max-w-[1430px]">
                 {/* Heading */}
-                <div className="max-w-7xl mx-auto mb-10 md:mb-16 flex flex-col md:flex-row items-start md:items-end justify-between">
-                    <h2 className="text-[#171717] font-[900] text-[24px] leading-[100%] tracking-[-0.02em] text-left mb-6 uppercase Creato">
+                <div className="max-w-7xl mx-auto mb-10 md:mb-16 flex flex-col md:flex-row items-center justify-between gap-5">
+                    <h2 className="text-[#171717] font-[900] text-[24px] tracking-[-0.02em] uppercase Creato text-center">
                         Structured Design. Predictable Results.
                     </h2>
-                    <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed md:w-2/3 md:pl-8">
+
+                    <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed md:max-w-[55%] text-center md:text-left">
                         Every project follows a defined framework and craft for design accuracy and execution reliability.
                     </p>
                 </div>
+
 
                 {/* Icons Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

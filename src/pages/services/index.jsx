@@ -1,5 +1,6 @@
 import Banner from "@/components/Banner";
 import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import servicesbottom from "../../Assets/Images/servicesbottom.jpg"
 import Layout from "../common/Layout";
 import ResidentialDesign from "./ResidentialDesign";
 import CommercialDesign from "./CommercialDesign";
@@ -7,15 +8,16 @@ import Vendor from "./Vendor";
 import Predictable from "./Predictable";
 import Execution from "./Execution";
 import Slider2 from "../home/Slider2";
+import Button from "../common/Button";
 
 export default function Index() {
     return (
         <Layout>
-            <Banner Slider1={ProductListBanner}
-                title={"From Blueprint to Reality — Complete Interior Design & Execution"}
+           <Banner Slider1={ProductListBanner}
+                title={"Get our latest designs"}
                 button={"SHOP OUR FURNITURE"} />
-            <div className="w-full px-4">
-                <div className="max-w-[1430px] mx-auto">
+             <div className="w-full">
+                <div className="container mx-auto px-4 max-w-[1430px]">
                     <div className="max-w-5xl mx-auto mt-8 mb-12 md:mt-12 md:mb-20 flex justify-center">
                         <h2 className="
         text-[#171717]
@@ -23,7 +25,7 @@ export default function Index() {
         leading-[130%]
         tracking-[-0.02em]
         text-center
-        uppercase font-bold
+        uppercase font-[900]
         Creato
       ">
                             Every Cadmax project begins with clarity — measured planning, verified
@@ -38,10 +40,61 @@ export default function Index() {
             <CommercialDesign />
             <Vendor />
             <Execution />
-            <Slider2 />
-            <Banner Slider1={ProductListBanner}
-                title={"From Blueprint to Reality — Complete Interior Design & Execution"}
-                button={"SHOP OUR FURNITURE"} />
+            <Slider2 /> 
+
+           <div className="relative w-full h-full md:h-[450px]">
+                <img
+                    src={servicesbottom?.src}
+                    alt="Slide"
+                    className="object-cover w-full h-full"
+                />
+
+                <div className="absolute inset-0 bg-black/30"></div>
+
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center w-full">
+
+                    <h1
+                        className="
+        font-[900]
+        text-[18px]
+        sm:text-[20px]
+        lg:text-[24px]
+        text-white
+        uppercase
+        Creato
+        leading-[110%]
+        tracking-[-0.01em]
+        max-w-[90%]
+        sm:max-w-[500px]
+        mx-auto
+      "
+                    >
+                        Start Your Interior Journey with Cadmax Interio
+                    </h1>
+
+                    <div
+                        className="
+        flex
+        flex-wrap
+        justify-center
+        items-center
+        gap-2
+        sm:gap-3
+        mt-3
+        sm:mt-5
+        max-w-[95%]
+        mx-auto
+      "
+                    >
+                        <Button
+                            title={"Book a Design Consultation"}
+                            classes={"bg-transparent text-white border-2 border-white whitespace-nowrap px-4 py-2"}
+                        />
+                    </div>
+
+                </div>
+            </div> 
+
         </Layout>
     );
 }

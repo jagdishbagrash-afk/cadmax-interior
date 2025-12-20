@@ -32,8 +32,17 @@ export default function Header() {
           </li>
 
 <MegaMenu/>
-          <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
+          {/* <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
             CONCEPT <IoIosArrowDown size={14} />
+          </li> */}
+
+               <li>
+            <Link
+              href="/services"
+              className="text-sm font-medium text-black hover:text-gray-500 transition"
+            >
+              CONCEPT
+            </Link>
           </li>
           <li>
             <Link
@@ -165,7 +174,7 @@ export default function Header() {
 
 
             <li>
-              <Link href="/concept" className="text-black text-sm font-medium">
+              <Link href="/services" className="text-black text-sm font-medium">
                 CONCEPT
               </Link>
             </li>
