@@ -31,11 +31,10 @@ export default function Index() {
 
     return (
         <Layout>
-            <Banner Slider1={ProductListBanner}
+            {/* <Banner Slider1={ProductListBanner}
                 title={"From Blueprint to Reality — Complete AND LUXURY FURNITURE"}
-                button={"SHOP OUR FURNITURE"} />
-            <div
-                className="bg-[#FFFFFF] py-4 md:py-8 ">
+                button={"SHOP OUR FURNITURE"} /> */}
+            <div className="bg-[#FFFFFF] py-4 md:py-8 ">
                 <div className="container mx-auto px-4 max-w-[1430px]">
                     {data && data?.map((item, index) => {
                         const isReverse = index % 2 !== 0; // alternate layout
@@ -54,7 +53,6 @@ export default function Index() {
                                     />
                                 </div>
 
-                                {/* Content */}
                                 <div className={`md:col-span-1 ${isReverse ? "md:order-1" : ""}`}>
 
 

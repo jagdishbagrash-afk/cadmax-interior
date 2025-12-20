@@ -174,7 +174,7 @@ export default function Header() {
 
 
             <li>
-              <Link href="/services" className="text-black text-sm font-medium">
+              <Link href="/servcies" className="text-black text-sm font-medium">
                 CONCEPT
               </Link>
             </li>
