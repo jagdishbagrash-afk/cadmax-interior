@@ -39,7 +39,7 @@ const MegaMenu = () => {
 
 // console.log("categories" ,categories)
   return (
-    <li className="relative">
+    <li className="">
       {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
       <div className="group inline-block">
         <Link
@@ -53,9 +53,7 @@ const MegaMenu = () => {
         {/* DROPDOWN POSITION EXACTLY FROM YOUR CODE */}
         <div
           className="
-    absolute bg-white shadow-2xl w-screen
-    ml-[calc(-50vw_+_165%)]
-
+    absolute bg-white shadow-2xl w-full left-0
     /* animation initial state */
     opacity-0 -translate-y-5
     transition-all duration-300 ease-out
@@ -69,11 +67,7 @@ const MegaMenu = () => {
     z-50
   "
         >
-          <div
-            className="
-      rounded-xl p-10 mt-6 w-screen
-      flex justify-center text-center
-    "
+          <div className="rounded-xl p-10 mt-6 flex justify-center text-center"
           >
             <div className="mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
               {categories?.map((item) => (
