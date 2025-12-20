@@ -94,7 +94,7 @@ const ProductGrid = ({ products }) => {
           </div>
 
           <div className="flex justify-center mt-10">
-            <button className="px-10 py-3 border text-sm font-bold hover:bg-black hover:text-white transition">
+            <button className="px-10 py-3 border text-sm font-bold hover:bg-black hover:text-white transition cursor-pointer">
               LOAD MORE
             </button>
           </div>
