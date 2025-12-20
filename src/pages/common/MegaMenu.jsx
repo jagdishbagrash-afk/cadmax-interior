@@ -10,13 +10,6 @@ import Listing from "../api/Listing";
 import { useEffect, useState } from "react";
 
 const MegaMenu = () => {
-  // const categories = [
-  //   { id: 1, name: "FURNITURE", image: c4.src },
-  //   { id: 2, name: "SOFA & SEATING", image: c3.src },
-  //   { id: 3, name: "LAMPS & LIGHTNING", image: c5.src },
-  //   { id: 4, name: "UPHOLSTERY", image: c1.src },
-  //   { id: 5, name: "HOME DECOR", image: c2.src },
-  // ];
 
   const [categories, setCategories] = useState([]);
 
@@ -39,9 +32,9 @@ const MegaMenu = () => {
 
 // console.log("categories" ,categories)
   return (
-    <li className="relative">
+    <li className=" ">
       {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
-      <div className="group inline-block">
+      <div className="group inline-block ">
         <Link
           href="/product"
           className="text-black text-sm font-medium flex items-center gap-1"
@@ -49,29 +42,21 @@ const MegaMenu = () => {
           PRODUCT <IoIosArrowDown size={14} />
         </Link>
 
-        {/* DROPDOWN SHOULD NOT BE PART OF HOVER AREA */}
-        {/* DROPDOWN POSITION EXACTLY FROM YOUR CODE */}
+      
         <div
           className="
-    absolute bg-white shadow-2xl w-screen
-    ml-[calc(-50vw_+_165%)]
-
-    /* animation initial state */
+    absolute bg-white shadow-2xl w-full left-[0px]
+    ml-[calc(-50vw_+_163%)]
     opacity-0 -translate-y-5
     transition-all duration-300 ease-out
-
-    /* show only when PRODUCT is hovered */
     group-hover:opacity-100 group-hover:translate-y-0
-
-    /* do NOT let hover on dropdown keep it open */
     pointer-events-none group-hover:pointer-events-auto
-
     z-50
   "
         >
           <div
             className="
-      rounded-xl p-10 mt-6 w-screen
+      rounded-xl p-10 mt-6 w-full
       flex justify-center text-center
     "
           >

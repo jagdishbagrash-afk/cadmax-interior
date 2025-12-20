@@ -2,6 +2,7 @@ import Image from "next/image";
 import imagesrc from "../../Assets/Images/swiper.jpg"
 import Listing from "../api/Listing";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Vendor() {
     const Products = [
@@ -17,7 +18,7 @@ export default function Vendor() {
     const fetchData = async () => {
         try {
             const main = new Listing();
-            const response = await main.VendorGet();
+            const response = await main.vendorcategoryList();
             if (response.data?.data) {
                 setData(response.data.data);
             } else {
@@ -53,7 +54,7 @@ export default function Vendor() {
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {data && data?.map((p, idx) => (
-                        <article key={p.id ?? idx} className="overflow-hidden">
+                        <Link href={`/vendor/${p._id}`} key={p.id ?? idx} className="overflow-hidden cursor-pointer">
                             {/* IMAGE + OFFER */}
                             <div className="relative w-full h-[290px] md:h-[340px] overflow-hidden bg-gray-100">
                                 <img
@@ -67,12 +68,9 @@ export default function Vendor() {
                                 <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium Creato tracking-[0.05em]">
                                     {p.name}
                                 </h3>
-
-                                <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed capitalize">
-
-                                    {p.VendorCategory.name}                    </p>
+                               
                             </div>
-                        </article>
+                        </Link>
                     ))}
                 </div>
             </div>
