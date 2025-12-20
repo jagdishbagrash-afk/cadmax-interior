@@ -6,6 +6,7 @@ import Listing from "@/pages/api/Listing";
 import dataimage from "../../../../Assets/Images/c1.jpg"
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
+import Link from "next/link";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -38,7 +39,17 @@ export default function Index() {
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
               Vendor  Listing
             </h2>
+             <div className="flex  flex-wrap gap-3 ">
+                    <Link
+                              href="/admin/vendor/category"
+                                className="cursor-pointer m-auto flex items-center justify-center
+                      w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                      bg-white hover:bg-gray-50 transition-all duration-200"
+                            >
+                                Vendor Category  List 
+                            </Link>
             <AddVendor fetchDatas={fetchData} />
+             </div>
           </div>
 
           <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-4">

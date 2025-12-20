@@ -85,7 +85,7 @@ function SideBar() {
                             href="/admin/order"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/order" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                           <BsCartCheckFill size={20} />
+                            <BsCartCheckFill size={20} />
                             Product Order
                         </Link>
                         <Link
@@ -122,7 +122,7 @@ function SideBar() {
                             <AiFillProduct size={20} />
                             Project
                         </Link>
-                              <Link
+                        <Link
                             href="/admin/contact"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/contact" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
@@ -130,24 +130,15 @@ function SideBar() {
                             <AiFillProduct size={20} />
                             contact
                         </Link>
-
-                            <Link
-                            href="/admin/vendor/category"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/vendor/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            Vendor  Categroy
-                        </Link>
-      <Link
+                        <Link
                             href="/admin/vendor/vendor"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/vendor/vendor" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
                             <AiFillProduct size={20} />
-                            Vendor  
+                            Vendor
                         </Link>
-                      
+
                         <Link
                             href="/admin/setting"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}

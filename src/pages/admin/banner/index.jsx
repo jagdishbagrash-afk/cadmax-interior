@@ -28,7 +28,6 @@ export default function Index() {
   useEffect(() => {
     fetchData();
   }, []);
-  console.log("data", data)
 
   return (
     <AdminLayout page={"Banner List"}>

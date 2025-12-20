@@ -6,59 +6,62 @@ import OrderDetail from './OrderDetail';
 import toast from 'react-hot-toast';
 
 export default function Index() {
-    const [data, setData] = useState([]);
-    
-      const fetchData = async () => {
-        try {
-          const main = new Listing();
-          const response = await main.adminGetOrders();
-          if (response.data?.data) {
-            setData(response.data.data);
-          } else {
-            setData([]);
-          }
-        } catch (error) {
-          console.log("Error:", error);
-          setData([]);
-        }
-      };
+  const [data, setData] = useState([]);
 
-      const handleStatusChange = async (id, value) => {
-        try {
-          const main = new Listing();
-          const response = await main.updateOrderStatus(id, {status: value});
-          if (response.data?.status) {
-            toast.success(response?.data?.message);
-          } else {
-            toast.error(response?.data?.message);
-          }
-        } catch (error) {
-          console.log("Error:", error);
-          toast.error(error?.response?.data?.message || "An unknown error occured");
-        }
-      };
-    
-      useEffect(() => {
-        fetchData();
-      }, []);
+  const fetchData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.adminGetOrders();
+      if (response.data?.data) {
+        setData(response.data.data);
+      } else {
+        setData([]);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setData([]);
+    }
+  };
 
-    //   console.log("data", data);
+  const handleStatusChange = async (id, value) => {
+    try {
+      const main = new Listing();
+      const response = await main.updateOrderStatus(id, { status: value });
+      if (response.data?.status) {
+        toast.success(response?.data?.message);
+      } else {
+        toast.error(response?.data?.message);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      toast.error(error?.response?.data?.message || "An unknown error occured");
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  //   console.log("data", data);
 
   return (
     <AdminLayout page="Order management">
-      <div className="min-h-screen p-5 lg:p-[30px]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
-            Orders List
-          </h2>
-        </div>
+      <div className="px-4 py-2 lg:px-4 lg:py-2.5">
+        <div className="bg-white rounded-[20px] mb-[10px] p-2">
+          {/* Header */}
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-2">
+          <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
+
+            <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
+              Orders List
+            </h2>
+
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-4">
             <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
-              <thead className="bg-gray-100">
+              <thead className="bg-gray-50">
                 <tr>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
                     Customer Name
@@ -131,7 +134,7 @@ export default function Index() {
                       </td>
                       {/* Details */}
                       <td className="px-6 py-4">
-                        <OrderDetail data={order?.product}/>
+                        <OrderDetail data={order?.product} />
                       </td>
                     </tr>
                   ))
