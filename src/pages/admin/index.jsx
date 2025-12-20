@@ -15,20 +15,20 @@ export default function Index() {
   const [listing, setListing] = useState(null); // Fix typo in setListing
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    setLoading(true);
-    const main = new Listing();
-    main
-      .AdminDashboard()
-      .then((r) => {
-        setListing(r?.data?.data); // ✅ Update state with data
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error("API Error:", err);
-        setLoading(false);
-      });
-  }, []);
+  // useEffect(() => {
+  //   setLoading(true);
+  //   const main = new Listing();
+  //   main
+  //     .AdminDashboard()
+  //     .then((r) => {
+  //       setListing(r?.data?.data); // ✅ Update state with data
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       console.error("API Error:", err);
+  //       setLoading(false);
+  //     });
+  // }, []);
 
   return (
     <AdminLayout page={"Dashboard"}>

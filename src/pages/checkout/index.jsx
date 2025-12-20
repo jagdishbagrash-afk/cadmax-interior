@@ -9,13 +9,14 @@ import { FaRegTrashCan } from "react-icons/fa6";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
 import { useRouter } from "next/router";
+import { useRole } from "@/context/RoleContext";
 
 export default function Index() {
   const router = useRouter();
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
-
-  console.log("cartItemsRedux", cartItemsRedux);
+  const { user } = useRole();
+  // console.log("user", user);
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);
@@ -23,8 +24,8 @@ export default function Index() {
 
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
-    name: "",
-    mobile: "",
+    name: user?.name || "",
+    mobile: user?.phone || "",
     address: "",
   });
 

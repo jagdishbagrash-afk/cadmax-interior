@@ -5,28 +5,28 @@ import { useRole } from "@/context/RoleContext";
 import Listing from "../api/Listing";
 
 export default function Layout({ children }) {
-    // const { setUser } = useRole();
+    const { setUser } = useRole();
     
-    // const fetchData = async (signal) => {
-    //     try {
-    //       const main = new Listing();
-    //       const response = await main.profileVerify(signal);
-    //       if (response.data) {
-    //         setUser(response.data.data.user);
-    //       }
-    //     } catch (error) {
-    //       console.log("error", error);
-    //       localStorage?.removeItem("token");
-    //     }
-    //   };
+    const fetchData = async (signal) => {
+        try {
+          const main = new Listing();
+          const response = await main.profileVerify(signal);
+          if (response.data) {
+            setUser(response.data.data.user);
+          }
+        } catch (error) {
+          console.log("error", error);
+          localStorage?.removeItem("token");
+        }
+      };
     
-    //   useEffect(() => {
-    //     const controller = new AbortController();
-    //     const { signal } = controller;
-    //     fetchData(signal);
+      useEffect(() => {
+        const controller = new AbortController();
+        const { signal } = controller;
+        fetchData(signal);
     
-    //     return () => controller.abort();
-    //   }, []);
+        return () => controller.abort();
+      }, []);
 
     return (
         <>

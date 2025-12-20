@@ -12,6 +12,7 @@ import { MdOutlineRateReview } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { MdOutlineReviews } from "react-icons/md";
 import { AiFillProduct } from "react-icons/ai";
+import { BsCartCheckFill } from "react-icons/bs";
 
 function SideBar() {
     const pathname = usePathname();
@@ -79,6 +80,13 @@ function SideBar() {
                         >
                             <AiFillProduct size={20} />
                             Products
+                        </Link>
+                        <Link
+                            href="/admin/order"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/order" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                        >
+                           <BsCartCheckFill size={20} />
+                            Product Order
                         </Link>
                         <Link
                             href="/admin/banner"

@@ -96,6 +96,14 @@ class Listing extends Component {
     return Api.get(`/product/list`, data);
   }
 
+  async adminGetOrders(data) {
+    return Api.get(`/order/getAll`, data);
+  }
+
+  async updateOrderStatus(id, data) {
+    return Api.post(`/order/status/update/${id}`, data);
+  }
+
   async deleteProduct(data) {
     return Api.post(`/product/delete/${data}`);
   }

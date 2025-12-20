@@ -57,7 +57,7 @@ export default function Login() {
       });
 
       if (res?.data?.status) {
-        localStorage.setItem("token", res?.data?.token);
+        localStorage && localStorage.setItem("token", res?.data?.data?.token);
         toast.success("Login successful");
         router.push("/");
       } else {
