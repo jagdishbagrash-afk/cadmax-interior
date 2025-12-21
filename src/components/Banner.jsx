@@ -4,10 +4,11 @@ import React from 'react';
 export default function Banner({ title, button, Slider1 }) {
 
   return (
+    <>
     <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
 
       <img
-        src={Slider1?.src}
+        src={ Slider1?.src }
         alt="Slide"
         className="object-cover w-full h-full"
       />
@@ -46,5 +47,7 @@ export default function Banner({ title, button, Slider1 }) {
         )}
       </div>
     </div>
+    
+    </>
   );
 }

@@ -5,13 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Vendor() {
-    const Products = [
-        { title: "3D MODELING & BRAND-CENTRIC VISUALIZATION", span: "row-span-2", image: imagesrc?.src },
-        { title: "2D SPACE PLANNING & OPTIMIZATION", image: imagesrc?.src },
-        { title: "CORPORATE OFFICES & WORKSPACES", image: imagesrc?.src },
-        { title: "CAFÉS, SALONS & SERVICE STUDIOS", image: imagesrc?.src },
-    ];
-
+   
 
     const [data, setData] = useState([]);
 
@@ -36,8 +30,7 @@ export default function Vendor() {
 
     console.log("data", data)
     return (
-        <div
-            className="bg-[#FFFFFF] py-4 md:py-8 ">
+        <div className="bg-[#FFFFFF] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
                 {/* Heading */}
 
@@ -56,11 +49,11 @@ export default function Vendor() {
                     {data && data?.map((p, idx) => (
                         <Link href={`/vendor/${p._id}`} key={p.id ?? idx} className="overflow-hidden cursor-pointer">
                             {/* IMAGE + OFFER */}
-                            <div className="relative w-full h-[290px] md:h-[340px] overflow-hidden bg-gray-100">
+                            <div className="relative w-full h-[290px] md:h-[340px] overflow-hidden ">
                                 <img
                                     src={p.Image}
                                     alt={p.title}
-                                    className="w-full h-full object-cover object-center"
+                                    className="w-full h-full object-contain  "
                                 />
                             </div>
                             {/* TITLE + PRICE */}
