@@ -2,17 +2,8 @@ import Image from "next/image";
 import imagesrc from "../../Assets/Images/end.jpg"
 
 
-export default function ResidentialDesign() {
-    const services = [
-    { title: "2D PLANNING & FULL-HOME LAYOUTS" },
-    { title: "FRONT ELEVATIONS & FACADE DESIGN" },
-    { title: "LIVING & BEDROOM INTERIORS" },
-    { title: "MODULAR KITCHEN & STORAGE PLANNING" },
-    { title: "STAIRCASE & BATHROOM DETAILING" },
-    { title: "GARDEN, GAZEBO & ROOFTOP CONCEPTS" },
-    { title: "FALSE CEILINGS, LIGHTING & WARDROBE SYSTEMS" },
-    { title: "CUSTOM TV PANELS & BUILT-IN UNITS" },
-];
+export default function ResidentialDesign({Residentialservices}) {
+    console.log("Residentialservices" ,Residentialservices)
     return (
         <div
             className="bg-[#FFFFFF] py-4 md:py-8 ">
@@ -33,13 +24,13 @@ export default function ResidentialDesign() {
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {services.map((item, index) => (
+                    {Residentialservices?.map((item, index) => (
                         <div
                             key={index}
                             className="relative overflow-hidden group"
                         >
                             <Image
-                                src={imagesrc?.src} // replace with real image
+                                src={item?.Image}
                                 alt={item.title}
                                 width={500}
                                 height={350}

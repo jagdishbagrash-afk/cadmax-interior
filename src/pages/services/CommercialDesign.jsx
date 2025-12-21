@@ -1,27 +1,19 @@
 import Image from "next/image";
 import imagesrc from "../../Assets/Images/swiper.jpg"
+import Link from "next/link";
 
 
 
-export default function CommercialDesign() {
-    const commercialServices = [
-        { title: "3D MODELING & BRAND-CENTRIC VISUALIZATION", span: "row-span-2" },
-        { title: "2D SPACE PLANNING & OPTIMIZATION" },
-        { title: "CORPORATE OFFICES & WORKSPACES" },
-        { title: "CAFÉS, SALONS & SERVICE STUDIOS" },
-        { title: "EXTERIOR & FACADE DESIGN" },
-        { title: "RETAIL STORES & SHOWROOMS" },
-        { title: "LIGHTING, SIGNAGE & MATERIAL COORDINATION" },
-    ];
+export default function CommercialDesign({Commercialservices}) {
+  
     return (
         <div
             className="bg-[#F6F6F6] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
                 {/* Heading */}
                 <div className="max-w-5xl mx-auto mb-10 md:mb-16 flex flex-col items-center justify-between">
-
                     <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
- tracking-[-0.02em] text-center uppercase Creato  ">
+                       tracking-[-0.02em] text-center uppercase Creato  ">
                         Commercial Spaces Engineered for Flow, Brand Presence & Performance
                     </h2>
                     <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
@@ -33,13 +25,14 @@ export default function CommercialDesign() {
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[300px] gap-6">
-                    {commercialServices?.map((item, index) => (
-                        <div
+                    {Commercialservices && Commercialservices?.map((item, index) => (
+                        <Link
+                        href={`/services/${item?.slug}`}
                             key={index}
-                            className={`relative overflow-hidden  group ${item.span || ""}`}
+                            className={`relative overflow-hidden  group ${item.title || ""}`}
                         >
                             <Image
-                                src={imagesrc?.src} // replace with actual image
+                                src={item?.Image} // replace with actual image
                                 alt={item.title}
                                 fill
                                 className="object-cover transition-transform duration-500 group-hover:scale-105"
@@ -51,7 +44,7 @@ export default function CommercialDesign() {
                                     {item.title}
                                 </h3>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

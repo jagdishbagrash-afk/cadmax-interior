@@ -13,7 +13,7 @@ export default function Index() {
   const fetchData = async () => {
     try {
       const main = new Listing();
-      const response = await main.servciestypeList();
+      const response = await main.ServciesList();
       if (response.data?.data) {
         setData(response.data.data);
       }
@@ -54,6 +54,9 @@ export default function Index() {
                     Name
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Content
+                  </th>
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Services type                   </th>
 
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
@@ -85,12 +88,13 @@ export default function Index() {
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
                         {item.title}
                       </td>
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                        {item.content}
+                      </td>
                       {/* Name */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
-                        {item.TypeServices}
+                        {item.ServicesType.TypeServices} - {item.ServicesType.title}
                       </td>
-
-
 
                       {/* Created Date */}
                       <td className="px-6 py-4 text-center text-[14px] text-gray-600">
@@ -128,8 +132,6 @@ export default function Index() {
               </tbody>
             </table>
           </div>
-
-
         </div>
       </div>
     </AdminLayout>

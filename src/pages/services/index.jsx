@@ -9,14 +9,35 @@ import Predictable from "./Predictable";
 import Execution from "./Execution";
 import Slider2 from "../home/Slider2";
 import Button from "../common/Button";
+import Listing from "../api/Listing";
+import { useEffect, useState } from "react";
 
 export default function Index() {
+
+    const [data, setData] = useState([]);
+
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.ServciesType();
+            if (response.data?.data) {
+                setData(response.data.data);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
     return (
         <Layout>
-           <Banner Slider1={ProductListBanner}
+            <Banner Slider1={ProductListBanner}
                 title={"Get our latest designs"}
                 button={"SHOP OUR FURNITURE"} />
-             <div className="w-full">
+            <div className="w-full">
                 <div className="container mx-auto px-4 max-w-[1430px]">
                     <div className="max-w-5xl mx-auto mt-8 mb-12 md:mt-12 md:mb-20 flex justify-center">
                         <h2 className="
@@ -36,13 +57,13 @@ export default function Index() {
                 </div>
             </div>
             <Predictable />
-            <ResidentialDesign />
-            <CommercialDesign />
+            <ResidentialDesign Residentialservices={data?.Residentialservices} />
+            <CommercialDesign Commercialservices={data?.Commercialservices} />
             <Vendor />
             <Execution />
-            <Slider2 /> 
+            <Slider2 />
 
-           <div className="relative w-full h-full md:h-[450px]">
+            <div className="relative w-full h-full md:h-[450px]">
                 <img
                     src={servicesbottom?.src}
                     alt="Slide"
@@ -93,7 +114,7 @@ export default function Index() {
                     </div>
 
                 </div>
-            </div> 
+            </div>
 
         </Layout>
     );

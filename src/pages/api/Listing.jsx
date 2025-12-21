@@ -23,17 +23,36 @@ class Listing extends Component {
     return Api.post("/vendor/category/add", data)
   }
 
-    async servicestype(data) {
+  async servicestype(data) {
     return Api.post("/services/type/add", data)
+  }
+
+
+  async services(data) {
+    return Api.post("/services/add", data)
   }
   async servciestypeList() {
     return Api.get("/services/type/list",)
   }
 
-   async ServicesTypeUpdate(id, formData) {
+   async ServicesUpdate(id, formData) {
+    return Api.post(`/services/edit/${id}`, formData);
+  }
+   async ServciesList() {
+    return Api.get("/services/list",)
+  }
+
+   async ServciesType() {
+    return Api.get("/services/type",)
+  }
+   async Servicesdelete(id) {
+    return Api.get(`/services/delete/${id}`)
+  }
+
+  async ServicesTypeUpdate(id, formData) {
     return Api.post(`/services/type/edit/${id}`, formData);
   }
-  async  ServicesTypedelete(id) {
+  async ServicesTypedelete(id) {
     return Api.get(`/services/type/delete/${id}`)
   }
 
@@ -72,7 +91,7 @@ class Listing extends Component {
   }
 
 
-async VendorCategoryList(id) {
+  async VendorCategoryList(id) {
     return Api.get(`/category/vendor/${id}`)
   }
 
