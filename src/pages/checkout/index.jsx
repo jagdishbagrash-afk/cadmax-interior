@@ -13,10 +13,11 @@ import { useRole } from "@/context/RoleContext";
 
 export default function Index() {
   const router = useRouter();
+  const [loading, setLoading] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
   const { user } = useRole();
-  // console.log("user", user);
+  // console.log("cartItemsRedux", cartItemsRedux);
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);
@@ -50,6 +51,12 @@ export default function Index() {
     e.preventDefault();
     // console.log("Form Submitted:", formData);
     // toast.success("Submitted in console");
+    if (!cartItemsRedux || cartItemsRedux.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+    if(loading){return;}
+    setLoading(true);
     try {
       const products = cartItemsRedux.map((item) => ({
         id: item?.product?._id,
@@ -75,8 +82,17 @@ export default function Index() {
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "An unknown error occured");
+    }finally{
+      setLoading(false);
     }
   };
+
+  useEffect(()=>{
+    if(!user){
+      toast.error("Please login to continue");
+      router.push("/login");
+    }
+  },[user])
 
   return (
     <Layout>
@@ -139,9 +155,9 @@ export default function Index() {
 
                   <button
                     type="submit"
-                    className="bg-black text-white w-full py-3 mt-3 uppercase tracking-wide"
+                    className="bg-black text-white w-full py-3 mt-3 uppercase tracking-wide cursor-pointer"
                   >
-                    Submit
+                    {loading ? "Submitting..." : "Submit"}
                   </button>
                 </form>
               </div>
@@ -174,7 +190,7 @@ export default function Index() {
                     <tr key={index} className="border-b border-gray-300">
                       <td className="py-3">
                         <button
-                          className="text-red-600"
+                          className="text-red-600 cursor-pointer"
                           onClick={() => handleRemove(item.id)}
                         >
                           <FaRegTrashCan size={14} />

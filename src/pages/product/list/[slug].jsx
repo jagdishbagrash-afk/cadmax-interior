@@ -35,29 +35,7 @@ export default function Index() {
   useEffect(() => {
     if (id) fetchData(id);
   }, [id]);
-
-  const [loading, setLoading] = useState(false);
-  const [project, setProject] = useState([])
-  const fetchProjectData = async () => {
-    try {
-      const main = new Listing();
-      const response = await main.getAllProductSubCategroy(selectedId);
-      const data = response?.data?.data;
-      console.log("data", data)
-      if (data) {
-        setProject(data)
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
-  };
-
-
-  useEffect(() => {
-    if (selectedId) {
-      fetchProjectData(selectedId);
-    }
-  }, [selectedId]);
+  
   return (
     <Layout>
       <div className="w-full bg-black py-3">
@@ -123,7 +101,7 @@ export default function Index() {
         </Swiper>
       </div>
 
-      <ProductGrid categoryId={selectedId} id={id} products={project} />
+      <ProductGrid selectedId={selectedId} />
 
     </Layout>
   );

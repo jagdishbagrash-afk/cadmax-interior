@@ -1,6 +1,37 @@
+import Listing from "@/pages/api/Listing";
 import ProductCard from "@/pages/common/ProductCard";
+import { useEffect, useState } from "react";
 
-const ProductGrid = ({ products }) => {
+const ProductGrid = ({selectedId}) => {
+  const [loading, setLoading] = useState(false);
+  const [project, setProject] = useState([]);
+  
+    const fetchProjectData = async () => {
+      try {
+        if(loading)return;
+        setLoading(true);
+        const main = new Listing();
+        const response = await main.getAllProductSubCategroy(selectedId);
+        const data = response?.data?.data;
+        // console.log("data", data)
+        if (data) {
+          setProject(data)
+        }
+      } catch (error) {
+        console.log("Error:", error);
+      }finally{
+        setLoading(false);
+      }
+    };
+  
+    useEffect(() => {
+      if (selectedId) {
+        fetchProjectData(selectedId);
+      }
+    }, [selectedId]);
+  
+    // console.log("project", project);
+
   return (
     <div className="w-full px-6 md:px-10 lg:px-14 py-8">
       <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
@@ -88,7 +119,7 @@ const ProductGrid = ({ products }) => {
         <div>
 
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            {products?.map((item) => (
+            {project && project?.data && project?.data?.map((item) => (
               <ProductCard key={item._id || item.id} item={item} />
             ))}
           </div>

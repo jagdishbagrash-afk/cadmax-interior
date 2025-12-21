@@ -7,18 +7,20 @@ import ProductCard from "../common/ProductCard";
 import Listing from "../api/Listing";
 
 export default function Related({ selectedId }) {
-const[Project ,setProject] = useState([])
+  const[Project,setProject] = useState([])
+  
   const fetchProjectData = async () => {
     try {
       const main = new Listing();
       const response = await main.getAllProductSubCategroy(selectedId);
-      const data = response?.data?.data;
-      // console.log("data", data)
-      if (data) {
-        setProject(data)
+      if (response?.data?.status) {
+        setProject(response?.data?.data?.data);
+      }else{
+        setProject([]);
       }
     } catch (error) {
       console.log("Error:", error);
+      setProject([]);
     }
   };
 
@@ -56,6 +58,8 @@ const[Project ,setProject] = useState([])
     },
 
   ];
+
+  console.log("Project", Project);
 
   return (
     <div className="mt-8 py-8">

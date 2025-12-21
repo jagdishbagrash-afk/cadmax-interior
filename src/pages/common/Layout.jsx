@@ -15,8 +15,9 @@ export default function Layout({ children }) {
             setUser(response.data.data.user);
           }
         } catch (error) {
-          console.log("error", error);
+          // console.log("error", error);
           localStorage?.removeItem("token");
+          setUser(null);
         }
       };
     

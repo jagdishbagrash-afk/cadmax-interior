@@ -34,11 +34,15 @@ export default function Index() {
       const main = new Listing();
       const response = await main.GetAllProductsId(id);
       // console.log("response", response)
-      if (response.data?.data) {
+      if (response.data?.status) {
         setProductDetails(response.data?.data);
+      }
+      else{
+        setProductDetails(null);
       }
     } catch (error) {
       console.log("Error:", error);
+      setProductDetails(null);
     }
   };
 
