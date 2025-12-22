@@ -1,5 +1,6 @@
 import Image from "next/image";
 import imagesrc from "../../Assets/Images/end.jpg"
+import Link from "next/link";
 
 
 export default function ResidentialDesign({Residentialservices}) {
@@ -25,7 +26,8 @@ export default function ResidentialDesign({Residentialservices}) {
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Residentialservices?.map((item, index) => (
-                        <div
+                        <Link
+                        href={`/services/residential/${item.slug}`}
                             key={index}
                             className="relative overflow-hidden group"
                         >
@@ -43,7 +45,7 @@ export default function ResidentialDesign({Residentialservices}) {
                                     {item.title}
                                 </h3>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

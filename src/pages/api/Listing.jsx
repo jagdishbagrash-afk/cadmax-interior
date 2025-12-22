@@ -194,6 +194,11 @@ class Listing extends Component {
   async getAllProductSubCategroy(id) {
     return Api.get(`/product/subcategory/${id}`,);
   }
+
+   async GetAllServicesType(id) {
+    return Api.get(`/type-services/${id}`,);
+  }
+
   async GetAllProductsId(id) {
     return Api.get(`/product/details/${id}`,);
   }

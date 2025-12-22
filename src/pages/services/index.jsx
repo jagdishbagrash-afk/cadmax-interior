@@ -62,7 +62,6 @@ export default function Index() {
             <Vendor />
             <Execution />
             <Slider2 />
-
             <div className="relative w-full h-full md:h-[450px]">
                 <img
                     src={servicesbottom?.src}
@@ -115,7 +114,6 @@ export default function Index() {
 
                 </div>
             </div>
-
         </Layout>
     );
 }

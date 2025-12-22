@@ -25,7 +25,6 @@ export default function Index() {
   useEffect(() => {
     fetchData();
   }, []);
-  console.log("data", data)
 
   return (
     <AdminLayout page={"Servcies Type"}>
@@ -81,19 +80,24 @@ export default function Index() {
                       <td className="px-6 py-4 text-center">
                         <img
                           src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
-                          className="w-[100px] h-[100px] object-cover text-center  rounded-md  shadow-sm"
+                          className="w-[200px] h-[200px] object-cover text-center rounded-md shadow-sm"
                           alt="SubCategory"
                         />
                       </td>
+
+                      {/* Title */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
                         {item.title}
                       </td>
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+
+                      {/* Content (Wrapped Text) */}
+                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 whitespace-normal break-words max-w-[800px]">
                         {item.content}
                       </td>
-                      {/* Name */}
+
+                      {/* Service Type */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
-                        {item.ServicesType.TypeServices} - {item.ServicesType.title}
+                        {item?.ServicesType?.TypeServices} - {item?.ServicesType?.title}
                       </td>
 
                       {/* Created Date */}
@@ -122,7 +126,7 @@ export default function Index() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={6}
                       className="px-6 py-8 text-center text-gray-500 text-[15px]"
                     >
                       No Categories Found
@@ -130,6 +134,7 @@ export default function Index() {
                   </tr>
                 )}
               </tbody>
+
             </table>
           </div>
         </div>
