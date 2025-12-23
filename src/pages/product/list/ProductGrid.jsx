@@ -4,33 +4,51 @@ import { useEffect, useState } from "react";
 
 const ProductGrid = ({selectedId}) => {
   const [loading, setLoading] = useState(false);
-  const [project, setProject] = useState([]);
-  
-    const fetchProjectData = async () => {
-      try {
-        if(loading)return;
-        setLoading(true);
-        const main = new Listing();
-        const response = await main.getAllProductSubCategroy(selectedId);
-        const data = response?.data?.data;
-        // console.log("data", data)
-        if (data) {
-          setProject(data)
-        }
-      } catch (error) {
-        console.log("Error:", error);
-      }finally{
-        setLoading(false);
+  const [products, setProducts] = useState([]);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [hasMore, setHasMore] = useState(true);
+
+
+  const fetchProjectData = async (pageNo = 1, reset = false) => {
+    try {
+      if (loading) return;
+      setLoading(true);
+      const main = new Listing();
+      const response = await main.getAllProductSubCategroy(
+        selectedId,
+        pageNo,
+        limit
+      );
+      const resData = response?.data?.data;
+      const newProducts = resData?.data || [];
+      const pagination = resData?.pagination;
+      if (reset) {
+        setProducts(newProducts);
+      } else {
+        setProducts((prev) => [...prev, ...newProducts]);
       }
-    };
-  
-    useEffect(() => {
-      if (selectedId) {
-        fetchProjectData(selectedId);
-      }
-    }, [selectedId]);
-  
-    // console.log("project", project);
+      setHasMore(pagination?.page < pagination?.totalPages);
+    } catch (error) {
+      console.log("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedId) return;
+    setProducts([]);
+    setPage(1);
+    setHasMore(true);
+    fetchProjectData(1, true);
+  }, [selectedId]);
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchProjectData(nextPage);
+  };
 
   return (
     <div className="w-full px-6 md:px-10 lg:px-14 py-8">
@@ -117,19 +135,22 @@ const ProductGrid = ({selectedId}) => {
 
         {/* PRODUCT GRID */}
         <div>
-
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            {project && project?.data && project?.data?.map((item) => (
+            {products.map((item) => (
               <ProductCard key={item._id || item.id} item={item} />
             ))}
           </div>
-
-          <div className="flex justify-center mt-10">
-            <button className="px-10 py-3 border text-sm font-bold hover:bg-black hover:text-white transition cursor-pointer">
-              LOAD MORE
-            </button>
-          </div>
-
+          {hasMore && (
+            <div className="flex justify-center mt-10">
+              <button
+                onClick={handleLoadMore}
+                disabled={loading}
+                className="px-10 py-3 border text-sm font-bold hover:bg-black hover:text-white transition disabled:opacity-50"
+              >
+                {loading ? "LOADING..." : "LOAD MORE"}
+              </button>
+            </div>
+          )}
         </div>
 
       </div>
