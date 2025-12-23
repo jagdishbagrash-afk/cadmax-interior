@@ -7,7 +7,7 @@ import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 
 export default function ServicesAdd({ fetchDatas, isEdit, item }) {
-  console.log("item" ,item)
+  console.log("item", item)
   const [datacategiroes, setDatacategiroes] = useState([]);
 
   const fecthServicesData = async () => {
@@ -34,7 +34,8 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
     file: null,
     preview: "",
     ServicesType: "",
-    content: ""
+    content: "",
+    concept: ""
   });
 
   useEffect(() => {
@@ -44,7 +45,8 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
         file: null,
         preview: item.Image || "",
         ServicesType: item.ServicesType?._id || "",
-        content:item.content || ""
+        content: item.content || "",
+        concept: item.concept || ""
       });
     }
   }, [isEdit, item]);
@@ -88,6 +90,7 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
       submitFormData.append("title", formData.title);
       submitFormData.append("content", formData.content);
       submitFormData.append("ServicesType", formData.ServicesType);
+      submitFormData.append("concept", formData.concept)
       if (formData.file) {
         submitFormData.append("Image", formData.file);
       }
@@ -106,6 +109,7 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
           file: null,
           preview: "",
           serviceType: "",
+          concept: ""
         });
 
         handleClose();
@@ -145,7 +149,7 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
         <Popup isOpen={isOpen} onClose={handleClose} size={"max-w-5xl"}>
           <div className="border-b px-4 py-4 flex justify-between items-center">
             <h2 className="text-xl font-semibold">
-              {isEdit ? "Edit" : "Add"} Services
+              {isEdit ? "Edit" : "Add"} Concept
             </h2>
 
             <button type="button" onClick={handleClose}>
@@ -173,6 +177,25 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
                     </option>
                   ))}
               </select>
+
+            </div>
+
+
+            <div className="mb-4">
+              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+                Concept
+              </label>
+              <select
+                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                value={formData.concept}
+                onChange={(e) => handleInputChange("concept", e.target.value)}
+              >
+                <option value="" disabled>Select Concept</option>
+                <option value="modern">Modern</option>
+                <option value="neo_classic">Neo Classic</option>
+                <option value="contemporary">Contemporary</option>
+              </select>
+
 
             </div>
 

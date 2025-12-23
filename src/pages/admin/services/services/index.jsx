@@ -27,14 +27,14 @@ export default function Index() {
   }, []);
 
   return (
-    <AdminLayout page={"Servcies Type"}>
+    <AdminLayout page={"Concept "}>
       <div className="px-4 py-2 lg:px-4 lg:py-2.5">
         <div className="bg-white rounded-[20px] mb-[10px] p-2">
           {/* Header */}
           <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
 
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-              Services Type List
+              Concept  List
             </h2>
             <ServicesAdd fetchDatas={fetchData} />
 
@@ -43,26 +43,28 @@ export default function Index() {
 
           {/* Table */}
           <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-4">
-            <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
+            <table className="min-w-full divide-y divide-gray-200 ">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Image
                   </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Name
                   </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
+                    Concept                   </th>
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Content
                   </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Services type                   </th>
 
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Created Date
                   </th>
 
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Action
                   </th>
                 </tr>
@@ -77,36 +79,38 @@ export default function Index() {
                         }`}
                     >
                       {/* Image */}
-                      <td className="px-6 py-4 text-center">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         <img
                           src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
-                          className="w-[200px] h-[200px] object-cover text-center rounded-md shadow-sm"
+                          className="w-full h-full object-cover text-center rounded-md shadow-sm"
                           alt="SubCategory"
                         />
                       </td>
 
                       {/* Title */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         {item.title}
                       </td>
-
+                      <td className="px-3 lg:px-4 py-2 uppercase lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
+                        {item.concept?.replaceAll("_" , " ")}
+                      </td>
                       {/* Content (Wrapped Text) */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 whitespace-normal break-words max-w-[800px]">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         {item.content}
                       </td>
 
                       {/* Service Type */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         {item?.ServicesType?.TypeServices} - {item?.ServicesType?.title}
                       </td>
 
                       {/* Created Date */}
-                      <td className="px-6 py-4 text-center text-[14px] text-gray-600">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         {moment(item.createdAt).format("DD-MM-YYYY")}
                       </td>
 
                       {/* Action */}
-                      <td className="px-6 py-4">
+                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         <div className="flex justify-center items-center gap-3">
                           <ServicesAdd
                             item={item}

@@ -24,7 +24,7 @@ export default function CommercialDesign({Commercialservices}) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 auto-rows-[300px] gap-6">
                     {Commercialservices && Commercialservices?.map((item, index) => (
                         <Link
-                        href={`/services/commercial/${item?.slug}`}
+                        href={`/concept/commercial/${item?.slug}`}
                             key={index}
                             className={`relative overflow-hidden  group ${item.title || ""}`}
                         >

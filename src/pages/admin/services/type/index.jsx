@@ -28,18 +28,16 @@ export default function Index() {
   console.log("data", data)
 
   return (
-    <AdminLayout page={"Servcies Type"}>
+    <AdminLayout page={"Concept Type"}>
       <div className="px-4 py-2 lg:px-4 lg:py-2.5">
         <div className="bg-white rounded-[20px] mb-[10px] p-2">
           {/* Header */}
           <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
 
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-              Services Type List
+              Concept Type List
             </h2>
             <TypeAdd fetchDatas={fetchData} />
-
-
           </div>
 
           {/* Table */}

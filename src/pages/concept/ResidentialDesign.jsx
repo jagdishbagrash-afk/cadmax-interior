@@ -4,7 +4,6 @@ import Link from "next/link";
 
 
 export default function ResidentialDesign({Residentialservices}) {
-    console.log("Residentialservices" ,Residentialservices)
     return (
         <div
             className="bg-[#FFFFFF] py-4 md:py-8 ">
@@ -13,7 +12,7 @@ export default function ResidentialDesign({Residentialservices}) {
                 <div className="max-w-4xl mx-auto mb-10 md:mb-16 flex flex-col items-center justify-between">
 
                     <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
- tracking-[-0.02em] text-center uppercase Creato  ">
+                     tracking-[-0.02em] text-center uppercase Creato  ">
                         Residential Design Tailored for Comfort, Coherence, and Daily Living
                     </h2>
                     <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
@@ -27,7 +26,7 @@ export default function ResidentialDesign({Residentialservices}) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Residentialservices?.map((item, index) => (
                         <Link
-                        href={`/services/residential/${item.slug}`}
+                        href={`/concept/residential/${item.slug}`}
                             key={index}
                             className="relative overflow-hidden group"
                         >
