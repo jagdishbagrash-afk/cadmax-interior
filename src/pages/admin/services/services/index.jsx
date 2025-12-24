@@ -6,6 +6,7 @@ import Listing from "@/pages/api/Listing";
 import dataimage from "../../../../Assets/Images/c1.jpg"
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
+import Link from "next/link";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -36,7 +37,19 @@ export default function Index() {
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
               Concept  List
             </h2>
-            <ServicesAdd fetchDatas={fetchData} />
+
+            <div className="flex  flex-wrap gap-3 ">
+              <Link
+                href="/admin/servcies/type"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                Concept Category  List
+              </Link>
+              <ServicesAdd fetchDatas={fetchData} />
+
+            </div>
 
 
           </div>
@@ -59,10 +72,6 @@ export default function Index() {
                   </th>
                   <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Services type                   </th>
-
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
-                    Created Date
-                  </th>
 
                   <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
                     Action
@@ -92,7 +101,7 @@ export default function Index() {
                         {item.title}
                       </td>
                       <td className="px-3 lg:px-4 py-2 uppercase lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {item.concept?.replaceAll("_" , " ")}
+                        {item.concept?.replaceAll("_", " ")}
                       </td>
                       {/* Content (Wrapped Text) */}
                       <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
@@ -104,10 +113,6 @@ export default function Index() {
                         {item?.ServicesType?.TypeServices} - {item?.ServicesType?.title}
                       </td>
 
-                      {/* Created Date */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {moment(item.createdAt).format("DD-MM-YYYY")}
-                      </td>
 
                       {/* Action */}
                       <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
