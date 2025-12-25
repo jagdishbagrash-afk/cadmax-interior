@@ -37,8 +37,7 @@ export default function Index() {
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
               Concept  List
             </h2>
-
-            <div className="flex  flex-wrap gap-3 ">
+            <div className="flex flex-wrap gap-3 ">
               <Link
                 href="/admin/servcies/type"
                 className="cursor-pointer m-auto flex items-center justify-center
