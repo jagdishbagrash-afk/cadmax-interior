@@ -128,7 +128,7 @@ function SideBar() {
                                      ${pathname === "/admin/services/services" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
                             <AiFillProduct size={20} />
-                            Services  
+                            Concept  
                         </Link>
                         <Link
                             href="/admin/vendor/vendor"

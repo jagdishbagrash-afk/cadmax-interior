@@ -128,7 +128,7 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
         <Popup isOpen={isOpen} onClose={handleClose} size={"max-w-2xl"}>
           <div className="border-b px-4 py-4 flex justify-between items-center">
             <h2 className="text-xl font-semibold">
-              {isEdit ? "Edit" : "Add"} Services Type
+              {isEdit ? "Edit" : "Add"} Concept Type
             </h2>
 
             <button type="button" onClick={handleClose}>

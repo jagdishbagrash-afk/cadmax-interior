@@ -67,7 +67,7 @@ export default function Header() {
 
                <li>
             <Link
-              href="/services"
+              href="/concept"
               className="text-sm font-medium text-black hover:text-gray-500 transition"
             >
               CONCEPT
@@ -246,7 +246,7 @@ export default function Header() {
 
 
             <li>
-              <Link href="/servcies" className="text-black text-sm font-medium">
+              <Link href="/concept" className="text-black text-sm font-medium">
                 CONCEPT
               </Link>
             </li>

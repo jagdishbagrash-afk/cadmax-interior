@@ -53,9 +53,9 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     return main.vendordelete(Id);
   };
 
-  const handleServicesType = () => {
+  const handleServices = () => {
     const main = new Listing();
-    return main.ServicesTypedelete(Id);
+    return main.Servicesdelete(Id);
   };
   /* -------------------- MAIN HANDLER -------------------- */
 
@@ -76,6 +76,8 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       else if (step === 7) response = await handleBanner();
       else if (step === 8) response = await handleVendor();
       else if (step === 9) response = await handleServicesType();
+      else if (step === 10) response = await handleServices();
+
 
       else throw new Error("Invalid Step");
 

@@ -7,6 +7,25 @@ import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 
 export default function ServicesAdd({ fetchDatas, isEdit, item }) {
+  console.log("item", item)
+  const [datacategiroes, setDatacategiroes] = useState([]);
+
+  const fecthServicesData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.servciestypeList();
+      if (response.data?.data) {
+        setDatacategiroes(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    fecthServicesData();
+  }, []);
+
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
@@ -14,7 +33,9 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
     title: "",
     file: null,
     preview: "",
-    TypeServices: ""
+    ServicesType: "",
+    content: "",
+    concept: ""
   });
 
   useEffect(() => {
@@ -23,11 +44,12 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
         title: item.title || "",
         file: null,
         preview: item.Image || "",
-        TypeServices: item.TypeServices || "",
+        ServicesType: item.ServicesType?._id || "",
+        content: item.content || "",
+        concept: item.concept || ""
       });
     }
   }, [isEdit, item]);
-
   const handleOpen = () => setIsOpen(true);
   const handleClose = () => setIsOpen(false);
 
@@ -65,20 +87,18 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
     try {
       const main = new Listing();
       const submitFormData = new FormData();
-
       submitFormData.append("title", formData.title);
-      submitFormData.append("TypeServices", formData.TypeServices);
-
+      submitFormData.append("content", formData.content);
+      submitFormData.append("ServicesType", formData.ServicesType);
+      submitFormData.append("concept", formData.concept)
       if (formData.file) {
         submitFormData.append("Image", formData.file);
       }
-
       let response;
-
       if (isEdit) {
-        response = await main.ServicesTypeUpdate(item._id, submitFormData);
+        response = await main.ServicesUpdate(item._id, submitFormData);
       } else {
-        response = await main.servicestype(submitFormData);
+        response = await main.services(submitFormData);
       }
 
       if (response?.data?.status) {
@@ -89,6 +109,7 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
           file: null,
           preview: "",
           serviceType: "",
+          concept: ""
         });
 
         handleClose();
@@ -125,10 +146,10 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
 
       {/* Popup */}
       {isOpen && (
-        <Popup isOpen={isOpen} onClose={handleClose} size={"max-w-2xl"}>
+        <Popup isOpen={isOpen} onClose={handleClose} size={"max-w-5xl"}>
           <div className="border-b px-4 py-4 flex justify-between items-center">
             <h2 className="text-xl font-semibold">
-              {isEdit ? "Edit" : "Add"} Services Type
+              {isEdit ? "Edit" : "Add"} Concept
             </h2>
 
             <button type="button" onClick={handleClose}>
@@ -143,18 +164,39 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
               <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
                 Service Type
               </label>
-
               <select
                 className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                value={formData.TypeServices}
-                onChange={(e) =>
-                  handleInputChange("TypeServices", e.target.value)
-                }
+                value={formData.ServicesType}
+                onChange={(e) => handleInputChange("ServicesType", e.target.value)}
               >
                 <option value="">Select Type</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Residential">Residential</option>
+                {datacategiroes?.length > 0 &&
+                  datacategiroes.map((item) => (
+                    <option key={item._id} value={item._id}>
+                      {item.TypeServices} - {item.title}
+                    </option>
+                  ))}
               </select>
+
+            </div>
+
+
+            <div className="mb-4">
+              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+                Concept
+              </label>
+              <select
+                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                value={formData.concept}
+                onChange={(e) => handleInputChange("concept", e.target.value)}
+              >
+                <option value="" disabled>Select Concept</option>
+                <option value="modern">Modern</option>
+                <option value="neo_classic">Neo Classic</option>
+                <option value="contemporary">Contemporary</option>
+              </select>
+
+
             </div>
 
             {/* Service Name */}
@@ -171,6 +213,19 @@ export default function ServicesAdd({ fetchDatas, isEdit, item }) {
               />
             </div>
 
+            <div className="mb-4">
+              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
+                Service Content
+              </label>
+              <textarea
+                type="text"
+                rows={5}
+                className="w-full px-4 lg:px-5 py-2 border border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                placeholder="Enter service content"
+                value={formData.content}
+                onChange={(e) => handleInputChange("content", e.target.value)}
+              />
+            </div>
 
 
             {/* Image Upload */}
