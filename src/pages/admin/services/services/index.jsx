@@ -39,7 +39,7 @@ export default function Index() {
             </h2>
             <div className="flex flex-wrap gap-3 ">
               <Link
-                href="/admin/servcies/type"
+                href="/admin/services/type"
                 className="cursor-pointer m-auto flex items-center justify-center
                                   w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
                                   bg-white hover:bg-gray-50 transition-all duration-200"
