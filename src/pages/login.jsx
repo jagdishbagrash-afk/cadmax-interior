@@ -36,7 +36,8 @@ export default function Login() {
         toast.error(res?.data?.message || "Failed to send OTP");
       }
     } catch (err) {
-      toast.error("Server error");
+      console.log("err" ,err)
+      toast.error(err.response.data.message);
     }
     setLoading(false);
   };
@@ -70,7 +71,7 @@ export default function Login() {
   };
 
   return (
-         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white px-4 md:px-6 lg:px-16 pt-5 pb-10 lg:pb-20  rounded-[20px] md:rounded-[20px] lg:rounded-[40px] shadow lg:shadow-lg w-full max-w-[976px] login_custom">
 
         {/* ✅ Logo */}
@@ -87,8 +88,8 @@ export default function Login() {
             />
           </Link>
         </div>
-  <h2 className="text-center text-[#000000] text-2xl lg:text-4xl font-bold mb-6 tracking-[-0.04em] mb-6 lg:mb-8">
-         Login with OTP
+        <h2 className="text-center text-[#000000] text-2xl lg:text-4xl font-bold mb-6 tracking-[-0.04em] mb-6 lg:mb-8">
+          Login with OTP
         </h2>
         {/* ✅ Title */}
         <p className="text-center text-sm text-gray-500 mb-6">
@@ -110,10 +111,16 @@ export default function Login() {
                   name="phone"
                   maxLength={10}
                   value={data.phone}
-                  onChange={handleChange}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ""); // only digits
+                    handleChange({ target: { name: "phone", value } });
+                  }}
                   placeholder="Enter mobile number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
                   className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
                 />
+
               </div>
             )}
 

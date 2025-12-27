@@ -188,7 +188,7 @@ class Listing extends Component {
   }
 
   async deleteBanner(data) {
-    return Api.post(`/banner/delete/${data}`);
+    return Api.post(`/admin/banner/delete/${data}`);
   }
 
   async getAllProductSubCategroy(id) {
@@ -250,7 +250,7 @@ class Listing extends Component {
     return Api.post("/contact-add", data)
   }
 
-  async AddVendorcate(data) {
+  async Success(){
     return Api.post("/contact-add", data)
   }
   render() {

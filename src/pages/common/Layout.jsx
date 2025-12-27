@@ -6,13 +6,13 @@ import Listing from "../api/Listing";
 
 export default function Layout({ children }) {
     const { setUser } = useRole();
-    
     const fetchData = async (signal) => {
         try {
           const main = new Listing();
           const response = await main.profileVerify(signal);
+          console.log(response)
           if (response.data) {
-            setUser(response.data.data.user);
+            setUser(response.data.data);
           }
         } catch (error) {
           // console.log("error", error);

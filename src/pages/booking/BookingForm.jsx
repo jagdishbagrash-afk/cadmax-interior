@@ -1,9 +1,14 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Listing from "../api/Listing";
 import toast from "react-hot-toast";
+import { useRole } from "@/context/RoleContext";
 
 function BookingForm() {
   const [loading, setLoading] = useState(false)
+  const { user } = useRole();
+  console.log("user", user)
+
+
   const [data, setData] = useState({
     email: "",
     project_type: "",
@@ -17,46 +22,55 @@ function BookingForm() {
     city: "",
     phone_mode: "",
     timeLine: "",
-    rate: 2500 || "",
-    subtotal: 5500 || "",
-    taxes: 8500 || "",
-    total_amount: 8700 || ""
+    rate: 0 || "",
+    subtotal: 0 || "",
+    taxes: 0 || "",
+    total_amount: 0 || ""
   });
 
- const handleChange = (e) => {
-  const { name, value } = e.target;
+  useEffect(() => {
+    setData({
+      email: user?.email,
+      name: user?.name,
+      phone_number: user?.phone
+    })
+  }, [
+    user
+  ])
+  const handleChange = (e) => {
+    const { name, value } = e.target;
 
-  let updated = {
-    ...data,
-    [name]: value,
+    let updated = {
+      ...data,
+      [name]: value,
+    };
+
+    // ---- SET RATE BASED ON BUDGET ----
+    let rate = data.rate;
+
+    if (name === "budget_range") {
+      if (value === "low") rate = 1500;
+      if (value === "medium") rate = 2500;
+      if (value === "HIGH") rate = 3500;
+      updated.rate = rate;
+    }
+
+    // ---- CALCULATE PRICE ----
+    const area = name === "area" ? Number(value) : Number(updated.area);
+    const finalRate = name === "budget_range" ? rate : Number(updated.rate);
+
+    if (area > 0 && finalRate > 0) {
+      const subtotal = area * finalRate;
+      const taxes = Math.round(subtotal * 0.18);
+      const total = subtotal + taxes;
+
+      updated.subtotal = subtotal;
+      updated.taxes = taxes;
+      updated.total_amount = total;
+    }
+
+    setData(updated);
   };
-
-  // ---- SET RATE BASED ON BUDGET ----
-  let rate = data.rate;
-
-  if (name === "budget_range") {
-    if (value === "low") rate = 1500;
-    if (value === "medium") rate = 2500;
-    if (value === "HIGH") rate = 3500;
-    updated.rate = rate;
-  }
-
-  // ---- CALCULATE PRICE ----
-  const area = name === "area" ? Number(value) : Number(updated.area);
-  const finalRate = name === "budget_range" ? rate : Number(updated.rate);
-
-  if (area > 0 && finalRate > 0) {
-    const subtotal = area * finalRate;
-    const taxes = Math.round(subtotal * 0.18);
-    const total = subtotal + taxes;
-
-    updated.subtotal = subtotal;
-    updated.taxes = taxes;
-    updated.total_amount = total;
-  }
-
-  setData(updated);
-};
 
   console.log("data", data)
   const handleSubmit = async (e) => {
@@ -179,12 +193,12 @@ function BookingForm() {
                 <label className="block Creato text-[14px] font-medium leading-[140%] tracking-[0.08em] uppercase text-[#4D5466] mb-1">
                   Estimated Budget Range
                 </label>
-                 <select
+                <select
                   name="budget_range"
                   required
                   onChange={handleChange}
                   value={data?.budget_range}
-                  placeholder ="Estimated Budget Range"
+                  placeholder="Estimated Budget Range"
                   className="w-full h-11 lg:h-[56px] font-semibold block bg-white text-[#46494D] border border-gray-300 rounded-lg px-3 lg:px-5 leading-tight focus:outline-none"
                 >
                   <option value="0">Select Budget Range </option>
@@ -192,7 +206,7 @@ function BookingForm() {
                   <option value="medium">medium </option>
                   <option value="HIGH">HIGH </option>
                 </select>
-               
+
               </div>
             </div>
 
@@ -328,7 +342,7 @@ function BookingForm() {
                     Rate (₹ / sq. ft.)
                   </span>
                   <span className="Creato text-[16px] font-medium text-[#171717]">
-                     ₹{data.rate || 0}
+                    ₹{data.rate || 0}
                   </span>
                 </div>
 
@@ -346,7 +360,7 @@ function BookingForm() {
                     Taxes & Fees
                   </span>
                   <span className="Creato text-[16px] font-medium text-[#171717]">
-                     ₹{data.taxes?.toLocaleString() || 0}
+                    ₹{data.taxes?.toLocaleString() || 0}
 
                   </span>
                 </div>

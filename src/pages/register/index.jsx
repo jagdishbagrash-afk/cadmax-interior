@@ -45,7 +45,7 @@ export default function Register() {
         toast.error(res?.data?.message || "OTP send failed");
       }
     } catch (err) {
-      toast.error("Server error");
+      toast.error(err?.res?.data?.message || "OTP send failed");
     }
     setLoading(false);
   };
@@ -70,7 +70,7 @@ export default function Register() {
       } else {
         toast.error(res?.data?.message || "Invalid OTP");
       }
-    } catch {
+    } catch  {
       toast.error("OTP verification failed");
     }
     setLoading(false);
@@ -97,8 +97,8 @@ export default function Register() {
       } else {
         toast.error(res?.data?.message || "Registration failed");
       }
-    } catch {
-      toast.error("Server error");
+    } catch(err) {
+       toast.error(err?.res?.data?.message || "OTP send failed");
     }
     setLoading(false);
   };
@@ -126,15 +126,20 @@ export default function Register() {
           {/* ✅ STEP 1: PHONE */}
           {step === 1 && (
             <div className="max-w-md mx-auto">
-              <input
-                name="phone"
-                maxLength="10"
-                placeholder="Phone Number"
-                type="tel"
-                value={data.phone}
-                onChange={handleChange}
-                className="w-full h-[50px] px-4 border rounded-lg bg-gray-100 focus:ring-1 focus:ring-black"
-              />
+             <input
+                  type="tel"
+                  name="phone"
+                  maxLength={10}
+                  value={data.phone}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, ""); // only digits
+                    handleChange({ target: { name: "phone", value } });
+                  }}
+                  placeholder="Enter mobile number"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+                />
               <button
                 onClick={sendOTP}
                 disabled={loading}

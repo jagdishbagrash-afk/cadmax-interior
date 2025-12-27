@@ -47,7 +47,7 @@ export default function Vendor() {
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {data && data?.map((p, idx) => (
-                        <Link href={`/vendor/${p._id}`} key={p.id ?? idx} className="overflow-hidden cursor-pointer">
+                        <Link href={`/vendor/${p.slug}`} key={p.id ?? idx} className="overflow-hidden cursor-pointer">
                             {/* IMAGE + OFFER */}
                             <div className="relative w-full h-[290px] md:h-[340px] overflow-hidden ">
                                 <img

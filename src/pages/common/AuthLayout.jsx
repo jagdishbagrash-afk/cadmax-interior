@@ -1,11 +1,4 @@
 import { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import NotifcationPopup from "./NotifcationPopup";
-import toast from "react-hot-toast";
-import Link from "next/link";
-import { MdLogout } from "react-icons/md";
-import { IoSettingsOutline } from "react-icons/io5";
-import Listing from "@/pages/api/Listing";
 import { FaRegUser } from "react-icons/fa6";
 // import { useRole } from "@/context/RoleContext";
 
