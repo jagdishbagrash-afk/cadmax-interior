@@ -8,7 +8,11 @@ const ProductGrid = ({selectedId}) => {
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
-
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [priceRange, setPriceRange] = useState({
+    low: 100,
+    high: 100000,
+  });
 
   const fetchProjectData = async (pageNo = 1, reset = false) => {
     try {
@@ -18,7 +22,12 @@ const ProductGrid = ({selectedId}) => {
       const response = await main.getAllProductSubCategroy(
         selectedId,
         pageNo,
-        limit
+        limit,
+        {
+          color: selectedColors.join(","),
+          lowPrice: priceRange.low,
+          highPrice: priceRange.high,
+        }
       );
       const resData = response?.data?.data;
       const newProducts = resData?.data || [];
@@ -50,6 +59,40 @@ const ProductGrid = ({selectedId}) => {
     fetchProjectData(nextPage);
   };
 
+  const handleColorChange = (color) => {
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+
+    setSelectedColors((prev) =>
+      prev.includes(color)
+        ? prev.filter((c) => c !== color)
+        : [...prev, color]
+    );
+  };
+
+  const handlePriceChange = (type, value) => {
+    value = Number(value);
+    setPage(1);
+    setProducts([]);
+    setHasMore(true);
+    setPriceRange((prev) => {
+      if (type === "low") {
+        return {
+          ...prev,
+          low: Math.min(value, prev.high - 100),
+        };
+      }
+      if (type === "high") {
+        return {
+          ...prev,
+          high: Math.max(value, prev.low + 100),
+        };
+      }
+      return prev;
+    });
+  };
+
   return (
     <div className="w-full px-6 md:px-10 lg:px-14 py-8">
       <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
@@ -60,13 +103,13 @@ const ProductGrid = ({selectedId}) => {
             <h3 className="text-sm font-bold uppercase tracking-wide text-gray-800">
               Filters
             </h3>
-            <button className="text-xs text-gray-500 hover:text-black transition">
+            {/* <button className="text-xs text-gray-500 hover:text-black transition">
               Hide
-            </button>
+            </button> */}
           </div>
 
           {/* AVAILABILITY */}
-          <div className="border-t pt-4 space-y-2">
+          {/* <div className="border-t pt-4 space-y-2">
             <h4 className="text-sm font-semibold text-gray-700">
               Availability
             </h4>
@@ -80,47 +123,100 @@ const ProductGrid = ({selectedId}) => {
               <input type="checkbox" className="accent-black" />
               <span className="group-hover:text-black transition">Made To Order</span>
             </label>
-          </div>
+          </div> */}
 
           {/* COLOR */}
           <div className="border-t pt-4 space-y-3">
             <h4 className="text-sm font-semibold text-gray-700">Color</h4>
 
             <div className="grid grid-cols-2 gap-2 text-sm">
-
               {[
-                { name: "Black Antique", color: "bg-black" },
-                { name: "Dark Blue", color: "bg-slate-700" },
-                { name: "Dark Green", color: "bg-green-700" },
-                { name: "Distressed Grey", color: "bg-stone-400" },
-                { name: "Natural Acacia", color: "bg-neutral-300" },
+                { name: "red", hex: "#ef4444" },
+                { name: "blue", hex: "#3b82f6" },
+                { name: "green", hex: "#22c55e" },
+                { name: "yellow", hex: "#eab308" },
+                { name: "pink", hex: "#ec4899" },
+                { name: "purple", hex: "#a855f7" },
+                { name: "black", hex: "#000000" },
+                { name: "white", hex: "#ffffff" },
+                { name: "gray", hex: "#6b7280" },
+                { name: "orange", hex: "#f97316" },
+                { name: "teal", hex: "#14b8a6" },
+                { name: "brown", hex: "#92400e" },
               ].map((c, i) => (
                 <label
                   key={i}
-                  className="flex items-center gap-2 cursor-pointer group hover:text-black transition"
+                  className="flex items-center gap-2 cursor-pointer"
                 >
-                  <span className={`w-4 h-4 rounded-full border ${c.color}`}></span>
+                  <input
+                    type="checkbox"
+                    checked={selectedColors.includes(c.name)}
+                    onChange={() => handleColorChange(c.name)}
+                    className="accent-black"
+                  />
+                  <span
+                    className="w-4 h-4 rounded-full border"
+                    style={{ backgroundColor: c.hex }}
+                  />
                   {c.name}
                 </label>
               ))}
-
             </div>
           </div>
 
           {/* PRICE */}
-          <div className="border-t pt-4 space-y-3">
+          <div className="border-t pt-4 space-y-4">
             <h4 className="text-sm font-semibold text-gray-700">Price</h4>
 
-            <input
-              type="range"
-              min="1000"
-              max="100000"
-              className="w-full accent-black"
-            />
+            <div className="relative w-full h-6">
+              {/* LOW THUMB */}
+              <input
+                type="range"
+                min={100}
+                max={100000}
+                value={priceRange.low}
+                onChange={(e) => handlePriceChange("low", e.target.value)}
+                className="absolute w-full pointer-events-none appearance-none bg-transparent
+                          [&::-webkit-slider-thumb]:pointer-events-auto
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:h-4
+                          [&::-webkit-slider-thumb]:w-4
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:bg-black"
+              />
+
+              {/* HIGH THUMB */}
+              <input
+                type="range"
+                min={100}
+                max={100000}
+                value={priceRange.high}
+                onChange={(e) => handlePriceChange("high", e.target.value)}
+                className="absolute w-full pointer-events-none appearance-none bg-transparent
+                          [&::-webkit-slider-thumb]:pointer-events-auto
+                          [&::-webkit-slider-thumb]:appearance-none
+                          [&::-webkit-slider-thumb]:h-4
+                          [&::-webkit-slider-thumb]:w-4
+                          [&::-webkit-slider-thumb]:rounded-full
+                          [&::-webkit-slider-thumb]:bg-black"
+              />
+
+              {/* TRACK */}
+              <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded"></div>
+
+              {/* ACTIVE RANGE */}
+              <div
+                className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded"
+                style={{
+                  left: `${((priceRange.low - 100) / (100000 - 100)) * 100}%`,
+                  width: `${((priceRange.high - priceRange.low) / (100000 - 100)) * 100}%`,
+                }}
+              />
+            </div>
 
             <div className="flex justify-between text-xs text-gray-500">
-              <span>₹1,000</span>
-              <span>₹1,00,000</span>
+              <span>₹{priceRange.low.toLocaleString()}</span>
+              <span>₹{priceRange.high.toLocaleString()}</span>
             </div>
           </div>
 
@@ -128,15 +224,12 @@ const ProductGrid = ({selectedId}) => {
           <button className="w-full border mt-2 py-2 text-sm uppercase tracking-wider hover:bg-black hover:text-white transition">
             Clear filters
           </button>
-
         </div>
-
-
 
         {/* PRODUCT GRID */}
         <div>
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((item) => (
+            {products && products?.map((item) => (
               <ProductCard key={item._id || item.id} item={item} />
             ))}
           </div>
