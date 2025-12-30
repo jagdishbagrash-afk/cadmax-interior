@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import ServicesAdd from "./ServicesAdd";
 import Listing from "@/pages/api/Listing";
 import dataimage from "../../../../Assets/Images/c1.jpg"
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
 import Link from "next/link";
+import { MdEdit } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -46,7 +46,16 @@ export default function Index() {
               >
                 Concept Category  List
               </Link>
-              <ServicesAdd fetchDatas={fetchData} />
+
+              <Link
+                href="/admin/services/services/add"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                Servcies Add
+              </Link>
+              {/* <ServicesAdd fetchDatas={fetchData} /> */}
 
             </div>
 
@@ -116,11 +125,20 @@ export default function Index() {
                       {/* Action */}
                       <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
                         <div className="flex justify-center items-center gap-3">
-                          <ServicesAdd
+                          {/* <ServicesAdd
                             item={item}
                             isEdit={true}
                             fetchDatas={fetchData}
-                          />
+                          /> */}
+
+                          <Link
+                href={`/admin/services/services/add?id=${item?.slug}`}
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[50px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                <MdEdit/>
+              </Link>
                           <BlockUnblock
                             Id={item._id}
                             fetchData={fetchData}

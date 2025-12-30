@@ -29,14 +29,14 @@ class Listing extends Component {
 
 
   async services(data) {
-    return Api.post("/services/add", data)
+    return ApiallowFile.post("/services/add", data)
   }
   async servciestypeList() {
     return Api.get("/services/type/list",)
   }
 
    async ServicesUpdate(id, formData) {
-    return Api.post(`/services/edit/${id}`, formData);
+    return ApiallowFile.post(`/services/edit/${id}`, formData);
   }
    async ServciesList() {
     return Api.get("/services/list",)
@@ -44,6 +44,10 @@ class Listing extends Component {
 
    async ServciesType() {
     return Api.get("/services/type",)
+  }
+
+   async ServciesDetails(id) {
+    return Api.get(`/services/details/${id}`,)
   }
    async Servicesdelete(id) {
     return Api.get(`/services/delete/${id}`)
