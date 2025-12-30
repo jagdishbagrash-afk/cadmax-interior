@@ -82,7 +82,7 @@ const ImageUploader = ({ images, setImages, project }) => {
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                {images.map((image, index) => (
+                {images?.map((image, index) => (
                     <div
                         key={index}
                         draggable
