@@ -174,7 +174,7 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3 ">
                         {p.content}
                       </p>
                     </div>
@@ -204,7 +204,7 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3    ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>
@@ -235,7 +235,7 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3    ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>

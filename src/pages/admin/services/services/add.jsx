@@ -174,7 +174,7 @@ const[project ,setProject] = useState([]);
                 <div className="bg-white border border-blue-100 rounded-xl shadow-sm">
                     <div className="px-6 py-4 border-b">
                         <h1 className="text-2xl font-bold text-blue-600">
-                            {isEdit ? "Edit Concept" : "Add New Concept"}
+                            {isEdit ? "Edit New  Concept" : "Add New Concept"}
                         </h1>
                         <p className="text-gray-500 text-sm">
                             Fill in the details below to {isEdit ? "update" : "create"} your Concept.
@@ -331,7 +331,7 @@ const[project ,setProject] = useState([]);
                             <label className="text-sm font-semibold text-gray-700">
                                 Project Images
                             </label>
-                            <ImageUploader images={images} setImages={setImages} project={project} />
+                            <ImageUploader images={images} setImages={setImages} project={project} fetchData={fetchData} />
                         </div>
 
                         {/* Footer */}

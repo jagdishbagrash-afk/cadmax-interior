@@ -1,15 +1,19 @@
 "use client";
 
 import Banner from "@/components/Banner";
+import { useRole } from "@/context/RoleContext";
 import Listing from "@/pages/api/Listing";
 import Button from "@/pages/common/Button";
 import Layout from "@/pages/common/Layout";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 
 export default function DesignLayout() {
     const router = useRouter();
     const id = router?.query?.slug;
+    const { user } = useRole();
+    console.log("user", user)
 
     const [project, setProject] = useState([]);
 
@@ -33,6 +37,58 @@ export default function DesignLayout() {
     }, [id]);
 
     console.log("project", project)
+
+
+    const [loading, setLoading] = useState(false)
+
+    const [data, setData] = useState({
+        TypeServices: "",
+        User: "",
+        Services: "",
+        concept: "",
+    });
+
+    useEffect(() => {
+        setData({
+            User: user?._id || "692dcfbd4816433146e11abd" || "",
+            TypeServices: project.ServicesType?._id || "",
+            Services: project._id || "",
+            concept: project?.concept || ""
+        })
+    }, [
+        project
+    ])
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        try {
+            const main = new Listing();
+            const res = await main.AddServicesContact({
+                TypeServices: data.TypeServices,
+                Services: data.Services,
+                concept: data.concept,
+                User: data.User,
+            });
+
+            if (res?.data?.status) {
+                toast.success(res?.data?.message);
+            } else {
+                toast.error(res?.data?.message || "Invalid OTP");
+            }
+            setLoading(false);
+            setData({
+                User: "",
+                concept: "",
+                TypeServices: "",
+                Services: ""
+            })
+        } catch (error) {
+            toast.error("Verification failed");
+            setLoading(false);
+
+        }
+    };
+
     return (
         <Layout>
             <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
@@ -119,10 +175,26 @@ export default function DesignLayout() {
                         </div>
 
                         <div className="flex flex-wrap justify-center mt-3 sm:mt-5">
-                            <Button
-                                title={"craft for you"}
-                                classes="bg-white text-[#171717] border-2 border-[#171717] shadow-md"
-                            />
+                            <button
+                                disabled={loading}
+                                onClick={handleSubmit}
+                                className={`
+        px-4 
+        py-[6px]
+        font-[700] 
+        cursor-pointer 
+        Creato 
+        uppercase 
+        md:px-[30px] 
+        md:py-[10px] 
+        text-[13px]
+       bg-white text-[#171717] border-2 border-[#171717] shadow-md
+      `}
+                            >
+                                {loading ? "Loading.." : " craft for you"}
+
+                            </button>
+
                         </div>
                     </div>
                 </div>

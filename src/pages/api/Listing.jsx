@@ -138,6 +138,9 @@ class Listing extends Component {
     return Api.get(`/product/list`, data);
   }
 
+  async deleteimages(id,image){
+    return  Api.get(`/services/images/delete/${id}/${image}`)
+  }
   async adminGetOrders(data) {
     return Api.get(`/order/getAll`, data);
   }
@@ -252,6 +255,14 @@ class Listing extends Component {
   }
   async AddContact(data) {
     return Api.post("/contact-add", data)
+  }
+
+   async AddServicesContact(data) {
+    return Api.post("/services/contact-add", data)
+  }
+
+  async GetServicesContact(data) {
+    return Api.get(`/services/contact-get`, data);
   }
 
   async Success(){

@@ -3,7 +3,7 @@ import { MdAdd, MdDelete } from "react-icons/md";
 import toast from "react-hot-toast";
 import Listing from "@/pages/api/Listing";
 
-const ImageUploader = ({ images, setImages, project }) => {
+const ImageUploader = ({ images, setImages, project  ,fetchData}) => {
     const [dragIndex, setDragIndex] = useState(null);
 
     const handleFileChange = (e) => {
@@ -38,19 +38,17 @@ const ImageUploader = ({ images, setImages, project }) => {
 
     const [Loading, setLoading] = useState(false);
 
-        const id = project?._id;
+    const id = project?._id;
 
     const HandleDeleteImages = async (image) => {
         const Ids = project?._id;
         try {
             setLoading(true);
-
             const main = new Listing();
             const response = await main.deleteimages(Ids, encodeURIComponent(image));
-
             if (response) {
                 toast.success(response.data.message);
-                fetchInstructorData();
+                fetchData();
             }
         } catch (error) {
             console.log("Delete Error:", error);
@@ -147,8 +145,8 @@ const ImageUploader = ({ images, setImages, project }) => {
                                 {id && (
                                     <button
                                         type="button"
-                                        // onClick={() => HandleDeleteImages(imageUrl)}
-                                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition"
+                                        onClick={() => HandleDeleteImages(imageUrl)}
+                                        className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition cursor-pointer"
                                     >
                                         {Loading ? "Loading..." : <MdDelete size={20} />}
 
