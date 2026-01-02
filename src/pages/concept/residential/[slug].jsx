@@ -8,6 +8,7 @@ import "swiper/css";
 import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
+import Link from "next/link";
 
 export default function Index() {
   const router = useRouter();
@@ -161,7 +162,7 @@ export default function Index() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {classic?.map((p, idx) => (
-                  <article key={p.id ?? idx} className="overflow-hidden">
+                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
@@ -175,11 +176,11 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             </>
@@ -191,7 +192,7 @@ export default function Index() {
                        tracking-[-0.02em] text-left uppercase Creato  mb-5 mt-5 ">MODERN</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {modern?.map((p, idx) => (
-                  <article key={p.id ?? idx} className="overflow-hidden">
+                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
@@ -205,11 +206,11 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3    ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             </>
@@ -222,7 +223,7 @@ export default function Index() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {contemporary?.map((p, idx) => (
-                  <article key={p.id ?? idx} className="overflow-hidden">
+                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
@@ -236,11 +237,11 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3    ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3 ">
                         {p.content}
                       </p>
                     </div>
-                  </article>
+                  </Link>
                 ))}
               </div>
             </>

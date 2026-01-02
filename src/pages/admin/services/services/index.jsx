@@ -1,12 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import moment from "moment";
-import ServicesAdd from "./ServicesAdd";
 import Listing from "@/pages/api/Listing";
 import dataimage from "../../../../Assets/Images/c1.jpg"
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
 import Link from "next/link";
+import { MdEdit } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -39,6 +39,14 @@ export default function Index() {
             </h2>
             <div className="flex flex-wrap gap-3 ">
               <Link
+                href="/admin/services/contact"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                 Contact List
+              </Link>
+              <Link
                 href="/admin/services/type"
                 className="cursor-pointer m-auto flex items-center justify-center
                                   w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
@@ -46,86 +54,96 @@ export default function Index() {
               >
                 Concept Category  List
               </Link>
-              <ServicesAdd fetchDatas={fetchData} />
+
+              <Link
+                href="/admin/services/services/add"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                Servcies Add
+              </Link>
+              {/* <ServicesAdd fetchDatas={fetchData} /> */}
 
             </div>
 
 
           </div>
 
-          {/* Table */}
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-4">
-            <table className="min-w-full divide-y divide-gray-200 ">
-              <thead className="bg-gray-50">
+          <div className="mt-5 overflow-x-auto rounded-xl border border-gray-200 shadow-md">
+            <table className="min-w-[900px] w-full bg-white">
+              <thead className="bg-gray-100">
                 <tr>
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
-                    Image
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">
+                    Image & Name
                   </th>
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
-                    Name
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">
+                    Concept & Services
                   </th>
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
-                    Concept                   </th>
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 uppercase">
                     Content
                   </th>
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
-                    Services type                   </th>
-
-                  <th className="font-normal text-sm lg:text-base px-3 lg:px-4 py-2 lg:py-3 border-t border-[rgba(204,40,40,0.2)] capitalize">
+                  <th className="px-4 py-3 text-center text-sm font-semibold text-gray-700 uppercase">
                     Action
                   </th>
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-100">
-                {data.length > 0 ? (
+              <tbody>
+                {data?.length > 0 ? (
                   data.map((item) => (
                     <tr
                       key={item?._id}
-                      className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
+                      className={`border-t hover:bg-gray-50 transition ${item?.deleted_at ? "opacity-50" : ""
                         }`}
                     >
-                      {/* Image */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        <img
-                          src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
-                          className="w-full h-full object-cover text-center rounded-md shadow-sm"
-                          alt="SubCategory"
-                        />
+                      {/* Image + Name */}
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={
+                              item?.Image
+                                ? item?.Image
+                                : dataimage?.src || "/no-image.png"
+                            }
+                            className="w-20 h-20 object-cover rounded-lg border"
+                            alt="Category"
+                          />
+                          <span className="font-medium text-gray-800">
+                            {item?.title}
+                          </span>
+                        </div>
                       </td>
 
-                      {/* Title */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {item.title}
-                      </td>
-                      <td className="px-3 lg:px-4 py-2 uppercase lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {item.concept?.replaceAll("_", " ")}
-                      </td>
-                      {/* Content (Wrapped Text) */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {item.content}
+                      {/* Concept */}
+                      <td className="px-4 py-3 text-gray-700 font-medium uppercase">
+                        {item?.concept?.replaceAll("_", " ")} /{" "}
+                        {item?.ServicesType?.TypeServices} -{" "}
+                        {item?.ServicesType?.title}
                       </td>
 
-                      {/* Service Type */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
-                        {item?.ServicesType?.TypeServices} - {item?.ServicesType?.title}
+                      {/* Content */}
+                      <td className="px-4 py-3 text-gray-600 text-sm max-w-[300px]">
+                        <p className="line-clamp-3 leading-relaxed">
+                          {item?.content}
+                        </p>
                       </td>
-
 
                       {/* Action */}
-                      <td className="px-3 lg:px-4 py-2 lg:py-3 text-black text-sm lg:text-base font-medium font-inter  ">
+                      <td className="px-4 py-3">
                         <div className="flex justify-center items-center gap-3">
-                          <ServicesAdd
-                            item={item}
-                            isEdit={true}
-                            fetchDatas={fetchData}
-                          />
+                          <Link
+                            href={`/admin/services/services/add?id=${item?.slug}`}
+                            className="w-10 h-10 flex items-center justify-center rounded-lg border bg-white hover:bg-gray-100 transition"
+                          >
+                            <MdEdit size={20} />
+                          </Link>
+
                           <BlockUnblock
-                            Id={item._id}
+                            Id={item?._id}
                             fetchData={fetchData}
                             step={10}
-                            status={item?.status === true ? false : true}
+                            status={item?.status ? false : true}
                           />
                         </div>
                       </td>
@@ -134,17 +152,17 @@ export default function Index() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={6}
-                      className="px-6 py-8 text-center text-gray-500 text-[15px]"
+                      colSpan={4}
+                      className="text-center py-8 text-gray-500 text-sm"
                     >
                       No Categories Found
                     </td>
                   </tr>
                 )}
               </tbody>
-
             </table>
           </div>
+
         </div>
       </div>
     </AdminLayout>
