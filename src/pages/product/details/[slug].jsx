@@ -10,6 +10,12 @@ import { addItem } from "@/redux/cartSlice";
 import Related from "../Related";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay, Pagination, Navigation, Thumbs } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import "swiper/css/thumbs";
 
 export default function Index() {
   const router = useRouter();
@@ -17,6 +23,7 @@ export default function Index() {
   const id = router?.query?.slug;
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
+  const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [open, setOpen] = useState(null);
   const [ProductDetails, setProductDetails] = useState(null);
   const dispatch = useDispatch();
@@ -36,8 +43,7 @@ export default function Index() {
       // console.log("response", response)
       if (response.data?.status) {
         setProductDetails(response.data?.data);
-      }
-      else{
+      } else {
         setProductDetails(null);
       }
     } catch (error) {
@@ -47,7 +53,7 @@ export default function Index() {
   };
 
   const handleAdd = (redirect) => {
-    const id=`${selectedVariant?.color}_${ProductDetails?._id}`;
+    const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
     const newItem = {
       id: id,
       name: ProductDetails?.title,
@@ -56,10 +62,12 @@ export default function Index() {
       imgUrl: selectedVariant?.images,
       product: ProductDetails,
       selectedVariant: selectedVariant?.color,
-    }; 
+    };
     dispatch(addItem(newItem));
-    if(redirect){router.push("/checkout");}
-  }
+    if (redirect) {
+      router.push("/checkout");
+    }
+  };
 
   useEffect(() => {
     if (id) fetchData(id);
@@ -87,13 +95,58 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               {/* Left */}
               <div className="w-full">
+                {/* MAIN IMAGE */}
                 <div className="w-full aspect-[4/5] relative rounded-lg overflow-hidden">
-                  <Image
-                    src={selectedVariant?.images?.[0]}
-                    alt="Product"
-                    fill
-                    className="object-cover"
-                  />
+                  <Swiper
+                    autoplay={{
+                      delay: 2500,
+                      disableOnInteraction: false,
+                    }}
+                    navigation
+                    thumbs={{ swiper: thumbsSwiper }}
+                    modules={[Autoplay, Navigation, Thumbs]}
+                    className="w-full h-full"
+                  >
+                    {selectedVariant?.images?.map((img, index) => (
+                      <SwiperSlide key={index}>
+                        <div className="w-full h-full relative">
+                          <Image
+                            src={img}
+                            alt={`Product image ${index + 1}`}
+                            fill
+                            className="object-cover"
+                            priority={index === 0}
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
+
+                {/* THUMBNAILS */}
+                <div className="mt-3">
+                  <Swiper
+                    onSwiper={setThumbsSwiper}
+                    slidesPerView={5}
+                    spaceBetween={10}
+                    watchSlidesProgress
+                    modules={[Thumbs]}
+                    className="w-full"
+                  >
+                    {selectedVariant?.images &&
+                      selectedVariant?.images?.map((img, index) => (
+                        <SwiperSlide key={index} className="cursor-pointer">
+                          <div className="aspect-square relative rounded-md overflow-hidden border border-gray-200 hover:border-black">
+                            <Image
+                              src={img}
+                              alt={`Thumbnail ${index + 1}`}
+                              fill
+                              className="object-cover"
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                  </Swiper>
                 </div>
               </div>
 
@@ -111,23 +164,6 @@ export default function Index() {
                   ₹{ProductDetails?.amount}
                 </h2>
 
-                {/* Qty */}
-                <div className="mt-6 w-full border border-gray-200 rounded-md px-4 py-3 flex items-center justify-between">
-                  <button
-                    onClick={decreaseQty}
-                    className="text-xl w-8 h-8 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
-                  >
-                    −
-                  </button>
-                  <span className="text-lg font-medium">{qty}</span>
-                  <button
-                    onClick={increaseQty}
-                    className="text-xl w-8 h-8 flex items-center justify-center hover:bg-gray-100 cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-
                 <p className="text-base font-medium text-[#4D5466] mt-2 Creato">
                   Deliver in approximately 8–12 days
                 </p>
@@ -143,59 +179,87 @@ export default function Index() {
                     </p>
 
                     <div className="flex gap-4">
-                      {ProductDetails.variants.map((variant, idx) => {
-                        const isActive =
-                          selectedVariant?.color === variant.color;
+                      {ProductDetails &&
+                        ProductDetails.variants &&
+                        ProductDetails?.variants?.map((variant, idx) => {
+                          const isActive =
+                            selectedVariant?.color === variant.color;
 
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() => setSelectedVariant(variant)}
-                            className={`w-[110px] border rounded-md p-2 cursor-pointer transition
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedVariant(variant)}
+                              className={`w-[110px] border rounded-md p-2 cursor-pointer transition
                     ${
                       isActive
                         ? "border-black"
                         : "border-gray-200 hover:border-gray-400"
                     }
                   `}
-                          >
-                            {/* Image */}
-                            <div className="w-full aspect-square relative rounded overflow-hidden">
-                              <Image
-                                src={variant.images?.[0]}
-                                alt={variant.color}
-                                fill
-                                className="object-cover"
-                              />
-                            </div>
+                            >
+                              {/* Image */}
+                              <div className="w-full aspect-square relative rounded overflow-hidden">
+                                <Image
+                                  src={variant.images?.[0]}
+                                  alt={variant?.color}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
 
-                            {/* Color label */}
-                            <p className="mt-2 text-center text-sm font-medium capitalize">
-                              {variant.color}
-                            </p>
-                          </div>
-                        );
-                      })}
+                              {/* Color label */}
+                              <p className="mt-2 text-center text-sm font-medium capitalize">
+                                {variant?.color}
+                              </p>
+                            </div>
+                          );
+                        })}
                     </div>
                   </div>
                 )}
 
                 {/* Buttons */}
-                <div className="mt-6 flex flex-col gap-3">
-                  <button className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer"
-                  onClick={()=>{
-                    handleAdd(false);
-                  }}
-                  >
-                    ADD TO CART
-                  </button>
+                <div className="mt-6 flex flex-col gap-3 w-full">
+                  {/* Row 1: Qty + Add to Cart */}
+                  <div className="flex gap-3 w-full">
+                    {/* Quantity */}
+                    <div className="w-24 border border-black rounded-md px-2 py-2 flex items-center justify-between">
+                      <button
+                        onClick={decreaseQty}
+                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
+                      >
+                        −
+                      </button>
 
-                  <button className="w-full border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer"
-                  onClick={()=>{
-                    handleAdd(true);
-                  }}
+                      <span className="text-md font-medium">{qty}</span>
+
+                      <button
+                        onClick={increaseQty}
+                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
+                      >
+                        +
+                      </button>
+                    </div>
+
+                    {/* Add to Cart */}
+                    <button
+                      className="flex-1 border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        handleAdd(false);
+                      }}
+                    >
+                      ADD TO CART
+                    </button>
+                  </div>
+
+                  {/* Row 2: Buy Now */}
+                  <button
+                    className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer"
+                    onClick={() => {
+                      handleAdd(true);
+                    }}
                   >
-                    BUY NOW
+                    BUY IT NOW
                   </button>
                 </div>
 
