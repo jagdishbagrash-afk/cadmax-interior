@@ -7,9 +7,17 @@ import Button from "@/pages/common/Button";
 import Layout from "@/pages/common/Layout";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { FcPrevious } from "react-icons/fc";
+import { FcNext } from "react-icons/fc";
+
 import toast from "react-hot-toast";
+import { MdClose } from "react-icons/md";
+import MultipleImages from "./MultipleImages";
 
 export default function DesignLayout() {
+    const [isOpen, setIsOpen] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
     const router = useRouter();
     const id = router?.query?.slug;
     const { user } = useRole();
@@ -161,18 +169,8 @@ export default function DesignLayout() {
                                 {project.content}
                             </p>
                         </div>
+                        <MultipleImages  project={project}/>
 
-                        {/* Design Photos Row */}
-                        <div className="grid grid-cols-3 gap-4 mt-6 flex-wrap">
-
-                            {project?.multiple_images?.map((box) => (
-                                <img
-                                    src={box}
-                                    alt={project.title}
-                                    className="w-full h-full object-cover transition-all duration-300"
-                                />
-                            ))}
-                        </div>
 
                         <div className="flex flex-wrap justify-center mt-3 sm:mt-5">
                             <button
