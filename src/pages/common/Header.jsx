@@ -47,7 +47,7 @@ export default function Header() {
           href="/"
           className="text-xl font-extrabold tracking-tight text-black"
         >
-          CADMAX
+          {/* CADMAX */}
         </Link>
 
         {/* Center Menu */}

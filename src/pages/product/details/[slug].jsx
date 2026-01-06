@@ -26,14 +26,22 @@ export default function Index() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [open, setOpen] = useState(null);
   const [ProductDetails, setProductDetails] = useState(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [show, setShow] = useState(false);
+  const [currentImage, setCurrentImage] = useState(null);
+
   const dispatch = useDispatch();
 
   const toggle = (id) => {
     setOpen(open === id ? null : id);
   };
 
-  const increaseQty = () => setQty((prev) => prev + 1);
-
+  const increaseQty = () => {
+    setQty((prev) => {
+      const maxStock = selectedVariant?.stock ?? 0;
+      return prev < maxStock ? prev + 1 : prev;
+    });
+  };
   const decreaseQty = () => setQty((prev) => (prev > 1 ? prev - 1 : 1));
 
   const fetchData = async (id) => {
@@ -79,7 +87,110 @@ export default function Index() {
     }
   }, [ProductDetails]);
 
-  // console.log("ProductDetails", ProductDetails);
+  const goToNext = () => {
+    if (currentIndex < selectedVariant?.images.length - 1) {
+      setCurrentImage(selectedVariant?.images[currentIndex + 1]);
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      setShow(false);
+    }
+  };
+
+  const goToPrevious = () => {
+    if (currentIndex > 0) {
+      setCurrentImage(selectedVariant?.images[currentIndex - 1]);
+      setCurrentIndex(currentIndex - 1);
+    } else {
+      setShow(false);
+    }
+  };
+
+  const handleClose = () => setShow(false);
+  
+  const handleShow = (item, index) => {
+    console.log("item", item);
+    console.log("index", index);
+    setCurrentIndex(index);
+    setCurrentImage(item);
+    if (!show) {
+      setShow(true);
+    }
+  };
+
+  const GalleryModal = () => {
+    return (
+      <div className="fixed inset-0 z-[9999999] bg-black flex items-center justify-center">
+        {/* Close button */}
+        <div
+          onClick={handleClose}
+          className="fixed top-2.5 right-2.5 sm:top-7 sm:right-7 cursor-pointer text-white"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            className="w-10 h-10"
+            fill="currentColor"
+          >
+            <path d="m6.4 18.308l-.708-.708l5.6-5.6l-5.6-5.6l.708-.708l5.6 5.6l5.6-5.6l.708.708l-5.6 5.6l5.6 5.6l-.708.708l-5.6-5.6z" />
+          </svg>
+        </div>
+
+        {/* Image carousel wrapper */}
+        <div className="flex items-center justify-center w-full h-full px-4">
+          {/* Previous */}
+          <button
+            onClick={goToPrevious}
+            className="text-white p-2 hover:bg-white/10 rounded-full transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15.75 19.5 8.25 12l7.5-7.5"
+              />
+            </svg>
+          </button>
+
+          {/* Image */}
+          <img
+            src={currentImage || ""}
+            alt="image"
+            className="max-h-full max-w-full object-contain mx-4"
+          />
+
+          {/* Next */}
+          <button
+            onClick={goToNext}
+            className="text-white p-2 hover:bg-white/10 rounded-full transition"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth="1.5"
+              stroke="currentColor"
+              className="w-6 h-6"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="m8.25 4.5 7.5 7.5-7.5 7.5"
+              />
+            </svg>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // console.log("selectedVariant", selectedVariant);
   return (
     <Layout>
       <div className="w-full py-14 flex flex-col justify-center">
@@ -102,9 +213,8 @@ export default function Index() {
                       delay: 2500,
                       disableOnInteraction: false,
                     }}
-                    navigation
                     thumbs={{ swiper: thumbsSwiper }}
-                    modules={[Autoplay, Navigation, Thumbs]}
+                    modules={[Autoplay, Thumbs]}
                     className="w-full h-full"
                   >
                     {selectedVariant?.images?.map((img, index) => (
@@ -114,8 +224,9 @@ export default function Index() {
                             src={img}
                             alt={`Product image ${index + 1}`}
                             fill
-                            className="object-cover"
+                            className="object-cover cursor-pointer"
                             priority={index === 0}
+                            onClick={() => handleShow(img, index)}
                           />
                         </div>
                       </SwiperSlide>
@@ -397,6 +508,7 @@ export default function Index() {
           <Related selectedId={ProductDetails?.subcategory?._id} />
         </div>
       </div>
+      {show && <GalleryModal />}
     </Layout>
   );
 }
