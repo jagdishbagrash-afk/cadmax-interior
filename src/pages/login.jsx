@@ -4,9 +4,13 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import Listing from "@/pages/api/Listing";
+import { useSearchParams } from "next/navigation";
 
 export default function Login() {
   const router = useRouter();
+   const searchParams = useSearchParams();
+  const redirect = searchParams.get("redirect");
+
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
 
@@ -41,7 +45,7 @@ export default function Login() {
     }
     setLoading(false);
   };
-
+console.log("redirect" ,redirect)
   // ✅ Verify OTP
   const handleVerifyOTP = async (e) => {
     e.preventDefault();
@@ -60,7 +64,12 @@ export default function Login() {
       if (res?.data?.status) {
         localStorage && localStorage.setItem("token", res?.data?.data?.token);
         toast.success("Login successful");
-        router.push("/");
+             if (redirect) {
+          router.push(`${redirect}`);
+          return;
+        }else{
+          router.push("/");
+        }
       } else {
         toast.error(res?.data?.message || "Invalid OTP");
       }
