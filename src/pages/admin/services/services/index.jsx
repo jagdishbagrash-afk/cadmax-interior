@@ -37,16 +37,9 @@ export default function Index() {
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
               Concept  List
             </h2>
+
             <div className="flex flex-wrap gap-3 ">
-              <Link
-                href="/admin/services/contact"
-                className="cursor-pointer m-auto flex items-center justify-center
-                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
-                                  bg-white hover:bg-gray-50 transition-all duration-200"
-              >
-           Craft for you
-              </Link>
-              <Link
+                 <Link
                 href="/admin/services/type"
                 className="cursor-pointer m-auto flex items-center justify-center
                                   w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
@@ -54,7 +47,22 @@ export default function Index() {
               >
                 Concept Category  List
               </Link>
-
+              <Link
+                href="/admin/services/category"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                Sub Category List
+              </Link>
+              <Link
+                href="/admin/services/contact"
+                className="cursor-pointer m-auto flex items-center justify-center
+                                  w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
+                                  bg-white hover:bg-gray-50 transition-all duration-200"
+              >
+                Craft for you
+              </Link>
               <Link
                 href="/admin/services/services/add"
                 className="cursor-pointer m-auto flex items-center justify-center

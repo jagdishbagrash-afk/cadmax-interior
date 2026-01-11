@@ -77,12 +77,11 @@ function Index() {
                 <ThreeBanner />
                 <FeaturedCategories />
                 <ProductGrid products={sampleProducts} title={"OUR BEST SELLER"} />
-                <Services />
+                {/* <Services /> */}
                 <ProductGrid products={sampleProducts} title={"New Arrival"} />
-                <Shop />
+                {/* <Shop /> */}
                 <ProductGrid products={sampleOfferProducts} title={"top sales products "} />
                 <ContactStyling />
-
             </Layout>
         </>);
 }

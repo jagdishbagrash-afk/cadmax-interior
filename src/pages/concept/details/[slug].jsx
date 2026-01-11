@@ -129,6 +129,14 @@ export default function DesignLayout() {
     }, [router.query.autoSubmit, data]);
 
 
+    console.log("proe", project)
+    const [selectedImage, setSelectedImage] = useState("");
+
+    useEffect(() => {
+        if (project?.Image) {
+            setSelectedImage(project.Image);
+        }
+    }, [project]);
 
 
     return (
@@ -176,11 +184,21 @@ export default function DesignLayout() {
 
                         {/* Selected Photo Container */}
                         <div className="relative group overflow-hidden bg-gray-200 aspect-square lg:aspect-auto">
-                            <img
-                                src={project.Image}
-                                alt={project.title}
-                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                            />
+
+                            {selectedImage ? (
+                                <img
+                                    src={selectedImage}
+                                    alt={project.title}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            ) : (
+                                <img
+                                    src={project.Image}
+                                    alt={project.title}
+                                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                />
+                            )}
+
                         </div>
 
                         {/* Right Side Content */}
@@ -196,7 +214,25 @@ export default function DesignLayout() {
 
                                 {/* Thumbnail Component */}
                                 <div className="mb-8">
-                                    <MultipleImages project={project} />
+                                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mt-6">
+                                        {project?.multiple_images?.map((img, index) => (
+                                            <div
+                                                key={index}
+                                                onClick={() => setSelectedImage(img)}
+                                                className={`
+      overflow-hidden rounded-lg cursor-pointer group
+      border-2 ${selectedImage === img ? "border-black" : "border-transparent"}
+    `}
+                                            >
+                                                <img
+                                                    src={img}
+                                                    alt={project?.title || "Project Image"}
+                                                    className="w-full h-40 object-cover group-hover:scale-110 transition duration-300"
+                                                />
+                                            </div>
+                                        ))}
+
+                                    </div>
                                 </div>
                             </div>
 
@@ -215,7 +251,7 @@ export default function DesignLayout() {
                                             handleSubmit(e);
                                         }
                                     }}
-                                    className="w-full sm:w-auto px-10 py-4 font-bold uppercase tracking-widest text-sm bg-black text-white hover:bg-gray-800"
+                                    className="w-full sm:w-auto px-10 py-4 font-bold uppercase tracking-widest text-sm bg-black text-white hover:bg-gray-800 cursor-pointer"
                                 >
                                     Craft for You
                                 </button>

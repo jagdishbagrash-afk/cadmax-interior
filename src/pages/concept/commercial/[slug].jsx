@@ -166,11 +166,11 @@ export default function Index() {
                         src={p.Image}
                         alt={p.title}
                         className="
-   w-full h-full object-cover object-center
-            transition-transform duration-700 ease-in-out
-            group-hover:rotate-45 group-hover:scale-120
+                        w-full h-full object-cover object-center
+                                  transition-transform duration-700 ease-in-out
+                                  group-hover:rotate-45 group-hover:scale-120
 
-      "
+                            "
                       />
                     </div>
 

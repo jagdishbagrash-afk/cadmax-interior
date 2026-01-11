@@ -31,9 +31,9 @@ export default function Index() {
 
     return (
         <Layout>
-            {/* <Banner Slider1={ProductListBanner}
+            <Banner Slider1={ProductListBanner}
                 title={"From Blueprint to Reality — Complete AND LUXURY FURNITURE"}
-                button={"SHOP OUR FURNITURE"} /> */}
+                button={"SHOP OUR FURNITURE"} />
             <div className="bg-[#FFFFFF] py-4 md:py-8 ">
                 <div className="container mx-auto px-4 max-w-[1430px]">
                     {data && data?.map((item, index) => {
@@ -41,7 +41,7 @@ export default function Index() {
                         return (
                             <div
                                 key={item.id}
-                                className={`grid grid-cols-1 md:grid-cols-3 gap-10 items-center  my-10 md:my-16 lg:my-20 ${isReverse ? "md:flex-row-reverse" : ""
+                                className={`grid grid-cols-1 md:grid-cols-3 gap-10 items-center my-4 md:my-8  ${isReverse ? "md:flex-row-reverse" : ""
                                     }`}
                             >
                                 <div className={`md:col-span-2 ${isReverse ? "md:order-2" : ""}`}>
@@ -49,7 +49,7 @@ export default function Index() {
                                     <img
                                         src={item.Image}
                                         alt={item.title}
-                                        className="w-full h-[520px] object-cover "
+                                        className="w-full h-[480px] object-cover "
                                     />
                                 </div>
 
@@ -103,7 +103,7 @@ export default function Index() {
                                                         hover:text-[#171717]
                                                         hover:bg-white
                                                         transition
-                                                        bg-black text-white
+                                                        bg-black text-white cursor-pointer
                                                                                 "
                                     >
                                         GET A QUOTE

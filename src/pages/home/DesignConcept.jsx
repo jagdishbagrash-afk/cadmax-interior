@@ -1,40 +1,27 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import Listing from "../api/Listing";
+import Link from "next/link";
 
 const DesignConcept = () => {
-    const items = [
-        {
-            id: 1,
-            title: "LIVING ROOM",
-            image:
-                "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=60",
-            span: "row-span-2",
-        },
-        {
-            id: 2,
-            title: "BEDROOM",
-            image:
-                "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1200&q=60",
-        },
-        {
-            id: 3,
-            image: "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
-            title: "OFFICE",
-        },
-        {
-            id: 4,
-            title: "KITCHEN",
-            image:
-                "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=1200&q=60",
-        },
-        {
-            id: 5,
-            title: "CAFE",
-            image:
-                "https://images.unsplash.com/photo-1615874959474-d609969a20ed?auto=format&fit=crop&w=1200&q=60",
+    const [data, setData] = useState([]);
 
-        },
-    ];
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.ServicesSubCategoryList();
 
+            if (response.data?.data) {
+                setData(response.data.data);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+    console.log("data", data)
     return (
         <section className="bg-white py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -45,31 +32,32 @@ const DesignConcept = () => {
                 {/* Grid Layout */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {/* First tall image */}
-                    <div className="sm:row-span-2 relative overflow-hidden">
+                    <Link       href={`/concept/${data[0]?.slug}`} className="sm:row-span-2 relative overflow-hidden">
                         <img
-                            src={items[0].image}
-                            alt={items[0].title}
+                            src={data[0]?.Image}
+                            alt={data[0]?.name}
                             className="w-full h-full md:h-[605px] object-cover transform hover:scale-105 transition duration-500"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                             <h3
                                 className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato"
                             >
-                                {items[0].title}
+                                {data[0]?.name}
                             </h3>
 
                         </div>
-                    </div>
+                    </Link>
 
                     {/* Remaining 4 images */}
-                    {items.slice(1).map((item) => (
-                        <div
-                            key={item.id}
+                    {data?.slice(1)?.map((item) => (
+                        <Link
+                        href={`/concept/${item?.slug}`}
+                            key={item._id}
                             className="relative overflow-hidden group h-48 sm:h-56 lg:h-[300px]"
                         >
                             <img
-                                src={item.image}
-                                alt={item.title}
+                                src={item.Image}
+                                alt={item.name}
                                 className="w-full h-full lg:h-[300px] object-cover transform group-hover:scale-105 transition duration-500"
                             />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
@@ -77,10 +65,10 @@ const DesignConcept = () => {
                                     className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato"
 
                                 >
-                                    {item.title}
+                                    {item.name}
                                 </h3>
                             </div>
-                        </div>
+                        </Link>
                     ))}
                 </div>
             </div>

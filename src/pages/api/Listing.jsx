@@ -19,6 +19,12 @@ class Listing extends Component {
     return Api.post("/category/add", data)
   }
 
+    async vendorsubcategory(data) {
+    return Api.post("/services/subcategory/add", data)
+  }
+
+
+
   async vendorcategory(data) {
     return Api.post("/vendor/category/add", data)
   }
@@ -71,6 +77,10 @@ class Listing extends Component {
     return Api.get("/category/get",)
   }
 
+   async ServicesSubCategoryList() {
+    return Api.get("/services/subcategory/list",)
+  }
+
   async vednorcategoryUpdate(id, formData) {
     return Api.post(`/vendor/category/edit/${id}`, formData);
   }
@@ -102,6 +112,11 @@ class Listing extends Component {
   async categoryUpdate(id, formData) {
     return Api.post(`/category/update/${id}`, formData);
   }
+
+  async vendorsubcategoryUpdate(id, formData) {
+    return Api.post(`/services/subcategory/edit/${id}`, formData);
+  }
+
   async subcategory(data) {
     return Api.post("/subcategory/add", data)
   }
@@ -204,6 +219,10 @@ class Listing extends Component {
 
    async GetAllServicesType(id) {
     return Api.get(`/type-services/${id}`,);
+  }
+
+   async GetAllConceptType(id) {
+    return Api.get(`/services/type-concept/${id}`,);
   }
 
   async GetAllProductsId(id) {

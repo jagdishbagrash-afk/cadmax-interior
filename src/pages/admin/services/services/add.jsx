@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 import AdminLayout from "../../common/AdminLayout";
@@ -9,6 +8,25 @@ import ImageUploader from "./ImageUploader";
 import { useRouter } from "next/router";
 
 export default function ServicesAdd() {
+
+     const [data, setData] = useState([]);
+    
+      const fetchSubcategroyData = async () => {
+        try {
+          const main = new Listing();
+          const response = await main.ServicesSubCategoryList();
+    
+          if (response.data?.data) {
+            setData(response.data.data);
+          }
+        } catch (error) {
+          console.log("Error:", error);
+        }
+      };
+    
+      useEffect(() => {
+        fetchSubcategroyData();
+      }, []);
     const router = useRouter();
     console.log(router)
     const isEdit = router.query.id;
@@ -21,7 +39,9 @@ export default function ServicesAdd() {
         timeline: "",
         material_details: "",
         concept: "",
-        cost: ""
+        cost: "",
+        subcategory :"" ,
+        ServicesSubCategory:""
     });
     const [images, setImages] = useState([]);
 const[project ,setProject] = useState([]);
@@ -43,6 +63,7 @@ const[project ,setProject] = useState([]);
                     concept: list.concept || "",
                     cost:list.cost ||"",
                     timeline :  list?.timeline|| "",
+                    ServicesSubCategory :  list?.ServicesSubCategory || "",
                     material_details :  list?.material_details || ""
                 });
             }
@@ -133,6 +154,7 @@ const[project ,setProject] = useState([]);
             submitFormData.append("concept", formData.concept)
             submitFormData.append("material_details", formData.material_details)
             submitFormData.append("timeline", formData.timeline)
+            submitFormData.append("ServicesSubCategory", formData.ServicesSubCategory)
             submitFormData.append("cost", formData.cost)
             if (formData.file) {
                 submitFormData.append("Image", formData.file);
@@ -207,6 +229,26 @@ const[project ,setProject] = useState([]);
                                         ))}
                                     </select>
                                 </div>
+
+
+                                   <div>
+                                    <label className="text-sm font-semibold text-gray-700">
+                                      Concept Sub Category 
+                                    </label>
+                                    <select
+                                        className="mt-1 w-full h-[48px] px-4 border rounded-lg bg-gray-100 focus:ring-2 focus:ring-blue-400 outline-none"
+                                        value={formData.ServicesSubCategory}
+                                        onChange={(e) => handleInputChange("ServicesSubCategory", e.target.value)}
+                                    >
+                                        <option value="">Select Concept Sub Category</option>
+                                        {data?.map((item) => (
+                                            <option key={item._id} value={item._id}>
+                                          {item.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
 
                                 {/* Concept */}
                                 <div>
