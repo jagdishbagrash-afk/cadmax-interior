@@ -143,7 +143,7 @@ const ProductGrid = ({selectedId}) => {
                 { name: "orange", hex: "#f97316" },
                 { name: "teal", hex: "#14b8a6" },
                 { name: "brown", hex: "#92400e" },
-              ].map((c, i) => (
+              ]?.map((c, i) => (
                 <label
                   key={i}
                   className="flex items-center gap-2 cursor-pointer"
@@ -174,7 +174,7 @@ const ProductGrid = ({selectedId}) => {
                 type="range"
                 min={100}
                 max={100000}
-                value={priceRange.low}
+                value={priceRange?.low}
                 onChange={(e) => handlePriceChange("low", e.target.value)}
                 className="absolute w-full pointer-events-none appearance-none bg-transparent
                           [&::-webkit-slider-thumb]:pointer-events-auto
@@ -190,7 +190,7 @@ const ProductGrid = ({selectedId}) => {
                 type="range"
                 min={100}
                 max={100000}
-                value={priceRange.high}
+                value={priceRange?.high}
                 onChange={(e) => handlePriceChange("high", e.target.value)}
                 className="absolute w-full pointer-events-none appearance-none bg-transparent
                           [&::-webkit-slider-thumb]:pointer-events-auto
@@ -208,15 +208,15 @@ const ProductGrid = ({selectedId}) => {
               <div
                 className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded"
                 style={{
-                  left: `${((priceRange.low - 100) / (100000 - 100)) * 100}%`,
-                  width: `${((priceRange.high - priceRange.low) / (100000 - 100)) * 100}%`,
+                  left: `${((priceRange?.low - 100) / (100000 - 100)) * 100}%`,
+                  width: `${((priceRange?.high - priceRange?.low) / (100000 - 100)) * 100}%`,
                 }}
               />
             </div>
 
             <div className="flex justify-between text-xs text-gray-500">
-              <span>₹{priceRange.low.toLocaleString()}</span>
-              <span>₹{priceRange.high.toLocaleString()}</span>
+              <span>₹{priceRange?.low?.toLocaleString()}</span>
+              <span>₹{priceRange?.high?.toLocaleString()}</span>
             </div>
           </div>
 
