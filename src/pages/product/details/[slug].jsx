@@ -29,6 +29,7 @@ export default function Index() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [zoomData, setZoomData] = useState(null);
 
   const dispatch = useDispatch();
 
@@ -108,8 +109,8 @@ export default function Index() {
   const handleClose = () => setShow(false);
   
   const handleShow = (item, index) => {
-    console.log("item", item);
-    console.log("index", index);
+    // console.log("item", item);
+    // console.log("index", index);
     setCurrentIndex(index);
     setCurrentImage(item);
     if (!show) {
@@ -190,6 +191,81 @@ export default function Index() {
     );
   };
 
+  const ZoomImage = ({ src, onZoom }) => {
+    const [showLens, setShowLens] = useState(false);
+    const LENS_SIZE = 120;
+
+    const handleMove = (e) => {
+      const rect = e.currentTarget.getBoundingClientRect();
+
+      let x = e.clientX - rect.left - LENS_SIZE / 2;
+      let y = e.clientY - rect.top - LENS_SIZE / 2;
+
+      x = Math.max(0, Math.min(x, rect.width - LENS_SIZE));
+      y = Math.max(0, Math.min(y, rect.height - LENS_SIZE));
+
+      onZoom({
+        show: true,
+        src,
+        bgX: (x / (rect.width - LENS_SIZE)) * 100,
+        bgY: (y / (rect.height - LENS_SIZE)) * 100,
+        rect,
+      });
+
+      setShowLens(true);
+    };
+
+    return (
+      <div
+        className="relative w-full h-full cursor-crosshair"
+        onMouseEnter={() => setShowLens(true)}
+        onMouseLeave={() => {
+          setShowLens(false);
+          onZoom({ show: false });
+        }}
+        onMouseMove={handleMove}
+      >
+        <Image src={src} fill className="object-cover" alt="product" />
+
+        {showLens && (
+          <div
+            className="absolute border border-gray-400 bg-white/30 pointer-events-none"
+            style={{
+              width: LENS_SIZE,
+              height: LENS_SIZE,
+              left: "var(--lens-x)",
+              top: "var(--lens-y)",
+            }}
+          />
+        )}
+      </div>
+    );
+  };
+
+  const ZoomPreview = ({ zoom }) => {
+    if (!zoom?.show) return null;
+
+    return (
+      <div
+        className="fixed top-24 right-24 w-full max-w-[40vw] h-[520px] bg-white border rounded-lg shadow-2xl
+          z-[999999]
+          hidden lg:block
+          pointer-events-none
+        "
+      >
+        <div
+          className="w-full h-full border-transparent"
+          style={{
+            backgroundImage: `url(${zoom.src})`,
+            backgroundRepeat: "no-repeat",
+            backgroundSize: "250%",
+            backgroundPosition: `${zoom.bgX}% ${zoom.bgY}%`,
+          }}
+        />
+      </div>
+    );
+  };
+
   // console.log("selectedVariant", selectedVariant);
   return (
     <Layout>
@@ -207,11 +283,12 @@ export default function Index() {
               {/* Left */}
               <div className="w-full">
                 {/* MAIN IMAGE */}
-                <div className="w-full aspect-[4/5] relative rounded-lg overflow-hidden">
+                <div className="w-full aspect-[4/5] relative rounded-lg overflow-visible">
                   <Swiper
                     autoplay={{
-                      delay: 2500,
+                      delay: 5000,
                       disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
                     }}
                     thumbs={{ swiper: thumbsSwiper }}
                     modules={[Autoplay, Thumbs]}
@@ -219,14 +296,21 @@ export default function Index() {
                   >
                     {selectedVariant?.images?.map((img, index) => (
                       <SwiperSlide key={index}>
-                        <div className="w-full h-full relative">
-                          <Image
+                        <div 
+                         className="w-full h-full relative"
+                         onMouseLeave={() => setZoomData({ show: false })}
+                        >
+                          {/* <Image
                             src={img}
                             alt={`Product image ${index + 1}`}
                             fill
                             className="object-cover cursor-pointer"
                             priority={index === 0}
                             onClick={() => handleShow(img, index)}
+                          /> */}
+                          <ZoomImage
+                            src={img}
+                            onZoom={setZoomData}
                           />
                         </div>
                       </SwiperSlide>
@@ -509,6 +593,7 @@ export default function Index() {
         </div>
       </div>
       {show && <GalleryModal />}
+      <ZoomPreview zoom={zoomData} />
     </Layout>
   );
 }

@@ -160,6 +160,10 @@ class Listing extends Component {
     return Api.get(`/order/getAll`, data);
   }
 
+  async userGetOrders(data) {
+    return Api.get(`/order/getbyUser`, data);
+  }
+
   async updateOrderStatus(id, data) {
     return Api.post(`/order/status/update/${id}`, data);
   }
