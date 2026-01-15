@@ -4,20 +4,24 @@ import Listing from "../api/Listing";
 import DateComponent from "@/components/DateComponent";
 import Image from "next/image";
 import { formatMultiPrice } from "@/components/ValueDataHook";
+import { FaChevronDown, FaSearch, FaCircle } from "react-icons/fa";
+import { motion, AnimatePresence } from "framer-motion";
 
-const STATUS_COLORS = {
-  pending: "text-orange-500",
-  confirmed: "text-blue-500",
-  shipped: "text-purple-500",
-  delivered: "text-green-600",
-  cancelled: "text-red-500",
+const STATUS_CONFIG = {
+  pending: { color: "text-yellow-600 bg-yellow-50 border-yellow-200", label: "Pending" },
+  confirmed: { color: "text-blue-600 bg-blue-50 border-blue-200", label: "Confirmed" },
+  shipped: { color: "text-purple-600 bg-purple-50 border-purple-200", label: "Shipped" },
+  delivered: { color: "text-green-600 bg-green-50 border-green-200", label: "Delivered" },
+  cancelled: { color: "text-red-600 bg-red-50 border-red-200", label: "Cancelled" },
 };
-const STATUSES = ["all", "pending", "confirmed", "shipped", "delivered", "cancelled"];
 
-export default function Index() {
+const TABS = ["All", "Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"];
+
+export default function OrderHistory() {
   const [orders, setOrders] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const [activeTab, setActiveTab] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [activeOrder, setActiveOrder] = useState(null);
 
   const fetchData = async () => {
@@ -37,148 +41,170 @@ export default function Index() {
     fetchData();
   }, []);
 
-  const toggleOrder = (id) => {
-    setActiveOrder(activeOrder === id ? null : id);
-  };
+  const filteredOrders = orders.filter((order) => {
+    const matchesStatus = activeTab === "All" || order.status.toLowerCase() === activeTab.toLowerCase();
 
-  const filteredOrders =
-    status === "all" ? orders : orders.filter((o) => o.status === status);
+    const matchesSearch =
+      order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.product.some(p => p.id?.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return matchesStatus && matchesSearch;
+  });
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <h1 className="text-2xl font-semibold mb-6">My Orders</h1>
+      <div className="max-w-5xl mx-auto px-4 py-8 bg-white min-h-screen font-sans text-[#111]">
 
-        <div className="flex flex-wrap gap-2 mb-8">
-          {STATUSES && STATUSES?.map((s) => (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+          <h1 className="text-[28px] font-normal">Your Orders</h1>
+          <div className="relative flex items-center w-full md:w-auto border border-[#888c8c] rounded-md shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-[#e77600] focus-within:border-[#e77600]">
+            <div className="pl-3 text-gray-400"><FaSearch size={13} /></div>
+            <input
+              type="text"
+              placeholder="Search by Product name"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="px-3 py-2 text-[13px] outline-none w-full md:w-72"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery("")}
+                className="pr-3 text-xs text-gray-400 hover:text-black"
+              >Clear</button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex border-b border-[#e7e7e7] mb-6 gap-6 overflow-x-auto no-scrollbar">
+          {TABS?.map((tab) => (
             <button
-              key={s}
-              onClick={() => setStatus(s)}
-              className={`px-4 py-2 text-sm border rounded-full transition cursor-pointer
-                ${
-                  status === s
-                    ? "bg-black text-white border-black"
-                    : "bg-white text-black border-black hover:bg-black hover:text-white"
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`pb-2 mt-2 text-[14px] whitespace-nowrap border-b-2 transition-all ${activeTab === tab
+                  ? "border-[#e77600] text-[#c45500] font-bold"
+                  : "border-transparent text-[#565959] hover:text-[#007185]"
                 }`}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {tab}
             </button>
           ))}
         </div>
 
-        {loading && <p className="text-gray-500">Loading orders...</p>}
+        <p className="text-[14px] mb-4 text-gray-600">
+          <span className="font-bold text-black">{filteredOrders?.length} orders</span> found
+          {searchQuery && <span> for "<span className="italic">{searchQuery}</span>"</span>}
+        </p>
 
-        {!loading && filteredOrders && filteredOrders?.length === 0 && (
-          <p className="text-gray-500">No orders found.</p>
-        )}
+        {loading ? (
+          <div className="flex flex-col items-center py-20">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#e77600]"></div>
+          </div>
+        ) : filteredOrders?.length === 0 ? (
+          <div className="text-center py-20 border border-dashed rounded-lg bg-gray-50">
+            <p className="text-gray-500">No orders found matching your criteria.</p>
+            <button onClick={() => { setSearchQuery(""); setActiveTab("All") }} className="text-[#007185] text-sm hover:underline mt-2">Clear all filters</button>
+          </div>
+        ) : (
+          <div className="space-y-6">
+            {filteredOrders?.map((order) => {
+              const isOpen = activeOrder === order?._id;
+              const statusStyle = STATUS_CONFIG[order?.status] || { color: "bg-gray-100", label: order.status };
 
-        <div className="space-y-4">
-          {filteredOrders && filteredOrders?.map((order) => {
-            const firstItem = order.product[0];
-            const image = firstItem?.id?.variants?.find(
-              (v) => v.color === firstItem.variant
-            )?.images?.[0];
-            console.log("firstItem", firstItem);
+              return (
+                <div key={order?._id} className="border border-[#D5D9D9] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
 
-            return (
-              <div
-                key={order?._id}
-                className="border border-gray-200 rounded-lg bg-white"
-              >
-                {/* COLLAPSED CARD */}
-                <button
-                  onClick={() => toggleOrder(order?._id)}
-                  className="w-full flex items-center gap-4 p-4 text-left hover:bg-gray-50 transition cursor-pointer"
-                >
-                  {/* Image */}
-                  <Image
-                    height={300}
-                    width={300}
-                    src={image}
-                    alt={firstItem?.id?.title}
-                    className="w-16 h-16 object-cover rounded border"
-                  />
-
-                  {/* Info */}
-                  <div className="flex-1">
-                    <p className="text-sm font-medium capitalize">{firstItem?.id?.title}</p>
-                    <p className="text-xs text-gray-500">
-                     {order?.product?.length} item(s)
-                    </p>
-                    <p className="text-xs text-gray-400">
-                      Order #{order?._id}
-                    </p>
+                  <div className={`px-4 py-1.5 text-[11px] font-bold uppercase flex items-center gap-2 border-b ${statusStyle.color}`}>
+                    <FaCircle size={7} className="animate-pulse" />
+                    Status: {statusStyle.label}
                   </div>
 
-                  {/* Price & Status */}
-                  <div className="text-right">
-                    <p className="font-semibold text-black">{formatMultiPrice(order?.amount, "INR")}</p>
-                    <p
-                      className={`text-xs font-medium ${
-                        STATUS_COLORS[order?.status]
-                      }`}
-                    >
-                      {order?.status.toUpperCase()}
-                    </p>
-                  </div>
-                </button>
+                  <div
+                    onClick={() => setActiveOrder(isOpen ? null : order?._id)}
+                    className="bg-[#F0F2F2] px-4 py-3 flex flex-wrap items-center justify-between gap-y-3 text-[12px] text-[#565959] cursor-pointer"
+                  >
+                    <div className="flex gap-8 sm:gap-12">
+                      <div>
+                        <p className="uppercase text-[10px] font-bold text-gray-500">Order Placed</p>
+                        <p className="text-[13px] text-[#111] font-medium"><DateComponent item={order?.createdAt} /></p>
+                      </div>
+                      <div>
+                        <p className="uppercase text-[10px] font-bold text-gray-500">Total Paid</p>
+                        <p className="text-[13px] text-[#111] font-bold">{formatMultiPrice(order?.amount, "INR")}</p>
+                      </div>
+                    </div>
 
-                {/* EXPANDED DETAILS */}
-                {activeOrder === order?._id && (
-                  <div className="border-t border-gray-200 p-4 space-y-4 bg-gray-50">
-                    {/* Products */}
-                    <div className="space-y-3">
-                      {order?.product && order?.product?.map((item, i) => (
-                        <div key={i} className="flex items-center gap-4">
-                          <Image
-                            height={200}
-                            width={200}
-                            src={
-                              item?.id?.variants?.find(
-                                (v) => v.color === item.variant
-                              )?.images?.[0]
-                            }
-                            className="w-12 h-12 object-cover rounded border"
-                          />
-                          <div className="flex-1">
-                            <p className="text-sm font-medium capitalize">
-                              {item?.id?.title}
-                            </p>
-                            <p className={`text-xs text-gray-500 capitalize`}>
-                              {item?.variant} • {formatMultiPrice(item?.price, "INR")} × {item?.quantity}
-                            </p>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right hidden sm:block">
+                        <p className="uppercase text-[10px] font-bold text-gray-500">Order # {order?._id.slice(-12).toUpperCase()}</p>
+                        <p className="text-[#007185] hover:underline">View details</p>
+                      </div>
+                      <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
+                        <FaChevronDown size={14} className="text-gray-400" />
+                      </motion.div>
+                    </div>
+                  </div>
+
+                  <AnimatePresence>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="bg-white"
+                      >
+                        <div className="p-5 border-t border-gray-100">
+                          {order?.product?.map((item, idx) => {
+                            const variantImg = item?.id?.variants?.find((v) => v.color === item.variant)?.images?.[0];
+                            return (
+                              <div key={idx} className="flex flex-col md:flex-row gap-6 mb-6 last:mb-0 pb-6 last:pb-0 border-b last:border-0">
+                                <div className="flex flex-1 gap-4">
+                                  <div className="w-24 h-24 relative flex-shrink-0 border border-gray-100 rounded-md">
+                                    <Image fill src={variantImg} alt="product" className="object-contain p-1" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <p className="text-[#007185] text-[15px] font-medium hover:underline cursor-pointer leading-snug">
+                                      {item?.id?.title}
+                                    </p>
+                                    <p className="text-[12px] text-gray-500 mt-1 uppercase font-bold tracking-tight">Variant: {item.variant}</p>
+                                    <p className="text-[14px] font-bold mt-2">{formatMultiPrice(item?.total, "INR")}</p>
+                                    <p className="text-[12px] text-gray-400">Qty: {item.quantity}</p>
+                                  </div>
+                                </div>
+
+                                {/* <div className="flex flex-col gap-2 w-full md:w-[200px]">
+                                  <button className="w-full text-[13px] py-1.5 border border-[#D5D9D9] rounded-lg hover:bg-gray-50 shadow-sm transition">
+                                    Ask Product Question
+                                  </button>
+                                  <button className="w-full text-[13px] py-1.5 border border-[#D5D9D9] rounded-lg hover:bg-gray-50 shadow-sm transition">
+                                    Write a review
+                                  </button>
+                                  <button className="w-full text-[13px] py-1.5 bg-[#FFD814] border border-[#FCD200] rounded-lg hover:bg-[#F7CA00] shadow-sm font-medium">
+                                    Buy it again
+                                  </button>
+                                </div> */}
+                              </div>
+                            );
+                          })}
+                          <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+                            <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">Shipping Address</p>
+                            <p className="text-[13px] text-gray-700 leading-relaxed">{order?.address}</p>
                           </div>
-                          <p className="text-sm font-medium">{formatMultiPrice(item?.total, "INR")}</p>
                         </div>
-                      ))}
-                    </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
 
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start text-sm gap-2">
-                    {/* Address */}
-                    <div className="max-w-[75%]">
-                        <p className="font-medium whitespace-nowrap">
-                        Delivery:
-                        </p>
-                        <p className="text-gray-600 line-clamp-2">
-                        {order?.address}
-                        </p>
+                  {!isOpen && (
+                    <div className="px-4 py-2 bg-white flex justify-between items-center text-[12px] text-gray-400">
+                      <p>{order?.product?.length} items in this order</p>
+                      <button onClick={() => toggleOrder(order?._id)} className="text-[#007185] hover:underline">Show items</button>
                     </div>
-
-                    {/* Date */}
-                    <p className="font-medium whitespace-nowrap">
-                        Placed on
-                        <p className="text-gray-600 line-clamp-2">
-                        <DateComponent item={order?.createdAt}/>
-                        </p> 
-                    </p>
-                    </div>
-
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </Layout>
   );
