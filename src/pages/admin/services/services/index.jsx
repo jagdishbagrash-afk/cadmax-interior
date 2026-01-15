@@ -44,7 +44,7 @@ export default function Index() {
                                   w-[200px] h-[42px] rounded-lg border border-gray-200 shadow-sm
                                   bg-white hover:bg-gray-50 transition-all duration-200"
               >
-                 Contact List
+           Craft for you
               </Link>
               <Link
                 href="/admin/services/type"

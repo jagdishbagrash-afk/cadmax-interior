@@ -160,12 +160,17 @@ export default function Index() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {classic?.map((p, idx) => (
-             <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
+                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="
+   w-full h-full object-cover object-center
+            transition-transform duration-700 ease-in-out
+            group-hover:rotate-45 group-hover:scale-120
+
+      "
                       />
                     </div>
 
@@ -174,7 +179,7 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3 ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>
@@ -190,12 +195,15 @@ export default function Index() {
                        tracking-[-0.02em] text-left uppercase Creato  mb-5 mt-5 ">MODERN</h2>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {modern?.map((p, idx) => (
-                 <Link href={`/concept/details/${p.slug}`} className="overflow-hidden">
+                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="w-full h-full object-cover object-center
+            transition-transform duration-700 ease-in-out
+            group-hover:rotate-45 group-hover:scale-90
+"
                       />
                     </div>
 
@@ -204,7 +212,7 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3  ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
                         {p.content}
                       </p>
                     </div>
@@ -221,12 +229,20 @@ export default function Index() {
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {contemporary?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
+                  <Link
+                    href={`/concept/details/${p.slug}`}
+                    key={p.id ?? idx}
+                    className="group overflow-hidden"
+                  >
                     <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="
+            w-full h-full object-cover object-center
+            transition-transform duration-700 ease-in-out
+            group-hover:rotate-45 group-hover:scale-180
+          "
                       />
                     </div>
 
@@ -235,13 +251,14 @@ export default function Index() {
                         {p.title}
                       </h3>
 
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
+                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3">
                         {p.content}
                       </p>
                     </div>
                   </Link>
                 ))}
               </div>
+
             </>
           )}
 

@@ -167,7 +167,12 @@ export default function Index() {
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="
+        w-full h-full object-cover object-center
+        transition-transform duration-700 ease-in-out
+      group-hover:rotate-90 group-hover:scale-110
+
+      "
                       />
                     </div>
 
@@ -197,7 +202,10 @@ export default function Index() {
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="   w-full h-full object-cover object-center
+        transition-transform duration-700 ease-in-out
+      group-hover:rotate-90 group-hover:scale-110
+"
                       />
                     </div>
 
@@ -228,7 +236,10 @@ export default function Index() {
                       <img
                         src={p.Image}
                         alt={p.title}
-                        className="w-full h-full object-cover object-center"
+                        className="   w-full h-full object-cover object-center
+        transition-transform duration-700 ease-in-out
+      group-hover:rotate-90 group-hover:scale-110
+"
                       />
                     </div>
 

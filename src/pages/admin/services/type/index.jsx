@@ -6,6 +6,7 @@ import Listing from "@/pages/api/Listing";
 import dataimage from "../../../../Assets/Images/c1.jpg"
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
+import Link from "next/link";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -37,6 +38,9 @@ export default function Index() {
             <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
               Concept Type List
             </h2>
+            <Link href="/admin/services/services" className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#ffffff] bg-black rounded-full p-2">
+              Concept Listing
+            </Link>
             <TypeAdd fetchDatas={fetchData} />
           </div>
 

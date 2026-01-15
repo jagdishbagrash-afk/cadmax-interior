@@ -22,7 +22,6 @@ export default function DesignLayout() {
     const id = router?.query?.slug;
     const { user } = useRole();
     console.log("user", user)
-
     const [project, setProject] = useState([]);
 
     // Fetch categories
@@ -66,9 +65,25 @@ export default function DesignLayout() {
     }, [
         project
     ])
+
+
+    useEffect(() => {
+        if (user && project?._id && project?.ServicesType?._id) {
+            setData({
+                User: user?._id || "692dcfbd4816433146e11abd",
+                TypeServices: project.ServicesType._id,
+                Services: project._id,
+                concept: project.concept || ""
+            });
+        }
+    }, [user, project]);
+
     const handleSubmit = async (e) => {
-        e.preventDefault();
+        if (e?.preventDefault) e.preventDefault();
+
+        if (loading) return;
         setLoading(true);
+
         try {
             const main = new Listing();
             const res = await main.AddServicesContact({
@@ -81,21 +96,40 @@ export default function DesignLayout() {
             if (res?.data?.status) {
                 toast.success(res?.data?.message);
             } else {
-                toast.error(res?.data?.message || "Invalid OTP");
+                toast.error(res?.data?.message || "Something went wrong");
             }
-            setLoading(false);
+
             setData({
                 User: "",
                 concept: "",
                 TypeServices: "",
                 Services: ""
-            })
+            });
         } catch (error) {
             toast.error("Verification failed");
+        } finally {
             setLoading(false);
-
         }
     };
+    useEffect(() => {
+        if (
+            router.query.autoSubmit === "true" &&
+            data.TypeServices &&
+            data.Services &&
+            data.User
+        ) {
+            handleSubmit();
+
+            router.replace(
+                `/concept/details/${id}`,
+                undefined,
+                { shallow: true }
+            );
+        }
+    }, [router.query.autoSubmit, data]);
+
+
+
 
     return (
         <Layout>
@@ -133,121 +167,95 @@ export default function DesignLayout() {
 
                 </div>
             </div>
-            <div className="w-full min-h-screen bg-white p-6">
+            <div className="w-full min-h-screen bg-white p-4 md:p-10 font-sans">
+                {/* Main Container */}
+                <div className=" ">
 
-                {/* Top Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Top Section: Image and Brief */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-0">
 
-                    {/* Selected Photo */}
-                    <div className=" flex justify-center items-center">
-                        <img
-                            src={project.Image}
-                            alt={project.title}
-                            className="w-full h-full object-cover transition-all duration-300"
-                        />
-
-                    </div>
-
-                    <div>
-                        {/* Design Brief */}
-                        <div className=" p-4">
-                            <h3 className="   font-[900]
-            text-[18px]
-            sm:text-[20px]
-            lg:text-[24px]
-            text-black mb-4
-            uppercase
-            Creato
-            leading-[110%]
-            tracking-[-0.02em]">{project.title}</h3>
-                            <p className=" font-[400]
-            text-[15px]
-            sm:text-[16px]
-            lg:text-[18px]
-            text-black mb-4
-            ">
-                                {project.content}
-                            </p>
+                        {/* Selected Photo Container */}
+                        <div className="relative group overflow-hidden bg-gray-200 aspect-square lg:aspect-auto">
+                            <img
+                                src={project.Image}
+                                alt={project.title}
+                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
                         </div>
-                        <MultipleImages  project={project}/>
+
+                        {/* Right Side Content */}
+                        <div className="p-4 lg:p-8 flex flex-col justify-between bg-white">
+                            <div>
+                                <h3 className="font-[900] text-xl md:text-4xl text-gray-900 mb-6 uppercase tracking-tight leading-tight">
+                                    {project.title}
+                                </h3>
+                                <div className="w-20 h-1 bg-black mb-6"></div>
+                                <p className="text-gray-600 text-lg leading-relaxed mb-8">
+                                    {project.content}
+                                </p>
+
+                                {/* Thumbnail Component */}
+                                <div className="mb-8">
+                                    <MultipleImages project={project} />
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row items-center gap-4">
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+
+                                        if (!user) {
+                                            toast.error("Please login first");
+                                            router.push(
+                                                `/login?redirect=/concept/details/${id}&autoSubmit=true`
+                                            );
+                                        } else {
+                                            handleSubmit(e);
+                                        }
+                                    }}
+                                    className="w-full sm:w-auto px-10 py-4 font-bold uppercase tracking-widest text-sm bg-black text-white hover:bg-gray-800"
+                                >
+                                    Craft for You
+                                </button>
 
 
-                        <div className="flex flex-wrap justify-center mt-3 sm:mt-5">
-                            <button
-                                disabled={loading}
-                                onClick={handleSubmit}
-                                className={`
-        px-4 
-        py-[6px]
-        font-[700] 
-        cursor-pointer 
-        Creato 
-        uppercase 
-        md:px-[30px] 
-        md:py-[10px] 
-        text-[13px]
-       bg-white text-[#171717] border-2 border-[#171717] shadow-md
-      `}
-                            >
-                                {loading ? "Loading.." : " craft for you"}
-
-                            </button>
+                            </div>
 
                         </div>
                     </div>
-                </div>
 
+                    {/* Bottom Section: Technical Details */}
+                    <div className="bg-gray-50 border-t border-gray-100 p-8 lg:p-12">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
 
+                            {/* Material Details */}
+                            <div className="space-y-2">
+                                <p className="font-black text-xs uppercase tracking-widest text-gray-400">Material Details</p>
+                                <p className="text-gray-800 font-medium text-lg leading-snug">
+                                    {project.material_details || "Premium Finish, LED Lights, Italian Marble"}
+                                </p>
+                            </div>
 
-                {/* Bottom Section */}
-                <div className=" mt-6 p-5">
+                            {/* Timeline */}
+                            <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                                <p className="font-black text-xs uppercase tracking-widest text-gray-400">Timeline</p>
+                                <p className="text-gray-800 font-medium text-lg">
+                                    {project?.timeline || "25 Days"}
+                                </p>
+                            </div>
 
-                    <p className=" font-[900]
-            text-[18px]
-            sm:text-[20px]
-            lg:text-[24px]
-            text-black mb-4
-            uppercase
-            Creato
-            leading-[110%]
-            tracking-[-0.02em]">Material Details :</p>
-                    <p className="font-[400]
-            text-[15px]
-            sm:text-[16px]
-            lg:text-[18px]
-            text-black mb-4 mb-3">{project.
-                            material_details
-                        }</p>
+                            {/* Design Cost */}
+                            <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                                <p className="font-black text-xs uppercase tracking-widest text-gray-400">Design Cost</p>
+                                <p className="text-black font-bold text-2xl">
+                                    {project?.cost || "₹ 1,20,000"}
+                                </p>
+                            </div>
 
-                    <p className=" font-[900]
-            text-[18px]
-            sm:text-[20px]
-            lg:text-[24px]
-            text-black mb-4
-            uppercase
-            Creato
-            leading-[110%]
-            tracking-[-0.02em]">Timeline :</p>
-                    <p className="font-[400]
-            text-[15px]
-            sm:text-[16px]
-            lg:text-[18px]
-            text-black mb-4 mb-3">{project?.timeline}</p>
-
-                    <p className=" font-[900]
-            text-[18px]
-            sm:text-[20px]
-            lg:text-[24px]
-            text-black mb-4
-            uppercase
-            Creato
-            leading-[110%]
-            tracking-[-0.02em]">Design Cost :</p>
-                    <p className="font-[400]
-            text-[15px]
-            sm:text-[16px]
-            lg:text-[18px]
-            text-black mb-4">{project?.cost}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </Layout>

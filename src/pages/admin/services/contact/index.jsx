@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import Listing from "@/pages/api/Listing";
 import AdminLayout from "../../common/AdminLayout";
+import Link from "next/link";
 
 export default function Index() {
     const [data, setData] = useState([]);
@@ -22,13 +23,17 @@ export default function Index() {
         fetchData();
     }, []);
     return (
-        <AdminLayout page={"Services Contact List"}>
+        <AdminLayout page={"Craft for you"}>
             <div className="px-4 py-2 lg:px-4 lg:py-2.5">
                 <div className="bg-white rounded-[20px] mb-[10px] p-2">
                     <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
-                        <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-                          Services  Contact  Listing
+                        <h2 className="Creato uppercase text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
+                            Craft for you
                         </h2>
+
+                        <Link href="/admin/services/services" className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#ffffff] bg-black rounded-full p-2">
+                          Concept Listing
+                        </Link>
                     </div>
                     {/* Table */}
                     <div className="overflow-x-auto rounded-xl border border-gray-200 mt-4">
