@@ -6,6 +6,9 @@ import { FiSearch, FiUser, FiShoppingBag } from "react-icons/fi";
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
+// import { MdOutlineAvTimer } from "react-icons/md";
+import { MdHistory } from "react-icons/md";
+import { MdOutlineSecurity } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
 import toast from "react-hot-toast";
@@ -17,7 +20,7 @@ export default function Header() {
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
-  console.log("cartItemsRedux", cartItemsRedux);
+  // console.log("cartItemsRedux", cartItemsRedux);
   // const cartCount = cartItemsRedux?.length || 0;
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
@@ -47,7 +50,7 @@ export default function Header() {
           href="/"
           className="text-xl font-extrabold tracking-tight text-black"
         >
-          {/* CADMAX */}
+          CADMAX
         </Link>
 
         {/* Center Menu */}
@@ -104,7 +107,23 @@ export default function Header() {
                 <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50">
                   <ul className="py-1">
                     <Link
-                      href="/user/setting"
+                      href="/orders"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <MdHistory size={24} />
+                      Order History
+                    </Link>
+
+                    <Link
+                      href="/security"
+                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                    >
+                      <MdOutlineSecurity size={24} />
+                        Security
+                    </Link>
+
+                    <Link
+                      href="/settings"
                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                       <IoSettingsOutline size={18} />
