@@ -10,14 +10,15 @@ import Layout from "../common/Layout";
 import Listing from "../api/Listing";
 import { useRouter } from "next/router";
 import { useRole } from "@/context/RoleContext";
-
+import Banner from "@/components/Banner";
+import BannerImages  from "../../Assets/Images/Frame18.jpg"
 export default function Index() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
   const { user } = useRole();
-  // console.log("cartItemsRedux", cartItemsRedux);
+  console.log("cartItemsRedux", cartItemsRedux);
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);
@@ -96,169 +97,170 @@ export default function Index() {
 
   return (
     <Layout>
-      <div className="w-full bg-white py-[50px] md:py-[70px] lg:py-[100px] text-black">
-        <div className="mx-auto container px-4">
-          <div className="flex flex-wrap -mx-4">
-            {/* LEFT FORM */}
-            <div className="w-full lg:w-6/12 px-4">
-              <div className="bg-[#F4F4F4] border border-gray-300">
-                <div className="px-4 pt-4 pb-4 border-b border-gray-300">
-                  <h2 className="font-normal text-3xl text-black">
-                    Your Details
-                  </h2>
-                </div>
+      <Banner Slider1={BannerImages}/>
+       <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black antialiased">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col lg:flex-row gap-12">
+          
+          {/* LEFT COLUMN: FORM */}
+          <div className="w-full lg:w-5/12">
+            <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm">
+              <div className="px-6 py-5 border-b border-gray-200">
+                <h2 className="text-2xl font-semibold tracking-tight">Shipping Details</h2>
+                <p className="text-sm text-gray-500 mt-1">Please enter your delivery information.</p>
+              </div>
 
-                <form className="px-4 py-6" onSubmit={handleSubmit}>
+              <form className="p-6" onSubmit={handleSubmit}>
+                <div className="space-y-6">
                   {/* NAME */}
-                  <div className="mb-5">
-                    <label className="text-base text-black mb-2 uppercase block">
-                      Name *
+                  <div>
+                    <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                      Full Name *
                     </label>
                     <input
+                      id="name"
                       type="text"
                       name="name"
+                      placeholder="John Doe"
+                      autoComplete="name"
                       value={formData.name}
                       onChange={handleChange}
-                      className="border border-gray-400 px-3 py-2 w-full text-black focus:outline-none"
+                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
                       required
                     />
                   </div>
 
                   {/* MOBILE */}
-                  <div className="mb-5">
-                    <label className="text-base text-black mb-2 uppercase block">
-                      Mobile *
+                  <div>
+                    <label htmlFor="mobile" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                      Mobile Number *
                     </label>
                     <input
-                      type="text"
+                      id="mobile"
+                      type="tel"
                       name="mobile"
+                      placeholder="+91 98765 43210"
+                      autoComplete="tel"
                       value={formData.mobile}
                       onChange={handleChange}
-                      className="border border-gray-400 px-3 py-2 w-full text-black focus:outline-none"
+                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
                       required
                     />
                   </div>
 
                   {/* ADDRESS */}
-                  <div className="mb-5">
-                    <label className="text-base text-black mb-2 uppercase block">
-                      Address *
+                  <div>
+                    <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                      Full Address *
                     </label>
                     <textarea
+                      id="address"
                       name="address"
+                      placeholder="House No, Street, Landmark, City, Pincode"
                       value={formData.address}
                       onChange={handleChange}
-                      className="border border-gray-400 px-3 py-2 w-full text-black focus:outline-none h-24"
+                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none h-32 resize-none"
                       required
                     />
                   </div>
+                </div>
 
-                  <button
-                    type="submit"
-                    className="bg-black text-white w-full py-3 mt-3 uppercase tracking-wide cursor-pointer"
-                  >
-                    {loading ? "Submitting..." : "Submit"}
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            {/* RIGHT CART */}
-            <div className="w-full lg:w-6/12 px-4 mt-6 lg:mt-0">
-              <div className="pt-4 pb-4 border-b border-gray-300">
-                <h2 className="font-normal text-3xl text-black">
-                  Your Items
-                </h2>
-              </div>
-
-              <table className="w-full mt-3">
-                <thead>
-                  <tr className="border-b border-gray-300">
-                    <td></td>
-                    <td className="py-3 text-black uppercase">Product</td>
-                    <td className="py-3 text-center text-black uppercase">
-                      QTY
-                    </td>
-                    <td className="py-3 text-right text-black uppercase">
-                      Amount
-                    </td>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {cartItemsRedux?.map((item, index) => (
-                    <tr key={index} className="border-b border-gray-300">
-                      <td className="py-3">
-                        <button
-                          className="text-red-600 cursor-pointer"
-                          onClick={() => handleRemove(item.id)}
-                        >
-                          <FaRegTrashCan size={14} />
-                        </button>
-                      </td>
-
-                      <td className="py-3">
-                        <div className="flex items-center">
-                          <div className="bg-gray-200 w-[70px]">
-                            <Image
-                              src={item?.imgUrl[0]}
-                              width={588}
-                              height={240}
-                              alt={item?.name}
-                              className="object-cover"
-                            />
-                          </div>
-                          <div className="pl-2 font-medium text-black capitalize">
-                            {item?.name}
-                          </div>
-                        </div>
-                      </td>
-
-                      <td className="text-center text-black">
-                        <div className="flex items-center justify-center gap-3">
-                          <button
-                            onClick={() => dispatch(decrementQty(item?.id))}
-                            className="border border-gray-400 p-1 hover:bg-gray-200 transition cursor-pointer"
-                            disabled={item.quantity === 1}
-                          >
-                            <FiMinus size={14} />
-                          </button>
-                          <span className="min-w-[20px] text-center font-medium">
-                            {item?.quantity}
-                          </span>
-                          <button
-                            onClick={() => dispatch(incrementQty(item?.id))}
-                            className="border border-gray-400 p-1 hover:bg-gray-200 transition cursor-pointer"
-                          >
-                            <FiPlus size={14} />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="text-right font-medium text-black">
-                        {formatMultiPrice(item.price * item.quantity, "INR")}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-
-                <tfoot>
-                  <tr className="border-b border-gray-300">
-                    <td
-                      colSpan={3}
-                      className="py-3 font-normal text-xl text-black"
-                    >
-                      Total
-                    </td>
-                    <td className="py-3 text-right font-medium text-black">
-                      {formatMultiPrice(totalPrice, "INR")}
-                    </td>
-                  </tr>
-                </tfoot>
-              </table>
+                <button
+                  type="submit"
+                  disabled={loading }
+                  className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
+                    ${loading 
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500" 
+                      : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
+                >
+                  {loading ? "Processing..." : "Complete Order"}
+                </button>
+              </form>
             </div>
           </div>
+
+          {/* RIGHT COLUMN: CART SUMMARY */}
+          <div className="w-full lg:w-7/12">
+            <div className="sticky top-10">
+              <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
+                Order Summary ({cartItemsRedux?.length || 0})
+              </h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-100">
+                        <th className="pb-3 text-left text-xs font-bold uppercase text-gray-400">Item</th>
+                        <th className="pb-3 text-center text-xs font-bold uppercase text-gray-400">Qty</th>
+                        <th className="pb-3 text-right text-xs font-bold uppercase text-gray-400">Total</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-100">
+                      {cartItemsRedux?.map((item) => (
+                        <tr key={item.id} className="group">
+                          <td className="py-4">
+                            <div className="flex items-center gap-4">
+                              <button
+                                onClick={() => handleRemove(item.id)}
+                                className="text-gray-400 hover:text-red-500 transition-colors"
+                                title="Remove Item"
+                              >
+                                <FaRegTrashCan size={16} />
+                              </button>
+                              <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100">
+                                <Image
+                                  src={item?.imgUrl[0]}
+                                  fill
+                                  alt={item?.name}
+                                  className="object-contain p-1"
+                                />
+                              </div>
+                              <span className="font-medium text-sm text-gray-900 line-clamp-2">
+                                {item?.name}
+                              </span>
+                            </div>
+                          </td>
+
+                          <td className="py-4 text-center">
+                            <div className="inline-flex items-center border border-gray-200 rounded-sm">
+                              <button
+                                onClick={() => dispatch(decrementQty(item?.id))}
+                                className="px-2 py-1 hover:bg-gray-100 disabled:opacity-30 transition"
+                                disabled={item.quantity === 1}
+                              >
+                                <FiMinus size={12} />
+                              </button>
+                              <span className="px-2 text-sm font-semibold w-8">{item?.quantity}</span>
+                              <button
+                                onClick={() => dispatch(incrementQty(item?.id))}
+                                className="px-2 py-1 hover:bg-gray-100 transition"
+                              >
+                                <FiPlus size={12} />
+                              </button>
+                            </div>
+                          </td>
+
+                          <td className="py-4 text-right font-semibold text-gray-900">
+                            {formatMultiPrice(item.price * item.quantity, "INR")}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot>
+                      <tr className="border-t-2 border-black">
+                        <td colSpan={2} className="py-6 text-lg font-bold">Total Amount</td>
+                        <td className="py-6 text-right text-xl font-extrabold text-black">
+                          {formatMultiPrice(totalPrice, "INR")}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+            </div>
+          </div>
+
         </div>
       </div>
+    </section>
     </Layout>
   );
 }

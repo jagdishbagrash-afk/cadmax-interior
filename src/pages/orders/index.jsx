@@ -6,6 +6,7 @@ import Image from "next/image";
 import { formatMultiPrice } from "@/components/ValueDataHook";
 import { FaChevronDown, FaSearch, FaCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 const STATUS_CONFIG = {
   pending: { color: "text-yellow-600 bg-yellow-50 border-yellow-200", label: "Pending" },
@@ -51,12 +52,14 @@ export default function OrderHistory() {
     return matchesStatus && matchesSearch;
   });
 
+  console.log("order?.product" , orders)
+
   return (
     <Layout>
       <div className="max-w-5xl mx-auto px-4 py-8 bg-white min-h-screen font-sans text-[#111]">
 
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
-          <h1 className="text-[28px] font-normal">Your Orders</h1>
+          <h1 className="text-[28px] font-normal">My Orders</h1>
           <div className="relative flex items-center w-full md:w-auto border border-[#888c8c] rounded-md shadow-sm overflow-hidden focus-within:ring-1 focus-within:ring-[#e77600] focus-within:border-[#e77600]">
             <div className="pl-3 text-gray-400"><FaSearch size={13} /></div>
             <input
@@ -161,14 +164,14 @@ export default function OrderHistory() {
                                   <div className="w-24 h-24 relative flex-shrink-0 border border-gray-100 rounded-md">
                                     <Image fill src={variantImg} alt="product" className="object-contain p-1" />
                                   </div>
-                                  <div className="flex-1">
-                                    <p className="text-[#007185] text-[15px] font-medium hover:underline cursor-pointer leading-snug">
+                                  <Link href={`/product/details/${item?.id?.slug}`} className="flex-1">
+                                    <p className="text-[#0000000] text-[15px] font-medium hover:underline cursor-pointer leading-snug">
                                       {item?.id?.title}
                                     </p>
                                     <p className="text-[12px] text-gray-500 mt-1 uppercase font-bold tracking-tight">Variant: {item.variant}</p>
                                     <p className="text-[14px] font-bold mt-2">{formatMultiPrice(item?.total, "INR")}</p>
                                     <p className="text-[12px] text-gray-400">Qty: {item.quantity}</p>
-                                  </div>
+                                  </Link>
                                 </div>
 
                                 {/* <div className="flex flex-col gap-2 w-full md:w-[200px]">
@@ -197,7 +200,7 @@ export default function OrderHistory() {
                   {!isOpen && (
                     <div className="px-4 py-2 bg-white flex justify-between items-center text-[12px] text-gray-400">
                       <p>{order?.product?.length} items in this order</p>
-                      <button onClick={() => toggleOrder(order?._id)} className="text-[#007185] hover:underline">Show items</button>
+                      <button  className="text-[#007185] hover:underline">Show items</button>
                     </div>
                   )}
                 </div>
