@@ -2,32 +2,36 @@ import Link from "next/link";
 import React from "react";
 
 export default function ProductCard({ item }) {
-
-  // ✅ get first available image safely
-  const image =
-    item?.variants?.find(v => v.images?.length)?.images[0];
+  const image = item?.variants?.find(v => v.images?.length)?.images;
 
   return (
     <Link href={`/product/details/${item?.slug}`}>
-      <div key={item?._id} className="group cursor-pointer">
 
-        <div className="w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
+        <div className="relative w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100 group cursor-pointer">
+
+          {/* Default image */}
           <img
-            src={image || "/no-image.png"}   // fallback if no image
+            src={image?.[0] || "/no-image.png"}
             alt={item?.title}
-            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
           />
+
+          {/* Hover image */}
+          <img
+            src={image?.[1] || image?.[0] || "/no-image.png"}
+            alt={item?.title}
+            className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          />
+
         </div>
-        {/* Product title */}
+
         <h3 className="mt-3 text-sm font-medium text-[#262A33] uppercase Creato">
           {item?.title}
         </h3>
-        {/* Price */}
+
         <p className="mt-1 text-base text-[#171717] font-extrabold uppercase Creato">
           ₹{item?.amount}
         </p>
-      </div>
     </Link>
   );
 }
-
