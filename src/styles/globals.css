@@ -58,3 +58,10 @@ body {
 /* Each image fade-down animation */
 
 
+.form-input {
+  @apply w-full h-11 rounded-lg bg-[#F4F6F8] px-4 text-gray-700 border border-[#F4F6F8] focus:outline-none focus:ring-2 focus:ring-indigo-500;
+}
+
+.form-select {
+  @apply w-full h-11 rounded-lg bg-[#F4F6F8] px-4 text-gray-700 border border-[#F4F6F8] focus:outline-none focus:ring-2 focus:ring-indigo-500;
+}

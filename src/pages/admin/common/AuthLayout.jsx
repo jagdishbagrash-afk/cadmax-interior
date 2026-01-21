@@ -11,7 +11,7 @@ export default function AuthLayout({ children, page, sidebar }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const router = useRouter();
 
-  const[User,setUser] =useState("")
+  const [User, setUser] = useState("")
 
   const handleLogout = () => {
     localStorage && localStorage.removeItem("token");
@@ -24,9 +24,14 @@ export default function AuthLayout({ children, page, sidebar }) {
     try {
       const main = new Listing();
       const response = await main.profileVerify(signal);
-      console.log("response0" , response)
+      console.log("response0", response)
       if (response.data) {
         setUser(response.data.data);
+      }
+      if (response?.data?.data?.role !== "admin") {
+        toast.error("Unauthorized access");
+        router.replace("/");
+        return;
       }
       // if (!response?.data?.data?.user?.email_verify) {
       //   router.push("/verify");

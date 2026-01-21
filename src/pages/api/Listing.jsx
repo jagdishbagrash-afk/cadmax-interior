@@ -9,6 +9,9 @@ class Listing extends Component {
   async Login(data) {
     return Api.post("/admin/login", data);
   }
+    async AdminProfileUpdate(data) {
+    return Api.post("/user/edit-profile", data);
+  }
   async profileVerify() {
     return Api.get("/user/profile")
   }

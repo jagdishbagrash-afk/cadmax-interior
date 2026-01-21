@@ -3,6 +3,7 @@ import AdminLayout from "../common/AdminLayout";
 import AdminManage from "./AdminManage";
 import Terms from "./Terms";
 import Privacy from "./Privacy";
+import ProfileIndex from "./ProfileIndex";
 
 export default function Index() {
   const [activeTab, setActiveTab] = useState("Profile");
@@ -69,7 +70,7 @@ export default function Index() {
       </div>
       <div className="px-3 md:px-8 lg:px-8 xl:px-12 pb-6 lg:pb-[30px] min-h-[75vh]">
         <div className="mt-0">
-          {activeTab === "admin" && <AdminManage />}
+          {activeTab === "Profile" && <ProfileIndex />}
           {activeTab === "term" && <Terms />}
           {activeTab === "privacy" && <Privacy />}
         </div>

@@ -9,7 +9,12 @@ const nextConfig = {
         hostname: 'cadmaxpro-buket.s3.ap-south-1.amazonaws.com',
         port: '',
         pathname: '/**',
-      }
+      },
+      {
+        protocol: "https",
+        hostname: "m.media-amazon.com",
+        pathname: "/**",
+      },
     ]
   }
 };

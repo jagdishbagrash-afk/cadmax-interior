@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react'
 import AdminLayout from './common/AdminLayout'
-import Listing from '../api/Listing';
 import { MdReviews } from 'react-icons/md';
 import { GiTeacher } from "react-icons/gi";
 import { PiStudentBold } from "react-icons/pi";
