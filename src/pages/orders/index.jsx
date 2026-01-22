@@ -52,7 +52,6 @@ export default function OrderHistory() {
     return matchesStatus && matchesSearch;
   });
 
-  console.log("order?.product" , orders)
 
   return (
     <Layout>
@@ -138,7 +137,7 @@ export default function OrderHistory() {
 
                     <div className="flex items-center gap-4">
                       <div className="text-right hidden sm:block">
-                        <p className="uppercase text-[10px] font-bold text-gray-500">Order # {order?._id.slice(-12).toUpperCase()}</p>
+                        <p className="uppercase text-[10px] font-bold text-gray-500">Order # {order?.orderId}</p>
                         <p className="text-[#007185] hover:underline">View details</p>
                       </div>
                       <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>

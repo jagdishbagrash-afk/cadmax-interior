@@ -41,13 +41,12 @@ console.log("data" ,data)
                     {/* TABLE */}
                     <div className="overflow-x-auto rounded-xl border border-gray-200 mt-4">
                         <table className="min-w-full divide-y divide-gray-200">
-                            <thead className="bg-gray-50 sticky top-0 z-10">
+                            <thead className="bg-gray-50 sticky top-0 z-10 text-center">
                                 <tr>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">#</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Profile</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Name</th>
-                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Phone</th>
-                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Email</th>
+                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Phone & Email</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Gender</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Status</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Created</th>
@@ -56,7 +55,7 @@ console.log("data" ,data)
                                 </tr>
                             </thead>
 
-                            <tbody className="bg-white divide-y divide-gray-100">
+                            <tbody className="bg-white divide-y divide-gray-100 text-center">
 
                                 {/* LOADING */}
                                 {loading && (
@@ -94,16 +93,12 @@ console.log("data" ,data)
 
                                         {/* PHONE */}
                                         <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            {item.phone}
-                                        </td>
-
-                                        {/* EMAIL */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            {item.email || "--"}
+                                            {item.phone}<br/>
+                                               {item.email || "--"}
                                         </td>
 
                                         {/* GENDER */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
+                                        <td className="uppercase px-4 py-3 text-[14px] font-semibold text-black ">
                                             {item.gender || "N/A"}
                                         </td>
 

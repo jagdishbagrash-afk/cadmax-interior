@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { MdSpaceDashboard, MdReviews, MdPayments } from "react-icons/md";
+import { MdSpaceDashboard, MdReviews, MdPayments, MdVerifiedUser, MdBorderAll, MdLabel, MdBookmarks, MdTask } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { IoIosMenu } from "react-icons/io";
@@ -53,26 +53,13 @@ function SideBar() {
                 <div className=" py-4 lg:py-5">
                     <div className="px-3 md:px-4 lg:px-6 uppercase text-[#727272] text-sm font-medium mb-4 lg:mb-5">MAIN MENU</div>
                     <ul className="mt-2 space-y-1 mb-10">
-                        {/* <Link
-                            href="/admin"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
+                           <Link
+                            href="/admin/user"
+                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
+                                     ${pathname === "/admin/user" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                            <MdSpaceDashboard size={20} />
-                            Dashboard
-                        </Link> */}
-                        <Link
-                            href="/admin/category"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6  gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/category" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <PiStudentFill size={20} />
-                            Category
-                        </Link>
-                        <Link
-                            href="/admin/subcategory"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/subcategory" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdReviews size={20} />
-                            Sub  Category
+                            <MdVerifiedUser size={20} />
+                            User
                         </Link>
                         <Link
                             href="/admin/product"
@@ -85,7 +72,7 @@ function SideBar() {
                             href="/admin/order"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/order" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                            <BsCartCheckFill size={20} />
+                            <MdBorderAll size={20} />
                             Product Order
                         </Link>
                         <Link
@@ -93,24 +80,17 @@ function SideBar() {
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/banner" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                            <AiFillProduct size={20} />
+                            <MdLabel size={20} />
                             Banners
                         </Link>
-                        <Link
-                            href="/admin/user"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/user" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            User
-                        </Link>
+                     
 
                         <Link
                             href="/admin/booking"
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/booking" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                            <AiFillProduct size={20} />
+                            <MdBookmarks size={20} />
                             Booking
                         </Link>
 
@@ -119,7 +99,7 @@ function SideBar() {
                             className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
                                      ${pathname === "/admin/project" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
                         >
-                            <AiFillProduct size={20} />
+                            <MdTask size={20} />
                             Project
                         </Link>
                         <Link

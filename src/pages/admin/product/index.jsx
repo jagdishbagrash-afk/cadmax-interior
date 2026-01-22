@@ -5,7 +5,7 @@ import Link from "next/link";
 import Listing from "@/pages/api/Listing";
 import moment from "moment";
 import { MdEdit, MdDelete } from "react-icons/md";
-import { FaUndo } from 'react-icons/fa'; 
+import { FaUndo } from 'react-icons/fa';
 import BlockUnblock from "../common/BlockUnblock";
 import { formatMultiPrice } from "@/components/ValueDataHook";
 
@@ -41,6 +41,18 @@ export default function index() {
           <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
             Product List
           </h2>
+          <Link
+            href="/admin/category"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
+          >
+            Category
+          </Link>
+          <Link
+            href="/admin/subcategory"
+            className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
+          >
+            Subcategory
+          </Link>
           <Link
             href="/admin/product/add"
             className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
@@ -146,7 +158,7 @@ export default function index() {
                             className="text-blue-500 hover:text-blue-700 cursor-pointer"
                             href={`/admin/product/edit?id=${item?._id}`}
                           >
-                            <MdEdit size={22}/>
+                            <MdEdit size={22} />
                           </Link>
                           <BlockUnblock
                             Id={item._id}

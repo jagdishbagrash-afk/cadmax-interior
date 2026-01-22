@@ -213,7 +213,7 @@ class Listing extends Component {
     return Api.post(`/project/delete/${data}`);
   }
   async deleteUser(data) {
-    return Api.post(`/user/delete/${data}`);
+    return Api.get(`/user/delete/${data}`);
   }
 
   async deleteBanner(data) {
