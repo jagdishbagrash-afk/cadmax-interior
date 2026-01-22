@@ -192,7 +192,6 @@ export default function Index() {
   };
 
   const ZoomImage = ({ src, onZoom }) => {
-    const [showLens, setShowLens] = useState(false);
     const LENS_SIZE = 120;
 
     const handleMove = (e) => {
@@ -209,52 +208,31 @@ export default function Index() {
         src,
         bgX: (x / (rect.width - LENS_SIZE)) * 100,
         bgY: (y / (rect.height - LENS_SIZE)) * 100,
-        rect,
       });
-
-      setShowLens(true);
     };
 
     return (
       <div
         className="relative w-full h-full cursor-crosshair"
-        onMouseEnter={() => setShowLens(true)}
-        onMouseLeave={() => {
-          setShowLens(false);
-          onZoom({ show: false });
-        }}
         onMouseMove={handleMove}
+        // Note: No onMouseLeave here anymore
       >
         <Image src={src} fill className="object-cover" alt="product" />
-
-        {showLens && (
-          <div
-            className="absolute border border-gray-400 bg-white/30 pointer-events-none"
-            style={{
-              width: LENS_SIZE,
-              height: LENS_SIZE,
-              left: "var(--lens-x)",
-              top: "var(--lens-y)",
-            }}
-          />
-        )}
       </div>
     );
   };
 
   const ZoomPreview = ({ zoom }) => {
-    if (!zoom?.show) return null;
+    // If zoom is null OR show is false, hide the component
+    if (!zoom || zoom.show === false) return null;
 
     return (
       <div
         className="fixed top-24 right-24 w-full max-w-[40vw] h-[520px] bg-white border rounded-lg shadow-2xl
-          z-[999999]
-          hidden lg:block
-          pointer-events-none
-        "
+        z-[999999] hidden lg:block pointer-events-none"
       >
         <div
-          className="w-full h-full border-transparent"
+          className="w-full h-full"
           style={{
             backgroundImage: `url(${zoom.src})`,
             backgroundRepeat: "no-repeat",
@@ -266,10 +244,12 @@ export default function Index() {
     );
   };
 
-  // console.log("selectedVariant", selectedVariant);
+  console.log("zoomData", zoomData);
   return (
     <Layout>
-      <div className="w-full py-14 flex flex-col justify-center">
+      <div className="w-full py-14 flex flex-col justify-center"
+       onHover={() => setZoomData(null)} // <--- KILL SWITCH HERE
+      >
         <div className="w-full max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
           <div className="bg-white">
             <p className="text-base text-[#4D5466] tracking-widest mb-6  uppercase">
@@ -283,7 +263,11 @@ export default function Index() {
               {/* Left */}
               <div className="w-full">
                 {/* MAIN IMAGE */}
-                <div className="w-full aspect-[4/5] relative rounded-lg overflow-visible">
+               {/* MAIN IMAGE CONTAINER */}
+                <div 
+                  className="w-full aspect-[4/5] relative rounded-lg overflow-visible"
+                  onMouseLeave={() => setZoomData(null)} // <--- KILL SWITCH HERE
+                >
                   <Swiper
                     autoplay={{
                       delay: 5000,
@@ -293,21 +277,11 @@ export default function Index() {
                     thumbs={{ swiper: thumbsSwiper }}
                     modules={[Autoplay, Thumbs]}
                     className="w-full h-full"
+                    onMouseEnter={() => {/* Optional: can set initial state here */}}
                   >
                     {selectedVariant?.images?.map((img, index) => (
                       <SwiperSlide key={index}>
-                        <div 
-                         className="w-full h-full relative"
-                         onMouseLeave={() => setZoomData({ show: false })}
-                        >
-                          {/* <Image
-                            src={img}
-                            alt={`Product image ${index + 1}`}
-                            fill
-                            className="object-cover cursor-pointer"
-                            priority={index === 0}
-                            onClick={() => handleShow(img, index)}
-                          /> */}
+                        <div className="w-full h-full relative">
                           <ZoomImage
                             src={img}
                             onZoom={setZoomData}
@@ -317,7 +291,6 @@ export default function Index() {
                     ))}
                   </Swiper>
                 </div>
-
                 {/* THUMBNAILS */}
                 <div className="mt-3">
                   <Swiper
