@@ -12,7 +12,6 @@ import Link from "next/link";
 
 /* ---------------- Reusable Section ---------------- */
 const ConceptSection = ({ title, data }) => {
-  console.log("data", data)
   if (!data?.length) return null;
 
   return (
@@ -39,11 +38,12 @@ const ConceptSection = ({ title, data }) => {
 
               {/* Hover image */}
               <img
-                src={
-                  p?.multiple_images?.length > 0
-                    ? p.multiple_images[0]
-                    : p?.Image || ProductListBanner?.src
-                }
+               src={
+  Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
+    ? p.multiple_images[0]
+    : p?.Image || ProductListBanner?.src
+}
+
 
                 alt={p?.title}
                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"

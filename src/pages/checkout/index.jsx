@@ -18,7 +18,6 @@ export default function Index() {
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const dispatch = useDispatch();
   const { user } = useRole();
-  console.log("cartItemsRedux", cartItemsRedux);
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);

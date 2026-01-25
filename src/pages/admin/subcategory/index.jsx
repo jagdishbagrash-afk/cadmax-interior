@@ -27,7 +27,6 @@ export default function Index() {
     fetchData();
   }, []);
 
-  console.log("data")
 
   return (
     <AdminLayout page={"SubCategory List"}>

@@ -9,7 +9,6 @@ export default function Index() {
         try {
             const main = new Listing();
             const response = await main.GetContact();
-            console.log("response", response)
             if (response.data?.data) {
                 setData(response.data.data?.contactget);
             }

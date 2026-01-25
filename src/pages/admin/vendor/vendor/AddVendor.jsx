@@ -7,7 +7,6 @@ import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
 
 export default function AddVendor({ fetchDatas, isEdit, item }) {
-    console.log("item" ,item)
     const [categroy, setCategory] = useState([]);
 
     const fetchVendorCategoryData = async () => {

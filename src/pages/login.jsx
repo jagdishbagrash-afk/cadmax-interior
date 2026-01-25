@@ -45,7 +45,6 @@ export default function Login() {
     }
     setLoading(false);
   };
-console.log("redirect" ,redirect)
   // ✅ Verify OTP
   const handleVerifyOTP = async (e) => {
     e.preventDefault();

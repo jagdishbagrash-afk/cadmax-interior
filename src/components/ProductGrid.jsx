@@ -4,12 +4,6 @@ import ProductCard from "@/pages/common/ProductCard";
 import Link from "next/link";
 
 export default function ProductGrid({ products = [], title, link }) {
-    console.log("products", products)
-
-    const productList = Array.isArray(products)
-        ? products
-        : products?.data || [];
-
     return (
         <section className="bg-[#fffff] py-4 md:py-8">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -31,11 +25,9 @@ export default function ProductGrid({ products = [], title, link }) {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {productList
-                        .slice(0, 4)
-                        .map((item, idx) => {
-                            const product = item?.product ?? item;
-
+                    {Array.isArray(products) &&
+                        products.slice(0, 4).map((item, idx) => {
+                            const product = item?.product ? item?.product : item;
                             return (
                                 <ProductCard
                                     key={product?._id || idx}
@@ -43,6 +35,7 @@ export default function ProductGrid({ products = [], title, link }) {
                                 />
                             );
                         })}
+
                 </div>
 
             </div>

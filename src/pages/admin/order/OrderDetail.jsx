@@ -7,7 +7,6 @@ export default function OrderDetail({ data }) {
   if (!data) return null;
   const [showPopup, setShowPopup] = useState(false);
   const handleClose = () => setShowPopup(false);
-  console.log("data", data);
   return (
     <>
       <div className="flex justify-center items-center">
@@ -20,7 +19,7 @@ export default function OrderDetail({ data }) {
         </button>
       </div>
       {showPopup && (
-       <Popup
+        <Popup
           isOpen={showPopup}
           onClose={handleClose}
           size="max-w-[900px]"

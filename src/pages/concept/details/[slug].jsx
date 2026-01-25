@@ -21,7 +21,6 @@ export default function DesignLayout() {
     const router = useRouter();
     const id = router?.query?.slug;
     const { user } = useRole();
-    console.log("user", user)
     const [project, setProject] = useState([]);
 
     // Fetch categories
@@ -43,7 +42,6 @@ export default function DesignLayout() {
         if (id) fetchData(id);
     }, [id]);
 
-    console.log("project", project)
 
 
     const [loading, setLoading] = useState(false)
@@ -129,7 +127,6 @@ export default function DesignLayout() {
     }, [router.query.autoSubmit, data]);
 
 
-    console.log("proe", project)
     const [selectedImage, setSelectedImage] = useState("");
 
     useEffect(() => {

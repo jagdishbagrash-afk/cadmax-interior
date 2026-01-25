@@ -59,7 +59,6 @@ export default function Related({ selectedId }) {
 
   ];
 
-  console.log("Project", Project);
 
   return (
     <div className="mt-8 py-8">

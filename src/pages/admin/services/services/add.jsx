@@ -28,7 +28,6 @@ export default function ServicesAdd() {
         fetchSubcategroyData();
       }, []);
     const router = useRouter();
-    console.log(router)
     const isEdit = router.query.id;
     const [formData, setFormData] = useState({
         title: "",
@@ -52,7 +51,6 @@ const[project ,setProject] = useState([]);
             const response = await main.ServciesDetails(isEdit);
             if (response.data?.data) {
                 const list = response.data.data || [];
-                console.log("list", list)
                 setProject(list || "")
                 setFormData({
                     title: list.title || "",
@@ -76,7 +74,6 @@ const[project ,setProject] = useState([]);
         if (isEdit) fetchData(isEdit);
     }, [isEdit]);
     const [datacategiroes, setDatacategiroes] = useState([]);
-    console.log("images", images)
     const fecthServicesData = async () => {
         try {
             const main = new Listing();
@@ -96,9 +93,6 @@ const[project ,setProject] = useState([]);
     const [isOpen, setIsOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
 
-
-
-    console.log("formData", formData)
     // useEffect(() => {
     //     if (isEdit && item) {
     //         setFormData({

@@ -25,7 +25,6 @@ const DesignConcept = () => {
     useEffect(() => {
         fetchData();
     }, []);
-    console.log("data", data)
     return (
         <section className="bg-white py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -40,7 +39,7 @@ const DesignConcept = () => {
                         <img
                             src={data[0]?.Image}
                             alt={data[0]?.name}
-                            className="w-full h-full md:h-[605px] object-cover transform hover:scale-105 transition duration-500"
+                            className="w-full h-full md:h-[630px] object-cover transform hover:scale-105 transition duration-500"
                         />
                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                             <h3

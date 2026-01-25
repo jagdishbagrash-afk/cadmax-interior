@@ -24,7 +24,6 @@ export default function AuthLayout({ children, page, sidebar }) {
     try {
       const main = new Listing();
       const response = await main.profileVerify(signal);
-      console.log("response0", response)
       if (response.data) {
         setUser(response.data.data);
       }

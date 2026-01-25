@@ -1,19 +1,15 @@
-import Banner from "@/components/Banner";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
 import Layout from "../common/Layout";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Listing from "../api/Listing";
 export default function Index() {
     const router = useRouter();
-    console.log("router", router.query.slug)
     const slug = router.query.slug;
     const [ProductDetail, setProductDetails] = useState([])
     const fetchData = async (slug) => {
         try {
             const main = new Listing();
             const response = await main.VendorCategoryList(slug);
-            console.log("response", response)
             if (response.data?.data) {
                 setProductDetails(response.data?.data);
             }
@@ -21,7 +17,6 @@ export default function Index() {
             console.log("Error:", error);
         }
     };
-    console.log("ProductDetail", ProductDetail)
     useEffect(() => {
         if (slug) fetchData(slug);
     }, [slug]);
@@ -43,7 +38,7 @@ export default function Index() {
                     <div className="space-y-2">
                         {/* SUBTITLE (Optional, adds professional touch) */}
                         <span className="text-white/80 text-[10px] sm:text-[12px] uppercase tracking-[0.3em] font-medium">
-                             Verified Professionals
+                            Verified Professionals
                         </span>
 
                         <h1 className="

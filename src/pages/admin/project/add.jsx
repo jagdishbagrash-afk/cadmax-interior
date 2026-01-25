@@ -8,7 +8,6 @@ import { useRouter } from "next/router";
 export default function Add() {
   const router = useRouter();
   const { id } = router.query;
-  console.log("id", id)
   const [form, setForm] = useState({
     title: "",
     content: "",
@@ -25,7 +24,6 @@ export default function Add() {
       const main = new Listing();
       const response = await main.getAllProjectId(id);
       const data = response?.data?.data;
-      console.log("data", data)
       if (data) {
         setForm({
           title: data.title || "",

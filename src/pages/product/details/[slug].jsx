@@ -244,7 +244,6 @@ export default function Index() {
     );
   };
 
-  console.log("zoomData", zoomData);
   return (
     <Layout>
       <div className="w-full py-14 flex flex-col justify-center"

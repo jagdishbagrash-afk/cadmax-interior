@@ -106,11 +106,9 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
 
   // Submit Handler
   const handleSubmit = async (e) => {
-    console.log("Hello")
     e.preventDefault();
     if (processing) return;
     setProcessing(true);
-    console.log("Hell2o")
     try {
       const main = new Listing();
       const submitFormData = new FormData();

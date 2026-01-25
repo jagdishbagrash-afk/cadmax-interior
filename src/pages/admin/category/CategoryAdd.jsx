@@ -11,7 +11,6 @@ import { toast } from "react-hot-toast";
 export default function AddCategory({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
-  console.log("item", item)
   // Single state for form data
   const [formData, setFormData] = useState({
     name: "",
@@ -85,11 +84,9 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
 
   // Submit Handler
   const handleSubmit = async (e) => {
-    console.log("Hello")
     e.preventDefault();
     if (processing) return;
     setProcessing(true);
-    console.log("Hell2o")
     try {
       const main = new Listing();
       const submitFormData = new FormData();
@@ -105,7 +102,6 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
       } else {
         response = await main.category(submitFormData);
       }
-      console.log("response", response)
       if (response?.data?.status) {
         toast.success(response.data.message);
         // Reset form data

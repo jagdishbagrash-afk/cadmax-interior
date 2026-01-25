@@ -13,7 +13,6 @@ export default function Index() {
         try {
             const main = new Listing();
             const response = await main.GetBestSeller();
-            console.log("response", response)
             if (response.data?.data) {
                 setbestseller(response.data.data);
             } else {

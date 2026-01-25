@@ -6,12 +6,10 @@ import Link from "next/link";
 
 export default function Index() {
     const [data, setData] = useState([]);
-    console.log("data" ,data)
     const fetchData = async () => {
         try {
             const main = new Listing();
             const response = await main.GetServicesContact();
-            console.log("response", response)
             if (response.data?.data) {
                 setData(response.data.data?.contactget);
             }

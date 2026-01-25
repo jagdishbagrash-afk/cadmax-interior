@@ -5,7 +5,6 @@ import Button from "../common/Button";
 import Slider1 from "../../Assets/Images/Slider1.png";
 
 export default function Slider() {
-  console.log("slider1", Slider1);
 
   const slides = [
     {

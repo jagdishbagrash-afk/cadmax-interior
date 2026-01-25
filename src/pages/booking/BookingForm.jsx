@@ -6,7 +6,6 @@ import { useRole } from "@/context/RoleContext";
 function BookingForm() {
   const [loading, setLoading] = useState(false)
   const { user } = useRole();
-  console.log("user", user)
 
 
   const [data, setData] = useState({
@@ -72,7 +71,6 @@ function BookingForm() {
     setData(updated);
   };
 
-  console.log("data", data)
   const handleSubmit = async (e) => {
     e.preventDefault();
 

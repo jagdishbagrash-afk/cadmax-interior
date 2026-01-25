@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function Vendor() {
-   
+
 
     const [data, setData] = useState([]);
 
@@ -28,7 +28,6 @@ export default function Vendor() {
         fetchData();
     }, []);
 
-    console.log("data", data)
     return (
         <div className="bg-[#FFFFFF] py-4 md:py-8 ">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -40,7 +39,7 @@ export default function Vendor() {
                     </h2>
 
                     <p className="text-[#4D5466] font-[500] text-[16px] md:text-[18px] leading-[100%] tracking-[-0.02em] md:max-w-[55%] text-center md:text-left Creato">
-                       Every Cadmax project includes detailed 3D renders that depict scale, lighting, and material texture — eliminating uncertainty and enabling clients to make informed decisions before execution begins.
+                        Every Cadmax project includes detailed 3D renders that depict scale, lighting, and material texture — eliminating uncertainty and enabling clients to make informed decisions before execution begins.
                     </p>
                 </div>
 
@@ -61,7 +60,7 @@ export default function Vendor() {
                                 <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium Creato tracking-[0.05em]">
                                     {p.name}
                                 </h3>
-                               
+
                             </div>
                         </Link>
                     ))}

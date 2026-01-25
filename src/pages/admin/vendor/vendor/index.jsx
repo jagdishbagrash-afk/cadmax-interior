@@ -15,7 +15,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.vendorList();
-      console.log("response", response)
       if (response.data?.data) {
         setData(response.data.data);
       }
@@ -27,7 +26,6 @@ export default function Index() {
   useEffect(() => {
     fetchData();
   }, []);
-  console.log("data", data)
 
   return (
     <AdminLayout page={"Vendor List"}>
