@@ -242,6 +242,13 @@ class Listing extends Component {
     return Api.get(`/get-booking`, data);
   }
 
+    async GetBestSeller(data) {
+    return Api.get(`/common/bestseller`, data);
+  }
+ 
+    async GetLastproduct(data) {
+    return Api.get(`/common/product`, data);
+  }
   async GetContact(data) {
     return Api.get(`/contact-get`, data);
   }

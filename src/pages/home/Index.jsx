@@ -1,6 +1,6 @@
 import AOS from "aos";
 import "aos/dist/aos.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "swiper/css";
 import "swiper/css/effect-fade";
 import "swiper/css/navigation";
@@ -16,6 +16,7 @@ import Sliderimage2 from "../../Assets/Images/seller3.jpg";
 import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import About from "./About";
 import Slider2 from "./Slider2";
+import Listing from "../api/Listing";
 
 
 function Index() {
@@ -24,42 +25,35 @@ function Index() {
     AOS.init();
     AOS.refresh();
   }, []);
+    const [bestseller, setbestseller] = useState("")
 
-  const sampleProducts = [
-    {
-      id: 1,
-      title: "BELMONT DEEP-SEAT CONTEMPORARY SOFA",
-      price: "₹68,500",
-      image: Sliderimage2?.src
 
-    },
-    {
-      id: 2,
-      title: "MONARCH BRUSHED-BRASS ARCHED FLOOR LAMP",
-      price: "₹22,300",
-      image: Sliderimage?.src
-      ,
-    },
-    {
-      id: 3,
-      title: "HERITAGE HANDWOVEN TEXTURED UPHOLSTERY CUSHION SET",
-      price: "₹35,750",
-      image: Sliderimage1?.src
-    },
-    {
-      id: 4,
-      title: "AURELUM LARGE-FORM SCULPTED CERAMIC CENTERPIECE VASE",
-      price: "₹85,000",
-      image: Sliderimage3?.src
+    const fetchData = async () => {
+        try {
+            const main = new Listing();
+            const response = await main.GetBestSeller();
+            console.log("response", response)
+            if (response.data?.data) {
+                setbestseller(response.data.data);
+            } else {
+                setbestseller([]);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+            setbestseller([]);
+        }
+    };
 
-    },
-  ];
+    useEffect(() => {
+        fetchData();
+    }, []);
+
 
   return (
     <>
       <Slider />
       <Servcies />
-      <ProductGrid products={sampleProducts} />
+      <ProductGrid products={bestseller} link={"best-seller"}/>
       <DesignConcept />
       <About/>
       <ContactStyling />

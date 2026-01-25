@@ -1,6 +1,10 @@
 import React, { useEffect, useState } from "react";
 import Listing from "../api/Listing";
 import Link from "next/link";
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/css";
+import "swiper/css/autoplay";
+import { Autoplay } from "swiper/modules";
 
 const DesignConcept = () => {
     const [data, setData] = useState([]);
@@ -32,7 +36,7 @@ const DesignConcept = () => {
                 {/* Grid Layout */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {/* First tall image */}
-                    <Link       href={`/concept/${data[0]?.slug}`} className="sm:row-span-2 relative overflow-hidden">
+                    <Link href={`/concept/${data[0]?.slug}`} className="sm:row-span-2 relative overflow-hidden">
                         <img
                             src={data[0]?.Image}
                             alt={data[0]?.name}
@@ -49,27 +53,48 @@ const DesignConcept = () => {
                     </Link>
 
                     {/* Remaining 4 images */}
-                    {data?.slice(1)?.map((item) => (
-                        <Link
-                        href={`/concept/${item?.slug}`}
-                            key={item._id}
-                            className="relative overflow-hidden group h-48 sm:h-56 lg:h-[300px]"
+                    <div className="lg:col-span-2">
+                        <Swiper
+                            slidesPerView={1}
+                            spaceBetween={12}
+                            autoplay={{ delay: 2500, disableOnInteraction: false }}
+                            loop
+                            modules={[Autoplay]}
                         >
-                            <img
-                                src={item.Image}
-                                alt={item.name}
-                                className="w-full h-full lg:h-[300px] object-cover transform group-hover:scale-105 transition duration-500"
-                            />
-                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                <h3
-                                    className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato"
+                            {data
+                                ?.slice(1)
+                                .reduce((acc, _, i, arr) => {
+                                    if (i % 4 === 0) acc.push(arr.slice(i, i + 4));
+                                    return acc;
+                                }, [])
+                                .map((group, idx) => (
+                                    <SwiperSlide key={idx}>
+                                        <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[620px]">
+                                            {group.map((item) => (
+                                                <Link
+                                                    key={item?._id}
+                                                    href={`/concept/${item?.slug}`}
+                                                    className="relative overflow-hidden group"
+                                                >
+                                                    <img
+                                                        src={item?.Image}
+                                                        alt={item?.name}
+                                                        className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
+                                                    />
 
-                                >
-                                    {item.name}
-                                </h3>
-                            </div>
-                        </Link>
-                    ))}
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                                                        <h3 className="text-white font-[900] uppercase text-[16px] Creato">
+                                                            {item?.name}
+                                                        </h3>
+                                                    </div>
+                                                </Link>
+                                            ))}
+                                        </div>
+                                    </SwiperSlide>
+                                ))}
+                        </Swiper>
+                    </div>
+
                 </div>
             </div>
         </section>

@@ -10,6 +10,62 @@ import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 
+const ConceptSection = ({ title, data }) => {
+  console.log("data", data)
+  if (!data?.length) return null;
+
+  return (
+    <>
+      <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px]
+        tracking-[-0.02em] uppercase Creato mb-5 mt-5">
+        {title}
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {data.map((p) => (
+          <Link
+            key={p._id}
+            href={`/concept/details/${p.slug}`}
+            className="overflow-hidden group"
+          >
+            <div className="relative w-full h-[400px] md:h-[480px] bg-gray-100 overflow-hidden">
+
+              <img
+                src={p.Image || ProductListBanner?.src}
+                alt={p?.title}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+              />
+
+              {/* Hover image */}
+              <img
+                src={
+                  p?.multiple_images?.length > 0
+                    ? p.multiple_images[0]
+                    : p?.Image || ProductListBanner?.src
+                }
+
+                alt={p?.title}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+              />
+            </div>
+
+            <div className="pt-2">
+              <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
+                {p.title}
+              </h3>
+
+              <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed
+                line-clamp-3">
+                {p.content}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
+  );
+};
+
 export default function Index() {
   const router = useRouter();
   const id = router?.query?.slug;
@@ -153,115 +209,9 @@ export default function Index() {
       {/* Services Grid */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
-          {classic.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato mb-5  ">NEO CLASSIC</h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {classic?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="
-                        w-full h-full object-cover object-center
-                                  transition-transform duration-700 ease-in-out
-                                  group-hover:rotate-45 group-hover:scale-120
-
-                            "
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3  ">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
-          {modern.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato  mb-5 mt-5 ">MODERN</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {modern?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="w-full h-full object-cover object-center
-            transition-transform duration-700 ease-in-out
-            group-hover:rotate-45 group-hover:scale-90
-"
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
-          {contemporary.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato mb-5 mt-5 ">CONTEMPORARY</h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {contemporary?.map((p, idx) => (
-                  <Link
-                    href={`/concept/details/${p.slug}`}
-                    key={p.id ?? idx}
-                    className="group overflow-hidden"
-                  >
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="
-            w-full h-full object-cover object-center
-            transition-transform duration-700 ease-in-out
-            group-hover:rotate-45 group-hover:scale-180
-          "
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-
-            </>
-          )}
-
+          <ConceptSection title="NEO CLASSIC" data={classic} />
+          <ConceptSection title="MODERN" data={modern} />
+          <ConceptSection title="CONTEMPORARY" data={contemporary} />
         </div>
       </section>
     </Layout>

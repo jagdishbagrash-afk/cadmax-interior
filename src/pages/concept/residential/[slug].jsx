@@ -10,139 +10,160 @@ import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 
+/* ---------------- Reusable Section ---------------- */
+const ConceptSection = ({ title, data }) => {
+  console.log("data", data)
+  if (!data?.length) return null;
+
+  return (
+    <>
+      <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px]
+        tracking-[-0.02em] uppercase Creato mb-5 mt-5">
+        {title}
+      </h2>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {data.map((p) => (
+          <Link
+            key={p._id}
+            href={`/concept/details/${p.slug}`}
+            className="overflow-hidden group"
+          >
+            <div className="relative w-full h-[400px] md:h-[480px] bg-gray-100 overflow-hidden">
+
+              <img
+                src={p.Image || ProductListBanner?.src}
+                alt={p?.title}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+              />
+
+              {/* Hover image */}
+              <img
+                src={
+                  p?.multiple_images?.length > 0
+                    ? p.multiple_images[0]
+                    : p?.Image || ProductListBanner?.src
+                }
+
+                alt={p?.title}
+                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+              />
+            </div>
+
+            <div className="pt-2">
+              <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
+                {p.title}
+              </h3>
+
+              <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed
+                line-clamp-3">
+                {p.content}
+              </p>
+            </div>
+          </Link>
+        ))}
+      </div>
+    </>
+  );
+};
+
+/* ---------------- Main Page ---------------- */
 export default function Index() {
   const router = useRouter();
-  const id = router?.query?.slug;
+  const slug = router?.query?.slug;
 
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [project, setProject] = useState([]);
-
-
-  // Fetch categories
-  const fetchData = async (id) => {
-    try {
-      const main = new Listing();
-      const response = await main.ServciesType(id);
-
-      if (response.data?.data) {
-        const list = response.data.data?.Residentialservices || [];
-        setCategories(list);
-
-        if (list.length > 0) {
-          const matched = list.find(
-            (item) => item._id === id || item.slug === id
-          );
-
-          if (matched) {
-            setSelectedId(matched._id);
-          } else {
-            setSelectedId(list[0]._id);
-          }
-        }
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) fetchData(id);
-  }, [id]);
 
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
   const [contemporary, setContemporary] = useState([]);
 
-  // Fetch Project Based on Selected
-  const fetchProjectData = async () => {
-    if (!selectedId) return;
+  /* -------- Fetch Categories -------- */
+  const fetchCategories = async (slug) => {
     try {
       const main = new Listing();
-      const response = await main.GetAllServicesType(selectedId);
-      const data = response?.data?.data;
+      const res = await main.ServciesType(slug);
+      const list = res?.data?.data?.Residentialservices || [];
 
-      if (data && Array.isArray(data)) {
+      setCategories(list);
 
-        // neo_classic
-        const classicData = data.filter(item => item.concept === "neo_classic");
-        setClassic(classicData);
-
-        // modern
-        const modernData = data.filter(item => item.concept === "modern");
-        setModern(modernData);
-
-        // contemporary
-        const contemporaryData = data.filter(item => item.concept === "contemporary");
-        setContemporary(contemporaryData);
+      if (list.length) {
+        const match = list.find(
+          (i) => i._id === slug || i.slug === slug
+        );
+        setSelectedId(match?._id || list[0]._id);
       }
-
-    } catch (error) {
-      console.log("Error:", error);
+    } catch (err) {
+      console.log("Category Error:", err);
     }
   };
 
   useEffect(() => {
-    fetchProjectData();
+    if (slug) fetchCategories(slug);
+  }, [slug]);
+
+  /* -------- Fetch Projects -------- */
+  const fetchProjects = async () => {
+    if (!selectedId) return;
+
+    try {
+      const main = new Listing();
+      const res = await main.GetAllServicesType(selectedId);
+      const data = res?.data?.data || [];
+
+      setClassic(data.filter(i => i.concept === "neo_classic"));
+      setModern(data.filter(i => i.concept === "modern"));
+      setContemporary(data.filter(i => i.concept === "contemporary"));
+    } catch (err) {
+      console.log("Project Error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
   }, [selectedId]);
-
-
-
 
   return (
     <Layout>
-      {/* Swiper Category Slider */}
+
+      {/* -------- Category Slider -------- */}
       <div className="w-full bg-black py-3">
         <Swiper
           spaceBetween={14}
-          loop={true}
+          loop
           speed={1000}
           autoplay={{ delay: 1800, disableOnInteraction: false }}
           modules={[Autoplay]}
-          grabCursor={true}
+          grabCursor
           breakpoints={{
             320: { slidesPerView: 2 },
             640: { slidesPerView: 3 },
             768: { slidesPerView: 4 },
           }}
         >
-          {categories?.map((item) => (
+          {categories.map((item) => (
             <SwiperSlide key={item._id}>
               <div
                 onClick={() => {
                   setSelectedId(item._id);
-                  // 🔥 URL SLUG CHANGE HERE
-                  router.push(
-                    `/concept/residential/${item?.slug}`,
-                    undefined,
-                    { shallow: true }
-                  );
+                  router.push(`/concept/residential/${item.slug}`, undefined, { shallow: true });
                 }}
-                className="relative h-[120px] md:h-[140px] lg:h-[150px] rounded-md overflow-hidden cursor-pointer transition-all duration-300"
+                className="relative h-[120px] md:h-[140px] lg:h-[150px]
+                rounded-md overflow-hidden cursor-pointer"
               >
                 <img
                   src={item.Image || ProductListBanner?.src}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-all duration-300"
+                  className="w-full h-full object-cover"
                 />
 
-                <div
-                  className={`absolute inset-0 transition-all duration-300
-                    ${selectedId === item._id
-                      ? "bg-black/20"
-                      : "bg-black/55 hover:bg-black/30"
-                    }`}
-                />
+                <div className={`absolute inset-0
+                  ${selectedId === item._id ? "bg-black/20" : "bg-black/55 hover:bg-black/30"}`} />
 
-                <div className="absolute inset-0 flex items-center justify-center px-2">
-                  <h1
-                    className={`text-white text-[11px] md:text-[12px] lg:text-[13px]
-                    font-bold uppercase tracking-wide leading-tight text-center
-                    ${selectedId === item._id
-                        ? "text-yellow-300 scale-105"
-                        : "text-gray-200"
-                      }`}
-                  >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h1 className={`text-white text-[11px] md:text-[13px] font-bold uppercase
+                    ${selectedId === item._id ? "text-yellow-300" : "text-gray-200"}`}>
                     {item.title}
                   </h1>
                 </div>
@@ -152,112 +173,12 @@ export default function Index() {
         </Swiper>
       </div>
 
-      {/* Services Grid */}
+      {/* -------- Sections -------- */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
-          {classic.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato mb-5  ">NEO CLASSIC</h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {classic?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="
-        w-full h-full object-cover object-center
-        transition-transform duration-700 ease-in-out
-      group-hover:rotate-90 group-hover:scale-110
-
-      "
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3 line-clamp-3  ">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
-          {modern.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato  mb-5 mt-5 ">MODERN</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {modern?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="   w-full h-full object-cover object-center
-        transition-transform duration-700 ease-in-out
-      group-hover:rotate-90 group-hover:scale-110
-"
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  line-clamp-3  ">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
-          {contemporary.length > 0 && (
-            <>
-              <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px] leading-[100%] 
-                       tracking-[-0.02em] text-left uppercase Creato mb-5 mt-5 ">CONTEMPORARY</h2>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {contemporary?.map((p, idx) => (
-                  <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
-                    <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
-                      <img
-                        src={p.Image}
-                        alt={p.title}
-                        className="   w-full h-full object-cover object-center
-        transition-transform duration-700 ease-in-out
-      group-hover:rotate-90 group-hover:scale-110
-"
-                      />
-                    </div>
-
-                    <div className="pt-2">
-                      <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                        {p.title}
-                      </h3>
-
-                      <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3   line-clamp-3 ">
-                        {p.content}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </>
-          )}
-
+          <ConceptSection title="NEO CLASSIC" data={classic} />
+          <ConceptSection title="MODERN" data={modern} />
+          <ConceptSection title="CONTEMPORARY" data={contemporary} />
         </div>
       </section>
     </Layout>

@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import end from "../../Assets/Images/end.jpg";
 import ligithing from "../../Assets/Images/ligithing.jpg";
 import Button from "../common/Button";
@@ -18,10 +19,21 @@ export default function Services() {
           <h2 className="text-[#ffffff] font-[900] text-[15px] md:text-[20px] leading-[100%] tracking-[-0.02em] mb-3 md:mb-6 uppercase Creato max-w-[550px] mx-auto">
             CONTEMPORARY FURNITURE, LIGHTING, AND DECOR FOR DAILY USE.
           </h2>
-          <Button
-            title={" SHOP NOW"}
-            classes={"bg-transparent text-white border border-white"}
-          />
+          <Link href="/product" className="
+           px-4 
+        py-[6px]
+        font-[700] 
+        cursor-pointer 
+        Creato 
+        uppercase 
+        md:px-[30px] 
+        md:py-[10px] 
+        text-[13px]
+        bg-transparent text-white border border-white
+          ">
+            SHOP NOW
+          </Link>
+
         </div>
       </div>
       <div
@@ -36,10 +48,21 @@ export default function Services() {
           <h2 className="text-[#ffffff] font-[900] text-[15px] md:text-[20px] leading-[100%] tracking-[-0.02em] mb-3 md:mb-6 uppercase Creato max-w-[550px] mx-auto">
             RESIDENTIAL AND COMMERCIAL INTERIORS DELIVERED END-TO-END.
           </h2>
-          <Button
-            title={"VIEW SERVICES"}
-            classes={"bg-transparent text-white border border-white"}
-          />
+          <Link href="/concept" className="
+           px-4 
+        py-[6px]
+        font-[700] 
+        cursor-pointer 
+        Creato 
+        uppercase 
+        md:px-[30px] 
+        md:py-[10px] 
+        text-[13px]
+        bg-transparent text-white border border-white
+          ">
+            VIEW CONCEPT
+          </Link>
+
         </div>
       </div>
     </div>

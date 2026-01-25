@@ -9,6 +9,7 @@ import Slider2 from "../../Assets/Images/swiper.jpg"
 import Frame18 from "../../Assets/Images/Frame18.jpg"
 
 import Button from "../common/Button";
+import Link from "next/link";
 
 export default function About() {
     const router = useRouter();
@@ -17,17 +18,20 @@ export default function About() {
         {
             front: Slider1?.src,
             title: "Residential Interior Design & Complete Full-Home Spatial Development",
-            button: "Explore Residential"
+            button: "Explore Residential",
+            link: "/concept"
         },
         {
             front: Slider2?.src,
             title: "Commercial Interior Planning, Brand-Aligned Layouts & Functional Space Execution",
-            button: "Explore Commercial"
+            button: "Explore Commercial",
+            link: "/concept"
         },
         {
             front: Frame18?.src,
             title: "Completed Interior Projects with Verified On-Site Finishing & Delivered Outcomes",
-            button: "View Projects"
+            button: "View Projects",
+            link: "/project"
         },
 
     ];
@@ -53,10 +57,21 @@ export default function About() {
                                 {item?.title}
                             </h3>
 
-                            <Button
-                                title={item?.button}
-                                classes={"bg-transparent text-white border border-white"}
-                            />
+                            <Link href={item?.link} className="
+           px-4 
+        py-[6px]
+        font-[700] 
+        cursor-pointer 
+        Creato 
+        uppercase 
+        md:px-[30px] 
+        md:py-[10px] 
+        text-[13px]
+        bg-transparent text-white border border-white
+          ">
+                                {item?.button}
+                            </Link>
+
                         </div>
                     </div>
                 </div>
