@@ -12,8 +12,6 @@ import Slider from "./Slider";
 import Slider2 from "./Slider2";
 import Listing from "../api/Listing";
 import About from "./About";
-
-
 function Index() {
 
   useEffect(() => {
@@ -46,7 +44,7 @@ function Index() {
     <>
       <Slider />
       <Servcies />
-      {/* <ProductGrid products={bestseller}  link={"/best-seller"} /> */}
+      <ProductGrid products={bestseller} link={"/best-seller"} />
       <DesignConcept />
       <About />
       <ContactStyling />
