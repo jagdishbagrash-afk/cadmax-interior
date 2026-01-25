@@ -8,7 +8,7 @@ import Listing from "../api/Listing";
 export default function Index() {
     const [bestseller, setbestseller] = useState([])
 
-console.log("bestseller" ,bestseller)
+    console.log("bestseller", bestseller)
     const fetchData = async () => {
         try {
             const main = new Listing();
@@ -35,10 +35,10 @@ console.log("bestseller" ,bestseller)
             <div className="bg-[#FFFFFF] py-4 md:py-8 ">
                 <div className="container mx-auto px-4 max-w-[1430px]">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                       {(Array.isArray(bestseller) ? bestseller : []).map((item, idx) => {
-    const product = item?.product ?? item;
-    return <ProductCard key={product?._id || idx} item={product} />;
-})}
+                        {(Array.isArray(bestseller) ? bestseller : []).map((item, idx) => {
+                            const product = item?.product ?? item;
+                            return <ProductCard key={product?._id || idx} item={product} />;
+                        })}
 
 
                     </div>
