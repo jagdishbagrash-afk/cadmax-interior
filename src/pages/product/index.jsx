@@ -56,9 +56,9 @@ function Index() {
                 {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
                 <ThreeBanner />
                 <FeaturedCategories />
-                <ProductGrid products={bestseller} title={"OUR BEST SELLER"} link={"/best-seller"} />
+                {/* <ProductGrid products={bestseller} title={"OUR BEST SELLER"} link={"/best-seller"} /> */}
                 {/* <Services /> */}
-                <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
+                {/* <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} /> */}
                 {/* <Shop /> */}
                 {/* <ProductGrid products={sampleOfferProducts} title={"top sales products "} /> */}
                 <ContactStyling />
