@@ -26,7 +26,7 @@ export default function ProductGrid({ products = [], title, link }) {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.isArray(products) &&
-                        products.slice(0, 4).map((item, idx) => {
+                        products?.slice(0, 4)?.map((item, idx) => {
                             const product = item?.product ? item?.product : item;
                             return (
                                 <ProductCard
