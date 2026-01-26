@@ -10,6 +10,7 @@ import { addItem } from "@/redux/cartSlice";
 import Related from "../Related";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
+import { EasyZoomOnHover } from "easy-magnify";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, Navigation, Thumbs } from "swiper/modules";
 import "swiper/css";
@@ -259,66 +260,75 @@ export default function Index() {
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Left */}
-              <div className="w-full">
-                {/* MAIN IMAGE */}
-               {/* MAIN IMAGE CONTAINER */}
-                <div 
-                  className="w-full aspect-[4/5] relative rounded-lg overflow-visible"
-                  onMouseLeave={() => setZoomData(null)} // <--- KILL SWITCH HERE
-                >
+              <div className="flex gap-4 w-full">
+
+                {/* ================= LEFT: THUMBNAILS ================= */}
+                <div className="w-[80px]">
                   <Swiper
-                    autoplay={{
-                      delay: 5000,
-                      disableOnInteraction: false,
-                      pauseOnMouseEnter: true,
-                    }}
-                    thumbs={{ swiper: thumbsSwiper }}
-                    modules={[Autoplay, Thumbs]}
-                    className="w-full h-full"
-                    onMouseEnter={() => {/* Optional: can set initial state here */}}
+                    direction="vertical"
+                    slidesPerView={5}
+                    spaceBetween={10}
+                    watchSlidesProgress
+                    onSwiper={setThumbsSwiper}
+                    modules={[Thumbs]}
+                    className="h-[500px]"
                   >
-                    {selectedVariant?.images?.map((img, index) => (
-                      <SwiperSlide key={index}>
-                        <div className="w-full h-full relative">
-                          <ZoomImage
+                    {selectedVariant?.images && selectedVariant?.images?.map((img, index) => (
+                      <SwiperSlide
+                        key={index}
+                        className="cursor-pointer"
+                        onMouseEnter={() => setCurrentIndex(index)}
+                        onClick={() => setCurrentIndex(index)}
+                      >
+                        <div
+                          className={`relative aspect-square rounded-md overflow-hidden border
+                            ${
+                              currentIndex === index
+                                ? "border-black"
+                                : "border-gray-300 hover:border-black"
+                            }`}
+                        >
+                          <Image
                             src={img}
-                            onZoom={setZoomData}
+                            alt={`Thumbnail ${index + 1}`}
+                            fill
+                            className="object-cover"
                           />
                         </div>
                       </SwiperSlide>
                     ))}
                   </Swiper>
                 </div>
-                {/* THUMBNAILS */}
-                <div className="mt-3">
-                  <Swiper
-                    onSwiper={setThumbsSwiper}
-                    slidesPerView={5}
-                    spaceBetween={10}
-                    watchSlidesProgress
-                    modules={[Thumbs]}
-                    className="w-full"
-                  >
-                    {selectedVariant?.images &&
-                      selectedVariant?.images?.map((img, index) => (
-                        <SwiperSlide key={index} className="cursor-pointer">
-                          <div className="aspect-square relative rounded-md overflow-hidden border border-gray-200 hover:border-black">
-                            <Image
-                              src={img}
-                              alt={`Thumbnail ${index + 1}`}
-                              fill
-                              className="object-cover"
-                            />
-                          </div>
-                        </SwiperSlide>
-                      ))}
-                  </Swiper>
+
+                {/* ================= RIGHT: MAIN IMAGE + ZOOM ================= */}
+                <div className="flex-1 max-w-[500px]">
+                  <div className="relative aspect-[4/5] z-50 rounded-lg overflow-visible">
+
+                    <EasyZoomOnHover
+                      key={currentIndex}
+                      mainImage={{
+                        src: selectedVariant?.images?.[currentIndex],
+                        alt: "Product Image",
+                        width: 500,
+                        height: 625,
+                      }}
+                      zoomImage={{
+                        src: selectedVariant?.images?.[currentIndex],
+                        alt: "Zoom Image",
+                      }}
+                      zoomContainerWidth={520}
+                      zoomContainerHeight={520}
+                      zoomLensScale={3}
+                      distance={16}
+                    />
+
+                  </div>
                 </div>
+
               </div>
 
               {/* Right */}
-              <div>
+              <div className="relative z-10">
                 <h1 className="text-2xl text-[#171717] font-black Creato mt-2 uppercase">
                   {ProductDetails?.title}
                 </h1>
