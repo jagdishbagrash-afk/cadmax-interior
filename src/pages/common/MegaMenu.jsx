@@ -37,7 +37,7 @@ const MegaMenu = () => {
       <div className="group inline-block ">
         <Link
           href="/product"
-          className="text-black text-sm font-medium flex items-center gap-1"
+          className="text-black hover:text-gray-500 text-sm font-medium flex items-center gap-1"
         >
           PRODUCT <IoIosArrowDown size={14} />
         </Link>

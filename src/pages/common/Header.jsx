@@ -1,284 +1,198 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { IoIosArrowDown } from "react-icons/io";
-import { FiSearch, FiUser, FiShoppingBag } from "react-icons/fi";
+import { FiUser, FiShoppingBag } from "react-icons/fi";
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
-// import { MdOutlineAvTimer } from "react-icons/md";
-import { MdHistory } from "react-icons/md";
-import { MdOutlineSecurity } from "react-icons/md";
+import { MdHistory, MdLogout } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
-import { MdLogout } from "react-icons/md";
+import { IoIosMenu } from "react-icons/io";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import { MdOutlineSettings, MdOutlineSecurity, MdOutlineAvTimer, MdOutlineLogout, } from "react-icons/md";
 
 export default function Header() {
-  const {user, setUser} = useRole();
-  const [cartCount, setCartCount]=useState(0);
+  const { user, setUser } = useRole();
   const router = useRouter();
+
   const [menuOpen, setMenuOpen] = useState(false);
-  const cartItemsRedux = useSelector((state) => state.cart.cartItems);
-  // console.log("cartItemsRedux", cartItemsRedux);
-  // const cartCount = cartItemsRedux?.length || 0;
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const cartItemsRedux = useSelector((state) => state.cart.cartItems);
+  const [cartCount, setCartCount] = useState(0);
 
   useEffect(() => {
     const totalQuantity = cartItemsRedux.reduce(
       (sum, item) => sum + (item.quantity || 0),
-      0
+      0,
     );
-
     setCartCount(totalQuantity);
   }, [cartItemsRedux]);
 
   const handleLogout = () => {
     localStorage && localStorage.removeItem("token");
-    // router.push("/login");
     toast.success("Logout Successfully");
     setUser(null);
+    setMenuOpen(false);
+    setDropdownOpen(false);
+    router.push("/login");
   };
 
-  // console.log("user", user);
+  const closeMenu = () => {
+    setMenuOpen(false);
+  };
 
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <nav className="max-w-[1350px] mx-auto flex items-center justify-between px-6 xl:px-0 py-3">
-        {/* Left Logo */}
-        <Link
-          href="/"
-          className="text-xl font-extrabold tracking-tight text-black"
-        >
+        {/* Logo */}
+        <Link href="/" className="text-xl font-extrabold text-black">
           CADMAX
         </Link>
 
-        {/* Center Menu */}
-        <ul className="hidden md:flex items-center gap-8">
-          <li>
-            <Link
-              href="/"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
-            >
-              CADMAX
-            </Link>
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex items-center gap-8 text-sm">
+          <li className="font-medium text-black hover:text-gray-500">
+            <Link href="/">CADMAX</Link>
           </li>
-          <MegaMenu/>
-          {/* <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
-            CONCEPT <IoIosArrowDown size={14} />
-          </li> */}
-
-               <li>
-            <Link
-              href="/concept"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
-            >
-              CONCEPT
-            </Link>
+          <MegaMenu />
+          <li className="font-medium text-black hover:text-gray-500">
+            <Link href="/concept">CONCEPT</Link>
           </li>
-          <li>
-            <Link
-              href="/project"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
-            >
-              PROJECTS
-            </Link>
+          <li className="font-medium text-black hover:text-gray-500">
+            <Link href="/project">PROJECTS</Link>
           </li>
-          <li>
-            <Link
-              href="/booking"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
-            >
-              BOOKING
-            </Link>
+          <li className="font-medium text-black hover:text-gray-500">
+            <Link href="/booking">BOOKING</Link>
           </li>
         </ul>
 
         {/* Right Icons */}
-       <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           {user ? (
-            <div className="relative">
+            <div className="relative hidden md:block">
               <FiUser
                 size={18}
-                className="cursor-pointer text-[#171717]"
+                className="cursor-pointer"
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               />
               {dropdownOpen && (
-                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white border border-gray-300 rounded-md shadow-lg z-50">
-                  <ul className="py-1">
-                    <Link
-                      href="/orders"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <MdHistory size={24} />
-                      Order History
-                    </Link>
-
-                    <Link
-                      href="/security"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <MdOutlineSecurity size={24} />
-                        Security
-                    </Link>
-
-                    <Link
-                      href="/setting"
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <IoSettingsOutline size={18} />
-                      Settings
-                    </Link>
-
-                    <li
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                      onClick={handleLogout}
-                    >
-                      <MdLogout size={18} />
-                      Logout
-                    </li>
-                  </ul>
+                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
+                  <Link href="/orders" className="dropdown-item">
+                    <MdHistory /> Order History
+                  </Link>
+                  <Link href="/security" className="dropdown-item">
+                    <MdOutlineSecurity /> Security
+                  </Link>
+                  <Link href="/setting" className="dropdown-item">
+                    <IoSettingsOutline /> Settings
+                  </Link>
+                  <button onClick={handleLogout} className="dropdown-item">
+                    <MdLogout /> Logout
+                  </button>
                 </div>
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-3">
-              <Link href="/login" className="text-sm font-medium text-[#171717] hover:underline">
-                Login
-              </Link>
-              <Link href="/register" className="text-sm font-medium text-[#171717] hover:underline">
-                Signup
-              </Link>
+            <div className="hidden md:flex gap-3">
+              <Link href="/login">Login</Link>
+              <Link href="/register">Signup</Link>
             </div>
           )}
 
           <Link href="/checkout" className="relative">
-            <FiShoppingBag size={18} className="cursor-pointer text-[#171717]" />
-
-            {cartCount > 0 && (
-              <span className="absolute -top-2 -right-2 flex items-center justify-center min-w-4 h-4 px-1 text-[10px] font-semibold text-white bg-red-500 rounded-full">
-                {cartCount}
-              </span>
-            )}
+            <FiShoppingBag size={18} />
+            {cartCount > 0 && <span className="badge">{cartCount}</span>}
           </Link>
-        </div>
 
-        {/* Mobile Menu Toggle */}
-        <button
-          className="md:hidden text-gray-700"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          ) : (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            </svg>
-          )}
-        </button>
+          {/* Mobile Toggle */}
+          <button className="md:hidden" onClick={() => setMenuOpen(!menuOpen)}>
+            <IoIosMenu size={24} />
+          </button>
+        </div>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
+      {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden border-t border-gray-200 bg-white">
-          <ul className="flex flex-col px-6 py-3 space-y-3">
-            <li>
-              <Link href="/" className="text-black text-sm font-medium">
-                CADMAX
-              </Link>
-            </li>
-            <li className="group relative">
-              {/* CLICK → /product */}
-              <Link
-                href="/product"
-                className="text-black text-sm font-medium flex items-center gap-1"
-              >
-                PRODUCT
-                {/* <span className="text-xs">▼</span> */}
-              </Link>
-
-              {/* HOVER → MEGA MENU */}
-              <div
-                className="
-      absolute left-1/2 -translate-x-1/2 
-      w-[90vw] 
-      bg-white shadow-2xl rounded-xl 
-      p-8 mt-5 hidden group-hover:block 
-      animate-[topToCenter_0.45s_ease-out]
-      z-50
-    "
-              >
-                <div className="grid grid-cols-5 gap-6">
-
-                  <Link href="/product?cat=furniture" className="block">
-                    <img src="/productImages/furniture.jpg" className="rounded-xl h-48 w-full object-cover" />
-                    <p className="text-center mt-2 font-medium">FURNITURE</p>
-                  </Link>
-
-                  <Link href="/product?cat=sofa" className="block">
-                    <img src="/productImages/sofa.jpg" className="rounded-xl h-48 w-full object-cover" />
-                    <p className="text-center mt-2 font-medium">SOFA & SEATING</p>
-                  </Link>
-
-                  <Link href="/product?cat=lamps" className="block">
-                    <img src="/productImages/lamps.jpg" className="rounded-xl h-48 w-full object-cover" />
-                    <p className="text-center mt-2 font-medium">LAMPS & LIGHTING</p>
-                  </Link>
-
-                  <Link href="/product?cat=upholstery" className="block">
-                    <img src="/productImages/upholstery.jpg" className="rounded-xl h-48 w-full object-cover" />
-                    <p className="text-center mt-2 font-medium">UPHOLSTERY</p>
-                  </Link>
-
-                  <Link href="/product?cat=decor" className="block">
-                    <img src="/productImages/decor.jpg" className="rounded-xl h-48 w-full object-cover" />
-                    <p className="text-center mt-2 font-medium">HOME DÉCOR</p>
-                  </Link>
-
-                </div>
-              </div>
-            </li>
-
-
-            <li>
-              <Link href="/concept" className="text-black text-sm font-medium">
+        <div className="md:hidden bg-white border-t">
+          <ul className="px-6 py-4 space-y-3 flex flex-col">
+            <li className="font-medium hover:text-gray-500">
+              <Link onClick={closeMenu} href="/concept">
                 CONCEPT
               </Link>
             </li>
-            <li>
-              <Link href="/project" className="text-black text-sm font-medium">
+            <li className="font-medium hover:text-gray-500">
+              <Link onClick={closeMenu} href="/project">
                 PROJECTS
               </Link>
             </li>
-            <li>
-              <Link href="/booking" className="text-black text-sm font-medium">
+            <li className="font-medium hover:text-gray-500">
+              <Link onClick={closeMenu} href="/booking">
                 BOOKING
               </Link>
             </li>
+
+            {/* AUTH SECTION */}
+            {user ? (
+              <>
+                <li className="text-2xl text-gray-700 mb-3 border-t border-gray-200 pt-4">
+                  My Account
+                </li>
+                <ul className="space-y-3">
+                  <li className="font-medium hover:text-gray-500">
+                    <Link
+                      onClick={closeMenu}
+                      href="/orders"
+                      className="flex gap-3"
+                    >
+                      <MdOutlineAvTimer size={24} /> Order History
+                    </Link>
+                  </li>
+                  <li className="font-medium hover:text-gray-500">
+                    <Link
+                      onClick={closeMenu}
+                      href="/security"
+                      className="flex gap-3"
+                    >
+                      <MdOutlineSecurity size={24} /> Security
+                    </Link>
+                  </li>
+                  <li className="font-medium hover:text-gray-500">
+                    <Link
+                      onClick={closeMenu}
+                      href="/setting"
+                      className="flex gap-3"
+                    >
+                      <MdOutlineSettings size={24} /> Settings
+                    </Link>
+                  </li>
+                  <li className="font-medium hover:text-gray-500">
+                    <button onClick={handleLogout} className="flex gap-3">
+                      <MdOutlineLogout size={24} /> Logout
+                    </button>
+                  </li>
+                </ul>
+              </>
+            ) : (
+              <li className="pt-4 space-y-3 flex flex-col">
+                <Link
+                  onClick={closeMenu}
+                  href="/login"
+                  className="block w-full text-center py-2 rounded-md border border-black text-black font-medium hover:bg-black hover:text-white transition"
+                >
+                  Login
+                </Link>
+
+                <Link
+                  onClick={closeMenu}
+                  href="/register"
+                  className="block w-full text-center py-2 rounded-md bg-black text-white font-medium hover:bg-white hover:text-black hover:border hover:border-black transition"
+                >
+                  Signup
+                </Link>
+              </li>
+            )}
           </ul>
         </div>
       )}
