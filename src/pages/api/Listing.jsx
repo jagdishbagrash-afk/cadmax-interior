@@ -9,7 +9,7 @@ class Listing extends Component {
   async Login(data) {
     return Api.post("/admin/login", data);
   }
-    async AdminProfileUpdate(data) {
+  async AdminProfileUpdate(data) {
     return Api.post("/user/edit-profile", data);
   }
   async profileVerify() {
@@ -22,7 +22,7 @@ class Listing extends Component {
     return Api.post("/category/add", data)
   }
 
-    async vendorsubcategory(data) {
+  async vendorsubcategory(data) {
     return Api.post("/services/subcategory/add", data)
   }
 
@@ -44,21 +44,21 @@ class Listing extends Component {
     return Api.get("/services/type/list",)
   }
 
-   async ServicesUpdate(id, formData) {
+  async ServicesUpdate(id, formData) {
     return ApiallowFile.post(`/services/edit/${id}`, formData);
   }
-   async ServciesList() {
+  async ServciesList() {
     return Api.get("/services/list",)
   }
 
-   async ServciesType() {
+  async ServciesType() {
     return Api.get("/services/type",)
   }
 
-   async ServciesDetails(id) {
+  async ServciesDetails(id) {
     return Api.get(`/services/details/${id}`,)
   }
-   async Servicesdelete(id) {
+  async Servicesdelete(id) {
     return Api.get(`/services/delete/${id}`)
   }
 
@@ -80,7 +80,7 @@ class Listing extends Component {
     return Api.get("/category/get",)
   }
 
-   async ServicesSubCategoryList() {
+  async ServicesSubCategoryList() {
     return Api.get("/services/subcategory/list",)
   }
 
@@ -156,8 +156,8 @@ class Listing extends Component {
     return Api.get(`/product/list`, data);
   }
 
-  async deleteimages(id,image){
-    return  Api.get(`/services/images/delete/${id}/${image}`)
+  async deleteimages(id, image) {
+    return Api.get(`/services/images/delete/${id}/${image}`)
   }
   async adminGetOrders(data) {
     return Api.get(`/order/getAll`, data);
@@ -220,15 +220,21 @@ class Listing extends Component {
     return Api.post(`/admin/banner/delete/${data}`);
   }
 
-  async getAllProductSubCategroy(id) {
-    return Api.get(`/product/subcategory/${id}`,);
+  async getAllProductSubCategroy(id, page, limit, filters = {}) {
+    return Api.get(`/product/subcategory/${id}`, {
+      params: {
+        page,
+        limit,
+        ...filters,
+      },
+    });
   }
 
-   async GetAllServicesType(id) {
+  async GetAllServicesType(id) {
     return Api.get(`/type-services/${id}`,);
   }
 
-   async GetAllConceptType(id) {
+  async GetAllConceptType(id) {
     return Api.get(`/services/type-concept/${id}`,);
   }
 
@@ -242,11 +248,11 @@ class Listing extends Component {
     return Api.get(`/get-booking`, data);
   }
 
-    async GetBestSeller(data) {
+  async GetBestSeller(data) {
     return Api.get(`/common/bestseller`, data);
   }
- 
-    async GetLastproduct(data) {
+
+  async GetLastproduct(data) {
     return Api.get(`/common/product`, data);
   }
   async GetContact(data) {
@@ -290,7 +296,7 @@ class Listing extends Component {
     return Api.post("/contact-add", data)
   }
 
-   async AddServicesContact(data) {
+  async AddServicesContact(data) {
     return Api.post("/services/contact-add", data)
   }
 
@@ -298,7 +304,7 @@ class Listing extends Component {
     return Api.get(`/services/contact-get`, data);
   }
 
-  async Success(){
+  async Success() {
     return Api.post("/contact-add", data)
   }
   render() {

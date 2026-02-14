@@ -15,8 +15,8 @@ import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 
 export default function Header() {
-  const {user, setUser} = useRole();
-  const [cartCount, setCartCount]=useState(0);
+  const { user, setUser } = useRole();
+  const [cartCount, setCartCount] = useState(0);
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
@@ -58,20 +58,16 @@ export default function Header() {
           <li>
             <Link
               href="/"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
+              className={`${router.pathname === "/" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
             >
-              CADMAX
+              Home
             </Link>
           </li>
-          <MegaMenu/>
-          {/* <li className="flex items-center gap-1 cursor-pointer text-sm font-medium text-black hover:text-gray-500 transition">
-            CONCEPT <IoIosArrowDown size={14} />
-          </li> */}
-
-               <li>
+          <MegaMenu />
+          <li>
             <Link
               href="/concept"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
+              className={`${router.pathname === "/concept" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
             >
               CONCEPT
             </Link>
@@ -79,7 +75,8 @@ export default function Header() {
           <li>
             <Link
               href="/project"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
+              className={`${router.pathname === "/project" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+
             >
               PROJECTS
             </Link>
@@ -87,7 +84,7 @@ export default function Header() {
           <li>
             <Link
               href="/booking"
-              className="text-sm font-medium text-black hover:text-gray-500 transition"
+              className={`${router.pathname === "/booking" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
             >
               BOOKING
             </Link>
@@ -95,7 +92,7 @@ export default function Header() {
         </ul>
 
         {/* Right Icons */}
-       <div className="flex items-center gap-4">
+        <div className="flex items-center gap-4">
           {user ? (
             <div className="relative">
               <FiUser
@@ -119,7 +116,7 @@ export default function Header() {
                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                     >
                       <MdOutlineSecurity size={24} />
-                        Security
+                      Security
                     </Link>
 
                     <Link
@@ -202,26 +199,26 @@ export default function Header() {
         </button>
       </nav>
 
-      {/* Mobile Dropdown Menu */}
       {menuOpen && (
         <div className="md:hidden border-t border-gray-200 bg-white">
           <ul className="flex flex-col px-6 py-3 space-y-3">
             <li>
-              <Link href="/" className="text-black text-sm font-medium">
+              <Link href="/"
+                className={`${router.pathname === "/" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+
+              >
                 CADMAX
               </Link>
             </li>
             <li className="group relative">
-              {/* CLICK → /product */}
               <Link
                 href="/product"
-                className="text-black text-sm font-medium flex items-center gap-1"
+                className={`${router.pathname === "/product" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+
               >
                 PRODUCT
-                {/* <span className="text-xs">▼</span> */}
               </Link>
 
-              {/* HOVER → MEGA MENU */}
               <div
                 className="
       absolute left-1/2 -translate-x-1/2 
@@ -265,17 +262,24 @@ export default function Header() {
 
 
             <li>
-              <Link href="/concept" className="text-black text-sm font-medium">
+              <Link href="/concept"
+                className={`${router.pathname === "/concept" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+
+              >
                 CONCEPT
               </Link>
             </li>
             <li>
-              <Link href="/project" className="text-black text-sm font-medium">
+              <Link href="/project"
+                className={`${router.pathname === "/project" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+              >
                 PROJECTS
               </Link>
             </li>
             <li>
-              <Link href="/booking" className="text-black text-sm font-medium">
+              <Link href="/booking"
+                className={`${router.pathname === "/booking" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
+              >
                 BOOKING
               </Link>
             </li>
