@@ -5,34 +5,41 @@ import { useRole } from "@/context/RoleContext";
 import Listing from "../api/Listing";
 
 export default function Layout({ children }) {
-    const { setUser } = useRole();
-    const fetchData = async (signal) => {
-        try {
-          const main = new Listing();
-          const response = await main.profileVerify(signal);
-          if (response.data) {
-            setUser(response.data.data);
-          }
-        } catch (error) {
-          // console.log("error", error);
-          localStorage?.removeItem("token");
-          setUser(null);
-        }
-      };
-    
-      useEffect(() => {
-        const controller = new AbortController();
-        const { signal } = controller;
-        fetchData(signal);
-    
-        return () => controller.abort();
-      }, []);
+  const { user, setUser } = useRole();
+  const [loading, setLoading] = useState(true);
 
-    return (
-        <>
-            <Header />
-            <main>{children}</main>
-            <Footer />
-        </>
-    );
+  // ✅ Fetch Profile
+  const fetchData = async (signal) => {
+    try {
+      const main = new Listing();
+      const response = await main.profileVerify(signal);
+
+      if (response?.data?.data) {
+        setUser(response.data.data);
+      }
+    } catch (error) {
+      localStorage?.removeItem("token");
+      setUser(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData(controller.signal);
+
+    return () => controller.abort();
+  }, []);
+
+  if (loading) return null;
+
+
+  return (
+    <>
+        <main>{children}</main>
+        <Header />
+        <Footer />
+    </>
+  );
 }
