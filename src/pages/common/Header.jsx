@@ -50,7 +50,14 @@ export default function Header() {
           href="/"
           className="text-xl font-extrabold tracking-tight text-black"
         >
-          CADMAX
+          <Image
+              className="w-auto h-[50px] sm:h-[60px]"
+              height={1126}
+              width={886}
+              layout="fixed"
+              src={"/Logo.png"}
+              alt="Japanese For Me"
+          />
         </Link>
 
         {/* Center Menu */}
@@ -60,7 +67,7 @@ export default function Header() {
               href="/"
               className={`${router.pathname === "/" ? "text-yellow-500" : "text-black"} text-sm font-medium hover:text-gray-500 transition`}
             >
-              Home
+              HOME
             </Link>
           </li>
           <MegaMenu />
