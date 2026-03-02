@@ -8,6 +8,7 @@ import { MdHistory, MdOutlineSecurity, MdLogout } from "react-icons/md";
 import { IoSettingsOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
+import Image from "next/image";
 
 export default function Header() {
   const { user, setUser } = useRole();
