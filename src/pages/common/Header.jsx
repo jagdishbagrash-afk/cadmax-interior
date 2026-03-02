@@ -43,10 +43,19 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 bg-white border-b border-gray-200">
       <nav className="max-w-[1350px] mx-auto flex items-center justify-between px-6 xl:px-0 py-3">
-
-        {/* LOGO */}
-        <Link href="/" className="text-xl font-extrabold tracking-tight">
-          CADMAX
+        {/* Left Logo */}
+        <Link
+          href="/"
+          className="text-xl font-extrabold tracking-tight text-black"
+        >
+          <Image
+              className="w-auto h-[50px] sm:h-[60px]"
+              height={1126}
+              width={886}
+              layout="fixed"
+              src={"/Logo.png"}
+              alt="Japanese For Me"
+          />
         </Link>
 
         {/* ================= DESKTOP MENU ================= */}
