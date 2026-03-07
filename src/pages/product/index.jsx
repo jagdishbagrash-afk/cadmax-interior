@@ -6,9 +6,12 @@ import Sliderimage2 from "../../Assets/Images/seller3.jpg";
 import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
+import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+
 import ThreeBanner from "./ThreeBanner";
 import { useEffect, useState } from "react";
 import Listing from "../api/Listing";
+import Banner from "@/components/Banner";
 function Index() {
     const [bestseller, setbestseller] = useState("")
     const [lastproduct, setlastproduct] = useState("")
@@ -53,10 +56,31 @@ function Index() {
     return (
         <>
             <Layout>
-                <ThreeBanner />
+                {/* <ThreeBanner /> */}
+
+          <Banner 
+  Slider1={ProductListBanner}
+  title={"Discover Luxury Furniture Crafted for Modern Living"}
+  button={"Shop Our Products"} 
+/>
                 <FeaturedCategories />
+
+                <ProductGrid products={bestseller} title={"OUR BEST SELLER"} link={"/best-seller"} />
+                <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
+                <ProductGrid products={bestseller} title={"top sales products "} link={"/top-selling-products"}/>
+                
                 <ContactStyling />
             </Layout>
+
+
+              {/* <Layout> */}
+                {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
+                {/* <ThreeBanner /> */}
+                {/* <FeaturedCategories /> */}
+                {/* <Services /> */}
+                {/* <Shop /> */}
+                {/* <ContactStyling /> */}
+            {/* </Layout> */}
         </>);
 }
 

@@ -24,7 +24,7 @@ export default function ProductGrid({ products = [], title = "OUR BEST SELLER", 
 
                 {/* Products Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {productList.map((item, idx) => {
+                    {productList?.map((item, idx) => {
                         const product = item?.product ?? item;
                         return <ProductCard key={product?._id || idx} item={product} />;
                     })}
