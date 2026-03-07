@@ -58,28 +58,28 @@ function Index() {
             <Layout>
                 {/* <ThreeBanner /> */}
 
-          <Banner 
-  Slider1={ProductListBanner}
-  title={"Discover Luxury Furniture Crafted for Modern Living"}
-  button={"Shop Our Products"} 
-/>
+                <Banner
+                    Slider1={ProductListBanner}
+                    title={"Discover Luxury Furniture Crafted for Modern Living"}
+                    button={"Shop Our Products"}
+                />
                 <FeaturedCategories />
 
                 <ProductGrid products={bestseller} title={"OUR BEST SELLER"} link={"/best-seller"} />
                 <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
-                <ProductGrid products={bestseller} title={"top sales products "} link={"/top-selling-products"}/>
-                
+                <ProductGrid products={bestseller} title={"top sales products "} link={"/top-selling-products"} />
+
                 <ContactStyling />
             </Layout>
 
 
-              {/* <Layout> */}
-                {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
-                {/* <ThreeBanner /> */}
-                {/* <FeaturedCategories /> */}
-                {/* <Services /> */}
-                {/* <Shop /> */}
-                {/* <ContactStyling /> */}
+            {/* <Layout> */}
+            {/* <Banner Slider1={Sliderimage} title={""} button={"shop product"}/> */}
+            {/* <ThreeBanner /> */}
+            {/* <FeaturedCategories /> */}
+            {/* <Services /> */}
+            {/* <Shop /> */}
+            {/* <ContactStyling /> */}
             {/* </Layout> */}
         </>);
 }
