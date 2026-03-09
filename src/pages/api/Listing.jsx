@@ -199,6 +199,10 @@ class Listing extends Component {
     return Api.get(`/project/list`, data);
   }
 
+   async GetAllProdcuctColor(data) {
+    return Api.get(`/product/color/by`, data);
+  }
+
   async AddProject(data) {
     return Api.post(`/project/add`, data);
   }

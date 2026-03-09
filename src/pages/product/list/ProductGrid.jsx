@@ -4,16 +4,61 @@ import { useEffect, useState } from "react";
 
 const ProductGrid = ({ selectedId }) => {
   const [loading, setLoading] = useState(false);
+
+
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [hasMore, setHasMore] = useState(true);
   const [selectedColors, setSelectedColors] = useState([]);
-  const [priceRange, setPriceRange] = useState({
-    low: 100,
-    high: 50000,
+
+
+  const [color, setColor] = useState([]);
+
+  const [priceLimits, setPriceLimits] = useState({
+    min: 0,
+    max: 0,
   });
 
+  const [priceRange, setPriceRange] = useState({
+    low: 0,
+    high: 0,
+  });
+  const fetchData = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.GetAllProdcuctColor();
+
+      if (response?.data?.data) {
+
+        const min = response.data.data.lowestPrice ?? 0;
+        const max = response.data.data.highestPrice ?? 0;
+
+        setColor(response.data.data.colors || []);
+
+        setPriceLimits({
+          min,
+          max
+        });
+
+        setPriceRange({
+          low: min,
+          high: max
+        });
+
+      } else {
+        setColor([]);
+      }
+
+    } catch (error) {
+      console.log("Error:", error);
+      setColor([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchData();
+  }, []);
 
   const fetchProjectData = async (pageNo = 1, reset = false) => {
     try {
@@ -23,8 +68,8 @@ const ProductGrid = ({ selectedId }) => {
         ...(selectedColors.length > 0 && {
           color: selectedColors.join(","),
         }),
-        lowPrice: priceRange.low,
-        highPrice: priceRange.high,
+        lowPrice: priceLimits.low,
+        highPrice: priceLimits.high,
       };
 
       const main = new Listing();
@@ -107,18 +152,25 @@ const ProductGrid = ({ selectedId }) => {
     });
   };
   const handleClearFilters = () => {
+
     setSelectedColors([]);
+
     setPriceRange({
-      low: 100,
-      high: 50000,
+      low: priceLimits.min,
+      high: priceLimits.max
     });
+
     setProducts([]);
     setPage(1);
     setHasMore(true);
+
     fetchProjectData(1, true);
   };
+  console.log("color", color)
+  const range = priceLimits.max - priceLimits.min || 1;
 
-
+  const leftPercent = ((priceRange.low - priceLimits.min) / range) * 100;
+  const widthPercent = ((priceRange.high - priceRange.low) / range) * 100;
   return (
     <div className="w-full px-6 md:px-10 lg:px-14 py-8">
       <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
@@ -142,39 +194,25 @@ const ProductGrid = ({ selectedId }) => {
             <h4 className="text-sm font-semibold text-gray-700">Color</h4>
 
             <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
-              {[
-                { name: "red", hex: "#ef4444" },
-                { name: "blue", hex: "#3b82f6" },
-                { name: "green", hex: "#22c55e" },
-                { name: "yellow", hex: "#eab308" },
-                { name: "pink", hex: "#ec4899" },
-                { name: "purple", hex: "#a855f7" },
-                { name: "black", hex: "#000000" },
-                { name: "white", hex: "#ffffff" },
-                { name: "gray", hex: "#6b7280" },
-                { name: "orange", hex: "#f97316" },
-                { name: "teal", hex: "#14b8a6" },
-                { name: "brown", hex: "#92400e" },
-              ].map((c, i) => (
-                <label
-                  key={i}
-                  className="flex items-center gap-2 cursor-pointer group"
-                >
+              {color && color.map((c, i) => (
+                <label key={i} className="flex items-center gap-2 cursor-pointer group">
+
                   <input
                     type="checkbox"
-                    checked={selectedColors.includes(c.name)}
-                    onChange={() => handleColorChange(c.name)}
+                    checked={selectedColors.includes(c)}
+                    onChange={() => handleColorChange(c)}
                     className="accent-black cursor-pointer"
                   />
 
                   <span
                     className="w-4 h-4 rounded-full border shadow-sm"
-                    style={{ backgroundColor: c.hex }}
+                    style={{ backgroundColor: c }}
                   />
 
                   <span className="capitalize text-gray-600 group-hover:text-black transition">
-                    {c.name}
+                    {c}
                   </span>
+
                 </label>
               ))}
             </div>
@@ -188,8 +226,8 @@ const ProductGrid = ({ selectedId }) => {
               {/* LOW RANGE */}
               <input
                 type="range"
-                min={100}
-                max={50000}
+                min={priceLimits.min}
+                max={priceLimits.max}
                 value={priceRange.low}
                 onChange={(e) => handlePriceChange("low", e.target.value)}
                 className="absolute w-full pointer-events-none appearance-none bg-transparent
@@ -204,8 +242,8 @@ const ProductGrid = ({ selectedId }) => {
               {/* HIGH RANGE */}
               <input
                 type="range"
-                min={100}
-                max={50000}
+                min={priceLimits.min}
+                max={priceLimits.max}
                 value={priceRange.high}
                 onChange={(e) => handlePriceChange("high", e.target.value)}
                 className="absolute w-full pointer-events-none appearance-none bg-transparent
@@ -224,15 +262,15 @@ const ProductGrid = ({ selectedId }) => {
               <div
                 className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
                 style={{
-                  left: `${((priceRange.low - 100) / (50000 - 100)) * 100}%`,
-                  width: `${((priceRange.high - priceRange.low) / (50000 - 100)) * 100}%`,
+                  left: `${Math.max(0, Math.min(100, leftPercent))}%`,
+                  width: `${Math.max(0, Math.min(100, widthPercent))}%`,
                 }}
               />
             </div>
 
             <div className="flex justify-between text-xs font-medium text-gray-500">
-              <span>₹{priceRange.low.toLocaleString()}</span>
-              <span>₹{priceRange.high.toLocaleString()}</span>
+              <span>₹{(priceRange.low ?? 0).toLocaleString()}</span>
+              <span>₹{(priceRange.high ?? 0).toLocaleString()}</span>
             </div>
           </div>
 
