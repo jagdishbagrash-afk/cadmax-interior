@@ -26,7 +26,7 @@ export default function ResidentialDesign({Residentialservices}) {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Residentialservices?.map((item, index) => (
                         <Link
-                        href={`/concept/residential/${item.slug}`}
+                        href={`/design/residential/${item.slug}`}
                             key={index}
                             className="relative overflow-hidden group"
                         >

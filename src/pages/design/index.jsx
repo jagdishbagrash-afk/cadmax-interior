@@ -59,7 +59,7 @@ export default function Index() {
             <Predictable />
             <ResidentialDesign Residentialservices={data?.Residentialservices} />
             <CommercialDesign Commercialservices={data?.Commercialservices} />
-            <Vendor />
+            {/* <Vendor /> */}
             <Execution />
             <Slider2 />
             <div className="relative w-full h-full md:h-[450px]">

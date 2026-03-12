@@ -19,13 +19,13 @@ export default function About() {
             front: Slider1?.src,
             title: "Residential Interior Design & Complete Full-Home Spatial Development",
             button: "Explore Residential",
-            link: "/concept"
+            link: "/design"
         },
         {
             front: Slider2?.src,
             title: "Commercial Interior Planning, Brand-Aligned Layouts & Functional Space Execution",
             button: "Explore Commercial",
-            link: "/concept"
+            link: "/design"
         },
         {
             front: Frame18?.src,

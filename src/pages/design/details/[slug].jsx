@@ -119,7 +119,7 @@ export default function DesignLayout() {
             handleSubmit();
 
             router.replace(
-                `/concept/details/${id}`,
+                `/design/details/${id}`,
                 undefined,
                 { shallow: true }
             );
@@ -242,7 +242,7 @@ export default function DesignLayout() {
                                         if (!user) {
                                             toast.error("Please login first");
                                             router.push(
-                                                `/login?redirect=/concept/details/${id}&autoSubmit=true`
+                                                `/login?redirect=/design/details/${id}&autoSubmit=true`
                                             );
                                         } else {
                                             handleSubmit(e);

@@ -9,7 +9,8 @@ import { IoSettingsOutline } from "react-icons/io5";
 import toast from "react-hot-toast";
 import { useSelector } from "react-redux";
 import Image from "next/image";
-
+import VendorMenu from "./VendorMenu";
+import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 export default function Header() {
   const { user, setUser } = useRole();
   const router = useRouter();
@@ -61,7 +62,7 @@ export default function Header() {
 
         {/* ================= DESKTOP MENU ================= */}
         <ul className="hidden md:flex items-center gap-8">
-          <li>
+          {/* <li>
             <Link
               href="/"
               className={`${router.pathname === "/"
@@ -71,32 +72,35 @@ export default function Header() {
             >
               HOME
             </Link>
-          </li>
+          </li> */}
 
           {/* Mega Menu */}
           <MegaMenu active={isActive("/product")} />
 
           <li>
             <Link
-              href="/concept"
-              className={`${isActive("/concept") ? "text-yellow-500" : "text-black"
-                } text-sm font-medium hover:text-gray-500 transition`}
+              href="/design"
+              className={`${isActive("/design") ? "text-yellow-500" : "text-black"
+                } text-sm font-medium hover:text-gray-500 transition uppercase`}
             >
-              CONCEPT
+              Design 
             </Link>
           </li>
-
+{/* 
           <li>
             <Link
-              href="/project"
-              className={`${isActive("/project") ? "text-yellow-500" : "text-black"
-                } text-sm font-medium hover:text-gray-500 transition`}
+              href="#"
+              className={`${isActive("#") ? "text-yellow-500" : "text-black"
+                } text-sm font-medium hover:text-gray-500 transition uppercase`}
             >
-              PROJECTS
+              vendor
             </Link>
-          </li>
+          </li> */}
 
-          <li>
+          <VendorMenu active={isActive("/vendor")} />
+
+
+          {/* <li>
             <Link
               href="/booking"
               className={`${isActive("/booking") ? "text-yellow-500" : "text-black"
@@ -104,7 +108,7 @@ export default function Header() {
             >
               BOOKING
             </Link>
-          </li>
+          </li> */}
         </ul>
 
         {/* ================= RIGHT SIDE ================= */}
@@ -165,62 +169,49 @@ export default function Header() {
         </div>
 
         {/* MOBILE TOGGLE */}
-        <button
-          className="md:hidden"
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          ☰
-        </button>
+   <button
+  className="md:hidden text-2xl"
+  onClick={() => setMenuOpen(!menuOpen)}
+>
+  {menuOpen ? <HiOutlineX /> : <HiOutlineMenu />}
+</button>
       </nav>
 
       {/* ================= MOBILE MENU ================= */}
-      {menuOpen && (
-        <div className="md:hidden border-t bg-white">
-          <ul className="flex flex-col px-6 py-3 space-y-3">
+     {menuOpen && (
+  <div className="md:hidden border-t bg-white">
+    <ul className="flex flex-col px-6 py-3 space-y-3">
 
-            <Link
-              href="/"
-              className={`${router.pathname === "/" ? "text-yellow-500" : "text-black"
-                }`}
-            >
-              HOME
-            </Link>
+      <li>
+        <Link
+          href="/product"
+          className={`${isActive("/product") ? "text-yellow-500" : "text-black"}`}
+        >
+          PRODUCT
+        </Link>
+      </li>
 
-            <Link
-              href="/product"
-              className={`${isActive("/product") ? "text-yellow-500" : "text-black"
-                }`}
-            >
-              PRODUCT
-            </Link>
+      <li>
+        <Link
+          href="/design"
+          className={`uppercase ${isActive("/design") ? "text-yellow-500" : "text-black"}`}
+        >
+          DESIGN
+        </Link>
+      </li>
 
-            <Link
-              href="/concept"
-              className={`${isActive("/concept") ? "text-yellow-500" : "text-black"
-                }`}
-            >
-              CONCEPT
-            </Link>
+      <li>
+        <Link
+          href="/vendor"
+          className={`uppercase ${isActive("/vendor") ? "text-yellow-500" : "text-black"}`}
+        >
+          VENDOR
+        </Link>
+      </li>
 
-            <Link
-              href="/project"
-              className={`${isActive("/project") ? "text-yellow-500" : "text-black"
-                }`}
-            >
-              PROJECTS
-            </Link>
-
-            <Link
-              href="/booking"
-              className={`${isActive("/booking") ? "text-yellow-500" : "text-black"
-                }`}
-            >
-              BOOKING
-            </Link>
-
-          </ul>
-        </div>
-      )}
+    </ul>
+  </div>
+)}
     </header>
   );
 }

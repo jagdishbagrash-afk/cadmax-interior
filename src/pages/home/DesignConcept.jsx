@@ -35,7 +35,7 @@ const DesignConcept = () => {
                 {/* Grid Layout */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                     {/* First tall image */}
-                    <Link href={`/concept/${data[0]?.slug}`} className="sm:row-span-2 relative overflow-hidden">
+                    <Link href={`/design/${data[0]?.slug}`} className="sm:row-span-2 relative overflow-hidden">
                         <img
                             src={data[0]?.Image}
                             alt={data[0]?.name}
@@ -72,7 +72,7 @@ const DesignConcept = () => {
                                             {group.map((item) => (
                                                 <Link
                                                     key={item?._id}
-                                                    href={`/concept/${item?.slug}`}
+                                                    href={`/design/${item?.slug}`}
                                                     className="relative overflow-hidden group"
                                                 >
                                                     <img

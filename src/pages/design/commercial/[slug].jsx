@@ -10,7 +10,6 @@ import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 
-/* ---------------- Reusable Section ---------------- */
 const ConceptSection = ({ title, data }) => {
   if (!data?.length) return null;
 
@@ -25,7 +24,7 @@ const ConceptSection = ({ title, data }) => {
         {data && data?.map((p) => (
           <Link
             key={p._id}
-            href={`/concept/details/${p.slug}`}
+            href={`/design/details/${p.slug}`}
             className="overflow-hidden group"
           >
             <div className="relative w-full h-[400px] md:h-[480px] bg-gray-100 overflow-hidden">
@@ -38,7 +37,7 @@ const ConceptSection = ({ title, data }) => {
 
               {/* Hover image */}
               <img
-               src={
+           src={
   Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
     ? p.multiple_images[0]
     : p?.Image || ProductListBanner?.src
@@ -67,75 +66,93 @@ const ConceptSection = ({ title, data }) => {
   );
 };
 
-/* ---------------- Main Page ---------------- */
 export default function Index() {
   const router = useRouter();
-  const slug = router?.query?.slug;
+  const id = router?.query?.slug;
 
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+  const [project, setProject] = useState([]);
+
+  // Fetch categories
+  const fetchData = async (id) => {
+    try {
+      const main = new Listing();
+      const response = await main.ServciesType(id);
+
+      if (response.data?.data) {
+        const list = response.data.data?.Commercialservices || [];
+        setCategories(list);
+
+        if (list.length > 0) {
+          const matched = list.find(
+            (item) => item._id === id || item.slug === id
+          );
+
+          if (matched) {
+            setSelectedId(matched._id);
+          } else {
+            setSelectedId(list[0]._id);
+          }
+        }
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    }
+  };
+
+  useEffect(() => {
+    if (id) fetchData(id);
+  }, [id]);
 
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
   const [contemporary, setContemporary] = useState([]);
 
-  /* -------- Fetch Categories -------- */
-  const fetchCategories = async (slug) => {
-    try {
-      const main = new Listing();
-      const res = await main.ServciesType(slug);
-      const list = res?.data?.data?.Residentialservices || [];
-
-      setCategories(list);
-
-      if (list.length) {
-        const match = list.find(
-          (i) => i._id === slug || i.slug === slug
-        );
-        setSelectedId(match?._id || list[0]._id);
-      }
-    } catch (err) {
-      console.log("Category Error:", err);
-    }
-  };
-
-  useEffect(() => {
-    if (slug) fetchCategories(slug);
-  }, [slug]);
-
-  /* -------- Fetch Projects -------- */
-  const fetchProjects = async () => {
+  // Fetch Project Based on Selected
+  const fetchProjectData = async () => {
     if (!selectedId) return;
-
     try {
       const main = new Listing();
-      const res = await main.GetAllServicesType(selectedId);
-      const data = res?.data?.data || [];
+      const response = await main.GetAllServicesType(selectedId);
+      const data = response?.data?.data;
 
-      setClassic(data.filter(i => i.concept === "neo_classic"));
-      setModern(data.filter(i => i.concept === "modern"));
-      setContemporary(data.filter(i => i.concept === "contemporary"));
-    } catch (err) {
-      console.log("Project Error:", err);
+      if (data && Array.isArray(data)) {
+
+        // neo_classic
+        const classicData = data.filter(item => item.concept === "neo_classic");
+        setClassic(classicData);
+
+        // modern
+        const modernData = data.filter(item => item.concept === "modern");
+        setModern(modernData);
+
+        // contemporary
+        const contemporaryData = data.filter(item => item.concept === "contemporary");
+        setContemporary(contemporaryData);
+      }
+
+    } catch (error) {
+      console.log("Error:", error);
     }
   };
 
   useEffect(() => {
-    fetchProjects();
+    fetchProjectData();
   }, [selectedId]);
+
 
   return (
     <Layout>
-
-      {/* -------- Category Slider -------- */}
+      {/* Swiper Category Slider */}
       <div className="w-full bg-black py-3">
         <Swiper
           spaceBetween={14}
-          loop
+          loop={true}
           speed={1000}
           autoplay={{ delay: 1800, disableOnInteraction: false }}
           modules={[Autoplay]}
-          grabCursor
+          grabCursor={true}
           breakpoints={{
             320: { slidesPerView: 2 },
             640: { slidesPerView: 3 },
@@ -147,23 +164,39 @@ export default function Index() {
               <div
                 onClick={() => {
                   setSelectedId(item._id);
-                  router.push(`/concept/residential/${item.slug}`, undefined, { shallow: true });
+
+                  // 🔥 URL SLUG CHANGE HERE
+                  router.push(
+                    `/design/commercial/${item?.slug}`,
+                    undefined,
+                    { shallow: true }
+                  );
                 }}
-                className="relative h-[120px] md:h-[140px] lg:h-[150px]
-                rounded-md overflow-hidden cursor-pointer"
+                className="relative h-[120px] md:h-[140px] lg:h-[150px] rounded-md overflow-hidden cursor-pointer transition-all duration-300"
               >
                 <img
                   src={item.Image || ProductListBanner?.src}
                   alt={item.title}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-all duration-300"
                 />
 
-                <div className={`absolute inset-0
-                  ${selectedId === item._id ? "bg-black/20" : "bg-black/55 hover:bg-black/30"}`} />
+                <div
+                  className={`absolute inset-0 transition-all duration-300
+                    ${selectedId === item._id
+                      ? "bg-black/20"
+                      : "bg-black/55 hover:bg-black/30"
+                    }`}
+                />
 
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <h1 className={`text-white text-[11px] md:text-[13px] font-bold uppercase
-                    ${selectedId === item._id ? "text-yellow-300" : "text-gray-200"}`}>
+                <div className="absolute inset-0 flex items-center justify-center px-2">
+                  <h1
+                    className={`text-white text-[11px] md:text-[12px] lg:text-[13px]
+                    font-bold uppercase tracking-wide leading-tight text-center
+                    ${selectedId === item._id
+                        ? "text-yellow-300 scale-105"
+                        : "text-gray-200"
+                      }`}
+                  >
                     {item.title}
                   </h1>
                 </div>
@@ -173,7 +206,7 @@ export default function Index() {
         </Swiper>
       </div>
 
-      {/* -------- Sections -------- */}
+      {/* Services Grid */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
           <ConceptSection title="NEO CLASSIC" data={classic} />

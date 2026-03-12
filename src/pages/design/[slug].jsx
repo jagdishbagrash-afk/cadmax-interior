@@ -97,7 +97,7 @@ export default function Index() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {classic?.map((p, idx) => (
-                                    <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
+                                    <Link href={`/design/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                                         <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                                             <img
                                                 src={p.Image}
@@ -132,7 +132,7 @@ export default function Index() {
                        tracking-[-0.02em] text-left uppercase Creato  mb-5 mt-5 ">MODERN</h2>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {modern?.map((p, idx) => (
-                                    <Link href={`/concept/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
+                                    <Link href={`/design/details/${p.slug}`} key={p.id ?? idx} className="overflow-hidden">
                                         <div className="relative w-full h-[400px] md:h-[480px] overflow-hidden bg-gray-100">
                                             <img
                                                 src={p.Image}
@@ -167,7 +167,7 @@ export default function Index() {
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                                 {contemporary?.map((p, idx) => (
                                     <Link
-                                        href={`/concept/details/${p.slug}`}
+                                        href={`/design/details/${p.slug}`}
                                         key={p.id ?? idx}
                                         className="group overflow-hidden"
                                     >

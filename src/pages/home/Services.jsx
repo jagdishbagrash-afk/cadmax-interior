@@ -48,7 +48,7 @@ export default function Services() {
           <h2 className="text-[#ffffff] font-[900] text-[15px] md:text-[20px] leading-[100%] tracking-[-0.02em] mb-3 md:mb-6 uppercase Creato max-w-[550px] mx-auto">
             RESIDENTIAL AND COMMERCIAL INTERIORS DELIVERED END-TO-END.
           </h2>
-          <Link href="/concept" className="
+          <Link href="/design" className="
            px-4 
         py-[6px]
         font-[700] 

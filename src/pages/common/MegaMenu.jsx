@@ -35,13 +35,17 @@ const MegaMenu = () => {
     <li className="">
       {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
       <div className="group inline-block ">
-        <Link
-          href="/product"
+        {/* <Link
+          href="/"
           className="text-black text-sm font-medium flex items-center gap-1"
         >
           PRODUCT <IoIosArrowDown size={14} />
-        </Link>
-
+        </Link> */}
+  <div
+          className="text-black text-sm font-medium flex items-center gap-1"
+        >
+          PRODUCT <IoIosArrowDown size={14} />
+        </div>
       
         <div
           className="
