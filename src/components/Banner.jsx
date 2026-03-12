@@ -1,25 +1,25 @@
 import Button from '@/pages/common/Button';
 import React from 'react';
 
-export default function Banner({ title, button, Slider1 }) {
+export default function Banner({ title, button, Slider1, content }) {
 
   return (
     <>
-    <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
+      <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
 
-      <img
-        src={ Slider1?.src }
-        alt="Slide"
-        className="object-cover w-full h-full"
-      />
+        <img
+          src={Slider1?.src}
+          alt="Slide"
+          className="object-cover w-full h-full"
+        />
 
-      <div className="absolute inset-0 bg-black/25"></div>
+        <div className="absolute inset-0 bg-black/25"></div>
 
-      {/* Overlay Content */}
-      <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+        {/* Overlay Content */}
+        <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
 
-        <h1
-          className="
+          <h1
+            className="
             font-[900]
             text-[18px]
             sm:text-[20px]
@@ -33,21 +33,29 @@ export default function Banner({ title, button, Slider1 }) {
             sm:max-w-[550px]
             mx-auto
           "
-        >
-          {title || " Modern Furniture. Curated Lighting. Defined Living."}
-        </h1>
+          >
+            {title || " Modern Furniture. Curated Lighting. Defined Living."}
+          </h1>
 
-        {button && (
-          <div className="flex flex-wrap justify-center mt-3 sm:mt-5">
-            <Button
-              title={button || "Shop product"}
-              classes="bg-white text-[#171717]"
-            />
-          </div>
-        )}
+          {content && (
+            <p className="text-[#ffffff] font-[400] text-[16px] md:text-base leading-relaxed mt-3  max-w-[90%]
+            sm:max-w-[750px] text-center  ">
+              {content}
+            </p>
+          )}
+
+
+          {button && (
+            <div className="flex flex-wrap justify-center mt-3 sm:mt-5">
+              <Button
+                title={button || "Shop product"}
+                classes="bg-white text-[#171717]"
+              />
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-    
+
     </>
   );
 }

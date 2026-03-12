@@ -9,7 +9,6 @@ import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
-
 /* ---------------- Reusable Section ---------------- */
 const ConceptSection = ({ title, data }) => {
   if (!data?.length) return null;

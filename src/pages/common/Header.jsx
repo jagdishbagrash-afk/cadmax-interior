@@ -11,6 +11,7 @@ import { useSelector } from "react-redux";
 import Image from "next/image";
 import VendorMenu from "./VendorMenu";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
+import DesignMenu from "./DesignMenu";
 export default function Header() {
   const { user, setUser } = useRole();
   const router = useRouter();
@@ -77,7 +78,7 @@ export default function Header() {
           {/* Mega Menu */}
           <MegaMenu active={isActive("/product")} />
 
-          <li>
+          {/* <li>
             <Link
               href="/design"
               className={`${isActive("/design") ? "text-yellow-500" : "text-black"
@@ -85,7 +86,7 @@ export default function Header() {
             >
               Design 
             </Link>
-          </li>
+          </li> */}
 {/* 
           <li>
             <Link
@@ -96,6 +97,9 @@ export default function Header() {
               vendor
             </Link>
           </li> */}
+
+          <DesignMenu active={isActive("/design")} />
+
 
           <VendorMenu active={isActive("/vendor")} />
 
