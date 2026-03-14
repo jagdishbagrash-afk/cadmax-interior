@@ -93,7 +93,6 @@ export default function ProfileIndex() {
   return (
     <Layout heading="Profile Management">
       <div className="max-w-5xl mx-auto px-4 pb-10 space-y-10 mt-4">
-
         {/* ================= PROFILE IMAGE ================= */}
         <section className="flex flex-col md:flex-row gap-6 items-start border-b pb-8">
           <div className="md:w-1/3">
