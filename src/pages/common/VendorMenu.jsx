@@ -60,7 +60,7 @@ const VendorMenu = () => {
                     >
                         <div className="mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                             {categories?.map((item) => (
-                                <Link href={`/vendor/${item?.name?.replaceAll(" ", "-")}`} key={item._id} className="group cursor-pointer">
+                                <Link href={`/vendor/${item?.slug}`} key={item._id} className="group cursor-pointer">
                                     <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
                                         <img
                                             src={item.Image ? item.Image : c1?.src || c1?.src}

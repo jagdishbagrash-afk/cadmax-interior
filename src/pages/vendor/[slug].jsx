@@ -5,11 +5,13 @@ import Listing from "../api/Listing";
 export default function Index() {
     const router = useRouter();
     const slug = router.query.slug;
+    console.log("slug", slug)
     const [ProductDetail, setProductDetails] = useState([])
     const fetchData = async (slug) => {
         try {
             const main = new Listing();
             const response = await main.VendorCategoryList(slug);
+            console.log("response", response)
             if (response.data?.data) {
                 setProductDetails(response.data?.data);
             }
@@ -60,64 +62,92 @@ export default function Index() {
                     </div>
                 </div>
             </div>
-            <div className="bg-[#FFFFFF] py-4 md:py-8 ">
-                <div className="container mx-auto px-4 max-w-[1430px]">
+          <div className="bg-[#f9fafb] py-6 md:py-10">
+  <div className="container mx-auto px-4 max-w-[1430px]">
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                        {ProductDetail?.vendors?.map((p, idx) => (
-                            <div
-                                key={p._id ?? idx}
-                                className="flex flex-col sm:flex-row bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300"
-                            >
-                                <div className="w-full sm:w-1/2 p-4 flex flex-col items-center bg-gray-50 border-r border-gray-100 text-center">
-                                    <div className="w-32 h-32 md:w-40 md:h-40 rounded-lg overflow-hidden border-2 border-white shadow-sm bg-gray-200">
-                                        <img
-                                            src={p.Image}
-                                            alt={p.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                    <h3 className="mt-3 text-center font-bold text-gray-800 uppercase text-sm tracking-wider">
-                                        {p.name}
-                                    </h3>
-                                </div>
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
 
-                                <div className="w-full sm:w-1/2 p-5 flex flex-col items-center justify-center text-center">
-                                    <div className="space-y-3 flex flex-col items-center w-full">
-                                        <div className="flex items-center justify-center w-full">
-                                            <span className="text-[11px] font-bold text-gray-400 uppercase w-24 text-right mr-3">Experience:</span>
-                                            <span className="text-sm text-gray-700 font-semibold w-24 text-left">{p.experience} Years</span>
-                                        </div>
+      {ProductDetail?.vendors?.map((p, idx) => (
 
-                                        <div className="flex items-center justify-center w-full">
-                                            <span className="text-[11px] font-bold text-gray-400 uppercase w-24 text-right mr-3">Specialities:</span>
-                                            <span className="text-sm text-gray-700 w-24 text-left truncate">{p.sepectailze || "General"}</span>
-                                        </div>
+        <div
+          key={p._id ?? idx}
+          className="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
+        >
 
-                                        {/* STATUS BADGE CENTERED */}
-                                        <div className="pt-1">
-                                            <span className={`text-[10px] px-3 py-1 rounded-full font-bold uppercase tracking-wider ${p.isAvailable ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
-                                                {p.isAvailable ? "Available" : "Busy"}
-                                            </span>
-                                        </div>
-                                    </div>
+          {/* Vendor Image */}
+          <div className="bg-gray-50 flex flex-col items-center py-6 border-b">
 
-                                    {/* ACTION BUTTONS CENTERED */}
-                                    {/* <div className="flex flex-row gap-3 mt-6 w-full justify-center">
-                                        <button className="px-4 py-2 border border-red-500 text-red-500 text-[11px] font-bold uppercase rounded hover:bg-red-50 transition-colors whitespace-nowrap">
-                                            Work Photos
-                                        </button>
-                                        <button className="px-6 py-2 border border-red-500 text-red-500 text-[11px] font-bold uppercase rounded hover:bg-red-50 transition-colors whitespace-nowrap">
-                                            Book
-                                        </button>
-                                    </div> */}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-
-                </div>
+            <div className="w-32 h-32 rounded-xl overflow-hidden border shadow">
+              <img
+                src={p.Image}
+                alt={p.name}
+                className="w-full h-full object-cover"
+              />
             </div>
+
+            <h3 className="mt-4 text-base font-semibold text-gray-800 uppercase tracking-wide text-center">
+              {p.name}
+            </h3>
+
+            {/* Status Badge */}
+            <span
+              className={`mt-2 text-xs px-3 py-1 rounded-full font-semibold
+              ${p.isAvailable
+                  ? "bg-green-100 text-green-700"
+                  : "bg-red-100 text-red-600"
+                }`}
+            >
+              {p.isAvailable ? "Available" : "Busy"}
+            </span>
+
+          </div>
+
+          {/* Vendor Details */}
+          <div className="p-5 flex flex-col gap-3 text-sm">
+
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-gray-500 font-medium">
+                Experience
+              </span>
+
+              <span className="font-semibold text-gray-800">
+                {p.experience} Years
+              </span>
+            </div>
+
+            <div className="flex justify-between border-b pb-2">
+              <span className="text-gray-500 font-medium">
+                Specialities
+              </span>
+
+              <span className="font-semibold text-gray-800 truncate max-w-[140px] text-right">
+                {p.sepectailze || "General"}
+              </span>
+            </div>
+
+          </div>
+
+          {/* Action Buttons */}
+          {/* <div className="flex gap-3 p-5 pt-0">
+
+            <button className="flex-1 border border-red-500 text-red-500 text-sm font-semibold py-2 rounded-lg hover:bg-red-50 transition">
+              Work Photos
+            </button>
+
+            <button className="flex-1 bg-red-500 text-white text-sm font-semibold py-2 rounded-lg hover:bg-red-600 transition">
+              Book Now
+            </button>
+
+          </div> */}
+
+        </div>
+
+      ))}
+
+    </div>
+
+  </div>
+</div>
 
         </Layout>
     );

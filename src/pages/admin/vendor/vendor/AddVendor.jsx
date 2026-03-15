@@ -183,7 +183,7 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                                 Experience
                             </label>
                             <input
-                                type="number"
+                                type="text"
                                 className="w-full px-4 py-2 h-[48px] border border-gray-200 rounded-[10px] bg-[#F4F6F8] focus:ring focus:ring-gray-300 outline-none"
                                 placeholder="Enter Experience"
                                 name="experience"
