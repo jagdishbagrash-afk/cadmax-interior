@@ -1,51 +1,43 @@
 "use client";
-
 import { useEffect, useState } from "react";
-import axios from "axios";
 import toast from "react-hot-toast";
 import Layout from "../common/Layout";
+import Listing from "../api/Listing";
 
 export default function ManageAddress() {
-
-    const [addresses, setAddresses] = useState([]);
+    const [data, setData] = useState([]);
     const [addAddress, setAddAddress] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [editId, setEditId] = useState(null);
+    const handleEdit = (item) => {
+
+        setForm({
+            street_address: item.street_address,
+            city: item.city,
+            state: item.state,
+            country: item.country,
+            pincode: item.pincode,
+            addressType: item.addressType
+        });
+
+        setEditId(item._id);
+        setEditOpen(true);
+
+    };
+
+
 
     const states = [
-        "Andhra Pradesh",
-        "Arunachal Pradesh",
-        "Assam",
-        "Bihar",
-        "Chhattisgarh",
-        "Goa",
-        "Gujarat",
-        "Haryana",
-        "Himachal Pradesh",
-        "Jharkhand",
-        "Karnataka",
-        "Kerala",
-        "Madhya Pradesh",
-        "Maharashtra",
-        "Manipur",
-        "Meghalaya",
-        "Mizoram",
-        "Nagaland",
-        "Odisha",
-        "Punjab",
-        "Rajasthan",
-        "Sikkim",
-        "Tamil Nadu",
-        "Telangana",
-        "Tripura",
-        "Uttar Pradesh",
-        "Uttarakhand",
-        "West Bengal",
-        "Delhi"
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa",
+        "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala",
+        "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
+        "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
+        "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi"
     ];
 
     const [form, setForm] = useState({
-        addressLine1: "",
-        addressLine2: "",
+        street_address: "",
         city: "",
         state: "",
         country: "India",
@@ -57,10 +49,18 @@ export default function ManageAddress() {
 
     const fetchAddress = async () => {
         try {
-            const res = await axios.get("/api/address");
-            setAddresses(res.data.data);
+            const main = new Listing();
+            const response = await main.AddressList();
+
+            if (response?.data?.data?.addresses) {
+                setData(response.data.data.addresses);
+            } else {
+                setData([]);
+            }
+
         } catch (error) {
-            toast.error("Failed to load addresses");
+            console.log(error);
+            setData([]);
         }
     };
 
@@ -80,89 +80,129 @@ export default function ManageAddress() {
     /* ---------------- Add Address ---------------- */
 
     const handleAddAddress = async () => {
+
         try {
+
             setLoading(true);
 
-            const res = await axios.post("/api/address", form);
+            const main = new Listing();
+            const response = await main.AddAddress(form);
 
-            setAddresses([...addresses, res.data.data]);
+            if (response?.data) {
 
-            toast.success("Address Added Successfully");
+                toast.success(response.data.message);
 
-            setForm({
-                addressLine1: "",
-                addressLine2: "",
-                city: "",
-                state: "",
-                country: "India",
-                pincode: "",
-                addressType: ""
-            });
+                fetchAddress();
 
-            setAddAddress(false);
+                setAddAddress(false);
 
-        } catch (error) {
-            toast.error("Error adding address");
+                setForm({
+                    street_address: "",
+                    city: "",
+                    state: "",
+                    country: "India",
+                    pincode: "",
+                    addressType: ""
+                });
+
+            }
+
+        } catch (err) {
+
+            toast.error("Failed to add address");
+
         } finally {
+
             setLoading(false);
+
         }
+
     };
 
-    /* ---------------- Delete Address ---------------- */
+    /* ---------------- Update Address  ---------------- */
+
+    const updateAddress = async () => {
+        try {
+            setLoading(true);
+            const main = new Listing();
+            const response = await main.UpdateAddressUser(editId, form);
+            toast.success(response.data.message);
+            setEditOpen(false);
+            fetchAddress();
+        } catch {
+
+            toast.error("Update failed");
+
+        } finally {
+
+            setLoading(false);
+
+        }
+
+    };
+
+    /* ---------------- Delete ---------------- */
 
     const deleteAddress = async (id) => {
+
         try {
 
-            await axios.delete(`/api/address/${id}`);
+            const main = new Listing();
 
-            setAddresses(addresses.filter((item) => item._id !== id));
+            const response = await main.DeleteAddressList(id);
 
-            toast.success("Address deleted");
+            toast.success(response.data.message);
 
-        } catch (error) {
+            fetchAddress();
+
+        } catch {
+
             toast.error("Delete failed");
+
         }
+
     };
 
     /* ---------------- Set Default ---------------- */
 
     const setDefault = async (id) => {
+
         try {
 
-            await axios.put(`/api/address/default/${id}`);
+            const main = new Listing();
 
-            const updated = addresses.map((item) => ({
-                ...item,
-                isDefault: item._id === id
-            }));
-
-            setAddresses(updated);
+            await main.DefalutAddressList(id);
 
             toast.success("Default Address Updated");
 
-        } catch (error) {
+            fetchAddress();
+
+        } catch {
+
             toast.error("Error updating default");
+
         }
+
     };
 
     return (
         <Layout heading="Manage Address">
 
-            <div className="bg-gray-50 py-10">
+            <div className="bg-gray-50 min-h-screen py-10">
 
-                <div className="container mx-auto px-4 max-w-[1430px]">
+                <div className="max-w-[1230px] mx-auto px-4">
 
                     {/* Header */}
 
-                    <div className="flex justify-between items-center mb-6">
+                    <div className="flex justify-between items-center mb-8">
 
-                        <h2 className="text-2xl font-semibold">
+                        <h2 className="text-2xl font-semibold text-gray-800">
                             Your Addresses
                         </h2>
 
                         <button
                             onClick={() => setAddAddress(!addAddress)}
-                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer"
+                            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg"
                         >
                             {addAddress ? "Cancel" : "+ Add Address"}
                         </button>
@@ -173,62 +213,104 @@ export default function ManageAddress() {
 
                     <div className="space-y-4">
 
-                        {addresses?.map((item) => (
+                        {data?.length === 0 && (
+                            <div className="text-center py-10 text-gray-500">
+                                No address found
+                            </div>
+                        )}
 
-                            <div
-                                key={item._id}
-                                className="bg-white border rounded-lg p-5 flex justify-between items-start hover:shadow-md transition"
-                            >
+                        <div className="space-y-4">
 
-                                <div
-                                    className="cursor-pointer"
-                                    onClick={() => setDefault(item._id)}
-                                >
+                            {data?.map((item) => {
 
-                                    <div className="flex items-center gap-2 mb-1">
+                                const isDeleted = item.deletedAt !== null;
 
-                                        <input
-                                            type="radio"
-                                            checked={item.isDefault}
-                                            readOnly
-                                        />
+                                return (
 
-                                        <span className="font-semibold">
-                                            {item.addressLine1}
-                                        </span>
+                                    <div
+                                        key={item._id}
+                                        className={`border rounded-xl p-5 transition flex justify-between items-start
+        ${isDeleted
+                                                ? "bg-gray-200 opacity-70 "
+                                                : "bg-white hover:shadow-md"
+                                            }`}
+                                    >
 
-                                        {item.isDefault && (
-                                            <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
-                                                Default
-                                            </span>
-                                        )}
+                                        {/* Address Info */}
+                                        <div
+                                            className={` cursor-pointer flex gap-3 ${isDeleted ? "" : "cursor-pointer"}`}
+                                            onClick={() => !isDeleted && setDefault(item._id)}
+                                        >
+
+                                            <input
+                                                type="radio"
+                                                checked={item.isDefault}
+                                                readOnly
+                                                disabled={isDeleted}
+                                                className="mt-1 cursor-pointer"
+                                            />
+
+                                            <div>
+
+                                                <div className="flex items-center gap-2">
+
+                                                    <span className="font-semibold text-gray-800">
+                                                        {item.street_address}
+                                                    </span>
+
+                                                    {item.isDefault && (
+                                                        <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded">
+                                                            Default
+                                                        </span>
+                                                    )}
+
+                                                </div>
+
+                                                <p className="text-gray-500 text-sm mt-1">
+                                                    {item.addressType}
+                                                </p>
+
+                                                <p className="text-gray-600 text-sm">
+                                                    {item.city}, {item.state}, {item.country} - {item.pincode}
+                                                </p>
+
+                                            </div>
+
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex justify-center items-center text-center gap-4 ">
+                                            {!isDeleted && (
+                                                <button
+                                                    onClick={() => handleEdit(item)}
+                                                    className="text-blue-500 hover:text-blue-700 text-sm cursor-pointer"
+                                                >
+                                                    Edit
+                                                </button>
+
+                                            )}
+                                            <button
+                                                onClick={() => deleteAddress(item._id)}
+                                                className={`${isDeleted ? "text-green-500 hover:text-green-700 text-sm" : "text-red-500 hover:text-red-700 text-sm"} cursor-pointer`}
+                                            >
+                                                {isDeleted ? "Restored" : "Delete"}
+
+                                            </button>
+                                        </div>
 
                                     </div>
 
-                                    <p className="text-gray-600 text-sm">
-                                        {item.addressLine2}
-                                    </p>
+                                );
 
-                                    <p className="text-gray-600 text-sm">
-                                        {item.city}, {item.state}, {item.country} - {item.pincode}
-                                    </p>
+                            })}
 
-                                </div>
-
-                                <button
-                                    onClick={() => deleteAddress(item._id)}
-                                    className="text-red-500 hover:text-red-700 text-sm"
-                                >
-                                    Delete
-                                </button>
-
-                            </div>
-
-                        ))}
+                        </div>
 
                     </div>
 
                     {/* Add Address Form */}
+
+
 
                     {addAddress && (
 
@@ -249,8 +331,8 @@ export default function ManageAddress() {
 
                                         <input
                                             type="text"
-                                            name="addressLine1"
-                                            value={form.addressLine1}
+                                            name="street_address"
+                                            value={form.street_address}
                                             onChange={handleChange}
                                             className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
@@ -323,6 +405,8 @@ export default function ManageAddress() {
                                             <option value="">Address Type</option>
                                             <option value="Home">Home</option>
                                             <option value="Office">Office</option>
+                                            <option value="Other">Other </option>
+
                                         </select>
                                     </div>
 
@@ -345,9 +429,106 @@ export default function ManageAddress() {
 
                     )}
 
+
+
                 </div>
 
             </div>
+            {editOpen && (
+
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+                    <div className="bg-white rounded-xl w-full max-w-lg p-6">
+
+                        <h3 className="text-lg font-semibold mb-6">
+                            Edit Address
+                        </h3>
+
+                        <div className="space-y-4">
+
+                            <input
+                                type="text"
+                                name="street_address"
+                                value={form.street_address}
+                                onChange={handleChange}
+                                placeholder="Street Address"
+                                className="w-full border rounded-lg p-3"
+                            />
+
+                            <select
+                                name="state"
+                                value={form.state}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-3"
+                            >
+
+                                <option value="">Select State</option>
+
+                                {states.map((state, index) => (
+                                    <option key={index} value={state}>
+                                        {state}
+                                    </option>
+                                ))}
+
+                            </select>
+
+                            <input
+                                type="text"
+                                name="city"
+                                value={form.city}
+                                onChange={handleChange}
+                                placeholder="City"
+                                className="w-full border rounded-lg p-3"
+                            />
+
+                            <input
+                                type="text"
+                                name="pincode"
+                                value={form.pincode}
+                                onChange={handleChange}
+                                placeholder="Pincode"
+                                className="w-full border rounded-lg p-3"
+                            />
+
+                            <select
+                                name="addressType"
+                                value={form.addressType}
+                                onChange={handleChange}
+                                className="w-full border rounded-lg p-3"
+                            >
+
+                                <option value="">Address Type</option>
+                                <option value="Home">Home</option>
+                                <option value="Office">Office</option>
+                                <option value="Other">Other</option>
+
+                            </select>
+
+                        </div>
+
+                        <div className="flex justify-end gap-4 mt-6">
+
+                            <button
+                                onClick={() => setEditOpen(false)}
+                                className="px-5 py-2 border rounded-lg"
+                            >
+                                Cancel
+                            </button>
+
+                            <button
+                                onClick={updateAddress}
+                                className="px-5 py-2 bg-blue-600 text-white rounded-lg"
+                            >
+                                {loading ? "Updating..." : "Update Address"}
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            )}
 
         </Layout>
     );

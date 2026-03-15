@@ -80,6 +80,21 @@ class Listing extends Component {
     return Api.get("/category/get",)
   }
 
+  async AddressList() {
+    return Api.get("/address/list",)
+  }
+
+  async DefalutAddressList(id) {
+    return Api.get(`/address/default/${id}`,)
+  }
+  async DeleteAddressList(id) {
+    return Api.get(`/address/delete/${id}`,)
+  }
+
+  async UpdateAddressUser(id, data) {
+    return Api.post(`/address/update/${id}`, data)
+  }
+
   async ServicesSubCategoryList() {
     return Api.get("/services/subcategory/list",)
   }
@@ -199,12 +214,16 @@ class Listing extends Component {
     return Api.get(`/project/list`, data);
   }
 
-   async GetAllProdcuctColor(data) {
+  async GetAllProdcuctColor(data) {
     return Api.get(`/product/color/by`, data);
   }
 
   async AddProject(data) {
     return Api.post(`/project/add`, data);
+  }
+
+  async AddAddress(data) {
+    return Api.post(`/address/add`, data);
   }
 
   async getAllProjectId(id) {
@@ -271,6 +290,11 @@ class Listing extends Component {
 
   async EditBanner(id, data) {
     return Api.post(`/admin/banner/edit/${id}`, data);
+  }
+
+
+  async AddressUser(id, data) {
+    return Api.get(`/address/user-list/${id}`, data);
   }
 
   async Register(data) {

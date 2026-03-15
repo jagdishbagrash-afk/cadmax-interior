@@ -12,6 +12,8 @@ import Image from "next/image";
 import VendorMenu from "./VendorMenu";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import DesignMenu from "./DesignMenu";
+import { FaRegAddressCard } from "react-icons/fa6";
+
 export default function Header() {
   const { user, setUser } = useRole();
   const router = useRouter();
@@ -52,12 +54,12 @@ export default function Header() {
           className="text-xl font-extrabold tracking-tight text-black"
         >
           <Image
-              className="w-auto h-[50px] sm:h-[60px]"
-              height={1126}
-              width={886}
-              layout="fixed"
-              src={"/Logo.png"}
-              alt="Japanese For Me"
+            className="w-auto h-[50px] sm:h-[60px]"
+            height={1126}
+            width={886}
+            layout="fixed"
+            src={"/Logo.png"}
+            alt="Japanese For Me"
           />
         </Link>
 
@@ -87,7 +89,7 @@ export default function Header() {
               Design 
             </Link>
           </li> */}
-{/* 
+          {/* 
           <li>
             <Link
               href="#"
@@ -139,7 +141,9 @@ export default function Header() {
                     <Link href="/setting" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
                       <IoSettingsOutline /> Settings
                     </Link>
-
+                    <Link href="/address" className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100">
+                      <FaRegAddressCard /> Address
+                    </Link>
                     <li
                       onClick={handleLogout}
                       className="flex items-center gap-2 px-4 py-2 hover:bg-gray-100 cursor-pointer"
@@ -173,49 +177,49 @@ export default function Header() {
         </div>
 
         {/* MOBILE TOGGLE */}
-   <button
-  className="md:hidden text-2xl"
-  onClick={() => setMenuOpen(!menuOpen)}
->
-  {menuOpen ? <HiOutlineX /> : <HiOutlineMenu />}
-</button>
+        <button
+          className="md:hidden text-2xl"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <HiOutlineX /> : <HiOutlineMenu />}
+        </button>
       </nav>
 
       {/* ================= MOBILE MENU ================= */}
-     {menuOpen && (
-  <div className="md:hidden border-t bg-white">
-    <ul className="flex flex-col px-6 py-3 space-y-3">
+      {menuOpen && (
+        <div className="md:hidden border-t bg-white">
+          <ul className="flex flex-col px-6 py-3 space-y-3">
 
-      <li>
-        <Link
-          href="/product"
-          className={`${isActive("/product") ? "text-yellow-500" : "text-black"}`}
-        >
-          PRODUCT
-        </Link>
-      </li>
+            <li>
+              <Link
+                href="/product"
+                className={`${isActive("/product") ? "text-yellow-500" : "text-black"}`}
+              >
+                PRODUCT
+              </Link>
+            </li>
 
-      <li>
-        <Link
-          href="/design"
-          className={`uppercase ${isActive("/design") ? "text-yellow-500" : "text-black"}`}
-        >
-          DESIGN
-        </Link>
-      </li>
+            <li>
+              <Link
+                href="/design"
+                className={`uppercase ${isActive("/design") ? "text-yellow-500" : "text-black"}`}
+              >
+                DESIGN
+              </Link>
+            </li>
 
-      <li>
-        <Link
-          href="/vendor"
-          className={`uppercase ${isActive("/vendor") ? "text-yellow-500" : "text-black"}`}
-        >
-          VENDOR
-        </Link>
-      </li>
+            <li>
+              <Link
+                href="/vendor"
+                className={`uppercase ${isActive("/vendor") ? "text-yellow-500" : "text-black"}`}
+              >
+                VENDOR
+              </Link>
+            </li>
 
-    </ul>
-  </div>
-)}
+          </ul>
+        </div>
+      )}
     </header>
   );
 }

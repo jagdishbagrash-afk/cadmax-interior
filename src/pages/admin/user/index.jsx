@@ -4,6 +4,9 @@ import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import Image from "next/image";
 import BlockUnblock from "../common/BlockUnblock";
+import Link from "next/link";
+import { IoMdEye } from "react-icons/io";
+import { FaHome } from "react-icons/fa";
 
 export default function Index() {
     const [data, setData] = useState([]);
@@ -92,8 +95,8 @@ export default function Index() {
 
                                         {/* PHONE */}
                                         <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            {item.phone}<br/>
-                                               {item.email || "--"}
+                                            {item.phone}<br />
+                                            {item.email || "--"}
                                         </td>
 
                                         {/* GENDER */}
@@ -121,12 +124,18 @@ export default function Index() {
                                         </td>
 
                                         <td>
-                                            <BlockUnblock
-                                                Id={item._id}
-                                                fetchData={fetchData}
-                                                step={6}
-                                                status={item?.deleted_at ? true : false}
-                                            />
+                                            <div className="flex justify-center items-center gap-4 text-center">
+
+                                                <Link href={`/admin/user/${item?._id}`} className="hover:text-blue-600">
+                                                    <FaHome size={24} />
+                                                </Link>
+                                                <BlockUnblock
+                                                    Id={item._id}
+                                                    fetchData={fetchData}
+                                                    step={6}
+                                                    status={item?.deleted_at ? true : false}
+                                                />
+                                            </div>
                                         </td>
 
                                     </tr>
