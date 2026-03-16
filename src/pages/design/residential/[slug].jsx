@@ -37,11 +37,11 @@ const ConceptSection = ({ title, data }) => {
 
               {/* Hover image */}
               <img
-               src={
-  Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
-    ? p.multiple_images[0]
-    : p?.Image || ProductListBanner?.src
-}
+                src={
+                  Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
+                    ? p.multiple_images[0]
+                    : p?.Image || ProductListBanner?.src
+                }
 
 
                 alt={p?.title}
@@ -76,6 +76,8 @@ export default function Index() {
 
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
+  const [common, setCommon] = useState([]);
+
   const [contemporary, setContemporary] = useState([]);
 
   /* -------- Fetch Categories -------- */
@@ -110,7 +112,7 @@ export default function Index() {
       const main = new Listing();
       const res = await main.GetAllServicesType(selectedId);
       const data = res?.data?.data || [];
-
+      setCommon(data.filter(i => i.concept === "common"));
       setClassic(data.filter(i => i.concept === "neo_classic"));
       setModern(data.filter(i => i.concept === "modern"));
       setContemporary(data.filter(i => i.concept === "contemporary"));
@@ -175,6 +177,7 @@ export default function Index() {
       {/* -------- Sections -------- */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
+          <ConceptSection data={common} />
           <ConceptSection title="NEO CLASSIC" data={classic} />
           <ConceptSection title="MODERN" data={modern} />
           <ConceptSection title="CONTEMPORARY" data={contemporary} />

@@ -258,6 +258,8 @@ const[project ,setProject] = useState([]);
                                         <option value="modern">Modern</option>
                                         <option value="neo_classic">Neo Classic</option>
                                         <option value="contemporary">Contemporary</option>
+                                        <option value="common">Common</option>
+
                                     </select>
                                 </div>
 

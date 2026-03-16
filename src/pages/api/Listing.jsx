@@ -99,6 +99,10 @@ class Listing extends Component {
     return Api.get("/services/subcategory/list",)
   }
 
+   async CommonProject() {
+    return Api.get("/common/project",)
+  }
+
   async vednorcategoryUpdate(id, formData) {
     return Api.post(`/vendor/category/edit/${id}`, formData);
   }
