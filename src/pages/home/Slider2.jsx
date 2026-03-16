@@ -44,19 +44,19 @@ export default function Slider2() {
 
         {/* Buttons */}
 
-        <button
-          onClick={handlePrev}
-          className="absolute left-0 cursor-pointer top-1/2 -translate-y-1/2 z-50 bg-white shadow-lg w-10 h-10 flex items-center justify-center rounded-full"
-        >
-          <FaArrowLeft />
-        </button>
+<button
+  onClick={handlePrev}
+  className="absolute left-40 cursor-pointer top-1/2 translate-y-1/2 z-50 bg-black text-white  shadow-lg w-10 h-10 flex items-center justify-center rounded-full"
+>
+  <FaArrowLeft />
+</button>
 
-        <button
-          onClick={handleNext}
-          className="absolute cursor-pointer right-0 top-1/2 -translate-y-1/2 z-50 bg-white shadow-lg w-10 h-10 flex items-center justify-center rounded-full"
-        >
-          <FaArrowRight />
-        </button>
+<button
+  onClick={handleNext}
+  className="absolute cursor-pointer right-40 top-1/2 translate-y-1/2 z-50 bg-black text-white  shadow-lg w-10 h-10 flex items-center justify-center rounded-full"
+>
+  <FaArrowRight />
+</button>
         <Swiper
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           loop={true}
@@ -69,19 +69,26 @@ export default function Slider2() {
           {data?.map((item, i) => (
             <SwiperSlide key={i}>
               {({ isActive }) => (
-                <div
-                  className={`relative transition-all duration-500 overflow-hidden
-        ${isActive
-                      ? "scale-[1.1] z-40"
-                      : "scale-[0.90] z-10 opacity-80  "
-                    }`}
-                >
-                  <img
-                    src={item?.Image}
-                    alt="project"
-                    className="w-full h-[450px] object-cover"
-                  />
-                </div>
+            <div
+  className={`relative transition-all duration-500 overflow-hidden 
+  ${isActive
+    ? "scale-[1.1] z-40 h-[500px]"
+    : "scale-[0.90] z-10  h-[480px]"
+  }`}
+>
+
+  <img
+    src={item?.Image}
+    alt="project"
+    className="w-full h-full object-cover"
+  />
+
+  {/* White Overlay for inactive images */}
+  {!isActive && (
+    <div className="absolute inset-0 bg-white/80"></div>
+  )}
+
+</div>
               )}
             </SwiperSlide>
           ))}
