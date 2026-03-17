@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 import Button from "../common/Button";
 import Slider1 from "../../Assets/Images/Slider1.png";
+import Listing from '../api/Listing';
 
 export default function Slider() {
 
@@ -21,6 +22,29 @@ export default function Slider() {
     },
   ];
 
+    const [Banner, setBanner] = useState([])
+
+    console.log("Banner" ,Banner)
+  
+    const fetchDatas = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.GetHomeList();
+      if (response.data) {
+        setBanner(response.data?.data);
+      } else {
+        setBanner([]);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setBanner([]);
+    }
+  };
+
+    useEffect(() => {
+      fetchDatas();
+    }, []);
+
   return (
     <div className="relative h-[425px] md:h-[560px] lg:h-[860px] md:mt-[-150px]">
       <Swiper
@@ -36,11 +60,11 @@ export default function Slider() {
         modules={[Autoplay]}
         className="w-full h-full"
       >
-        {slides?.map((slide, index) => (
+        {Banner?.map((slide, index) => (
           <SwiperSlide key={index}>
             <div className="relative w-full h-full">
               <img
-                src={slide.front}
+                src={slide.Image}
                 alt="Slide"
                 className="object-cover w-full h-full"
               />

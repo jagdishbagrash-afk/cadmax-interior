@@ -282,6 +282,11 @@ class Listing extends Component {
   async GetLastproduct(data) {
     return Api.get(`/common/product`, data);
   }
+
+   async GetHomeList(data) {
+    return Api.get(`/common/banner`, data);
+  }
+
   async GetContact(data) {
     return Api.get(`/contact-get`, data);
   }

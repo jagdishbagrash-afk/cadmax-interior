@@ -56,8 +56,9 @@ export default function ResidentialDesign() {
                             <Link
                                 href={`/design/commercial/${item.slug}`}
                                 key={index}
-                                className="relative overflow-hidden group"
+                                className="relative overflow-hidden group block"
                             >
+                                {/* Image */}
                                 <Image
                                     src={item?.Image}
                                     alt={item.title}
@@ -66,13 +67,32 @@ export default function ResidentialDesign() {
                                     className="w-full h-[325px] object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
 
-                                {/* Overlay */}
-                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center text-center  p-4">
-                                    <h3 className="text-white Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] ">
+                                {/* Dark Overlay */}
+                                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-center p-4 transition-all duration-300">
+
+                                    {/* Title */}
+                                    <h3 className="text-white Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] mb-3">
                                         {item.title}
                                     </h3>
+
+                                    {/* Book Now Button (Hidden by default) */}
+                                    <Link
+                                        href={`/booking`}
+                                        className="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300   px-4 
+        py-[6px]
+        font-[700] 
+        cursor-pointer 
+        Creato 
+        uppercase 
+        md:px-[30px] 
+        md:py-[10px] 
+        text-[13px] bg-transparent text-white border border-white"
+                                    >
+                                        Book Now
+                                    </Link>
                                 </div>
                             </Link>
+
                         ))}
                     </div>
                 </div>

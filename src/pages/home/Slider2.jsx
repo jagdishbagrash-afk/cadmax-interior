@@ -40,7 +40,7 @@ export default function Slider2() {
         <button
           onClick={handlePrev}
           className="
-          absolute 
+          absolute   cursor-pointer
           left-[-10px] md:left-[-20px] lg:left-[-30px]
           top-1/2 -translate-y-1/2 
           z-50 
@@ -56,7 +56,7 @@ export default function Slider2() {
         <button
           onClick={handleNext}
           className="
-          absolute 
+          absolute cursor-pointer
           right-[-10px] md:right-[-20px] lg:right-[-30px]
           top-1/2 -translate-y-1/2 
           z-50 
@@ -73,6 +73,7 @@ export default function Slider2() {
           onSwiper={(swiper) => (swiperRef.current = swiper)}
           loop={true}
           centeredSlides={true}
+           loopAdditionalSlides={data.length}
           slidesPerView={1.2}
           spaceBetween={10}
           breakpoints={{
