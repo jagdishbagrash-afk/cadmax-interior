@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import Layout from "@/pages/common/Layout";
 import Banner from "@/components/Banner";
 import ProductListBanner from "../../../Assets/Images/ProductListBanner.png";
+import DesignConcept from "@/pages/home/DesignConcept";
+import Slider2 from "@/pages/home/Slider2";
 
 
 export default function ResidentialDesign() {
@@ -73,6 +75,9 @@ export default function ResidentialDesign() {
                             </Link>
                         ))}
                     </div>
+                </div>
+                <div className="mt-4">
+                    <Slider2 />
                 </div>
             </div>
         </Layout>

@@ -9,62 +9,63 @@ import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
+import ConceptSection from "@/pages/common/ConceptSection";
 
-const ConceptSection = ({ title, data }) => {
-  if (!data?.length) return null;
+// const ConceptSection = ({ title, data }) => {
+//   if (!data?.length) return null;
 
-  return (
-    <>
-      <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px]
-        tracking-[-0.02em] uppercase Creato mb-5 mt-5">
-        {title}
-      </h2>
+//   return (
+//     <>
+//       <h2 className="text-[#171717] font-[900] text-[18px] md:text-[20px] lg:text-[24px]
+//         tracking-[-0.02em] uppercase Creato mb-5 mt-5">
+//         {title}
+//       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        {data && data?.map((p) => (
-          <Link
-            key={p._id}
-            href={`/design/details/${p.slug}`}
-            className="overflow-hidden group"
-          >
-            <div className="relative w-full h-[400px] md:h-[480px] bg-gray-100 overflow-hidden">
+//       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+//         {data && data?.map((p) => (
+//           <Link
+//             key={p._id}
+//             href={`/design/details/${p.slug}`}
+//             className="overflow-hidden group"
+//           >
+//             <div className="relative w-full h-[400px] md:h-[480px] bg-gray-100 overflow-hidden">
 
-              <img
-                src={p.Image || ProductListBanner?.src}
-                alt={p?.title}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
-              />
+//               <img
+//                 src={p.Image || ProductListBanner?.src}
+//                 alt={p?.title}
+//                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+//               />
 
-              {/* Hover image */}
-              <img
-           src={
-  Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
-    ? p.multiple_images[0]
-    : p?.Image || ProductListBanner?.src
-}
+//               {/* Hover image */}
+//               <img
+//                 src={
+//                   Array.isArray(p?.multiple_images) && p.multiple_images.length > 0
+//                     ? p.multiple_images[0]
+//                     : p?.Image || ProductListBanner?.src
+//                 }
 
 
-                alt={p?.title}
-                className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
-              />
-            </div>
+//                 alt={p?.title}
+//                 className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+//               />
+//             </div>
 
-            <div className="pt-2">
-              <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
-                {p.title}
-              </h3>
+//             <div className="pt-2">
+//               <h3 className="text-[14px] uppercase text-[#262A33] mb-2 font-medium tracking-[0.05em]">
+//                 {p.title}
+//               </h3>
 
-              <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed
-                line-clamp-3">
-                {p.content}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
-    </>
-  );
-};
+//               <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed
+//                 line-clamp-3">
+//                 {p.content}
+//               </p>
+//             </div>
+//           </Link>
+//         ))}
+//       </div>
+//     </>
+//   );
+// };
 
 export default function Index() {
   const router = useRouter();
@@ -108,6 +109,7 @@ export default function Index() {
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
   const [contemporary, setContemporary] = useState([]);
+  const [common, setCommon] = useState([]);
 
   // Fetch Project Based on Selected
   const fetchProjectData = async () => {
@@ -118,7 +120,7 @@ export default function Index() {
       const data = response?.data?.data;
 
       if (data && Array.isArray(data)) {
-
+        setCommon(data.filter(i => i.concept === "common"));
         // neo_classic
         const classicData = data.filter(item => item.concept === "neo_classic");
         setClassic(classicData);
@@ -209,6 +211,7 @@ export default function Index() {
       {/* Services Grid */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
+          <ConceptSection title="" data={common} />
           <ConceptSection title="NEO CLASSIC" data={classic} />
           <ConceptSection title="MODERN" data={modern} />
           <ConceptSection title="CONTEMPORARY" data={contemporary} />

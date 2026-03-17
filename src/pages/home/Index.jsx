@@ -19,6 +19,8 @@ function Index() {
     AOS.refresh();
   }, []);
   const [bestseller, setbestseller] = useState("")
+  const [lastproduct, setlastproduct] = useState("")
+
 
   const fetchData = async () => {
     try {
@@ -35,8 +37,25 @@ function Index() {
     }
   };
 
+
+  const fetchDatas = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.GetLastproduct();
+      if (response.data?.data) {
+        setlastproduct(response.data.data);
+      } else {
+        setlastproduct([]);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setlastproduct([]);
+    }
+  };
+
   useEffect(() => {
     fetchData();
+    fetchDatas();
   }, []);
 
 
@@ -45,6 +64,8 @@ function Index() {
       <Slider />
       <Servcies />
       <ProductGrid products={bestseller} link={"/best-seller"} />
+      <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
+
       <DesignConcept />
       <About />
       <ContactStyling />
