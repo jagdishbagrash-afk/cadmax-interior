@@ -65,3 +65,153 @@ body {
 .form-select {
   @apply w-full h-11 rounded-lg bg-[#F4F6F8] px-4 text-gray-700 border border-[#F4F6F8] focus:outline-none focus:ring-2 focus:ring-indigo-500;
 }
+
+
+
+
+.policy-page h1 {
+  color: #000;
+   font-family: 'Creato Display', sans-serif;
+  ;
+  font-size: 28px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 42px;
+  text-transform: uppercase;
+  margin: 0 0 15px;
+}
+
+.policy-page h2 {
+  color: #000;
+   font-family: 'Creato Display', sans-serif;
+  ;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 38px;
+  text-transform: uppercase;
+}
+
+.policy-page h3 {
+  color: #000;
+   font-family: 'Creato Display', sans-serif;
+  ;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  text-transform: uppercase;
+  /* margin: 30px 0 3px; */
+  padding-top: 20px;
+}
+
+.policy-page h4 {
+  color: #000;
+    font-family: 'Creato Display', sans-serif;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 600;
+  /* margin: 24px 0 3px; */
+}
+
+.policy-page p {
+  color: #000  !important ;
+  font-size: 18px !important ;
+  font-style: normal !important ;
+  line-height: 29px !important ;
+
+}
+
+.policy-page p a {
+  color: #000;
+  font-weight: 300;
+  line-height: normal;
+  text-decoration: underline;
+  margin: 0 0 5px;
+  word-break: break-word;
+
+}
+
+.policy-page ul {
+  list-style-type: disc;
+  padding-left: 20px;
+  padding-top: 10px;
+  padding-bottom: 20px;
+}
+
+.policy-page ul li {
+  color: #000;
+  margin-bottom: 10px;
+}
+
+
+/* Tablet styles */
+@media (max-width: 991px) {
+  .policy-page h1 {
+    font-size: 34px;
+    line-height: 38px;
+    /* margin: 0 0 10px; */
+  }
+
+  .policy-page h2 {
+    font-size: 32px;
+    line-height: 38px;
+    /* margin: 40px 0 10px; */
+  }
+}
+
+
+/* Mobile styles */
+@media (max-width: 767px) {
+  .policy-page h1 {
+    font-size: 24px;
+  }
+
+  .policy-page h2 {
+    font-size: 22px;
+    /* margin: 20px 0 5px; */
+  }
+
+  .policy-page p {
+    font-size: 14px;
+  }
+}
+/* UL List */
+.policy-page ul {
+  list-style: disc;
+}
+
+/* OL List */
+.policy-page ol {
+  list-style: decimal;
+  padding-left: 22px;
+}
+
+/* List Items */
+.policy-page li {
+  font-size: 16.5px;
+  line-height: 26px;
+  margin-bottom: 6px;
+}
+
+/* Nested List (important for professional look) */
+.policy-page ul ul,
+.policy-page ol ul {
+  list-style: circle;
+  margin-top: 6px;
+}
+
+.policy-page ol ol {
+  list-style: lower-alpha;
+  margin-top: 6px;
+}
+
+/* Strong Text */
+.policy-page strong {
+  font-weight: 600;
+}
+
+/* Spacing Fix Between Sections */
+.policy-page section,
+.policy-page .section {
+  margin-bottom: 30px;
+}
