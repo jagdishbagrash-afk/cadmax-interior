@@ -247,10 +247,10 @@ export default function Index() {
 
   return (
     <Layout>
-      <div className="w-full py-14 flex flex-col justify-center"
+      <div className="w-full md:py-14 flex flex-col justify-center"
        onHover={() => setZoomData(null)} // <--- KILL SWITCH HERE
       >
-        <div className="w-full max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
+        <div className="w-full container max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
           <div className="bg-white">
             <p className="text-base text-[#4D5466] tracking-widest mb-6  uppercase">
               <span className="text-[#171717]">
@@ -262,7 +262,6 @@ export default function Index() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
               <div className="flex gap-4 w-full">
 
-                {/* ================= LEFT: THUMBNAILS ================= */}
                 <div className="w-[80px]">
                   <Swiper
                     direction="vertical"
@@ -301,7 +300,7 @@ export default function Index() {
                 </div>
 
                 {/* ================= RIGHT: MAIN IMAGE + ZOOM ================= */}
-                <div className="flex-1 max-w-[500px]">
+                <div className="flex-1 w-full md:max-w-[500px]">
                   <div className="relative aspect-[4/5] z-50 rounded-lg overflow-visible">
 
                     <EasyZoomOnHover

@@ -62,7 +62,7 @@ export default function Related({ selectedId }) {
 
   return (
     <div className="mt-8 py-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center">
         <h2 className="text-[#171717] text-2xl font-black Creato uppercase">
           Related Items
         </h2>
@@ -71,7 +71,7 @@ export default function Related({ selectedId }) {
           items also has wide range of categories
         </p>
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6 mt-4">
         {Project &&
           Project?.map((item) => (
             <ProductCard item={item} />
