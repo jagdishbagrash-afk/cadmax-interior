@@ -3,9 +3,11 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/navigation";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import "swiper/css/effect-coverflow";
+import { EffectCoverflow, Autoplay } from "swiper/modules";
 import { useEffect, useRef, useState } from "react";
 import Listing from "../api/Listing";
+import Link from "next/link";
 
 export default function Slider2() {
   const [data, setData] = useState([]);
@@ -14,94 +16,118 @@ export default function Slider2() {
   const fetchData = async () => {
     try {
       const main = new Listing();
-      const response = await main.CommonProject();
-
+      const response = await main.getAllProject();
       if (response.data?.data) {
         setData(response.data.data);
+      } else {
+        setData([]);
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error:", error);
+      setData([]);
     }
   };
+
 
   useEffect(() => {
     fetchData();
   }, []);
 
+  const [activeIndex, setActiveIndex] = useState(0);
   return (
-    <div className="w-full bg-white py-6 md:py-12">
-      <div className="container mx-auto px-4 max-w-[1430px]">
+    <div className="relative w-full py-16 overflow-hidden">
 
-        {/* Heading */}
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 md:mb-12">
-          <h2 className="text-[#171717] font-[900] text-[20px] md:text-[26px] uppercase tracking-tight text-center md:text-left">
-            VERIFIED RESULTS, PHOTOGRAPHED AFTER COMPLETION
-          </h2>
-
-          <p className="text-[#4D5466] text-sm md:text-base md:max-w-[55%] text-center md:text-left">
-            Our work speaks through delivered spaces, not renders. Browse our
-            collection of completed residential and commercial interiors built
-            exactly as planned.
-          </p>
-        </div>
+      {/* 🔥 Background Image (Active Slide) */}
+      <div
+        className="absolute inset-0 transition-all duration-700"
+        style={{
+          backgroundImage: `url(${data[activeIndex]?.Image})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px]"></div>
       </div>
 
-      {/* Slider Section */}
-      <div className="container mx-auto px-4 max-w-[1430px]">
+      {/* 🔥 Content */}
+      <div className="relative z-10 w-[92%] max-w-[1200px] mx-auto">
 
-        <div className="w-full flex justify-center relative overflow-hidden">
-          <div className="w-[95%] md:w-[88%] relative">
+        {/* Heading */}
+        <div className="container mx-auto px-4 max-w-[1430px]">
 
-            {/* Buttons */}
-            <button
-              onClick={() => swiperRef.current?.slidePrev()}
-              className="absolute left-0 md:-left-6 cursor-pointer  top-1/2 -translate-y-1/2 z-50 bg-white shadow-lg p-3 rounded-full"
-            >
-              <FaArrowLeft />
-            </button>
+          {/* Heading */}
+          <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 md:mb-12">
+            <h2 className="text-[#ffffff] font-[900] text-[20px] md:text-[26px] uppercase tracking-tight text-center md:text-left">
+              VERIFIED RESULTS, PHOTOGRAPHED AFTER COMPLETION
+            </h2>
 
-            <button
-              onClick={() => swiperRef.current?.slideNext()}
-              className="absolute cursor-pointer right-0 md:-right-6 top-1/2 -translate-y-1/2 z-50 bg-white shadow-lg p-3 rounded-full"
-            >
-              <FaArrowRight />
-            </button>
-
-            <Swiper
-              onSwiper={(swiper) => (swiperRef.current = swiper)}
-              loop={true}
-              centeredSlides={true}
-              slidesPerView="auto"
-              spaceBetween={30}
-            >
-              {data && data?.map((item, i) => (
-                <SwiperSlide key={i} className="!w-auto flex justify-center">
-                  {({ isActive }) => (
-                    <div
-                      className={`
-                        transition-all duration-500 rounded-xl overflow-hidden ${isActive
-                          ? "w-full md:w-[700px]"
-                          : "w-full md:w-[300px] "
-                        }`}
-                    >
-                      <img
-                        src={item?.Image}
-                        alt=""
-                        className={`w-full object-cover ${isActive
-                          ? "h-[260px] sm:h-[360px] md:h-[520px]"
-                          : "h-[240px] sm:h-[340px] md:h-[500px] bg-white/80"
-                          }`}
-                      />
-                      {!isActive && (
-                        <div className="absolute inset-0 bg-white/50"></div>
-                      )}
-                    </div>
-                  )}
-                </SwiperSlide>
-              ))}
-            </Swiper>
+            <p className="text-[#ffffff] text-sm md:text-base md:max-w-[55%] text-center md:text-left">
+              Our work speaks through delivered spaces, not renders. Browse our
+              collection of completed residential and commercial interiors built
+              exactly as planned.
+            </p>
           </div>
         </div>
+
+        {/* 🔥 Swiper */}
+        <Swiper
+          modules={[EffectCoverflow, Autoplay]}
+          effect="coverflow"
+          centeredSlides={true}
+          slidesPerView={1.2}
+          spaceBetween={20}
+          loop={true}
+          autoplay={{ delay: 3000 }}
+          onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+          breakpoints={{
+            640: { slidesPerView: 1.5 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 2.5 },
+          }}
+          coverflowEffect={{
+            rotate: 0,
+            stretch: 0,
+            depth: 150,
+            modifier: 2,
+            slideShadows: false,
+          }}
+          className="pb-10"
+        >
+          {data?.map((item, index) => (
+            <SwiperSlide key={index}>
+              {({ isActive }) => (
+                <Link
+                  href={`/project/${item?.slug}`}
+                  className={`
+          transition-all duration-500 
+          ${isActive ? "scale-100" : "scale-90 opacity-70"}
+        `}
+                >
+                  {/* 🔥 WHITE FRAME CARD */}
+                  <div className="bg-white p-3 sm:p-4 rounded-xl shadow-2xl">
+
+                    {/* IMAGE */}
+                    <div className="overflow-hidden rounded-md">
+                      <img
+                        src={item.Image}
+                        alt={item.title}
+                        className="w-full h-[200px] sm:h-[260px] md:h-[300px] object-cover"
+                      />
+                    </div>
+
+                    {/* TITLE */}
+                    <div className="pt-3 text-center">
+                      <p className="text-xs sm:text-sm font-semibold text-gray-800 uppercase tracking-wide">
+                        {item.title}
+                      </p>
+                    </div>
+
+                  </div>
+                </Link>
+              )}
+            </SwiperSlide>
+          ))}
+        </Swiper>
       </div>
     </div>
   );

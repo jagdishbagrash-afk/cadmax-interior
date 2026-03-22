@@ -229,7 +229,6 @@ export default function Add() {
             accept="image/*"
             onChange={handleImageChange}
             className="border border-gray-300 rounded-lg p-2 w-full"
-            required
           />
           {imagePreview && (
             <img

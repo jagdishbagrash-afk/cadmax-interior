@@ -130,6 +130,9 @@ class Listing extends Component {
   async VendorCategoryList(id) {
     return Api.get(`/category/vendor/${id}`)
   }
+ async ProjectSlug(id) {
+    return Api.get(`/project-slug/${id}`)
+  }
 
   async categoryUpdate(id, formData) {
     return Api.post(`/category/update/${id}`, formData);

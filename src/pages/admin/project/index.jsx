@@ -65,7 +65,7 @@ export default function index() {
                   <Link href={`/admin/project/add?id=${item?._id}`} className="cursor-pointer m-auto flex items-center justify-center
                     w-[42px] h-[42px] rounded-lg 
                     border border-gray-200 shadow-sm 
-                    bg-white hover:bg-gray-50 transition-all duration-200 ">
+                    bg-black hover:bg-gray-50 transition-all duration-200 ">
                     <MdEdit
                       size={20}
                       className=" cursor-pointer"
@@ -86,6 +86,16 @@ export default function index() {
             <div >
               <h2 className="Creato font-[900] uppercase text-[24px] leading-[1] tracking-[-0.02em] mb-3">
                 {item.title}
+
+                  <Link href={`/admin/project/add?id=${item?._id}`} className="cursor-pointer m-auto flex items-center justify-center
+                    w-[42px] h-[42px] rounded-lg 
+                    border border-gray-200 shadow-sm 
+                    bg-white hover:bg-gray-50 transition-all duration-200 ">
+                    <MdEdit
+                      size={20}
+                      className=" cursor-pointer"
+                    />
+                  </Link>
               </h2>
 
               <p className="Creato font-medium text-[14px] sm:text-[15px] md:text-[16px] leading-[1] tracking-[-0.02em] uppercase text-left text-[#4D5466] mb-6">
