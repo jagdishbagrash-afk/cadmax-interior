@@ -1,10 +1,10 @@
 "use client";
-
 import { useState, useEffect } from "react";
 import Popup from "@/pages/common/Popup";
 import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
+import ImageUploader from "../../services/services/ImageUploader";
 
 export default function AddVendor({ fetchDatas, isEdit, item }) {
     const [categroy, setCategory] = useState([]);
@@ -28,30 +28,35 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
 
     const [isOpen, setIsOpen] = useState(false);
     const [processing, setProcessing] = useState(false);
+    const [images, setImages] = useState([]);
 
     const [formData, setFormData] = useState({
         name: "",
         experience: "",
-        sepectailze: "",
+        specialization: "",
         VendorCategory: "",
         price: "",
         phone: "",
         isAvailable: true,
         file: null,
-        preview: ""
+        preview: "",
+        content :"",
     });
+    const [project, setProject] = useState([]);
 
     useEffect(() => {
         if (isEdit && item) {
+            setProject(item);
             setFormData({
                 name: item?.name || "",
                 experience: item?.experience || "",
-                sepectailze: item?.sepectailze || "",
+                specialization: item?.specialization || "",
                 VendorCategory: item?.VendorCategory?._id || "",
                 price: item?.price || "",
                 phone: item?.phone || "",
                 isAvailable: item?.isAvailable ?? true,
                 preview: item?.Image || "",
+                content  : item?.content || "",
                 file: null
             });
         }
@@ -96,10 +101,14 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
             const submitForm = new FormData();
             submitForm.append("name", formData.name);
             submitForm.append("experience", formData.experience);
-            submitForm.append("sepectailze", formData.sepectailze);
+            submitForm.append("specialization", formData.specialization);
+            submitForm.append("content", formData.content);
             submitForm.append("VendorCategory", formData.VendorCategory);
             submitForm.append("phone", formData.phone);
             if (formData.file) submitForm.append("Image", formData.file);
+            images.forEach((img) => {
+                submitForm.append("images[]", img); // remove [] — most servers expect 'images' multiple times
+            });
             let response;
             if (isEdit) {
                 response = await main.vendorUpdate(item._id, submitForm);
@@ -113,7 +122,7 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                 setFormData({
                     name: "",
                     experince: "",
-                    sepectailze: "",
+                    specialization: "",
                     VendorCategory: "",
                     price: "",
                     phone: "",
@@ -200,12 +209,15 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                             <input
                                 className="w-full px-4 py-2 h-[48px] border border-gray-200 rounded-[10px] bg-[#F4F6F8] focus:ring focus:ring-gray-300 outline-none"
                                 placeholder="Enter Specialization"
-                                value={formData.sepectailze}
-                                name="sepectailze"
+                                value={formData.specialization}
+                                name="specialization"
                                 type="text"
-                                onChange={(e) => handleInputChange("sepectailze", e.target.value)}
+                                onChange={(e) => handleInputChange("specialization", e.target.value)}
                             />
                         </div>
+
+                       
+
 
                         {/* Service Type */}
                         <div>
@@ -249,9 +261,6 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                                 }}
                             />
                         </div>
-
-
-
                         {/* Image Upload */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -269,6 +278,26 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                                 />
                             )}
                         </div>
+                    </div>
+     <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                About
+                            </label>
+                            <textarea
+                            rows={5}
+                                className="w-full px-4 py-2  border border-gray-200 rounded-[10px] bg-[#F4F6F8] focus:ring focus:ring-gray-300 outline-none"
+                                placeholder="Enter about"
+                                value={formData.content}
+                                name="specialization"
+                                type="text"
+                                onChange={(e) => handleInputChange("content", e.target.value)}
+                            />
+                        </div>
+                    <div>
+                        <label className="text-sm font-semibold text-gray-700">
+                            Vendor Images
+                        </label>
+                        <ImageUploader type={"vendor"} images={images} setImages={setImages} project={project} fetchData={fetchDatas} />
                     </div>
 
                     {/* Footer */}

@@ -4,7 +4,6 @@ import servicesbottom from "../../Assets/Images/servicesbottom.jpg"
 import Layout from "../common/Layout";
 import ResidentialDesign from "./ResidentialDesign";
 import CommercialDesign from "./CommercialDesign";
-import Vendor from "./Vendor";
 import Predictable from "./Predictable";
 import Execution from "./Execution";
 import Slider2 from "../home/Slider2";

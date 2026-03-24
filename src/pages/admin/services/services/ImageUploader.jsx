@@ -3,7 +3,7 @@ import { MdAdd, MdDelete } from "react-icons/md";
 import toast from "react-hot-toast";
 import Listing from "@/pages/api/Listing";
 
-const ImageUploader = ({ images, setImages, project  ,fetchData}) => {
+const ImageUploader = ({ images, setImages, project  ,fetchData , type}) => {
     const [dragIndex, setDragIndex] = useState(null);
 
     const handleFileChange = (e) => {
@@ -45,7 +45,7 @@ const ImageUploader = ({ images, setImages, project  ,fetchData}) => {
         try {
             setLoading(true);
             const main = new Listing();
-            const response = await main.deleteimages(Ids, encodeURIComponent(image));
+            const response = await main.deleteimages(Ids, encodeURIComponent(image) ,  type);
             if (response) {
                 toast.success(response.data.message);
                 fetchData();

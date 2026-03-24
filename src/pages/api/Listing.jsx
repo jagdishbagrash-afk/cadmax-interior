@@ -134,6 +134,11 @@ class Listing extends Component {
     return Api.get(`/project-slug/${id}`)
   }
 
+   async VendorSlug(id) {
+    return Api.get(`/vendor-slug/${id}`)
+  }
+
+
   async categoryUpdate(id, formData) {
     return Api.post(`/category/update/${id}`, formData);
   }
@@ -178,8 +183,8 @@ class Listing extends Component {
     return Api.get(`/product/list`, data);
   }
 
-  async deleteimages(id, image) {
-    return Api.get(`/services/images/delete/${id}/${image}`)
+  async deleteimages(id, image,type) {
+    return Api.get(`/services/images/delete/${id}/${image}/${type}`)
   }
   async adminGetOrders(data) {
     return Api.get(`/order/getAll`, data);
@@ -335,7 +340,13 @@ class Listing extends Component {
   async AddContact(data) {
     return Api.post("/contact-add", data)
   }
+async LeadAdd(data) {
+    return Api.post("/lead-add", data)
+  }
 
+  async Leadget(data) {
+    return Api.get("/lead-get", data)
+  }
   async AddServicesContact(data) {
     return Api.post("/services/contact-add", data)
   }

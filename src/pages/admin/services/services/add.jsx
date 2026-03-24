@@ -369,7 +369,7 @@ const[project ,setProject] = useState([]);
                             <label className="text-sm font-semibold text-gray-700">
                                 Project Images
                             </label>
-                            <ImageUploader images={images} setImages={setImages} project={project} fetchData={fetchData} />
+                            <ImageUploader images={images} setImages={setImages} project={project} type={"services"} fetchData={fetchData} />
                         </div>
 
                         {/* Footer */}
