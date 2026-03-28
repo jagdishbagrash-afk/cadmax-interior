@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-        "dev-turbo": "next dev --turbopack",
+    "dev-turbo": "next dev --turbopack",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -16,6 +16,7 @@
     "animate.css": "^4.1.1",
     "aos": "^2.3.4",
     "axios": "^1.13.2",
+    "country-state-city": "^3.2.1",
     "easy-magnify": "^1.1.4",
     "framer-motion": "^12.26.2",
     "moment": "^2.30.1",

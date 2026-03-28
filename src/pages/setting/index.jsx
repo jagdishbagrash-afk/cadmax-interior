@@ -173,7 +173,7 @@ export default function ProfileIndex() {
             </select>
           </FormRow>
 
-          <FormRow label="Address" desc="Your full address">
+          {/* <FormRow label="Address" desc="Your full address">
             <textarea
               name="address"
               value={record.address}
@@ -182,7 +182,7 @@ export default function ProfileIndex() {
               className="form-input"
               placeholder="Enter address"
             />
-          </FormRow>
+          </FormRow> */}
         </section>
 
         {/* ================= BUTTON ================= */}

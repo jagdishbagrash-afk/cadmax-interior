@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
+import { InputBox } from "@/components/InputBox";
 
 export default function ManageAddress() {
     const [data, setData] = useState([]);
@@ -27,14 +28,6 @@ export default function ManageAddress() {
     };
 
 
-
-    const states = [
-        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa",
-        "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala",
-        "Madhya Pradesh", "Maharashtra", "Manipur", "Meghalaya", "Mizoram", "Nagaland",
-        "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", "Tripura",
-        "Uttar Pradesh", "Uttarakhand", "West Bengal", "Delhi"
-    ];
 
     const [form, setForm] = useState({
         street_address: "",
@@ -320,7 +313,6 @@ export default function ManageAddress() {
                                 Add New Address
                             </h3>
 
-                            <div className="p-6 lg:p-10">
                                 <div className="flex flex-wrap -mx-2.5">
 
                                     {/* Street Address */}
@@ -337,43 +329,7 @@ export default function ManageAddress() {
                                             className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         />
                                     </div>
-
-                                    {/* State */}
-                                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                                            State
-                                        </label>
-
-                                        <select
-                                            name="state"
-                                            value={form.state}
-                                            onChange={handleChange}
-                                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="">Select State</option>
-
-                                            {states.map((state, index) => (
-                                                <option key={index} value={state}>
-                                                    {state}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-
-                                    {/* City */}
-                                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                                            City
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            name="city"
-                                            value={form.city}
-                                            onChange={handleChange}
-                                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </div>
+                            <InputBox data={form} handleChange={handleChange} />
 
                                     {/* Pincode */}
                                     <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
@@ -411,7 +367,6 @@ export default function ManageAddress() {
                                     </div>
 
                                 </div>
-                            </div>
 
                             <div className="mt-6 text-right">
 
@@ -454,32 +409,7 @@ export default function ManageAddress() {
                                 placeholder="Street Address"
                                 className="w-full border rounded-lg p-3"
                             />
-
-                            <select
-                                name="state"
-                                value={form.state}
-                                onChange={handleChange}
-                                className="w-full border rounded-lg p-3"
-                            >
-
-                                <option value="">Select State</option>
-
-                                {states.map((state, index) => (
-                                    <option key={index} value={state}>
-                                        {state}
-                                    </option>
-                                ))}
-
-                            </select>
-
-                            <input
-                                type="text"
-                                name="city"
-                                value={form.city}
-                                onChange={handleChange}
-                                placeholder="City"
-                                className="w-full border rounded-lg p-3"
-                            />
+                          <InputBox data={form} handleChange={handleChange} />
 
                             <input
                                 type="text"
