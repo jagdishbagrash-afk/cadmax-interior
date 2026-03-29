@@ -283,6 +283,11 @@ class Listing extends Component {
     return Api.get(`/get-booking`, data);
   }
 
+   async GetPayment() {
+    return Api.get(`/payment-get`, );
+  }
+
+  
   async GetBestSeller(data) {
     return Api.get(`/common/bestseller`, data);
   }
