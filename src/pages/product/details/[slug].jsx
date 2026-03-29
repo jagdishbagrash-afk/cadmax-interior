@@ -17,11 +17,14 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
+import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 
 export default function Index() {
   const router = useRouter();
   // console.log("router", router)
   const id = router?.query?.slug;
+    const { error, isLoading, Razorpay } = useRazorpay();
+      const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);

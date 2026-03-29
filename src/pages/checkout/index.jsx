@@ -11,11 +11,18 @@ import Listing from "../api/Listing";
 import { useRouter } from "next/router";
 import { useRole } from "@/context/RoleContext";
 import Banner from "@/components/Banner";
-import BannerImages  from "../../Assets/Images/Frame18.jpg"
+import BannerImages from "../../Assets/Images/Frame18.jpg"
+import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
+
 export default function Index() {
+  const { error, isLoading, Razorpay } = useRazorpay();
+  const [data, setData] = useState([]);
+  const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
+  console.log("KEY:", process.env.NEXT_PUBLIC_RAZOPAY_KEY);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
+
   const dispatch = useDispatch();
   const { user } = useRole();
 
@@ -23,11 +30,14 @@ export default function Index() {
     return sum + Number(item?.price * item?.quantity);
   }, 0);
 
+  console.log("totalPrice" ,totalPrice)
+  const itemNames = cartItemsRedux.map((item) => item.name);
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone || "",
     address: "",
+    addressId: ""
   });
 
   const handleChange = (e) => {
@@ -47,15 +57,80 @@ export default function Index() {
     dispatch(removeItem(id));
   };
 
-  const handleSubmit = async(e) => {
-    e.preventDefault();
-    // console.log("Form Submitted:", formData);
-    // toast.success("Submitted in console");
+
+  const handlePaymentCreateSubmit = async (e) => {
+     e.preventDefault();
+    if (totalPrice === 0) {
+      toast.error("Amount can't be 0!");
+      return;
+    }
+    setLoading(true);
+    const main = new Listing();
+    try {
+      const res = await main.AddPaymentCreate({
+        "amount" : totalPrice , 
+       "currency":  "INR",
+       "receipt" : "receipt#1"
+      });
+      if (res && res.data && res.data.orderId) {
+        const options = {
+          key: RAZOPAY_KEY,
+          amount: totalPrice,
+          currency: "INR",
+          name: "Cadmaxatelier",
+          description: "Payment for services",
+          order_id: res.data.orderId,
+          handler: function (response) {
+            console.log("response" ,response);
+            localStorage.setItem("response", JSON.stringify(response));
+ handleSubmit(response);
+            toast.success("Payment Successful");
+          },
+          prefill: {
+            name: "Customer Name",
+            email: "customer@example.com",
+            contact: "1234567890",
+          },
+          notes: {
+            address: "Razorpay Corporate Office",
+          },
+          theme: {
+            color: "#F37254",
+          },
+        };
+
+        const rzp = new Razorpay(options);
+        rzp.on("payment.failed", function (response) {
+          const error = response.error;
+          const orderId = error?.metadata?.order_id;
+          const paymentId = error?.metadata?.payment_id;
+          if (orderId && paymentId) {
+            savePaymentDetails(orderId, paymentId, "failed");
+            router.push(`/cancel`);
+            // Pass 'failed'
+          } else {
+            console.error("Failed to retrieve Razorpay order or payment ID");
+          }
+        });
+        rzp.open();
+      } else {
+        toast.error(res.data.message || "Failed to create order");
+      }
+    } catch (error) {
+      toast.error("Error creating order");
+      console.error("Order creation error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (response) => {
+    console.log("response2" ,response)
     if (!cartItemsRedux || cartItemsRedux.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
-    if(loading){return;}
+    if (loading) { return; }
     setLoading(true);
     try {
       const products = cartItemsRedux.map((item) => ({
@@ -66,124 +141,216 @@ export default function Index() {
         variant: item?.selectedVariant,
       }));
       const main = new Listing();
-      const res = await main.AddOrder({ 
-        name: formData?.name, 
-        mobile: formData?.mobile, 
-        address: formData?.address, 
-        product: products, 
+      const res = await main.AddOrder({
+        name: formData?.name,
+        mobile: formData?.mobile,
+        address: formData?.address,
+        product: products,
         amount: totalPrice,
-       });
+        PaymentId: response.razorpay_payment_id
+      });
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        router.push("/");
-        dispatch(clearCart());
+        const orderId = res?.data?.data?._id;
+        await savePaymentDetails(
+          response.razorpay_order_id,
+          response.razorpay_payment_id,
+          "success",
+          orderId
+        );
+        toast.success(res?.data?.message);
+        
+
       } else {
         toast.error(res?.data?.message || "Failed to place order");
       }
     } catch (err) {
       toast.error(err?.response?.data?.message || "An unknown error occured");
-    }finally{
+    } finally {
       setLoading(false);
     }
   };
 
-  useEffect(()=>{
-    if(!user){
+
+  const savePaymentDetails = async (orderId, paymentId, payment_status, Orderdatas) => {
+    setLoading(true);
+    try {
+      const main = new Listing();
+     
+      const response = await main.PaymentSave({
+"order_id":  orderId,
+"payment_id":  paymentId,
+"currency":  "INR",
+"product_name" : itemNames,
+"amount": totalPrice ,
+"type" : "product",
+"payment_status": payment_status,
+"OrderID":  Orderdatas,
+      });
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+        router.push(`/success`);
+        dispatch(clearCart());
+      } else {
+        toast.error(response.data.message);
+      }
+    } catch (error) {
+      toast.error(error?.response?.data?.data?.message || "An error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  const fetchAddress = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.AddressList();
+
+      if (response?.data?.data?.addresses) {
+        setData(response.data.data.addresses);
+      } else {
+        setData([]);
+      }
+
+    } catch (error) {
+      console.log(error);
+      setData([]);
+    }
+  };
+
+  useEffect(() => {
+    fetchAddress();
+  }, []);
+
+
+
+  useEffect(() => {
+    if (!user) {
       toast.error("Please login to continue");
       router.push("/login");
     }
-  },[user])
+  }, [user])
+
+  console.log("formData", formData)
 
   return (
     <Layout>
-      <Banner Slider1={BannerImages}/>
-       <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black antialiased">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col lg:flex-row gap-12">
-          
-          {/* LEFT COLUMN: FORM */}
-          <div className="w-full lg:w-5/12">
-            <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm">
-              <div className="px-6 py-5 border-b border-gray-200">
-                <h2 className="text-2xl font-semibold tracking-tight">Shipping Details</h2>
-                <p className="text-sm text-gray-500 mt-1">Please enter your delivery information.</p>
-              </div>
+      <Banner Slider1={BannerImages} />
+      <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black antialiased">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col lg:flex-row gap-12">
 
-              <form className="p-6" onSubmit={handleSubmit}>
-                <div className="space-y-6">
-                  {/* NAME */}
-                  <div>
-                    <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                      Full Name *
-                    </label>
-                    <input
-                      id="name"
-                      type="text"
-                      name="name"
-                      placeholder="John Doe"
-                      autoComplete="name"
-                      value={formData.name}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
-                      required
-                    />
-                  </div>
-
-                  {/* MOBILE */}
-                  <div>
-                    <label htmlFor="mobile" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                      Mobile Number *
-                    </label>
-                    <input
-                      id="mobile"
-                      type="tel"
-                      name="mobile"
-                      placeholder="+91 98765 43210"
-                      autoComplete="tel"
-                      value={formData.mobile}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
-                      required
-                    />
-                  </div>
-
-                  {/* ADDRESS */}
-                  <div>
-                    <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                      Full Address *
-                    </label>
-                    <textarea
-                      id="address"
-                      name="address"
-                      placeholder="House No, Street, Landmark, City, Pincode"
-                      value={formData.address}
-                      onChange={handleChange}
-                      className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none h-32 resize-none"
-                      required
-                    />
-                  </div>
+            {/* LEFT COLUMN: FORM */}
+            <div className="w-full lg:w-5/12">
+              <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm">
+                <div className="px-6 py-5 border-b border-gray-200">
+                  <h2 className="text-2xl font-semibold tracking-tight">Shipping Details</h2>
+                  <p className="text-sm text-gray-500 mt-1">Please enter your delivery information.</p>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={loading }
-                  className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
-                    ${loading 
-                      ? "bg-gray-300 cursor-not-allowed text-gray-500" 
-                      : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
-                >
-                  {loading ? "Processing..." : "Complete Order"}
-                </button>
-              </form>
-            </div>
-          </div>
+                <form className="p-6" onSubmit={handlePaymentCreateSubmit}>
+                  <div className="space-y-6">
+                    {/* NAME */}
+                    <div>
+                      <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                        Full Name *
+                      </label>
+                      <input
+                        id="name"
+                        type="text"
+                        name="name"
+                        placeholder="John Doe"
+                        autoComplete="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
+                        required
+                      />
+                    </div>
 
-          {/* RIGHT COLUMN: CART SUMMARY */}
-          <div className="w-full lg:w-7/12">
-            <div className="sticky top-10">
-              <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
-                Order Summary ({cartItemsRedux?.length || 0})
-              </h2>
+                    {/* MOBILE */}
+                    <div>
+                      <label htmlFor="mobile" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                        Mobile Number *
+                      </label>
+                      <input
+                        id="mobile"
+                        type="tel"
+                        name="mobile"
+                        placeholder="+91 98765 43210"
+                        autoComplete="tel"
+                        value={formData.mobile}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
+                        required
+                      />
+                    </div>
+
+                    {/* ADDRESS */}
+                    {/* <div>
+                      <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                        Full Address *
+                      </label>
+                      <textarea
+                        id="address"
+                        name="address"
+                        placeholder="House No, Street, Landmark, City, Pincode"
+                        value={formData.address}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none h-32 resize-none"
+                        required
+                      />
+                    </div> */}
+
+
+                    <div>
+                      <label
+                        htmlFor="address"
+                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                      >
+                        Address *
+                      </label>
+
+                      <select
+                        id="addressId"
+                        name="addressId"
+                        value={formData.addressId || ""}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 text-black focus:border-black focus:ring-1 focus:ring-black outline-none"
+                        required
+                      >
+                        <option value="">Select Address</option>
+
+                        {data.map((item) => (
+                          <option key={item._id} value={item._id}>
+                            {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode} (${item.addressType})`}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
+                    ${loading
+                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                        : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
+                  >
+                    {loading ? "Processing..." : "Complete Order"}
+                  </button>
+                </form>
+              </div>
+            </div>
+
+            {/* RIGHT COLUMN: CART SUMMARY */}
+            <div className="w-full lg:w-7/12">
+              <div className="sticky top-10">
+                <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
+                  Order Summary ({cartItemsRedux?.length || 0})
+                </h2>
                 <div className="overflow-x-auto">
                   <table className="w-full">
                     <thead>
@@ -254,12 +421,12 @@ export default function Index() {
                     </tfoot>
                   </table>
                 </div>
+              </div>
             </div>
-          </div>
 
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
     </Layout>
   );
 }

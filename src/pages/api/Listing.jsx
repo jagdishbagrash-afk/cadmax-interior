@@ -99,7 +99,7 @@ class Listing extends Component {
     return Api.get("/services/subcategory/list",)
   }
 
-   async CommonProject() {
+  async CommonProject() {
     return Api.get("/common/project",)
   }
 
@@ -130,11 +130,11 @@ class Listing extends Component {
   async VendorCategoryList(id) {
     return Api.get(`/category/vendor/${id}`)
   }
- async ProjectSlug(id) {
+  async ProjectSlug(id) {
     return Api.get(`/project-slug/${id}`)
   }
 
-   async VendorSlug(id) {
+  async VendorSlug(id) {
     return Api.get(`/vendor-slug/${id}`)
   }
 
@@ -183,7 +183,7 @@ class Listing extends Component {
     return Api.get(`/product/list`, data);
   }
 
-  async deleteimages(id, image,type) {
+  async deleteimages(id, image, type) {
     return Api.get(`/services/images/delete/${id}/${image}/${type}`)
   }
   async adminGetOrders(data) {
@@ -291,7 +291,7 @@ class Listing extends Component {
     return Api.get(`/common/product`, data);
   }
 
-   async GetHomeList(data) {
+  async GetHomeList(data) {
     return Api.get(`/common/banner`, data);
   }
 
@@ -340,7 +340,7 @@ class Listing extends Component {
   async AddContact(data) {
     return Api.post("/contact-add", data)
   }
-async LeadAdd(data) {
+  async LeadAdd(data) {
     return Api.post("/lead-add", data)
   }
 
@@ -358,6 +358,15 @@ async LeadAdd(data) {
   async Success() {
     return Api.post("/contact-add", data)
   }
+
+   async AddPaymentCreate(data) {
+    return Api.post("/create", data)
+  }
+
+   async PaymentSave(data) {
+    return Api.post("/verify-payment", data)
+  }
+
   render() {
     return (
       <div>
