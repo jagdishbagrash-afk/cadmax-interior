@@ -5,7 +5,7 @@ import Listing from "@/pages/api/Listing";
 
 export default function Index() {
     const [data, setData] = useState([]);
-    console.log("data" ,data)
+    console.log("data", data)
     const fetchData = async () => {
         try {
             const main = new Listing();
@@ -17,6 +17,7 @@ export default function Index() {
             console.log("Error:", error);
         }
     };
+
     useEffect(() => {
         fetchData();
     }, []);
