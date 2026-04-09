@@ -73,45 +73,53 @@ export default function ManageAddress() {
     /* ---------------- Add Address ---------------- */
 
     const handleAddAddress = async () => {
+        // ✅ Validation
+        if (
+            !form.street_address.trim() ||
+            !form.city.trim() ||
+            !form.state.trim() ||
+            !form.country.trim() ||
+            !form.pincode.trim() ||
+            !form.addressType.trim()
+        ) {
+            return toast.error("All fields are required");
+        }
+
+        // ✅ Optional: Pincode validation (India)
+        if (!/^[1-9][0-9]{5}$/.test(form.pincode)) {
+            return toast.error("Enter valid 6 digit pincode");
+        }
 
         try {
-
             setLoading(true);
 
             const main = new Listing();
             const response = await main.AddAddress(form);
 
             if (response?.data) {
-
                 toast.success(response.data.message);
 
                 fetchAddress();
-
                 setAddAddress(false);
 
+                // reset form
                 setForm({
                     street_address: "",
                     city: "",
                     state: "",
                     country: "India",
                     pincode: "",
-                    addressType: ""
+                    addressType: "",
                 });
-
             }
-
         } catch (err) {
-
-            toast.error("Failed to add address");
-
+            toast.error(
+                err?.response?.data?.message || "Failed to add address"
+            );
         } finally {
-
             setLoading(false);
-
         }
-
     };
-
     /* ---------------- Update Address  ---------------- */
 
     const updateAddress = async () => {
@@ -313,60 +321,63 @@ export default function ManageAddress() {
                                 Add New Address
                             </h3>
 
-                                <div className="flex flex-wrap -mx-2.5">
+                            <div className="flex flex-wrap -mx-2.5">
 
-                                    {/* Street Address */}
-                                    <div className="w-full px-2.5 mb-3 lg:mb-6">
-                                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                                            Street Address
-                                        </label>
+                                {/* Street Address */}
+                                <div className="w-full px-2.5 mb-3 lg:mb-6">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Street Address
+                                    </label>
 
-                                        <input
-                                            type="text"
-                                            name="street_address"
-                                            value={form.street_address}
-                                            onChange={handleChange}
-                                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </div>
-                            <InputBox data={form} handleChange={handleChange} />
-
-                                    {/* Pincode */}
-                                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                                            Pincode
-                                        </label>
-
-                                        <input
-                                            type="text"
-                                            name="pincode"
-                                            value={form.pincode}
-                                            onChange={handleChange}
-                                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        />
-                                    </div>
-
-                                    {/* Address Type */}
-                                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                                            Address Type
-                                        </label>
-
-                                        <select
-                                            name="addressType"
-                                            value={form.addressType}
-                                            onChange={handleChange}
-                                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            <option value="">Address Type</option>
-                                            <option value="Home">Home</option>
-                                            <option value="Office">Office</option>
-                                            <option value="Other">Other </option>
-
-                                        </select>
-                                    </div>
-
+                                    <input
+                                        type="text"
+                                        name="street_address"
+                                        value={form.street_address}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
                                 </div>
+                                <InputBox data={form} handleChange={handleChange} />
+
+                                {/* Pincode */}
+                                <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Pincode
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        name="pincode"
+                                        value={form.pincode}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* Address Type */}
+                                <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Address Type
+                                    </label>
+
+                                    <select
+                                        name="addressType"
+                                        value={form.addressType}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Address Type</option>
+                                        <option value="Home">Home</option>
+                                        <option value="Office">Office</option>
+                                        <option value="Other">Other </option>
+
+                                    </select>
+                                </div>
+
+                            </div>
 
                             <div className="mt-6 text-right">
 
@@ -409,7 +420,7 @@ export default function ManageAddress() {
                                 placeholder="Street Address"
                                 className="w-full border rounded-lg p-3"
                             />
-                          <InputBox data={form} handleChange={handleChange} />
+                            <InputBox data={form} handleChange={handleChange} />
 
                             <input
                                 type="text"

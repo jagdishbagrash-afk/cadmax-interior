@@ -38,15 +38,17 @@ export default function Header() {
     setCartCount(totalQuantity);
   }, [cartItemsRedux]);
 
+
   /* ---------------- LOGOUT ---------------- */
   const handleLogout = () => {
     localStorage.removeItem("token");
     toast.success("Logout Successfully");
+router.push("/")
     setUser(null);
   };
 
   return (
-    <header className="sticky top-0 z-100 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-100 bg-white/30 ">
       <nav className="max-w-[1350px] mx-auto flex items-center justify-between px-6 xl:px-0 py-3">
         {/* Left Logo */}
         <Link

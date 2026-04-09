@@ -10,6 +10,8 @@ export default function VendorDetailPage() {
     const { vendorslug, slug } = router.query;
 
     const [vendor, setVendor] = useState(null);
+
+    console.log("vendor", vendor)
     const [loading, setLoading] = useState(true);
 
     const fetchData = async (vendorslug) => {
@@ -37,107 +39,149 @@ export default function VendorDetailPage() {
                     Loading Vendor...
                 </div>
             ) : (
-                <>
-                    {/* 🔥 HERO */}
-                    <div className="relative h-[280px] md:h-[420px] w-full">
+                <div className="bg-[#fafafa]">
+
+                    {/* 🔥 TOP BANNER */}
+                    <div className="h-[200px] md:h-[280px] w-full relative">
                         <img
-                            src={vendor?.Image}
+                            src={vendor?.VendorCategory?.Image}
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/50" />
-
-                        <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
-                            <h1 className="text-2xl md:text-5xl font-bold uppercase">
-                                {vendor?.name}
-                            </h1>
-
-                            <p className="mt-2 text-sm md:text-lg">
-                                {vendor?.specialization}
-                            </p>
-                        </div>
+                        <div className="absolute inset-0 bg-black/40" />
                     </div>
 
-                    {/* 🔥 CONTENT */}
-                    <div className="max-w-[1100px] mx-auto px-4 py-10 space-y-10">
+                    {/* 🔥 MAIN LAYOUT */}
+                    <div className="max-w-[1200px] mx-auto px-4 md:px-6 -mt-20 relative z-10 grid md:grid-cols-[320px_1fr] gap-8">
 
-                        {/* INFO */}
-                        <div className="grid grid-cols-2  gap-4">
+                        {/* ================= LEFT SIDE (STICKY PROFILE) ================= */}
+                        <div className="bg-white rounded-2xl shadow-lg p-6 h-fit md:sticky top-24">
 
-                            <div className="p-4 border rounded-xl">
-                                <p className="text-gray-500 text-sm">Experience</p>
-                                <p className="font-semibold">
-                                    {vendor?.experience}
-                                </p>
-                            </div>
+                            {/* PROFILE */}
+                            <div className="flex flex-col items-center text-center">
+                                <img
+                                    src={vendor?.Image}
+                                    className="w-[110px] h-[110px] rounded-full object-cover border-4 border-white shadow-md"
+                                />
 
-                            <div className="p-4 border rounded-xl">
-                                <p className="text-gray-500 text-sm">Specialization</p>
-                                <p className="font-semibold">
-                                    {vendor?.specialization}
-                                </p>
-                            </div>
-
-                            {/* <div className="p-4 border rounded-xl col-span-2 md:col-span-1">
-                                <p className="text-gray-500 text-sm">Phone</p>
-                                <p className="font-semibold">
-                                    {vendor?.phone}
-                                </p>
-                            </div> */}
-
-                        </div>
-
-                        {/* 🔥 DESCRIPTION */}
-                        {vendor?.content && (
-                            <div>
-                                <h2 className="text-xl font-semibold mb-3">
-                                    About Vendor
+                                <h2 className="mt-4 text-lg font-semibold ">
+                                    {vendor?.name}
                                 </h2>
 
-                                <p className="text-gray-600 leading-relaxed whitespace-pre-line">
-                                    {vendor?.content}
+                                <p className="text-sm text-gray-500">
+                                    {vendor?.VendorCategory?.name}
                                 </p>
                             </div>
-                        )}
 
+                            {/* TAGS */}
+                            <div className="mt-5 flex flex-wrap gap-2 justify-center">
+                                <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
+                                    {vendor?.experience}
+                                </span>
+                                <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
+                                    {vendor?.specialization}
+                                </span>
+                            </div>
 
-
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4">
-                                Work Gallery
-                            </h2>
-
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-
-                                {vendor?.multiple_images?.map((img, i) => (
-                                    <div key={i} className="overflow-hidden ">
-                                        <img
-                                            src={img}
-                                            className="w-full h-full object-cover  transition"
-                                        />
-                                    </div>
-                                ))}
-
-
-
+                            {/* CTA */}
+                            <div className="mt-6">
+                                <DynamicCTA
+                                    cta={{
+                                        text: "Hire Now",
+                                        redirect: "/login",
+                                        redirectAfterLogin: `/design/details/${slug}/${vendorslug}`,
+                                        autoSubmit: true,
+                                        type: "vendors",
+                                    }}
+                                    record={vendor}
+                                />
                             </div>
                         </div>
-                        <div className="flex gap-4 flex-col sm:flex-row justify-center items-center text-center">
 
-                            <DynamicCTA
-                                cta={{
-                                    text: "Enquiry Now",
-                                    redirect: "/login",
-                                    redirectAfterLogin: `/design/details/${slug}/${vendorslug}`,
-                                    autoSubmit: true,
-                                    type : "vendors"
-                                }}
-                                record={vendor}
-                            />
+                        {/* ================= RIGHT SIDE CONTENT ================= */}
+                        <div className="space-y-10">
 
+                            {/* 🔥 TITLE */}
+                            <div>
+                                <h1 className="text-2xl md:text-4xl text-[#ffffff] font-bold leading-tight">
+                                    {vendor?.name}
+                                </h1>
+                                <p className="text-[#ffffff] mt-2">
+                                    Professional {vendor?.specialization} services
+                                </p>
+                            </div>
+
+                            {/* 🔥 STATS */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                                <div className="bg-white p-5 rounded-xl shadow-sm">
+                                    <p className="text-gray-400 text-sm">Experience</p>
+                                    <p className="font-semibold text-lg">
+                                        {vendor?.experience}
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-xl shadow-sm">
+                                    <p className="text-gray-400 text-sm">Specialization</p>
+                                    <p className="font-semibold text-lg">
+                                        {vendor?.specialization}
+                                    </p>
+                                </div>
+
+                                <div className="bg-white p-5 rounded-xl shadow-sm">
+                                    <p className="text-gray-400 text-sm">Category</p>
+                                    <p className="font-semibold text-lg">
+                                        {vendor?.VendorCategory?.name}
+                                    </p>
+                                </div>
+                            </div>
+
+                            {/* 🔥 DESCRIPTION */}
+                            {vendor?.content && (
+                                <div className="bg-white p-6 rounded-xl shadow-sm">
+                                    <h2 className="text-xl font-semibold mb-3">
+                                        About Vendor
+                                    </h2>
+
+                                    <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                                        {vendor?.content}
+                                    </p>
+                                </div>
+                            )}
+
+                            {/* 🔥 GALLERY (MASONRY STYLE FEEL) */}
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">
+                                    Work Showcase
+                                </h2>
+
+                                <div className="columns-2 md:columns-3 gap-4 space-y-4">
+                                    {vendor?.multiple_images?.map((img, i) => (
+                                        <img
+                                            key={i}
+                                            src={img}
+                                            className="w-full rounded-xl hover:scale-[1.03] transition duration-300 cursor-pointer"
+                                        />
+                                    ))}
+                                </div>
+                            </div>
 
                         </div>
                     </div>
-                </>
+
+                    {/* 🔥 MOBILE STICKY CTA */}
+                    <div className="fixed bottom-0 left-0 w-full bg-white p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] md:hidden">
+                        <DynamicCTA
+                            cta={{
+                                text: "Hire This Vendor",
+                                redirect: "/login",
+                                redirectAfterLogin: `/design/details/${slug}/${vendorslug}`,
+                                autoSubmit: true,
+                                type: "vendors",
+                            }}
+                            record={vendor}
+                        />
+                    </div>
+
+                </div>
             )}
         </Layout>
     );

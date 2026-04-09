@@ -42,13 +42,14 @@ export function InputBox({ data: parentData = null, handleChange: parentHandleCh
     }, [data?.state, states]);
 
     return (
-       <div className="w-full grid grid-cols-2  gap-2 px-2.5 mb-3 lg:mb-6">
+        <div className="w-full grid grid-cols-2  gap-2 px-2.5 mb-3 lg:mb-6">
             {/* STATE */}
             <div className=" relative">
                 <select
                     name="state"
                     value={data?.state || ""}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pr-10 border border-[#808080] rounded-[8px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-500"
                 >
                     <option value="" disabled>Select State</option>
@@ -76,6 +77,7 @@ export function InputBox({ data: parentData = null, handleChange: parentHandleCh
                     name="city"
                     value={data?.city || ""}
                     onChange={handleChange}
+                    required
                     className="w-full px-4 py-3 pr-10 border border-[#808080] rounded-[8px] bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-500"
                 >
                     <option value="" disabled>Select City</option>

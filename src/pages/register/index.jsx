@@ -42,9 +42,11 @@ export default function Register() {
         toast.success("OTP sent successfully");
         setStep(2);
       } else {
+        console.log("res?.data?.message ", res?.data?.message)
         toast.error(res?.data?.message || "OTP send failed");
       }
     } catch (err) {
+      console.log("err", err)
       toast.error(err?.res?.data?.message || "OTP send failed");
     }
     setLoading(false);
@@ -70,7 +72,7 @@ export default function Register() {
       } else {
         toast.error(res?.data?.message || "Invalid OTP");
       }
-    } catch  {
+    } catch {
       toast.error("OTP verification failed");
     }
     setLoading(false);
@@ -91,15 +93,25 @@ export default function Register() {
         role: "customer",
       });
 
-      if (res?.data) {
+      if (res?.data?.status) {
         toast.success("Registration successful");
         router.push("/login");
       } else {
         toast.error(res?.data?.message || "Registration failed");
       }
-    } catch(err) {
-       toast.error(err?.res?.data?.message || "OTP send failed");
+
+    } catch (err) {
+      console.log("err", err);
+
+      const message =
+        err?.response?.data?.errors?.email ||
+        err?.response?.data?.errors?.phone ||
+        err?.response?.data?.message ||
+        "Registration failed";
+
+      toast.error(message);
     }
+
     setLoading(false);
   };
 
@@ -126,20 +138,20 @@ export default function Register() {
           {/* ✅ STEP 1: PHONE */}
           {step === 1 && (
             <div className="max-w-md mx-auto">
-             <input
-                  type="tel"
-                  name="phone"
-                  maxLength={10}
-                  value={data.phone}
-                  onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, ""); // only digits
-                    handleChange({ target: { name: "phone", value } });
-                  }}
-                  placeholder="Enter mobile number"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
-                />
+              <input
+                type="tel"
+                name="phone"
+                maxLength={10}
+                value={data.phone}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/\D/g, ""); // only digits
+                  handleChange({ target: { name: "phone", value } });
+                }}
+                placeholder="Enter mobile number"
+                inputMode="numeric"
+                pattern="[0-9]*"
+                className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
+              />
               <button
                 onClick={sendOTP}
                 disabled={loading}
