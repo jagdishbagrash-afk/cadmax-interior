@@ -10,6 +10,8 @@ import BlockUnblock from "../common/BlockUnblock";
 import { formatMultiPrice } from "@/components/ValueDataHook";
 
 export default function index() {
+  const [search, setSearch] = useState("");
+
   const [data, setData] = useState([]);
 
   const fetchData = async () => {
@@ -32,6 +34,10 @@ export default function index() {
   }, []);
 
 
+  
+   const filteredData = data.filter((item) =>
+  item.title.toLowerCase().includes(search.toLowerCase())
+);
   return (
     <AdminLayout page={"Product List"}>
       <div className="min-h-screen p-5 lg:p-[30px]">
@@ -58,6 +64,17 @@ export default function index() {
           >
             <MdAdd size={18} /> Add Product
           </Link>
+
+          <div className="flex flex-wrap gap-2 items-center">
+            <input
+              type="text"
+              placeholder="Search product ..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          
+          </div>
         </div>
 
         {/* Table */}
@@ -94,8 +111,8 @@ export default function index() {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-100">
-                {data?.length > 0 ? (
-                  data?.map((item) => (
+                {filteredData?.length > 0 ? (
+                  filteredData?.map((item) => (
                     <tr key={item?._id} className={`transition hover:bg-gray-50
                       ${item?.deletedAt ? "opacity-50" : ""}
                     `}>

@@ -9,6 +9,9 @@ import dataimage from "../../../Assets/Images/c1.jpg"
 
 export default function Index() {
   const [data, setData] = useState([]);
+  const [search, setSearch] = useState("");
+
+ 
 
   const fetchData = async () => {
     try {
@@ -27,6 +30,9 @@ export default function Index() {
     fetchData();
   }, []);
 
+   const filteredData = data.filter((item) =>
+  item.name.toLowerCase().includes(search.toLowerCase())
+);
   return (
     <AdminLayout page={"Category List"}>
       <div className="px-4 py-2 lg:px-4 lg:py-2.5">
@@ -38,9 +44,18 @@ export default function Index() {
               Category  Listing
             </h2>
 
-            <CategoryAdd fetchDatas={fetchData} />
 
+<div className="flex flex-wrap gap-2 items-center">
+  <input
+    type="text"
+    placeholder="Search category..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+  />
 
+  <CategoryAdd fetchDatas={fetchData} />
+</div>
           </div>
 
           {/* Table */}
@@ -67,8 +82,8 @@ export default function Index() {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-100">
-                {data.length > 0 ? (
-                  data.map((item) => (
+                {filteredData.length > 0 ? (
+                  filteredData?.map((item) => (
                     <tr
                       key={item?._id}
                       className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""

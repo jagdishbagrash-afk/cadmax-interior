@@ -371,7 +371,10 @@ class Listing extends Component {
    async PaymentSave(data) {
     return Api.post("/verify-payment", data)
   }
-
+async DeleteImageUrl(data){
+    return Api.post("/common/delete-image", data)
+  
+}
   render() {
     return (
       <div>

@@ -5,6 +5,19 @@ import Listing from "@/pages/api/Listing";
 
 export default function Index() {
     const [data, setData] = useState([]);
+
+    const [search, setSearch] = useState("");
+    const filteredData = data.filter((item) => {
+        const query = search.toLowerCase();
+
+        return (
+            item?.user_id?.name?.toLowerCase().includes(query) ||
+            item?.user_id?.email?.toLowerCase().includes(query) ||
+            item?.user_id?.phone?.toString().includes(query) ||
+            item?.OrderID?.orderId?.toLowerCase().includes(query) ||
+            item?.payment_id?.toLowerCase().includes(query)
+        );
+    });
     console.log("data", data)
     const fetchData = async () => {
         try {
@@ -25,10 +38,19 @@ export default function Index() {
         <AdminLayout page={"Payment List"}>
             <div className="px-4 py-2 lg:px-4 lg:py-2.5">
                 <div className="bg-white rounded-[20px] mb-[10px] p-2">
-                    <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
-                        <h2 className="Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-                            Payment  Listing
+                    <div className="px-4 py-3 flex flex-wrap justify-between items-center gap-3 border-b border-black/10">
+
+                        <h2 className="Creato text-[16px] lg:text-[18px] font-normal text-[#1E1E1E]">
+                            Payment Listing
                         </h2>
+
+                        <input
+                            type="text"
+                            placeholder="Search by name, email, order ID, payment ID..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full md:w-[300px] px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
                     </div>
                     {/* Table */}
                     <div className="overflow-x-auto rounded-xl border border-gray-200 mt-4">
@@ -48,8 +70,8 @@ export default function Index() {
 
 
                             <tbody className="bg-white divide-y divide-gray-100">
-                                {data.length > 0 ? (
-                                    data.map((item) => (
+                                {filteredData.length > 0 ? (
+                                    filteredData?.map((item) => (
                                         <tr key={item._id} className="hover:bg-gray-50">
 
                                             {/* Order ID */}

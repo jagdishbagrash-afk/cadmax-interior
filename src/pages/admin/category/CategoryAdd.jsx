@@ -7,6 +7,7 @@ import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
+import DeleteImages from "@/components/DeleteImages";
 
 export default function AddCategory({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -221,13 +222,15 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
                 onChange={handleImageChange}
               />
 
-              {formData.preview && (
+              {/* {formData.preview && (
                 <img
                   src={formData.preview}
                   alt="Preview"
                   className="w-32 h-32 object-cover mt-3 rounded border"
                 />
-              )}
+              )} */}
+
+              <DeleteImages image={formData.preview} />
             </div>
 
             {/* Footer Buttons */}
