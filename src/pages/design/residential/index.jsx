@@ -30,7 +30,7 @@ export default function ResidentialDesign() {
     return (
         <Layout>
             <div
-                className="bg-[#FFFFFF] py-4 md:py-8 ">
+                className=" ">
                 <Banner Slider1={ProductListBanner}
                     title={"Residential Design Tailored for Comfort, Coherence, and Daily Living"}
                     content={"From compact apartments to villas, we deliver interiors that function with character. Our process includes precise layout planning, 3D visualizations, and on-site supervision for complete spatial control."} />

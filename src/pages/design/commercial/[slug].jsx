@@ -147,7 +147,7 @@ export default function Index() {
   return (
     <Layout>
       {/* Swiper Category Slider */}
-      <div className="w-full bg-black py-3">
+      <div className="w-full  py-3">
         <Swiper
           spaceBetween={14}
           loop={true}

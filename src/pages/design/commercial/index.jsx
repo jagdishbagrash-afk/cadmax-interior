@@ -31,7 +31,7 @@ export default function ResidentialDesign() {
     return (
         <Layout>
             <div
-                className="bg-[#FFFFFF] py-4 md:py-8 ">
+                className=" ">
                 <Banner Slider1={ProductListBanner}
                     title={"  Commercial Spaces Engineered for Flow, Brand Presence & Performance"}
                     content={" Every commercial project is designed to optimize spatial efficiency, brand impact, and customer experience. Whether it’s a café, salon, or corporate office, layouts are driven by logic and modern aesthetics."} />

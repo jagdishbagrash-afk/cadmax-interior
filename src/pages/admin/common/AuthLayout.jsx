@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import toast from "react-hot-toast";
 import Link from "next/link";
 import { MdLogout } from "react-icons/md";
-import { IoSettingsOutline } from "react-icons/io5";
 import Listing from "@/pages/api/Listing";
 import { FaRegUser } from "react-icons/fa6";
 
@@ -14,7 +13,7 @@ export default function AuthLayout({ children, page, sidebar }) {
   const [User, setUser] = useState("")
 
   const handleLogout = () => {
-    localStorage && localStorage.removeItem("token");
+    localStorage && localStorage.removeItem("admintoken");
     router.push("/admin/login");
     toast.success("Logout Successfully");
     setUser(null);

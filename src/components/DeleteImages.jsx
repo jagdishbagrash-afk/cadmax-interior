@@ -20,7 +20,7 @@ export default function DeleteImages({
 
         try {
             const main = new Listing();
-            const res = await main.DeleteImageUrl({ fileUrl: image });
+            const res = await main.DeleteImageUrl({ imageUrl: image });
 
             if (res) {
                 toast.success("Deleted successfully");

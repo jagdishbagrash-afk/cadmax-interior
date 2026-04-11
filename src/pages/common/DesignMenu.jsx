@@ -1,74 +1,94 @@
 "use client";
 import Link from "next/link";
 import { IoIosArrowDown } from "react-icons/io";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import c1 from "../../Assets/Images/c1.jpg";
 
-const DesignMenu = () => {
+const DesignMenu = ({ textColor, active }) => {
+    const [open, setOpen] = useState(false);
+    const menuRef = useRef(null);
 
-    const [categories, setCategories] = useState([
+    const categories = [
         {
             _id: 1,
             name: "Residential",
             Image: "/residential.jpg",
-            slug: "residential"
+            slug: "residential",
         },
         {
             _id: 2,
             name: "Commercial",
-        Image: "/commercial.jpeg",
-            slug: "commercial"
+            Image: "/commercial.jpeg",
+            slug: "commercial",
+        },
+    ];
 
-        }
-    ]);
-
-
+    /* CLOSE ON OUTSIDE CLICK */
+    useEffect(() => {
+        const handleClickOutside = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                setOpen(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
 
     return (
-        <li className="">
-            {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
-            <div className="group inline-block ">
+        <li
+            ref={menuRef}
+            onMouseEnter={() => window.innerWidth > 768 && setOpen(true)}
+            onMouseLeave={() => window.innerWidth > 768 && setOpen(false)}
+        >
+            {/* TRIGGER */}
+
+            <div className="flex items-center gap-1">
                 <Link
                     href="/design"
-                    className="text-black text-sm font-medium flex items-center gap-1 uppercase"
+                    className={`uppercase ${textColor}`}
                 >
-                    design <IoIosArrowDown size={14} />
+                    Design
                 </Link>
-                {/* <div
-          className="text-black text-sm font-medium flex items-center gap-1"
-        >
-          Vendor <IoIosArrowDown size={14} />
-        </div> */}
 
-                <div
-                    className="
-    absolute bg-white shadow-2xl w-full left-0
-    /* animation initial state */
-    opacity-0 -translate-y-5
-    transition-all duration-300 ease-out
-    group-hover:opacity-100 group-hover:translate-y-0
-    pointer-events-none group-hover:pointer-events-auto
-    z-50
-  "
-                >
-                    <div className="rounded-xl p-10 mt-6 flex justify-center text-center"
-                    >
-                        <div className="mx-auto grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
-                            {categories?.map((item) => (
-                                <Link href={`/design/${item?.slug}`} key={item._id} className="group cursor-pointer">
-                                    <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
-                                        <img
-                                            src={item.Image ? item.Image : c1?.src || c1?.src}
-                                            alt={item.name}
-                                            className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-                                        />
-                                    </div>
+                <IoIosArrowDown
+                    onClick={(e) => {
+                        e.preventDefault();
+                        setOpen(!open);
+                    }}
+                    className="cursor-pointer"
+                />
+            </div>
 
-                                    <h3 className="mt-3 text-sm font-medium text-[#262A33] uppercase">
-                                        {item.name}
-                                    </h3>
-                                </Link>
-                            ))}
-                        </div>
+            {/* DROPDOWN */}
+            <div
+                className={`absolute top-full left-0 right-0   bg-white shadow-xl z-50 transition-all duration-300 ${open
+                    ? "opacity-100 translate-y-0 visible"
+                    : "opacity-0 -translate-y-5 invisible"
+                    }`}
+            >
+                {/* INNER CONTAINER (IMPORTANT) */}
+                <div className="max-w-[1200px] mx-auto p-8">
+                    <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-2 gap-6">
+                        {categories.map((item) => (
+                            <Link
+                                key={item._id}
+                                href={`/design/${item.slug}`}
+                                onClick={() => setOpen(false)}
+                                className="group"
+                            >
+                                <div className="h-[220px] overflow-hidden rounded-lg">
+                                    <img
+                                        src={item.Image || c1.src}
+                                        alt={item.name}
+                                        className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+                                    />
+                                </div>
+
+                                <h3 className="mt-3 text-sm font-medium text-gray-800 uppercase text-center">
+                                    {item.name}
+                                </h3>
+                            </Link>
+                        ))}
                     </div>
                 </div>
             </div>

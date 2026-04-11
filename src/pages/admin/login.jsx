@@ -45,7 +45,7 @@ export default function Login() {
 
       if (response?.data?.status) {
         toast.success(response.data.message);
-        localStorage && localStorage.setItem("token", response?.data?.token);
+        localStorage && localStorage.setItem("admintoken", response?.data?.token);
         // setUser(response?.data);
         if (response?.data?.user?.role === "admin") {
           router.push("/admin/category");

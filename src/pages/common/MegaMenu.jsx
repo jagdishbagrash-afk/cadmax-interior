@@ -1,82 +1,84 @@
 "use client";
 import Link from "next/link";
 import { IoIosArrowDown } from "react-icons/io";
-import c1 from "../../Assets/Images/c1.jpg";
-import c2 from "../../Assets/Images/c2.jpg";
-import c3 from "../../Assets/Images/c3.jpg";
-import c4 from "../../Assets/Images/c4.jpg";
-import c5 from "../../Assets/Images/c5.jpg";
+import { useEffect, useRef, useState } from "react";
 import Listing from "../api/Listing";
-import { useEffect, useState } from "react";
+import c1 from "../../Assets/Images/c1.jpg";
 
-const MegaMenu = () => {
-
+const MegaMenu = ({ textColor, active }) => {
   const [categories, setCategories] = useState([]);
-
-  const fetchData = async () => {
-    try {
-      const main = new Listing();
-      const response = await main.categoryStatus();
-
-      if (response.data?.data) {
-        setCategories(response.data.data);
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
-  };
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef(null);
 
   useEffect(() => {
+    const fetchData = async () => {
+      const main = new Listing();
+      const res = await main.categoryStatus();
+      if (res.data?.data) setCategories(res.data.data);
+    };
     fetchData();
   }, []);
 
-// console.log("categories" ,categories)
-  return (
-    <li className="">
-      {/* ONLY PRODUCT IS THE HOVER TRIGGER */}
-      <div className="group inline-block ">
-        {/* <Link
-          href="/"
-          className="text-black text-sm font-medium flex items-center gap-1"
-        >
-          PRODUCT <IoIosArrowDown size={14} />
-        </Link> */}
-  <div
-          className="text-black text-sm font-medium flex items-center gap-1"
-        >
-          PRODUCT <IoIosArrowDown size={14} />
-        </div>
-      
-        <div
-          className="
-    absolute bg-white shadow-2xl w-full left-0
-    /* animation initial state */
-    opacity-0 -translate-y-5
-    transition-all duration-300 ease-out
-    group-hover:opacity-100 group-hover:translate-y-0
-    pointer-events-none group-hover:pointer-events-auto
-    z-50
-  "
-        >
-          <div className="rounded-xl p-10 mt-6 flex justify-center text-center"
-          >
-            <div className="mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-              {categories?.map((item) => (
-                <Link href={`/product/list/${item?.name?.replaceAll(" ", "-")}`} key={item._id} className="group cursor-pointer">
-                  <div className="w-full h-[280px] md:h-[300px] lg:h-[320px] overflow-hidden">
-                    <img
-                      src={item.Image  ? item.Image : c1?.src  || c1?.src }
-                      alt={item.name}
-                      className="w-full h-full object-cover transition-all duration-300 group-hover:scale-105"
-                    />
-                  </div>
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
-                  <h3 className="mt-3 text-sm font-medium text-[#262A33] uppercase">
-                    {item.name}
-                  </h3>
-                </Link>
-              ))}
-            </div>
+  return (
+    <li
+      ref={menuRef}
+      onMouseEnter={() => window.innerWidth > 768 && setOpen(true)}
+      onMouseLeave={() => window.innerWidth > 768 && setOpen(false)}
+    >
+
+      <div className="flex items-center gap-1">
+        <Link
+          href="/product"
+          className={`uppercase ${textColor}`}
+        >
+          PRODUCT
+        </Link>
+
+        <IoIosArrowDown
+          onClick={(e) => {
+            e.preventDefault();
+            setOpen(!open);
+          }}
+          className="cursor-pointer"
+        />
+      </div>
+
+      {/* DROPDOWN */}
+      <div
+        className={`absolute top-full left-0 right-0   bg-white shadow-xl z-50 transition-all duration-300 ${open
+          ? "opacity-100 translate-y-0 visible"
+          : "opacity-0 -translate-y-5 invisible"
+          }`}
+      >
+        <div className="max-w-[1230px] mx-auto p-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+            {categories?.map((item) => (
+              <Link
+                key={item._id}
+                href={`/product/list/${item.name}`}
+                onClick={() => setOpen(false)}
+              >
+                <div className="h-[220px] overflow-hidden rounded-lg">
+                  <img
+                    src={item.Image || c1.src}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <p className="text-center mt-2 text-black">
+                  {item.name}
+                </p>
+              </Link>
+            ))}
           </div>
         </div>
       </div>
