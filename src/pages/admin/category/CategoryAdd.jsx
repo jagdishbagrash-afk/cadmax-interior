@@ -222,15 +222,15 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
                 onChange={handleImageChange}
               />
 
-              {/* {formData.preview && (
+              {formData.preview && (
                 <img
                   src={formData.preview}
                   alt="Preview"
                   className="w-32 h-32 object-cover mt-3 rounded border"
                 />
-              )} */}
+              )}
 
-              <DeleteImages image={formData.preview} />
+              {/* <DeleteImages image={formData.preview} /> */}
             </div>
 
             {/* Footer Buttons */}
