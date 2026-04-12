@@ -65,7 +65,7 @@ const MegaMenu = ({ textColor, active }) => {
             {categories?.map((item) => (
               <Link
                 key={item._id}
-                href={`/product/list/${item.name}`}
+                href={`/product/list/${item.slug}`}
                 onClick={() => setOpen(false)}
               >
                 <div className="h-[220px] overflow-hidden rounded-lg">

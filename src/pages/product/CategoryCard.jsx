@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import Listing from '../api/Listing';
 import Link from 'next/link';
-const CategoryCard = ({ title, image }) => (
+const CategoryCard = ({ title, image  ,slug}) => (
     <Link
-        href={`/product/list/${title?.replaceAll(" ", "-")}`}
+        href={`/product/list/${slug}`}
         className="flex-shrink-0 w-[180px] sm:w-[220px] text-center p-1"
     >
         <div className="w-[180px] h-[250px] sm:w-[240px] sm:h-[ ] rounded-full overflow-hidden relative mx-auto">
@@ -58,6 +58,7 @@ const FeaturedCategories = () => {
                             key={category.id}
                             title={category.name}
                             image={category.Image}
+                            slug={category.slug}
                         />
                     ))}
                 </div>
