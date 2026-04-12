@@ -46,7 +46,6 @@ export default function Login() {
       if (response?.data?.status) {
         toast.success(response.data.message);
         localStorage && localStorage.setItem("admintoken", response?.data?.token);
-        // setUser(response?.data);
         if (response?.data?.user?.role === "admin") {
           router.push("/admin/product");
 
@@ -72,10 +71,10 @@ export default function Login() {
   };
 
   return (
-             <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="bg-white px-4 md:px-6 lg:px-16 pt-5 pb-10 lg:pb-20  rounded-[20px] md:rounded-[20px] lg:rounded-[40px] shadow lg:shadow-lg w-full max-w-[976px] login_custom">
         {/* Logo */}
-             <div className="flex justify-center mb-6">
+        <div className="flex justify-center mb-6">
           <Link href="/">
             <Image
               src="/Logo.png"
