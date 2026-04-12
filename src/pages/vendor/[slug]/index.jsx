@@ -13,7 +13,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.VendorCategoryList(slug);
-      console.log("response", response)
       if (response.data?.data) {
         setProductDetails(response.data?.data);
       }
@@ -71,7 +70,7 @@ export default function Index() {
 
             {ProductDetail?.vendors?.map((p, idx) => (
 
-              <Link
+              <div
                 href={`/vendor/${slug}/${p.slug}`}
                 key={p._id ?? idx}
                 className="group bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col"
@@ -128,14 +127,14 @@ export default function Index() {
                 </div>
 
                 {/* 🔥 View Vendor Button */}
-                <div className="p-5 pt-0">
+                <Link className="p-5 pt-0"
+                  href={`/vendor/${slug}/${p.slug}`}
+                >
                   <div className="w-full text-center bg-black text-white py-2 rounded-lg text-sm font-semibold group-hover:bg-gray-800 transition">
                     View Vendor →
                   </div>
-                </div>
-
-              </Link>
-
+                </Link>
+              </div>
             ))}
 
           </div>
