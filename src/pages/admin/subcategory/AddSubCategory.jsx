@@ -157,16 +157,22 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
              transition-all duration-200"
         >
           {isEdit ? (
+         <>
             <MdEdit
               size={22}
               className="text-blue-600 group-hover:text-blue-700 transition"
 
             />
+
+         </>
           ) : (
+      <>
             <MdAdd
               size={22}
               className="text-blue-600 group-hover:text-blue-700 transition"
             />
+            Add 
+      </>
           )}
 
         </button>
