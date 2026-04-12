@@ -2,15 +2,15 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
-import Image from "next/image";
-import BlockUnblock from "../common/BlockUnblock";
 import Link from "next/link";
-import { IoMdEye } from "react-icons/io";
 import { FaHome } from "react-icons/fa";
+import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
     const [data, setData] = useState([]);
+    const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState("");
 
     const fetchData = async () => {
         try {
@@ -18,6 +18,7 @@ export default function Index() {
             const response = await main.GetUser();
             if (response?.data?.data) {
                 setData(response.data.data);
+                setFilteredData(response.data.data); // initial
             }
         } catch (error) {
             console.log("Error:", error);
@@ -28,16 +29,37 @@ export default function Index() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    // 🔍 SEARCH FILTER
+    useEffect(() => {
+        const result = data.filter((item) =>
+            item.name?.toLowerCase().includes(search.toLowerCase()) ||
+            item.phone?.toString().includes(search) ||   // ✅ FIX
+            item.email?.toLowerCase().includes(search.toLowerCase())
+        );
+        setFilteredData(result);
+    }, [search, data]);
+
     return (
         <AdminLayout page={"User Listing"}>
 
-            {/* CARD */}
             <div className="px-4 py-2 lg:px-4 lg:py-2.5">
                 <div className="bg-white rounded-[20px] mb-[10px] p-2">
-                    <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10">
-                        <h2 className="uppercase Creato text-[16px] lg:text-[18px] font-normal leading-[120%] tracking-[-0.03em] text-[#1E1E1E]">
-                            user  Listing
+
+                    {/* HEADER + SEARCH */}
+                    <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10 gap-3">
+                        <h2 className="uppercase text-[16px] lg:text-[18px] font-normal text-[#1E1E1E]">
+                            User Listing
                         </h2>
+
+                        {/* 🔍 SEARCH INPUT */}
+                        <input
+                            type="text"
+                            placeholder="Search name, phone, email..."
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="border border-gray-300 rounded-lg px-3 py-2 text-sm w-full md:w-[250px] focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        />
                     </div>
 
                     {/* TABLE */}
@@ -53,7 +75,6 @@ export default function Index() {
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Status</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Created</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Action</th>
-
                                 </tr>
                             </thead>
 
@@ -69,46 +90,33 @@ export default function Index() {
                                 )}
 
                                 {/* DATA */}
-                                {!loading && data.length > 0 && data.map((item, index) => (
+                                {!loading && filteredData.length > 0 && filteredData.map((item, index) => (
                                     <tr key={item._id} className="hover:bg-gray-50 transition">
 
-                                        {/* SR */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            {index + 1}
-                                        </td>
+                                        <td className="px-4 py-3 font-semibold">{index + 1}</td>
 
-                                        {/* PROFILE */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
+                                        <td className="px-4 py-3">
                                             <img
-                                                src={item.profileImage || "/avatar.png"}
+                                                src={item.profileImage || "/avatar.jpg"}
                                                 alt="profile"
-                                                width={38}
-                                                height={38}
-                                                className="rounded-full object-cover border"
+                                                className="w-10 h-10 rounded-full object-cover border mx-auto"
                                             />
                                         </td>
 
-                                        {/* NAME */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-                                            {item.name}
-                                        </td>
+                                        <td className="px-4 py-3 font-semibold">{item.name}</td>
 
-                                        {/* PHONE */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
+                                        <td className="px-4 py-3 font-semibold">
                                             {item.phone}<br />
                                             {item.email || "--"}
                                         </td>
 
-                                        {/* GENDER */}
-                                        <td className="uppercase px-4 py-3 text-[14px] font-semibold text-black ">
+                                        <td className="px-4 py-3 uppercase">
                                             {item.gender || "N/A"}
                                         </td>
 
-
-                                        {/* STATUS */}
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
+                                        <td className="px-4 py-3">
                                             <span className={`uppercase px-3 py-1 rounded-full text-xs font-semibold
-                                           ${item.status === "active"
+                                                ${item.status === "active"
                                                     ? "bg-green-100 text-green-700"
                                                     : "bg-red-100 text-red-600"}`}
                                             >
@@ -116,19 +124,17 @@ export default function Index() {
                                             </span>
                                         </td>
 
-                                        {/* DATE */}
-
-                                        <td className="px-4 py-3 text-[14px] font-semibold text-black ">
-
+                                        <td className="px-4 py-3">
                                             {new Date(item.createdAt).toLocaleDateString()}
                                         </td>
 
                                         <td>
-                                            <div className="flex justify-center items-center gap-4 text-center">
+                                            <div className="flex justify-center items-center gap-4">
 
                                                 <Link href={`/admin/user/${item?._id}`} className="hover:text-blue-600">
-                                                    <FaHome size={24} />
+                                                    <FaHome size={20} />
                                                 </Link>
+
                                                 <BlockUnblock
                                                     Id={item._id}
                                                     fetchData={fetchData}
@@ -142,7 +148,7 @@ export default function Index() {
                                 ))}
 
                                 {/* EMPTY */}
-                                {!loading && data.length === 0 && (
+                                {!loading && filteredData.length === 0 && (
                                     <tr>
                                         <td colSpan="9" className="text-center py-12 text-gray-500">
                                             No users found.

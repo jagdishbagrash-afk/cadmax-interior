@@ -1,28 +1,22 @@
+"use client";
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
-import { MdAdd } from "react-icons/md";
+import { MdAdd, MdEdit } from "react-icons/md";
 import Link from "next/link";
 import Listing from "@/pages/api/Listing";
 import moment from "moment";
-import { MdEdit, MdDelete } from "react-icons/md";
-import { FaUndo } from 'react-icons/fa';
 import BlockUnblock from "../common/BlockUnblock";
 import { formatMultiPrice } from "@/components/ValueDataHook";
 
-export default function index() {
+export default function Index() {
   const [search, setSearch] = useState("");
-
   const [data, setData] = useState([]);
 
   const fetchData = async () => {
     try {
       const main = new Listing();
       const response = await main.getAllproducts();
-      if (response.data?.data) {
-        setData(response.data.data);
-      } else {
-        setData([]);
-      }
+      setData(response.data?.data || []);
     } catch (error) {
       console.log("Error:", error);
       setData([]);
@@ -33,127 +27,125 @@ export default function index() {
     fetchData();
   }, []);
 
+  const filteredData = data.filter((item) =>
+    item.title?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  
-   const filteredData = data.filter((item) =>
-  item.title.toLowerCase().includes(search.toLowerCase())
-);
   return (
     <AdminLayout page={"Product List"}>
-      <div className="min-h-screen p-5 lg:p-[30px]">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
+      <div className="p-5">
+
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+
+          <h2 className="text-xl font-bold text-gray-800">
             Product List
           </h2>
-          <Link
-            href="/admin/category"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
-          >
-            Category
-          </Link>
-          <Link
-            href="/admin/subcategory"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
-          >
-            Subcategory
-          </Link>
-          <Link
-            href="/admin/product/add"
-            className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
-          >
-            <MdAdd size={18} /> Add Product
-          </Link>
 
           <div className="flex flex-wrap gap-2 items-center">
+
             <input
               type="text"
-              placeholder="Search product ..."
+              placeholder="Search product..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400"
             />
-          
+
+            <Link
+              href="/admin/category"
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
+            >
+              Category
+            </Link>
+
+            <Link
+              href="/admin/subcategory"
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
+            >
+              Subcategory
+            </Link>
+
+            <Link
+              href="/admin/product/add"
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-1 text-sm"
+            >
+              <MdAdd /> Add
+            </Link>
+
           </div>
         </div>
 
-        {/* Table */}
-        <div className="bg-white rounded-2xl p-4 shadow-lg border border-gray-200">
-          <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm mt-2">
-            <table className="min-w-full divide-y divide-gray-200 whitespace-nowrap">
-              <thead className="bg-gray-100">
-                <tr>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Image
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Title
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Category
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    SubCategory
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Price
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Stock
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Created Date
-                  </th>
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase text-center">
-                    Action
-                  </th>
+        {/* TABLE CARD */}
+        <div className="bg-white rounded-2xl shadow-md border">
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+
+              {/* HEAD */}
+              <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
+                <tr className="text-center">
+                  <th className="px-6 py-3">Image</th>
+                  <th className="px-6 py-3">Title</th>
+                  <th className="px-6 py-3">Category</th>
+                  <th className="px-6 py-3">SubCategory</th>
+                  <th className="px-6 py-3">Price</th>
+                  <th className="px-6 py-3">Stock</th>
+                  <th className="px-6 py-3">Date</th>
+                  <th className="px-6 py-3">Action</th>
                 </tr>
               </thead>
 
-              <tbody className="bg-white divide-y divide-gray-100">
-                {filteredData?.length > 0 ? (
-                  filteredData?.map((item) => (
-                    <tr key={item?._id} className={`transition hover:bg-gray-50
-                      ${item?.deletedAt ? "opacity-50" : ""}
-                    `}>
-                      {/* Image */}
+              {/* BODY */}
+              <tbody className="divide-y">
+
+                {filteredData.length > 0 ? (
+                  filteredData.map((item) => (
+                    <tr
+                      key={item._id}
+                      className={`hover:bg-gray-50 transition
+                      ${item?.deletedAt ? "opacity-50" : ""}`}
+                    >
+
+                      {/* IMAGE */}
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item?.variants[0]?.images[0]}
-                          className="w-20 h-20 object-cover rounded-md shadow-sm mx-auto"
-                          alt="Product"
+                          src={item?.variants?.[0]?.images?.[0] || "/no-image.png"}
+                          className="w-16 h-16 object-cover rounded-lg border mx-auto"
+                          alt="product"
                         />
                       </td>
 
-                      {/* Title */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 font-medium capitalize">
-                        {item?.title}
+                      {/* TITLE */}
+                      <td className="px-6 py-4 text-center font-medium text-gray-800 capitalize">
+                        {item.title}
                       </td>
 
-                      {/* Category */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 capitalize">
-                        {item?.category?.name}
+                      {/* CATEGORY */}
+                      <td className="px-6 py-4 text-center capitalize">
+                        {item?.category?.name || "-"}
                       </td>
 
-                      {/* SubCategory */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-800 capitalize">
-                        {item?.subcategory?.name}
+                      {/* SUBCATEGORY */}
+                      <td className="px-6 py-4 text-center capitalize">
+                        {item?.subcategory?.name || "-"}
                       </td>
 
-                      {/* Price */}
-                      <td className="px-6 py-4 text-center text-[15px] text-gray-600">
+                      {/* PRICE */}
+                      <td className="px-6 py-4 text-center font-semibold text-gray-700">
                         {formatMultiPrice(item?.amount, "INR")}
                       </td>
 
-                      {/* Stock */}
-                      <td className="px-6 py-4 text-left text-[14px] text-gray-800">
+                      {/* STOCK */}
+                      <td className="px-6 py-4 text-left">
                         {item?.variants?.map((v) => (
-                          <div key={v.color} className="capitalize">
-                            {v.color}: {v.stock}
+                          <div key={v.color} className="flex justify-between text-xs">
+                            <span className="capitalize">{v.color}</span>
+                            <span className="font-semibold">{v.stock}</span>
                           </div>
                         ))}
 
-                        <div className="mt-1 pt-1 border-t text-[13px] font-medium">
+                        <div className="mt-1 border-t pt-1 text-xs font-bold text-gray-700">
                           Total:{" "}
                           {item?.variants?.reduce(
                             (sum, v) => sum + (Number(v.stock) || 0),
@@ -161,41 +153,46 @@ export default function index() {
                           )}
                         </div>
                       </td>
-                      {/* Created Date */}
-                      <td className="px-6 py-4 text-center text-[14px] text-gray-600">
-                        {moment(item?.createdAt).format("DD-MM-YYYY")}
+
+                      {/* DATE */}
+                      <td className="px-6 py-4 text-center text-gray-500">
+                        {moment(item.createdAt).format("DD MMM YYYY")}
                       </td>
 
-                      {/* Action */}
+                      {/* ACTION */}
                       <td className="px-6 py-4">
-                        <div className="flex justify-center items-center gap-3">
-                          {/* Edit */}
+                        <div className="flex justify-center gap-3">
+
                           <Link
-                            className="text-blue-500 hover:text-blue-700 cursor-pointer"
-                            href={`/admin/product/edit?id=${item?._id}`}
+                            href={`/admin/product/edit?id=${item._id}`}
+                            className="cursor-pointer m-auto flex items-center justify-center
+                    w-[42px] h-[42px] rounded-lg 
+                    border border-gray-200 shadow-sm 
+                    bg-white hover:bg-gray-50 transition-all duration-200"
                           >
-                            <MdEdit size={22} />
+                            <MdEdit size={20} />
                           </Link>
+
                           <BlockUnblock
                             Id={item._id}
                             fetchData={fetchData}
                             step={4}
                             status={item?.deletedAt ? true : false}
                           />
+
                         </div>
                       </td>
+
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td
-                      colSpan={8}
-                      className="px-6 py-8 text-center text-gray-500 text-[15px]"
-                    >
+                    <td colSpan={8} className="text-center py-10 text-gray-400">
                       No Products Found
                     </td>
                   </tr>
                 )}
+
               </tbody>
             </table>
           </div>

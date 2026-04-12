@@ -2,161 +2,149 @@
 import { useEffect, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
-import Image from "next/image";
-import BlockUnblock from "../common/BlockUnblock";
 import Link from "next/link";
-import { IoMdEye } from "react-icons/io";
 import { useRouter } from "next/router";
 
 export default function Index() {
+  const router = useRouter();
+  const { slug } = router.query;
 
-    const router = useRouter();
-    const { slug } = router.query;   // 👈 slug destructure
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-    const [data, setData] = useState([]);
-    const [loading, setLoading] = useState(true);
+  const fetchData = async (id) => {
+    try {
+      const main = new Listing();
+      const response = await main.AddressUser(id);
 
-    console.log("data", data)
+      if (response?.data?.data) {
+        setData(response.data.data);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const fetchData = async (id) => {
-        try {
-            const main = new Listing();
-            const response = await main.AddressUser(id);
+  useEffect(() => {
+    if (router.isReady && slug) {
+      fetchData(slug);
+    }
+  }, [router.isReady, slug]);
 
-            if (response?.data?.data) {
-                setData(response.data.data);
-            }
-        } catch (error) {
-            console.log("Error:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
+  return (
+    <AdminLayout page={"User Address Listing"}>
+      <div className="p-4">
 
-    useEffect(() => {
+        {/* CARD */}
+        <div className="bg-white rounded-2xl shadow-md border border-gray-100">
 
-        if (router.isReady && slug) {   // 👈 important check
-            fetchData(slug);
-        }
+          {/* HEADER */}
+          <div className="flex justify-between items-center px-6 py-4 border-b">
+            <h2 className="text-lg font-semibold text-gray-800 tracking-wide">
+              User Address List
+            </h2>
 
-    }, [router.isReady, slug]);
+            <Link
+              href="/admin/user"
+              className="text-sm px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 transition"
+            >
+              ← Back
+            </Link>
+          </div>
 
-    return (
-        <AdminLayout page={"USER Address Listing"}>
+          {/* TABLE */}
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm text-gray-700">
 
-            <div className="px-4 py-2 lg:px-4 lg:py-2.5">
-                <div className="bg-white rounded-[20px] mb-[10px] p-2">
+              {/* HEAD */}
+              <thead className="bg-gray-50 text-xs uppercase text-gray-500">
+                <tr className="text-center">
+                  <th className="px-6 py-3">#</th>
+                  <th className="px-6 py-3 text-left">Address</th>
+                  <th className="px-6 py-3">State</th>
+                  <th className="px-6 py-3">City</th>
+                  <th className="px-6 py-3">Pincode</th>
+                  <th className="px-6 py-3">Default</th>
+                  <th className="px-6 py-3">Type</th>
+                </tr>
+              </thead>
 
-                    <div className="px-4 py-3 flex justify-between  items-center border-b border-black/10">
-                        <h2 className="uppercase text-[18px] text-[#1E1E1E]">
-                          USER  Address Listing
-                        </h2>
-                    <Link href={"/admin/user"} className="uppercase text-[18px] text-[#1E1E1E]">
-                    Back
-                    </Link>
-                    </div>
+              {/* BODY */}
+              <tbody className="divide-y">
 
-                    <div className="overflow-x-auto rounded-xl border border-gray-200 mt-4">
+                {/* LOADING */}
+                {loading && (
+                  <tr>
+                    <td colSpan="7" className="py-10 text-center text-gray-400">
+                      Loading Address...
+                    </td>
+                  </tr>
+                )}
 
-                        <table className="min-w-full divide-y divide-gray-200">
+                {/* DATA */}
+                {!loading && data.length > 0 &&
+                  data.map((item, index) => (
+                    <tr
+                      key={item._id}
+                      className="hover:bg-gray-50 transition duration-200"
+                    >
+                      <td className="px-6 py-4 text-center font-medium">
+                        {index + 1}
+                      </td>
 
-                            <thead className="bg-gray-50 text-center">
-                                <tr>
+                      <td className="px-6 py-4 text-left max-w-[250px] truncate">
+                        {item.street_address}
+                      </td>
 
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">#</th>
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">Address</th>
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">state</th>
-                                
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">city</th>
+                      <td className="px-6 py-4 text-center">
+                        {item.state}
+                      </td>
 
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">pincode</th>
+                      <td className="px-6 py-4 text-center">
+                        {item.city}
+                      </td>
 
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">isDefault</th>
+                      <td className="px-6 py-4 text-center">
+                        {item.pincode}
+                      </td>
 
-                                    <th className="px-4 py-3 text-sm font-semibold text-gray-600">Type</th>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={`px-3 py-1 text-xs rounded-full font-semibold
+                          ${
+                            item.isDefault
+                              ? "bg-green-100 text-green-700"
+                              : "bg-gray-100 text-gray-500"
+                          }`}
+                        >
+                          {item.isDefault ? "Yes" : "No"}
+                        </span>
+                      </td>
 
-                                </tr>
-                            </thead>
+                      <td className="px-6 py-4 text-center capitalize">
+                        <span className="px-3 py-1 text-xs rounded-full bg-blue-100 text-blue-700 font-semibold">
+                          {item.addressType}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
 
-                            <tbody className="bg-white divide-y divide-gray-100 text-center">
+                {/* EMPTY */}
+                {!loading && data.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="py-12 text-center text-gray-400">
+                      No Address Found
+                    </td>
+                  </tr>
+                )}
 
-                                {loading && (
-                                    <tr>
-                                        <td colSpan="9" className="py-10 text-gray-500">
-                                            Loading Address...
-                                        </td>
-                                    </tr>
-                                )}
-
-                                {!loading && data.length > 0 && data.map((item, index) => {
-
-                                    const user = item.userId || {};
-
-                                    return (
-
-                                        <tr key={item._id} className="hover:bg-gray-50">
-
-                                            {/* SR */}
-                                            <td className="px-4 py-3 font-semibold">
-                                                {index + 1}
-                                            </td>
-
-                                            {/* PROFILE */}
-                                            <td className="px-4 py-3">
-                                              {item.street_address}
-                                            </td>
-
-                                            {/* NAME */}
-                                            <td className="px-4 py-3 font-semibold">
-                                               {item.state} 
-                                            </td>
-
-                                            {/* PHONE EMAIL */}
-                                            <td className="px-4 py-3 text-sm">
-                                               {item.city}
-                                            </td>
-
-                                            {/* ADDRESS */}
-                                            <td className="px-4 py-3 text-sm">
-                                              {item.pincode}
-                                            </td>
-
-                                                 <td className="px-4 py-3 text-sm font-medium">
-                                                {item.isDefault === true  ? "True" : "False"}
-                                            </td>
-
-                                            {/* TYPE */}
-                                            <td className="px-4 py-3 text-sm font-medium">
-                                                {item.addressType}
-                                            </td>
-
-                                            {/* STATUS */}
-                                       
-
-                                  
-                                       
-
-                                        </tr>
-
-                                    )
-
-                                })}
-
-                                {!loading && data.length === 0 && (
-                                    <tr>
-                                        <td colSpan="9" className="py-10 text-gray-500">
-                                            No Address Found
-                                        </td>
-                                    </tr>
-                                )}
-
-                            </tbody>
-
-                        </table>
-                    </div>
-                </div>
-            </div>
-
-        </AdminLayout>
-    );
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </AdminLayout>
+  );
 }

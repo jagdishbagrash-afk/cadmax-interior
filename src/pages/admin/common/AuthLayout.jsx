@@ -36,7 +36,7 @@ export default function AuthLayout({ children, page, sidebar }) {
       // }
     } catch (error) {
       console.log("error", error);
-      localStorage?.removeItem("token");
+      localStorage?.removeItem("admintoken");
       setUser(null);
       router.push("/admin/login");
       toast.error("Please log in first.");

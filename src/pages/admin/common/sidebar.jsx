@@ -1,155 +1,103 @@
+"use client";
 import React, { useState } from "react";
-import { MdSpaceDashboard, MdReviews, MdPayments, MdVerifiedUser, MdBorderAll, MdLabel, MdBookmarks, MdTask } from "react-icons/md";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { IoIosMenu } from "react-icons/io";
-import { IoMdArrowRoundBack } from "react-icons/io";
-import Image from "next/image";
-import { PiChalkboardTeacherFill } from "react-icons/pi";
-import { PiStudentFill } from "react-icons/pi";
-import { IoSettingsOutline } from "react-icons/io5";
-import { MdOutlineRateReview } from "react-icons/md";
-import { FaEdit } from "react-icons/fa";
-import { MdOutlineReviews } from "react-icons/md";
+import { IoIosMenu, IoMdArrowRoundBack } from "react-icons/io";
+import {
+  MdSpaceDashboard,
+  MdVerifiedUser,
+  MdBorderAll,
+  MdLabel,
+  MdBookmarks,
+  MdTask,
+} from "react-icons/md";
 import { AiFillProduct } from "react-icons/ai";
 import { BsCartCheckFill } from "react-icons/bs";
 import { GiLeadPipe } from "react-icons/gi";
+import { IoSettingsOutline } from "react-icons/io5";
 
 function SideBar() {
-    const pathname = usePathname();
-    const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
+  const [isOpen, setIsOpen] = useState(false);
 
-    return (
-        <>
-            {!isOpen &&
-                <button
-                    className="lg:hidden p-2 fixed font-bold top-2.5 text-[#565F66] z-[99]"
-                    onClick={() => setIsOpen(true)}
-                >
-                    <IoIosMenu size={24} />
-                </button>}
+  // ✅ MENU CONFIG (easy to manage)
+  const menuItems = [
+    { name: "Users", path: "/admin/user", icon: <MdVerifiedUser /> },
+    { name: "Vendors", path: "/admin/vendor/vendor", icon: <MdVerifiedUser /> },
 
-            <div
-                className={`z-50 custom_scroll sidebar border-opacity-10 w-[260px] md:w-[286px] fixed left-0 top-0 bottom-0 overflow-y-auto bg-white transition-transform transform ${isOpen ? "translate-x-0" : "-translate-x-full"
-                    } lg:translate-x-0 lg:block`}
-            >
-                {isOpen &&
-                    <button
-                        className="lg:hidden p-2 absolute left-[213px] top-6 text-red-700 border border-red-700 z-[99] rounded"
-                        onClick={() => setIsOpen(false)}
-                    >
-                        <IoMdArrowRoundBack size={18} />
-                    </button>}
+    { name: "Products", path: "/admin/product", icon: <AiFillProduct /> },
 
-                <div className="px-4 lg:px-6 text-center py-46 lg:py-6">
-                    {/* <Image
-                        src="/Logo.png"
-                        width={120}
-                        height={120}
-                        alt="Logo"
-                        className="mx-auto h-[70px] w-auto"
-                    /> */}
-                </div>
+    { name: "Orders", path: "/admin/order", icon: <BsCartCheckFill /> },
+    { name: "Payments", path: "/admin/payment", icon: <MdBorderAll /> },
 
-                <div className=" py-4 lg:py-5">
-                    <div className="px-3 md:px-4 lg:px-6 uppercase text-[#727272] text-sm font-medium mb-4 lg:mb-5">MAIN MENU</div>
-                    <ul className="mt-2 space-y-1 mb-10">
-                           <Link
-                            href="/admin/user"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/user" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdVerifiedUser size={20} />
-                            User
-                        </Link>
-                        <Link
-                            href="/admin/product"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/product" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            Products
-                        </Link>
+    { name: "Leads", path: "/admin/lead", icon: <GiLeadPipe /> },
+    { name: "Bookings", path: "/admin/booking", icon: <MdBookmarks /> },
+    { name: "Projects", path: "/admin/project", icon: <MdTask /> },
 
-                          <Link
-                            href="/admin/payment"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/payment" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            Payment
-                        </Link>
+    { name: "Concept", path: "/admin/services/services", icon: <AiFillProduct /> },
+    { name: "Banners", path: "/admin/banner", icon: <MdLabel /> },
 
+    { name: "Settings", path: "/admin/setting", icon: <IoSettingsOutline /> },
+  ];
 
-                            <Link
-                            href="/admin/lead"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/lead" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <GiLeadPipe size={20} />
-                            Leads
-                        </Link>
-                        <Link
-                            href="/admin/order"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/order" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdBorderAll size={20} />
-                            Product Order
-                        </Link>
-                        <Link
-                            href="/admin/banner"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/banner" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdLabel size={20} />
-                            Banners
-                        </Link>
-                     
+  return (
+    <>
+      {/* MOBILE MENU BUTTON */}
+      {!isOpen && (
+        <button
+          className="lg:hidden fixed top-3 left-3 z-50 bg-white shadow p-2 rounded-md"
+          onClick={() => setIsOpen(true)}
+        >
+          <IoIosMenu size={22} />
+        </button>
+      )}
 
-                        <Link
-                            href="/admin/booking"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/booking" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdBookmarks size={20} />
-                            Booking
-                        </Link>
+      {/* SIDEBAR */}
+      <div
+        className={`fixed top-0 left-0 h-full w-[260px] bg-white shadow-lg z-50 transition-transform duration-300
+        ${isOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0`}
+      >
+        {/* CLOSE BUTTON */}
+        {isOpen && (
+          <button
+            className="lg:hidden absolute top-4 right-4 text-red-500"
+            onClick={() => setIsOpen(false)}
+          >
+            <IoMdArrowRoundBack size={20} />
+          </button>
+        )}
 
-                        <Link
-                            href="/admin/project"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/project" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <MdTask size={20} />
-                            Project
-                        </Link>
-                        <Link
-                            href="/admin/services/services"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/services/services" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            Concept  
-                        </Link>
-                        <Link
-                            href="/admin/vendor/vendor"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em]
-                                     ${pathname === "/admin/vendor/vendor" ? "text-white bg-[#000000]" : "hover:bg-gray-100"} `}
-                        >
-                            <AiFillProduct size={20} />
-                            Vendor
-                        </Link>
+        {/* LOGO */}
+        <div className="h-16 flex items-center justify-center border-b font-bold text-lg">
+          Admin Panel
+        </div>
 
-                        <Link
-                            href="/admin/setting"
-                            className={`flex items-center py-2.5 px-3 md:px-4 lg:px-6 gap-2 text-[#565F66] text-base font-medium tracking-[-0.06em] ${pathname === "/admin/setting" ? "text-white bg-[#000000]" : "hover:bg-gray-100"}`}
-                        >
-                            <IoSettingsOutline size={20} />
-                            Settings
-                        </Link>
+        {/* MENU */}
+        <div className="mt-4 px-2 space-y-1 overflow-y-auto h-[calc(100%-70px)]">
 
-                    </ul>
-                </div>
-            </div>
-        </>
-    );
+          {menuItems.map((item, index) => {
+            const isActive = pathname === item.path;
+
+            return (
+              <Link
+                key={index}
+                href={item.path}
+                className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition
+                  
+                  ${isActive
+                    ? "bg-black text-white shadow"
+                    : "text-gray-600 hover:bg-gray-100"}
+                `}
+              >
+                <span className="text-lg">{item.icon}</span>
+                {item.name}
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+    </>
+  );
 }
 
 export default SideBar;

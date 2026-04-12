@@ -48,7 +48,7 @@ export default function Login() {
         localStorage && localStorage.setItem("admintoken", response?.data?.token);
         // setUser(response?.data);
         if (response?.data?.user?.role === "admin") {
-          router.push("/admin/category");
+          router.push("/admin/product");
 
         } else {
           router.push("/");
