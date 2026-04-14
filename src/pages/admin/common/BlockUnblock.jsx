@@ -44,7 +44,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
 
   const handleUser = () => {
     const main = new Listing();
-    return main.deleteUser(Id);
+    return main.DeleteAdminUser(Id);
   };
 
 

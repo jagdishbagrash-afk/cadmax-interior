@@ -4,9 +4,11 @@ import toast from "react-hot-toast";
 import Layout from "../common/Layout";
 import { useRole } from "@/context/RoleContext";
 import Listing from "../api/Listing";
+import { useRouter } from "next/router";
 
 export default function ProfileIndex() {
   const { setUser } = useRole();
+  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [previewImgSrc, setPreviewImgSrc] = useState("/default-user.png");
 
@@ -17,7 +19,7 @@ export default function ProfileIndex() {
     gender: "",
     address: "",
     timezone: "",
-    profileImage: null, // ✅ backend-matched key
+    profileImage: null,
   });
 
   /* ================= FETCH PROFILE ================= */
@@ -28,6 +30,7 @@ export default function ProfileIndex() {
       const data = res?.data?.data;
 
       setUser(data);
+
       setRecord({
         name: data?.name || "",
         email: data?.email || "",
@@ -90,9 +93,37 @@ export default function ProfileIndex() {
     }
   };
 
+
+  const [deleteloading, setdeleteLoading] = useState(false);
+
+  /* ================= DELETE USER ================= */
+  const HandleDelete = async () => {
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete your account? This action cannot be undone."
+    );
+
+    if (!confirmDelete) return;
+
+    try {
+      setdeleteLoading(true);
+      const api = new Listing();
+      const response = await api.DeleteUser();
+      response?.data?.status
+        ? toast.success(response.data.message)
+        : toast.error(response.data.message);
+      router.push("/")
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed");
+    } finally {
+      setdeleteLoading(false);
+    }
+  };
+
   return (
     <Layout heading="Profile Management">
-      <div className="max-w-5xl mx-auto px-4 pb-10 space-y-10 mt-4">
+      <div className="max-w-[1230px] mx-auto px-4 pb-10 space-y-10 mt-4">
+
         {/* ================= PROFILE IMAGE ================= */}
         <section className="flex flex-col md:flex-row gap-6 items-start border-b pb-8">
           <div className="md:w-1/3">
@@ -172,20 +203,9 @@ export default function ProfileIndex() {
               <option value="other">Other</option>
             </select>
           </FormRow>
-
-          {/* <FormRow label="Address" desc="Your full address">
-            <textarea
-              name="address"
-              value={record.address}
-              onChange={handleChange}
-              rows={3}
-              className="form-input"
-              placeholder="Enter address"
-            />
-          </FormRow> */}
         </section>
 
-        {/* ================= BUTTON ================= */}
+        {/* ================= UPDATE BUTTON ================= */}
         <div className="flex justify-center">
           <button
             onClick={handleSubmit}
@@ -195,6 +215,37 @@ export default function ProfileIndex() {
             {loading ? "Updating..." : "Update Profile"}
           </button>
         </div>
+
+
+
+      </div>
+
+      <div className="w-full max-w-[1230px] mx-auto container px-4 pb-10 py-4 border-t bg-red-50">
+
+        {/* ================= DANGER ZONE ================= */}
+        <div className="flex flex-col md:flex-row w-full gap-6 items-center justify-between">
+
+          <div className="md:w-1/2">
+            <h3 className="text-2xl font-bold text-red-600">
+              Delete Account
+            </h3>
+            <p className="text-gray-600 mt-1">
+              Permanently delete your account and all associated data. This action cannot be undone.
+            </p>
+          </div>
+
+          <div className="md:w-auto w-full flex md:justify-end cursor-pointer">
+            <button
+              onClick={HandleDelete}
+              disabled={deleteloading}
+              className="w-full md:w-auto px-8 py-3 cursor-pointer bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-all duration-200 shadow-md disabled:opacity-50"
+            >
+              {deleteloading ? "Deleting..." : "Delete Account"}
+            </button>
+          </div>
+
+        </div>
+
       </div>
     </Layout>
   );
@@ -213,8 +264,5 @@ const FormRow = ({ label, desc, children }) => (
 );
 
 const Input = (props) => (
-  <input
-    {...props}
-    className="form-input"
-  />
+  <input {...props} className="form-input" />
 );

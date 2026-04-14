@@ -6,6 +6,7 @@ import { MdDelete } from "react-icons/md";
 
 export default function DeleteImages({
     image = "https://media.collegesathi.com/images/1775537518604-formimage.webp",
+    fetchProduct
 }) {
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -24,6 +25,7 @@ export default function DeleteImages({
 
             if (res) {
                 toast.success("Deleted successfully");
+                fetchProduct();
                 setOpen(false);
             }
         } catch {
@@ -45,12 +47,8 @@ export default function DeleteImages({
 
                 <button
                     onClick={() => setOpen(true)}
-                    className="
-      absolute top-2 right-2 
-      bg-red-600 text-white p-2 rounded-full shadow-lg
-      opacity-100
-      transition-all duration-300
-    "
+                    type="button"
+                    className=" absolute top-2 right-2      bg-red-600 text-white p-2 rounded-full shadow-lg     opacity-100   transition-all duration-300  "
                 >
                     <MdDelete size={20} />
                 </button>
@@ -99,12 +97,14 @@ export default function DeleteImages({
                                 <button
                                     onClick={handleSubmit}
                                     disabled={loading}
+                                  type="button"
                                     className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg text-lg disabled:opacity-50"
                                 >
                                     {loading ? "Deleting..." : "Yes"}
                                 </button>
 
                                 <button
+                                 type="button"
                                     onClick={handleClosePopup}
                                     className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-lg text-lg"
                                 >
