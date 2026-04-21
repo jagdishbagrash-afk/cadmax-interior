@@ -29,7 +29,7 @@ export default function Vendor({ vendors = [], title = "OUR PROFESSIONALS", link
                         return (
                             <Link
                                 key={item?._id || idx}
-                                href={`/vendor/${item?.slug}`}
+                                href={`/vendor/${item?.VendorCategory?.slug}/${item?.slug}`}
                                 className="group block rounded-2xl overflow-hidden shadow hover:shadow-xl transition bg-white"
                             >
 
