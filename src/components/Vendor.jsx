@@ -23,9 +23,7 @@ export default function Vendor({ vendors = [], title = "OUR PROFESSIONALS", link
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {vendors?.map((item, idx) => {
-                        const image = item?.multiple_images?.[0] || item?.Image;
                         const category = item?.VendorCategory?.name;
-
                         return (
                             <Link
                                 key={item?._id || idx}
