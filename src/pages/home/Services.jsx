@@ -2,7 +2,6 @@
 import Link from "next/link";
 import end from "../../Assets/Images/end.jpg";
 import ligithing from "../../Assets/Images/ligithing.jpg";
-import Button from "../common/Button";
 
 export default function Services() {
   return (

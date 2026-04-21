@@ -12,6 +12,8 @@ import Slider from "./Slider";
 import Slider2 from "./Slider2";
 import Listing from "../api/Listing";
 import About from "./About";
+import Download from "../common/Download";
+import Vendor from "@/components/Vendor";
 function Index() {
 
   useEffect(() => {
@@ -53,9 +55,28 @@ function Index() {
     }
   };
 
+  const [vendor, setvendor] = useState([])
+
+  const FecthVendor = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.GetVendorData();
+      if (response.data?.data) {
+        setvendor(response.data.data);
+      } else {
+        setvendor([]);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setvendor([]);
+    }
+  };
+
+
   useEffect(() => {
     fetchData();
     fetchDatas();
+    FecthVendor();
   }, []);
 
 
@@ -66,6 +87,8 @@ function Index() {
       <ProductGrid products={bestseller} link={"/best-seller"} />
       <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
 
+      <Download />
+      <Vendor vendors={vendor} title={"Popular Vendor"} link={"/vendor"} />
       <DesignConcept />
       <About />
       <ContactStyling />

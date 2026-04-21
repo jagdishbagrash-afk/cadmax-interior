@@ -299,6 +299,10 @@ class Listing extends Component {
     return Api.get(`/common/product`, data);
   }
 
+    async GetVendorData(data) {
+    return Api.get(`/vendor/get`, data);
+  } 
+
   async GetHomeList(data) {
     return Api.get(`/common/banner`, data);
   }
