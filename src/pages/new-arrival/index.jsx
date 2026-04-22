@@ -1,5 +1,5 @@
 import Banner from "@/components/Banner";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../Assets/Images/arrival.jpg";
 import Layout from "../common/Layout";
 import ProductCard from "../common/ProductCard";
 import { useEffect, useState } from "react";

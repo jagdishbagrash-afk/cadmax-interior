@@ -1,5 +1,5 @@
 import Banner from "@/components/Banner";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../Assets/Images/desgin000888.jpeg";
 import servicesbottom from "../../Assets/Images/servicesbottom.jpg"
 import Layout from "../common/Layout";
 import ResidentialDesign from "./ResidentialDesign";

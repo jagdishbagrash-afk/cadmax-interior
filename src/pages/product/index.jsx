@@ -6,7 +6,7 @@ import Sliderimage2 from "../../Assets/Images/seller3.jpg";
 import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../Assets/Images/desgin001.jpeg";
 
 import ThreeBanner from "./ThreeBanner";
 import { useEffect, useState } from "react";

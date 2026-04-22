@@ -4,7 +4,7 @@ import Listing from "@/pages/api/Listing";
 import { useEffect, useState } from "react";
 import Layout from "@/pages/common/Layout";
 import Banner from "@/components/Banner";
-import ProductListBanner from "../../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../../Assets/Images/desgin004.jpeg";
 import Slider2 from "@/pages/home/Slider2";
 
 

@@ -1,5 +1,5 @@
 import Banner from "@/components/Banner";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../Assets/Images/project.jpeg";
 import ProjectList from "../../Assets/Images/projectlist.jpg";
 import Layout from "../common/Layout";
 import Button from "../common/Button";
