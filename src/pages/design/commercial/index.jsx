@@ -6,10 +6,7 @@ import Layout from "@/pages/common/Layout";
 import Banner from "@/components/Banner";
 import ProductListBanner from "../../../Assets/Images/desgin006.jpeg";
 import Slider2 from "@/pages/home/Slider2";
-
-
 export default function ResidentialDesign() {
-
     const [data, setData] = useState([]);
 
     const fetchData = async () => {
