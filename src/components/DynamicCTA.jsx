@@ -77,7 +77,7 @@ export default function DynamicCTA({ cta, record }) {
     <button
       onClick={handleClick}
       disabled={loading}
-      className="w-full md:w-auto px-6 py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full md:w-auto px-6 cursor-pointer py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {loading ? "Processing..." : cta?.text || "Submit"}
     </button>

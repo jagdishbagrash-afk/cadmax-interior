@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Listing from "../api/Listing";
 import Layout from "../common/Layout";
-import ProductListBanner from "../../Assets/Images/ProductListBanner.png";
+import ProductListBanner from "../../Assets/Images/vendor.png";
 import Banner from "@/components/Banner";
 
 export default function Index() {

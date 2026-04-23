@@ -77,13 +77,13 @@ export default function VendorDetailPage() {
                                 <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
                                     {vendor?.experience}
                                 </span>
-                                <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
+                                {/* <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
                                     {vendor?.specialization}
-                                </span>
+                                </span> */}
                             </div>
 
                             {/* CTA */}
-                            <div className="mt-6">
+                            <div className="mt-6 flex justify-center items-center text-center cursor-pointer">
                                 <DynamicCTA
                                     cta={{
                                         text: "Hire Now",
@@ -153,7 +153,7 @@ export default function VendorDetailPage() {
                                     Work Showcase
                                 </h2>
 
-                                <div className="columns-2 md:columns-3 gap-4 space-y-4">
+                                <div className="columns-2 md:columns-3 gap-4 space-y-4 mt-3 mb-3 ">
                                     {vendor?.multiple_images?.map((img, i) => (
                                         <img
                                             key={i}

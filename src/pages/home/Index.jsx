@@ -88,7 +88,7 @@ function Index() {
       <ProductGrid products={lastproduct} title={"New Arrival"} link={"/new-arrival"} />
 
       <Download />
-      <Vendor vendors={vendor} title={"Popular Vendor"} link={"/vendor"} />
+      <Vendor vendors={vendor} title={"Popular Vendor"} link={"/popular-vendor"} />
       <DesignConcept />
       <About />
       <ContactStyling />

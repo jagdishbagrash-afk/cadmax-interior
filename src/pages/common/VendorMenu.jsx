@@ -4,6 +4,8 @@ import { IoIosArrowDown } from "react-icons/io";
 import { useEffect, useRef, useState } from "react";
 import Listing from "../api/Listing";
 import c1 from "../../Assets/Images/c1.jpg";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
 
 const VendorMenu = ({ textColor, active }) => {
     const [categories, setData] = useState([]);
@@ -70,28 +72,49 @@ const VendorMenu = ({ textColor, active }) => {
             >
                 {/* INNER CONTAINER */}
                 <div className="max-w-[1200px] mx-auto p-8">
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                    <Swiper
+                        modules={[Autoplay]}
+                        key={categories.length} // 🔥 force re-init
+                        slidesPerView={1}
+                        loop={categories.length > 1}
+                        autoplay={{
+                            delay: 2500,
+                            disableOnInteraction: false,
+                            pauseOnMouseEnter: false,
+                        }}
+                        spaceBetween={24} // ✅ spacing between cards
+                        breakpoints={{
+                            640: {
+                                slidesPerView: 2,
+                            },
+                            1024: {
+                                slidesPerView: 4,
+                            },
+                        }}
+                    >
                         {categories?.map((item) => (
-                            <Link
-                                key={item._id}
-                                href={`/vendor/${item.slug}`}
-                                onClick={() => setOpen(false)}
-                                className="group"
-                            >
-                                <div className="h-[220px] overflow-hidden rounded-lg">
-                                    <img
-                                        src={item.Image || c1.src}
-                                        alt={item.name}
-                                        className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-                                    />
-                                </div>
+                            <SwiperSlide key={item._id}>
+                                <Link
+                                    href={`/vendor/${item.slug}`}
+                                    onClick={() => setOpen(false)}
+                                >
+                                    <div className="h-[180px] md:h-[220px] overflow-hidden rounded-lg">
+                                        <img
+                                            src={item.Image || c1.src}
+                                            alt={item.name}
+                                            className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                                        />
+                                    </div>
 
-                                <h3 className="mt-3 text-sm font-medium text-gray-800 uppercase text-center">
-                                    {item.name}
-                                </h3>
-                            </Link>
+                                    <p className="text-center mt-2 text-black text-sm md:text-base">
+                                        {item.name}
+                                    </p>
+                                </Link>
+                            </SwiperSlide>
                         ))}
-                    </div>
+                    </Swiper>
+
+
                 </div>
             </div>
         </li>

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 export default function Vendor({ vendors = [], title = "OUR PROFESSIONALS", link = "/vendors" }) {
 
+     const VendorList = Array.isArray(vendors) ? vendors.slice(0, 4) : [];
     return (
         <section className="bg-white py-6 md:py-10">
             <div className="container mx-auto px-4 max-w-[1430px]">
@@ -22,7 +23,7 @@ export default function Vendor({ vendors = [], title = "OUR PROFESSIONALS", link
 
                 {/* Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                    {vendors?.map((item, idx) => {
+                    {VendorList?.map((item, idx) => {
                         const category = item?.VendorCategory?.name;
                         return (
                             <Link
