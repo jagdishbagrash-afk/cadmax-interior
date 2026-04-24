@@ -67,16 +67,16 @@ export default function Header() {
           : "bg-white/30"
       }`}
     >
-      <nav className="max-w-[1230px] container bg-transparent  mx-auto flex items-center justify-between px-6 xl:px-0 py-3 md:py-0">
+      <nav className="max-w-[1430px] container bg-transparent  mx-auto flex items-center justify-between px-6 xl:px-0 py-3 md:py-0">
 
         {/* LOGO */}
-        <Link href="/">
+        <Link href="/" className="mt-2 mb-2">
           <Image
             src="/Logo.png"
             width={200}
             height={80}
             alt="Logo"
-            className="h-[50px] sm:h-[60px] md:h-[70px] w-auto object-contain"
+            className="h-[50px] sm:h-[60px] md:h-[70px] w-auto object-cover"
           />
         </Link>
 
