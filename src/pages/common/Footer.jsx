@@ -26,7 +26,7 @@ export default function Footer() {
         <div>
         <Link href="/" className="inline-block">
   <Image
-    src="/logo.png"
+    src="/Logo.png"
     alt="Cadmax Atelier Logo"
     width={160}
     height={50}
