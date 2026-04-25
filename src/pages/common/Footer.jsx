@@ -69,11 +69,11 @@ export default function Footer() {
           <GiHomeGarage className="text-[#D4AF37]" size={32} />
           <h3 className="text-white mt-2 mb-4">RESIDENTIAL DESIGNS</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/residential/elevations" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Elevations</Link></li>
-            <li><Link href="/residential/gazebo" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Gazebo</Link></li>
-            <li><Link href="/residential/living-room" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Living Room</Link></li>
-            <li><Link href="/residential/bedroom" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Bedroom</Link></li>
-            <li><Link href="/residential/kitchen" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Kitchens</Link></li>
+            <li><Link href="/design/residential/elevations" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Elevations</Link></li>
+            <li><Link href="/design/residential/gazebo" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Gazebo</Link></li>
+            <li><Link href="/design/residential/living-room" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Living Room</Link></li>
+            <li><Link href="/design/residential/bedroom" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Bedroom</Link></li>
+            <li><Link href="/design/residential/kitchen" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Kitchens</Link></li>
           </ul>
         </div>
 
@@ -82,11 +82,11 @@ export default function Footer() {
           <BsBuildings className="text-[#D4AF37]" size={32} />
           <h3 className="text-white mt-2 mb-4">COMMERCIAL DESIGNS</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/commercial/offices" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Offices</Link></li>
-            <li><Link href="/commercial/cafe" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Cafe & Restaurants</Link></li>
-            <li><Link href="/commercial/showrooms" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Showrooms</Link></li>
-            <li><Link href="/commercial/saloon" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Saloon & Spa</Link></li>
-            <li><Link href="/commercial/banquet" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Banquet Halls</Link></li>
+            <li><Link href="/design/commercial/offices" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Offices</Link></li>
+            <li><Link href="/design/commercial/cafe" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Cafe & Restaurants</Link></li>
+            <li><Link href="/design/commercial/showrooms" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Showrooms</Link></li>
+            <li><Link href="/design/commercial/saloon-spa" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Saloon & Spa</Link></li>
+            <li><Link href="/design/commercial/banquet" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Banquet Halls</Link></li>
           </ul>
         </div>
 
