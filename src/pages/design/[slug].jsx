@@ -18,7 +18,7 @@ export default function Index() {
     const [classic, setClassic] = useState([]);
     const [modern, setModern] = useState([]);
     const [contemporary, setContemporary] = useState([]);
-  const [common, setCommon] = useState([]);
+    const [common, setCommon] = useState([]);
 
     // Fetch Project Based on Selected
     const fetchProjectData = async () => {
@@ -26,7 +26,7 @@ export default function Index() {
         try {
             const main = new Listing();
             const response = await main.GetAllConceptType(id);
-            console.log("response",response)
+            console.log("response", response)
             setRecord(response.data.data.record)
             const data = response?.data?.data?.services;
 
@@ -44,7 +44,7 @@ export default function Index() {
                 const contemporaryData = data.filter(item => item.concept === "contemporary");
                 setContemporary(contemporaryData);
 
-                 const common = data.filter(item => item.concept === "common");
+                const common = data.filter(item => item.concept === "common");
                 setCommon(common);
             }
 
@@ -94,15 +94,15 @@ export default function Index() {
                 </div>
             </div>
 
-              {/* Services Grid */}
-      <section className="py-4 md:py-8">
-        <div className="container mx-auto px-4 max-w-[1430px]">
-          <ConceptSection title="" data={common} />
-          <ConceptSection title="NEO CLASSIC" data={classic} />
-          <ConceptSection title="MODERN" data={modern} />
-          <ConceptSection title="CONTEMPORARY" data={contemporary} />
-        </div>
-      </section>
+            {/* Services Grid */}
+            <section className="py-4 md:py-8">
+                <div className="container mx-auto px-4 max-w-[1430px]">
+                    <ConceptSection title="" data={common} />
+                    <ConceptSection title="NEO CLASSIC" data={classic} />
+                    <ConceptSection title="MODERN" data={modern} />
+                    <ConceptSection title="CONTEMPORARY" data={contemporary} />
+                </div>
+            </section>
         </Layout>
     );
 }
