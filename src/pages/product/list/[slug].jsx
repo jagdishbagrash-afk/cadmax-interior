@@ -35,7 +35,7 @@ export default function Index() {
   useEffect(() => {
     if (id) fetchData(id);
   }, [id]);
-  
+
   return (
     <Layout>
       <div className="w-full bg-black py-3">

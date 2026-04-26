@@ -7,20 +7,20 @@ export default function ProductCard({ item }) {
   return (
     <Link href={`/product/details/${item?.slug}`}>
 
-      <div className="relative w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100 group cursor-pointer">
+      <div className="relative w-full h-[280px] md:h-[350px] lg:h-[450px] overflow-hidden  group cursor-pointer">
 
         {/* Default image */}
         <img
           src={image?.[0] || "/no-image.png"}
           alt={item?.title}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+          className="absolute inset-0 w-full h-full object-cover  h-[280px] md:h-[350px] lg:h-[450px] transition-opacity duration-300 group-hover:opacity-0"
         />
 
         {/* Hover image */}
         <img
           src={image?.[1] || image?.[0] || "/no-image.png"}
           alt={item?.title}
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+          className="absolute inset-0 w-full h-full  object-cover  h-[280px] md:h-[350px] lg:h-[450px]  transition-opacity duration-300 opacity-0 group-hover:opacity-100"
         />
 
       </div>

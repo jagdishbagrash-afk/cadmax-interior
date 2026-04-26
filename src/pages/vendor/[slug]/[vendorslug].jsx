@@ -54,7 +54,7 @@ export default function VendorDetailPage() {
                     <div className="max-w-[1200px] mx-auto px-4 md:px-6 -mt-20 relative z-10 grid md:grid-cols-[320px_1fr] gap-8">
 
                         {/* ================= LEFT SIDE (STICKY PROFILE) ================= */}
-                        <div className="bg-white rounded-2xl shadow-lg p-6 h-fit md:sticky top-24">
+                        <div className="bg-white rounded-2xl shadow-lg p-2 md:p-6 h-fit md:sticky top-24">
 
                             {/* PROFILE */}
                             <div className="flex flex-col items-center text-center">
@@ -98,21 +98,21 @@ export default function VendorDetailPage() {
                         </div>
 
                         {/* ================= RIGHT SIDE CONTENT ================= */}
-                        <div className="space-y-10">
+                        <div className="space-y-10 p-2 md:p-6">
 
                             {/* 🔥 TITLE */}
                             <div>
-                                <h1 className="text-2xl md:text-4xl text-[#ffffff] font-bold leading-tight">
+                                <h1 className="text-2xl md:text-4xl text-[#000000] md:text-[#ffffff] font-bold leading-tight">
                                     {vendor?.name}
                                 </h1>
-                                <p className="text-[#ffffff] mt-2">
+                                <p className="text-[#000000] md:text-[#ffffff]  mt-2">
                                     Professional {vendor?.specialization} services
                                 </p>
                             </div>
 
                             {/* 🔥 STATS */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                                <div className="bg-white p-5 rounded-xl shadow-sm">
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm">
                                     <p className="text-gray-400 text-sm">Experience</p>
                                     <p className="font-semibold text-lg">
                                         {vendor?.experience}
@@ -136,7 +136,7 @@ export default function VendorDetailPage() {
 
                             {/* 🔥 DESCRIPTION */}
                             {vendor?.content && (
-                                <div className="bg-white p-6 rounded-xl shadow-sm">
+                                <div className="bg-white p-2 md:p-6 rounded-xl shadow-sm">
                                     <h2 className="text-xl font-semibold mb-3">
                                         About Vendor
                                     </h2>

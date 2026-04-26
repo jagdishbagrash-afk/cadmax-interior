@@ -173,9 +173,9 @@ const ProductGrid = ({ selectedId }) => {
   const widthPercent = ((priceRange.high - priceRange.low) / range) * 100;
   return (
     <div className="w-full px-6 md:px-10 lg:px-14 py-8">
-      <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
         {/* FILTER PANEL */}
-        <div className="bg-white p-6 sticky top-24 h-max space-y-6  rounded-xl shadow-sm order-2 md:order-1">
+        <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6  rounded-xl shadow-md order-1">
           <div className="flex justify-between items-center border-b pb-4">
             <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
               Filters
@@ -278,7 +278,7 @@ const ProductGrid = ({ selectedId }) => {
 
 
         {/* PRODUCT GRID */}
-    <div className="order-1 md:order-2">
+         <div className="order-2">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {products && products?.map((item) => (
               <ProductCard key={item._id || item.id} item={item} />
