@@ -204,7 +204,7 @@ export default function AddVendor({ fetchDatas, isEdit, item }) {
                         {/* Specialization */}
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Specialization
+                                Project Completed
                             </label>
                             <input
                                 className="w-full px-4 py-2 h-[48px] border border-gray-200 rounded-[10px] bg-[#F4F6F8] focus:ring focus:ring-gray-300 outline-none"

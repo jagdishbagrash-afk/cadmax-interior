@@ -13,11 +13,11 @@ export default function CommercialDesign({Commercialservices}) {
                        tracking-[-0.02em] text-center uppercase Creato  ">
                         Commercial Spaces Engineered for Flow, Brand Presence & Performance
                     </h2>
-                    <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
+                    {/* <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
                         Every commercial project is designed to optimize spatial efficiency,
                         brand impact, and customer experience. Whether it’s a café, salon, or
                         corporate office, layouts are driven by logic and modern aesthetics.
-                    </p>
+                    </p> */}
                 </div>
 
                 {/* Grid */}

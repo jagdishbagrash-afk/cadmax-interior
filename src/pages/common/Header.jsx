@@ -10,6 +10,7 @@ import VendorMenu from "./VendorMenu";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import DesignMenu from "./DesignMenu";
 import { FaRegAddressCard } from "react-icons/fa6";
+import toast from "react-hot-toast";
 
 export default function Header() {
   const { user, setUser } = useRole();
@@ -53,6 +54,7 @@ export default function Header() {
     localStorage.removeItem("token");
     toast.success("Logout Successfully");
     setUser(null);
+    setDropdownOpen(false)
     router.push("/");
   };
 

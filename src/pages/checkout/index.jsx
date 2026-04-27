@@ -13,10 +13,12 @@ import { useRole } from "@/context/RoleContext";
 import Banner from "@/components/Banner";
 import BannerImages from "../../Assets/Images/Frame18.jpg"
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
+import Link from "next/link";
 
 export default function Index() {
   const { error, isLoading, Razorpay } = useRazorpay();
   const [data, setData] = useState([]);
+  console.log("data", data)
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   console.log("KEY:", process.env.NEXT_PUBLIC_RAZOPAY_KEY);
   const router = useRouter();
@@ -30,7 +32,7 @@ export default function Index() {
     return sum + Number(item?.price * item?.quantity);
   }, 0);
 
-  console.log("totalPrice" ,totalPrice)
+  console.log("totalPrice", totalPrice)
   const itemNames = cartItemsRedux.map((item) => item.name);
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
@@ -59,7 +61,7 @@ export default function Index() {
 
 
   const handlePaymentCreateSubmit = async (e) => {
-     e.preventDefault();
+    e.preventDefault();
     if (totalPrice === 0) {
       toast.error("Amount can't be 0!");
       return;
@@ -68,9 +70,9 @@ export default function Index() {
     const main = new Listing();
     try {
       const res = await main.AddPaymentCreate({
-        "amount" : totalPrice , 
-       "currency":  "INR",
-       "receipt" : "receipt#1"
+        "amount": totalPrice,
+        "currency": "INR",
+        "receipt": "receipt#1"
       });
       if (res && res.data && res.data.orderId) {
         const options = {
@@ -81,9 +83,9 @@ export default function Index() {
           description: "Payment for services",
           order_id: res.data.orderId,
           handler: function (response) {
-            console.log("response" ,response);
+            console.log("response", response);
             localStorage.setItem("response", JSON.stringify(response));
- handleSubmit(response);
+            handleSubmit(response);
             toast.success("Payment Successful");
           },
           prefill: {
@@ -125,7 +127,7 @@ export default function Index() {
   };
 
   const handleSubmit = async (response) => {
-    console.log("response2" ,response)
+    console.log("response2", response)
     if (!cartItemsRedux || cartItemsRedux.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -159,7 +161,7 @@ export default function Index() {
           orderId
         );
         toast.success(res?.data?.message);
-        
+
 
       } else {
         toast.error(res?.data?.message || "Failed to place order");
@@ -176,16 +178,16 @@ export default function Index() {
     setLoading(true);
     try {
       const main = new Listing();
-     
+
       const response = await main.PaymentSave({
-"order_id":  orderId,
-"payment_id":  paymentId,
-"currency":  "INR",
-"product_name" : itemNames,
-"amount": totalPrice ,
-"type" : "product",
-"payment_status": payment_status,
-"OrderID":  Orderdatas,
+        "order_id": orderId,
+        "payment_id": paymentId,
+        "currency": "INR",
+        "product_name": itemNames,
+        "amount": totalPrice,
+        "type": "product",
+        "payment_status": payment_status,
+        "OrderID": Orderdatas,
       });
       if (response?.data?.status) {
         toast.success(response.data.message);
@@ -206,7 +208,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.AddressList();
-
       if (response?.data?.data?.addresses) {
         setData(response.data.data.addresses);
       } else {
@@ -240,7 +241,6 @@ export default function Index() {
       <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black antialiased">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12">
-
             {/* LEFT COLUMN: FORM */}
             <div className="w-full lg:w-5/12">
               <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm">
@@ -305,12 +305,23 @@ export default function Index() {
 
 
                     <div>
-                      <label
+                   <div className="flex justify-between items-center  text-center mt-2 "> 
+                       <label
                         htmlFor="address"
                         className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
                       >
                         Address *
                       </label>
+
+                      {(!data || data.length === 0) && (
+                        <Link
+                          href={"/address"}
+                          className="mt-2 text-sm text-blue-600 underline mb-2"
+                        >
+                          + Add New Address
+                        </Link>
+                      )}
+                   </div>
 
                       <select
                         id="addressId"
@@ -322,12 +333,15 @@ export default function Index() {
                       >
                         <option value="">Select Address</option>
 
-                        {data.map((item) => (
+                        {data?.map((item) => (
                           <option key={item._id} value={item._id}>
                             {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode} (${item.addressType})`}
                           </option>
                         ))}
                       </select>
+
+                      {/* 👉 If no address */}
+                      
                     </div>
                   </div>
 

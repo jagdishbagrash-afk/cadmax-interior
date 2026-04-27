@@ -16,14 +16,22 @@ const MegaMenu = ({ textColor, active }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-  useEffect(() => {
-    const fetchData = async () => {
+useEffect(() => {
+  const fetchData = async () => {
+    try {
       const main = new Listing();
       const res = await main.categoryStatus();
-      if (res.data?.data) setCategories(res.data.data);
-    };
-    fetchData();
-  }, []);
+
+      if (res.data?.data) {
+        setCategories(res.data.data);
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+    }
+  };
+
+  fetchData();
+}, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {

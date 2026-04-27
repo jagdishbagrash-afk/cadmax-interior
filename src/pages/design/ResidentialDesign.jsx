@@ -15,11 +15,11 @@ export default function ResidentialDesign({Residentialservices}) {
                      tracking-[-0.02em] text-center uppercase Creato  ">
                         Residential Design Tailored for Comfort, Coherence, and Daily Living
                     </h2>
-                    <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
+                    {/* <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed mt-3  text-center  ">
                         From compact apartments to villas, we deliver interiors that function
                         with character. Our process includes precise layout planning, 3D
                         visualizations, and on-site supervision for complete spatial control.
-                    </p>
+                    </p> */}
                 </div>
 
                 {/* Grid */}

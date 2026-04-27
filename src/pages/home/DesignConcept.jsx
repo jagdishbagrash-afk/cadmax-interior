@@ -68,7 +68,7 @@ const DesignConcept = () => {
                                 }, [])
                                 .map((group, idx) => (
                                     <SwiperSlide key={idx}>
-                                        <div className="grid grid-cols-2 grid-rows-2 gap-3 h-[620px]">
+                                        <div className="grid grid-cols-1  md:grid-cols-2 md:grid-rows-2 gap-3 h-[620px]">
                                             {group.map((item) => (
                                                 <Link
                                                     key={item?._id}
@@ -81,8 +81,8 @@ const DesignConcept = () => {
                                                         className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
                                                     />
 
-                                                    <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-                                                        <h3 className="text-white font-[900] uppercase text-[16px] Creato">
+                                                    <div className="absolute inset-0 bg-black/40 flex items-center text-center justify-center">
+                                                        <h3 className="text-white font-[900] uppercase text-[14px] md:text-[16px] Creato">
                                                             {item?.name}
                                                         </h3>
                                                     </div>

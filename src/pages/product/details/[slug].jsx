@@ -23,8 +23,8 @@ export default function Index() {
   const router = useRouter();
   // console.log("router", router)
   const id = router?.query?.slug;
-    const { error, isLoading, Razorpay } = useRazorpay();
-      const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
+  const { error, isLoading, Razorpay } = useRazorpay();
+  const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
@@ -111,7 +111,7 @@ export default function Index() {
   };
 
   const handleClose = () => setShow(false);
-  
+
   const handleShow = (item, index) => {
     // console.log("item", item);
     // console.log("index", index);
@@ -121,6 +121,20 @@ export default function Index() {
       setShow(true);
     }
   };
+
+
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const GalleryModal = () => {
     return (
@@ -219,7 +233,7 @@ export default function Index() {
       <div
         className="relative w-full h-full cursor-crosshair"
         onMouseMove={handleMove}
-        // Note: No onMouseLeave here anymore
+      // Note: No onMouseLeave here anymore
       >
         <Image src={src} fill className="object-cover" alt="product" />
       </div>
@@ -251,7 +265,7 @@ export default function Index() {
   return (
     <Layout>
       <div className="w-full md:py-14 flex flex-col justify-center"
-       onHover={() => setZoomData(null)} // <--- KILL SWITCH HERE
+        onHover={() => setZoomData(null)} // <--- KILL SWITCH HERE
       >
         <div className="w-full container max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
           <div className="bg-white">
@@ -262,32 +276,69 @@ export default function Index() {
               | {ProductDetails?.subcategory?.name}
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="flex gap-4 w-full">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
 
-                <div className="w-[80px]">
+              {/* ================= LEFT: IMAGES ================= */}
+              <div className="flex flex-col md:flex-row gap-4 w-full">
+
+                {/* 🖼️ MAIN IMAGE */}
+                <div className="order-1 md:order-2 flex-1 w-full md:max-w-[500px]">
+                  <div className="relative aspect-[4/5] rounded-lg overflow-hidden">
+                    {isMobile ? (
+                      <img
+                        src={selectedVariant?.images?.[currentIndex]}
+                        alt="Product"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <EasyZoomOnHover
+                        key={currentIndex}
+                        mainImage={{
+                          src: selectedVariant?.images?.[currentIndex],
+                          alt: "Product Image",
+                          width: 500,
+                          height: 625,
+                        }}
+                        zoomImage={{
+                          src: selectedVariant?.images?.[currentIndex],
+                          alt: "Zoom Image",
+                        }}
+                        zoomContainerWidth={520}
+                        zoomContainerHeight={520}
+                        zoomLensScale={3}
+                        distance={16}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* 📱💻 THUMBNAILS */}
+                <div className="order-2 md:order-1 w-full md:w-[80px]">
+
                   <Swiper
-                    direction="vertical"
-                    slidesPerView={5}
-                    spaceBetween={10}
-                    watchSlidesProgress
-                    onSwiper={setThumbsSwiper}
+                    direction="horizontal"
+                    breakpoints={{
+                      768: {
+                        direction: "vertical",
+                        slidesPerView: 5,
+                      },
+                    }}
+                    slidesPerView={4}
+                    spaceBetween={8}
                     modules={[Thumbs]}
-                    className="h-[500px]"
+                    className="w-full md:h-[500px]"
                   >
-                    {selectedVariant?.images && selectedVariant?.images?.map((img, index) => (
+                    {selectedVariant?.images?.map((img, index) => (
                       <SwiperSlide
                         key={index}
-                        className="cursor-pointer"
-                        onMouseEnter={() => setCurrentIndex(index)}
                         onClick={() => setCurrentIndex(index)}
+                        className="cursor-pointer"
                       >
                         <div
                           className={`relative aspect-square rounded-md overflow-hidden border
-                            ${
-                              currentIndex === index
-                                ? "border-black"
-                                : "border-gray-300 hover:border-black"
+              ${currentIndex === index
+                              ? "border-black"
+                              : "border-gray-300"
                             }`}
                         >
                           <Image
@@ -300,276 +351,101 @@ export default function Index() {
                       </SwiperSlide>
                     ))}
                   </Swiper>
+
                 </div>
-
-                {/* ================= RIGHT: MAIN IMAGE + ZOOM ================= */}
-                <div className="flex-1 w-full md:max-w-[500px]">
-                  <div className="relative aspect-[4/5] z-50 rounded-lg overflow-visible">
-
-                    <EasyZoomOnHover
-                      key={currentIndex}
-                      mainImage={{
-                        src: selectedVariant?.images?.[currentIndex],
-                        alt: "Product Image",
-                        width: 500,
-                        height: 625,
-                      }}
-                      zoomImage={{
-                        src: selectedVariant?.images?.[currentIndex],
-                        alt: "Zoom Image",
-                      }}
-                      zoomContainerWidth={520}
-                      zoomContainerHeight={520}
-                      zoomLensScale={3}
-                      distance={16}
-                    />
-
-                  </div>
-                </div>
-
               </div>
 
-              {/* Right */}
+              {/* ================= RIGHT: DETAILS ================= */}
               <div className="relative z-10">
-                <h1 className="text-2xl text-[#171717] font-black Creato mt-2 uppercase">
+
+                <h1 className="text-xl md:text-2xl font-black uppercase mt-2">
                   {ProductDetails?.title}
                 </h1>
 
-                <p className="text-[#4D5466] text-lg font-medium mt-4 Creato">
+                <p className="text-[#4D5466] text-base md:text-lg mt-3 md:mt-4">
                   {ProductDetails?.description}
                 </p>
 
-                <h2 className="text-3xl text-[#171717] font-bold mt-6 Creato">
+                <h2 className="text-2xl md:text-3xl font-bold mt-4 md:mt-6">
                   ₹{ProductDetails?.amount}
                 </h2>
 
-                <p className="text-base font-medium text-[#4D5466] mt-2 Creato">
+                <p className="text-sm md:text-base text-[#4D5466] mt-2">
                   Deliver in approximately 8–12 days
                 </p>
 
-                {/* Color Variants */}
+                {/* 🎨 Variants */}
                 {ProductDetails?.variants?.length > 0 && (
-                  <div className="mt-6">
-                    <p className="text-sm font-medium text-[#4D5466] mb-3">
+                  <div className="mt-5 md:mt-6">
+                    <p className="text-sm text-[#4D5466] mb-3">
                       Colour:{" "}
-                      <span className="capitalize text-[#171717]">
+                      <span className="capitalize text-black">
                         {selectedVariant?.color}
                       </span>
                     </p>
 
-                    <div className="flex gap-4">
-                      {ProductDetails &&
-                        ProductDetails.variants &&
-                        ProductDetails?.variants?.map((variant, idx) => {
-                          const isActive =
-                            selectedVariant?.color === variant.color;
+                    <div className="flex gap-3 md:gap-4 flex-wrap">
+                      {ProductDetails?.variants?.map((variant, idx) => {
+                        const isActive =
+                          selectedVariant?.color === variant.color;
 
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => setSelectedVariant(variant)}
-                              className={`w-[110px] border rounded-md p-2 cursor-pointer transition
-                    ${
-                      isActive
-                        ? "border-black"
-                        : "border-gray-200 hover:border-gray-400"
-                    }
-                  `}
-                            >
-                              {/* Image */}
-                              <div className="w-full aspect-square relative rounded overflow-hidden">
-                                <Image
-                                  src={variant.images?.[0]}
-                                  alt={variant?.color}
-                                  fill
-                                  className="object-cover"
-                                />
-                              </div>
-
-                              {/* Color label */}
-                              <p className="mt-2 text-center text-sm font-medium capitalize">
-                                {variant?.color}
-                              </p>
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => setSelectedVariant(variant)}
+                            className={`w-[90px] md:w-[110px] border rounded-md p-2 cursor-pointer
+                ${isActive
+                                ? "border-black"
+                                : "border-gray-200"
+                              }`}
+                          >
+                            <div className="w-full aspect-square relative rounded overflow-hidden">
+                              <Image
+                                src={variant.images?.[0]}
+                                alt={variant?.color}
+                                fill
+                                className="object-cover"
+                              />
                             </div>
-                          );
-                        })}
+
+                            <p className="mt-2 text-center text-xs md:text-sm capitalize">
+                              {variant?.color}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 )}
 
-                {/* Buttons */}
+                {/* 🛒 Buttons */}
                 <div className="mt-6 flex flex-col gap-3 w-full">
-                  {/* Row 1: Qty + Add to Cart */}
+
                   <div className="flex gap-3 w-full">
-                    {/* Quantity */}
+                    {/* Qty */}
                     <div className="w-24 border border-black rounded-md px-2 py-2 flex items-center justify-between">
-                      <button
-                        onClick={decreaseQty}
-                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
-                      >
-                        −
-                      </button>
-
-                      <span className="text-md font-medium">{qty}</span>
-
-                      <button
-                        onClick={increaseQty}
-                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
-                      >
-                        +
-                      </button>
+                      <button onClick={decreaseQty}>−</button>
+                      <span>{qty}</span>
+                      <button onClick={increaseQty}>+</button>
                     </div>
 
-                    {/* Add to Cart */}
+                    {/* Add */}
                     <button
-                      className="flex-1 border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer"
-                      onClick={() => {
-                        handleAdd(false);
-                      }}
+                      className="flex-1 border border-black py-3 rounded-md"
+                      onClick={() => handleAdd(false)}
                     >
                       ADD TO CART
                     </button>
                   </div>
 
-                  {/* Row 2: Buy Now */}
                   <button
-                    className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer"
-                    onClick={() => {
-                      handleAdd(true);
-                    }}
+                    className="w-full bg-black text-white py-3 rounded-md"
+                    onClick={() => handleAdd(true)}
                   >
                     BUY IT NOW
                   </button>
                 </div>
 
-                {/* Features */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-8 text-base text-[#4D5466] Creato">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Complimentary Delivery & Setup <br /> Above ₹20000{" "}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Complimentary Styling Services
-                    </p>{" "}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Quality Assured Warranty Coverage
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">Fast Local Service Support</p>{" "}
-                  </div>
-                </div>
-
-                {/* Accordion Sections */}
-                <div className="mt-10">
-                  {/* 1. Dimensions */}
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(1)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Dimensions
-                      </span>
-                      {open === 1 ? (
-                        <FaMinus size={20} />
-                      ) : (
-                        <FaPlus size={20} />
-                      )}
-                    </div>
-
-                    {open === 1 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.dimensions}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 2. Materials & Features */}
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(2)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Materials & Features
-                      </span>
-                      {open === 2 ? (
-                        <FaMinus size={20} />
-                      ) : (
-                        <FaPlus size={20} />
-                      )}
-                    </div>
-
-                    {open === 2 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.material}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 3. Product Care */}
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(3)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Product Care
-                      </span>
-                      {open === 3 ? (
-                        <FaMinus size={20} />
-                      ) : (
-                        <FaPlus size={20} />
-                      )}
-                    </div>
-
-                    {open === 3 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.type}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* 4. Terms & Conditions */}
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(4)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Terms & Conditions
-                      </span>
-                      {open === 4 ? (
-                        <FaMinus size={20} />
-                      ) : (
-                        <FaPlus size={20} />
-                      )}
-                    </div>
-
-                    {open === 4 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.terms}
-                      </p>
-                    )}
-                  </div>
-                </div>
               </div>
             </div>
           </div>

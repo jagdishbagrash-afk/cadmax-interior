@@ -120,7 +120,7 @@ export default function VendorDetailPage() {
                                 </div>
 
                                 <div className="bg-white p-5 rounded-xl shadow-sm">
-                                    <p className="text-gray-400 text-sm">Specialization</p>
+                                    <p className="text-gray-400 text-sm"> Project Completed</p>
                                     <p className="font-semibold text-lg">
                                         {vendor?.specialization}
                                     </p>
@@ -168,7 +168,7 @@ export default function VendorDetailPage() {
                     </div>
 
                     {/* 🔥 MOBILE STICKY CTA */}
-                    <div className="fixed bottom-0 left-0 w-full bg-white p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] md:hidden">
+                    {/* <div className="fixed bottom-0 left-0 z-[999999] w-full bg-white p-4 shadow-[0_-2px_10px_rgba(0,0,0,0.1)] md:hidden">
                         <DynamicCTA
                             cta={{
                                 text: "Hire This Vendor",
@@ -179,7 +179,7 @@ export default function VendorDetailPage() {
                             }}
                             record={vendor}
                         />
-                    </div>
+                    </div> */}
 
                 </div>
             )}

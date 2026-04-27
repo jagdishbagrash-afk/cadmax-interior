@@ -117,7 +117,7 @@ export default function Index() {
 
                   <div className="flex justify-between border-b pb-2">
                     <span className="text-gray-500 font-medium">
-                      Specialities
+                      Project Completed
                     </span>
                     <span className="font-semibold text-gray-800 truncate max-w-[140px] text-right">
                       {p.sepectailze || "General"}
