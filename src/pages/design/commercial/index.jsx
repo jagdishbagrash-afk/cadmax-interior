@@ -72,20 +72,24 @@ export default function ResidentialDesign() {
                                     </h3>
 
                                     {/* Book Now Button (Hidden by default) */}
-                                    <Link
-                                        href={`/booking`}
-                                        className="opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300   px-4 
-        py-[6px]
-        font-[700] 
-        cursor-pointer 
-        Creato 
-        uppercase 
-        md:px-[30px] 
-        md:py-[10px] 
-        text-[13px] bg-transparent text-white border border-white"
-                                    >
-                                        Book Now
-                                    </Link>
+                                  <Link
+  href={`/booking`}
+  className="
+    opacity-100 translate-y-0 
+    md:opacity-0 md:translate-y-4 
+    md:group-hover:opacity-100 md:group-hover:translate-y-0 
+    transition-all duration-300
+    px-4 py-[6px]
+    font-[700]
+    cursor-pointer
+    Creato uppercase
+    md:px-[30px] md:py-[10px]
+    text-[13px]
+    bg-transparent text-white border border-white
+  "
+>
+  Book Now
+</Link>
                                 </div>
                             </Link>
 

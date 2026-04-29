@@ -22,7 +22,7 @@ export default function TermsConditions() {
 
             <div className="policy-page pt-[20px] pb-[20px]">
 
-                <div className='mx-auto container sm:container md:container lg:container xl:max-w-[1230px]  px-4'>
+                <div className='container mx-auto px-4 max-w-[1430px]'>
 
 
                     {/* Section */}

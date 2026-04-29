@@ -91,7 +91,7 @@ export default function Index() {
                     Experience
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 text-center">
-                    Specialization
+                    Project
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 text-center">
                     Category
@@ -130,8 +130,8 @@ export default function Index() {
                       </td>
 
                       {/* Specialization */}
-                      <td className="px-6 py-4 text-center">
-                        {item?.sepectailze}
+                      <td className="px-6 py-4 text-center text-nowrap">
+                        {item?.specialization}
                       </td>
 
                       {/* Category */}

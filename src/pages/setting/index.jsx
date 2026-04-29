@@ -122,7 +122,7 @@ export default function ProfileIndex() {
 
   return (
     <Layout heading="Profile Management">
-      <div className="max-w-[1230px] mx-auto px-4 pb-10 space-y-10 mt-4">
+      <div className="container mx-auto px-4 max-w-[1430px] pb-10 space-y-10 mt-4">
 
         {/* ================= PROFILE IMAGE ================= */}
         <section className="flex flex-col md:flex-row gap-6 items-start border-b pb-8">
@@ -220,7 +220,7 @@ export default function ProfileIndex() {
 
       </div>
 
-      <div className="w-full max-w-[1230px] mx-auto container px-4 pb-10 py-4 border-t bg-red-50">
+      <div className="w-full max-w-[1430px] mx-auto container px-4 pb-10 py-4 border-t bg-red-50">
 
         {/* ================= DANGER ZONE ================= */}
         <div className="flex flex-col md:flex-row w-full gap-6 items-center justify-between">

@@ -26,21 +26,21 @@ const ConceptSection = ({ title, data }) => {
         loop={true}
         breakpoints={{
           0: {
-            slidesPerView: 1.5,
+            slidesPerView: 1, // mobile
           },
           640: {
-            slidesPerView: 2.5,
+            slidesPerView: 2, // tablet
           },
           1024: {
-            slidesPerView: 4,
+            slidesPerView: 3, // desktop
           },
         }}
       >
         {data && data?.map((p) => (
-          <SwiperSlide key={p._id}>
+          <SwiperSlide key={p._id} className="w-full">
             <Link
               href={`/design/details/${p.slug}`}
-              className="overflow-hidden group block"
+              className="overflow-hidden group block w-full"
             >
               <div className="relative w-full h-[300px] md:h-[400px] lg:h-[420px] bg-gray-100 overflow-hidden rounded-lg">
 
@@ -48,7 +48,7 @@ const ConceptSection = ({ title, data }) => {
                 <img
                   src={p.Image || ProductListBanner?.src}
                   alt={p?.title}
-                  className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                  className="absolute inset-0 !w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
                 />
 
                 {/* Hover image */}
@@ -68,7 +68,7 @@ const ConceptSection = ({ title, data }) => {
                   {p.title}
                 </h3>
 
-                <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed line-clamp-2">
+                <p className="text-[#4D5466] font-[500] text-sm md:text-base leading-relaxed md:line-clamp-2">
                   {p.content}
                 </p>
               </div>

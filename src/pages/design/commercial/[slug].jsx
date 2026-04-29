@@ -10,6 +10,7 @@ import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 import ConceptSection from "@/pages/common/ConceptSection";
+import NoData from "@/pages/common/NoData";
 
 // const ConceptSection = ({ title, data }) => {
 //   if (!data?.length) return null;
@@ -156,7 +157,7 @@ export default function Index() {
           modules={[Autoplay]}
           grabCursor={true}
           breakpoints={{
-            320: { slidesPerView: 2 },
+            320: { slidesPerView: 1},
             640: { slidesPerView: 3 },
             768: { slidesPerView: 4 },
           }}
@@ -216,6 +217,16 @@ export default function Index() {
           <ConceptSection title="MODERN" data={modern} />
           <ConceptSection title="CONTEMPORARY" data={contemporary} />
         </div>
+        {selectedId &&
+          !common?.length &&
+          !classic?.length &&
+          !modern?.length &&
+          !contemporary?.length && (
+            <NoData
+              heading="No Design Found"
+              content="We couldn’t find any designs for this category. Please try another category or check back later."
+            />
+          )}
       </section>
     </Layout>
   );

@@ -88,7 +88,7 @@ export default function Index() {
         mx-auto
       "
                     >
-                        Start Your Interior Journey with Cadmax Interio
+                        Start Your Interior Journey with CadmaxAtelier
                     </h1>
 
                     <div

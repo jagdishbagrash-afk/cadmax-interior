@@ -191,7 +191,7 @@ export default function ManageAddress() {
 
             <div className="bg-gray-50 min-h-screen py-10">
 
-                <div className="max-w-[1230px] mx-auto px-4">
+                <div className="container mx-auto px-4 max-w-[1430px]">
 
                     {/* Header */}
 

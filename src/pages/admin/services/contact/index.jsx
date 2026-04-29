@@ -55,7 +55,7 @@ export default function Index() {
                                             <td className="px-4 py-3 text-center">{item.User.email}</td>
                                             <td className="px-4 py-3 text-center">{item.concept}</td>
                                             <td className="px-4 py-3 text-center">{item.ServicesType.title}</td>
-                                            <td className="px-4 py-3 text-center">{item.Services.title}</td>
+                                            <td className="px-4 py-3 text-center">{item.ServicesType.title}</td>
                                         </tr>
                                     ))
                                 ) : (

@@ -132,7 +132,7 @@ function BookingForm() {
 
   return (
     <div className="w-full min-h-screen bg-[#fafafa] flex justify-center py-10 px-4">
-      <div className="mx-auto container sm:container md:container lg:container xl:max-w-[1230px] px-4">
+      <div className="container mx-auto px-4 max-w-[1430px]">
         <div className=" grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* LEFT SIDE FORM SECTION */}
           <div className="lg:col-span-2 space-y-10">

@@ -77,7 +77,7 @@ export default function Slider() {
               <div className="absolute inset-0 bg-black/50"></div>
 
               {/* Content */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+              {/* <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
                 
                 <h1 className="text-white font-extrabold text-[18px] md:text-[28px] lg:text-[42px] uppercase leading-tight max-w-[800px]">
                   {slide?.title || "Elevate Every Room with Premium Interiors"}
@@ -88,7 +88,6 @@ export default function Slider() {
                     "Built-to-last furniture and complete interior solutions tailored for your lifestyle."}
                 </p>
 
-                {/* Buttons */}
                 <div className="flex flex-wrap justify-center gap-3 mt-5">
                   <Button
                     title="Shop Product"
@@ -99,7 +98,7 @@ export default function Slider() {
                     classes="border border-white text-white px-5 py-2 rounded-md"
                   />
                 </div>
-              </div>
+              </div> */}
 
             </div>
           </SwiperSlide>

@@ -11,7 +11,7 @@ export default function FAQ({ classess, Faq, heading }) {
   return (
     <div className={`pb-[40px] md:pb-[40px] lg:pb-[60px] ${classess}`}>
       {Faq && Faq?.length > 0 && (
-        <div className="mx-auto container sm:container md:container lg:container xl:max-w-[1230px] px-4">
+        <div className="container mx-auto px-4 max-w-[1430px]">
           <Heading
             classess="text-[#1E1E1E] mb-3"
             title= {heading || "Frequently Asked Questions"}

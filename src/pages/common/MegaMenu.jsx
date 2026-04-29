@@ -74,7 +74,7 @@ useEffect(() => {
           : "opacity-0 -translate-y-5 invisible"
           }`}
       >
-        <div className="max-w-[1230px] mx-auto p-8">
+        <div className="container max-w-[1430px] mx-auto p-8">
           {/* ✅ Swiper instead of grid */}
             <Swiper
             modules={[Autoplay]}

@@ -57,18 +57,18 @@ export default function Vendor({
                 >
 
                   {/* Image */}
-                  <div className="relative w-full h-[280px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
+                  <div className="relative w-full h-full md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
 
                     <img
                       src={item?.Image || "/no-image.png"}
                       alt={item?.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                      className="absolute inset-0 max-w-full md:max-w-[375px] h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
                     />
 
                     <img
                       src={item?.multiple_images?.[0] || item?.Image || "/no-image.png"}
                       alt={item?.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
+                      className="absolute inset-0 max-w-full md:max-w-[375px] h-full object-cover transition-opacity duration-300 opacity-0 group-hover:opacity-100"
                     />
 
                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/50 transition" />

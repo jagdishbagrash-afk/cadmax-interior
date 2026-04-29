@@ -3,8 +3,10 @@
 import DynamicCTA from "@/components/DynamicCTA";
 import Listing from "@/pages/api/Listing";
 import Layout from "@/pages/common/Layout";
+import MultipleImages from "@/pages/design/details/MultipleImages";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { MdArrowCircleLeft, MdArrowCircleRight, MdClose } from "react-icons/md";
 export default function VendorDetailPage() {
     const router = useRouter();
     const { vendorslug, slug } = router.query;
@@ -31,6 +33,27 @@ export default function VendorDetailPage() {
     useEffect(() => {
         if (vendorslug) fetchData(vendorslug);
     }, [vendorslug]);
+
+    const [SelectedImage, setSelectedImage] = useState("")
+    const [isOpen, setIsOpen] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const openModal = (index) => {
+        setCurrentIndex(index);
+        setIsOpen(true);
+    };
+
+    const closeModal = () => setIsOpen(false);
+
+    const prevImage = () =>
+        setCurrentIndex((prev) =>
+            prev === 0 ? vendor.multiple_images.length - 1 : prev - 1
+        );
+
+    const nextImage = () =>
+        setCurrentIndex((prev) =>
+            prev === vendor.multiple_images.length - 1 ? 0 : prev + 1
+        );
 
     return (
         <Layout>
@@ -63,7 +86,7 @@ export default function VendorDetailPage() {
                                     className="w-[110px] h-[110px] rounded-full object-cover border-4 border-white shadow-md"
                                 />
 
-                                <h2 className="mt-4 text-lg font-semibold ">
+                                <h2 className="mt-4 text-lg font-semibold capitalize ">
                                     {vendor?.name}
                                 </h2>
 
@@ -75,7 +98,7 @@ export default function VendorDetailPage() {
                             {/* TAGS */}
                             <div className="mt-5 flex flex-wrap gap-2 justify-center">
                                 <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
-                               Experience     {vendor?.experience}
+                                    Experience  :    {vendor?.experience}
                                 </span>
                                 {/* <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
                                     {vendor?.specialization}
@@ -102,7 +125,7 @@ export default function VendorDetailPage() {
 
                             {/* 🔥 TITLE */}
                             <div>
-                                <h1 className="text-2xl md:text-4xl text-[#000000] md:text-[#ffffff] font-bold leading-tight">
+                                <h1 className="text-2xl md:text-4xl capitalize  text-[#000000] md:text-[#ffffff] font-bold leading-tight">
                                     {vendor?.name}
                                 </h1>
                                 <p className="text-[#000000] md:text-[#ffffff]  mt-2">
@@ -153,15 +176,24 @@ export default function VendorDetailPage() {
                                     Work Showcase
                                 </h2>
 
-                                <div className="columns-2 md:columns-3 gap-4 space-y-4 mt-3 mb-3 ">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 mb-3">
                                     {vendor?.multiple_images?.map((img, i) => (
-                                        <img
+                                        <div
                                             key={i}
-                                            src={img}
-                                            className="w-full rounded-xl hover:scale-[1.03] transition duration-300 cursor-pointer"
-                                        />
+                                            className="w-full h-[250px] md:h-[300px] overflow-hidden rounded-xl"
+                                        >
+                                            <img
+                                                src={img}
+                                                alt={`vendor-${i}`}
+                                                onClick={() => openModal(i)}
+                                                className="w-full h-full object-cover hover:scale-105 transition duration-300 cursor-pointer"
+                                            />
+                                        </div>
                                     ))}
                                 </div>
+
+
+
                             </div>
 
                         </div>
@@ -180,6 +212,44 @@ export default function VendorDetailPage() {
                             record={vendor}
                         />
                     </div> */}
+
+
+
+                </div>
+            )}
+
+            {isOpen && (
+                <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
+
+                    {/* Close */}
+                    <button
+                        onClick={closeModal}
+                        className="absolute top-5 right-5 text-white text-4xl"
+                    >
+                        <MdClose />
+                    </button>
+
+                    {/* Prev */}
+                    <button
+                        onClick={prevImage}
+                        className="absolute left-5 text-white text-5xl top-1/2 -translate-y-1/2"
+                    >
+                        <MdArrowCircleLeft />
+                    </button>
+
+                    {/* Image */}
+                    <img
+                        src={vendor?.multiple_images[currentIndex]}
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                    />
+
+                    {/* Next */}
+                    <button
+                        onClick={nextImage}
+                        className="absolute right-5 text-white text-5xl top-1/2 -translate-y-1/2"
+                    >
+                        <MdArrowCircleRight />
+                    </button>
 
                 </div>
             )}
