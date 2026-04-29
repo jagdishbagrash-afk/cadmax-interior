@@ -1,4 +1,5 @@
 import Listing from "@/pages/api/Listing";
+import NoData from "@/pages/common/NoData";
 import ProductCard from "@/pages/common/ProductCard";
 import { useEffect, useState } from "react";
 
@@ -172,7 +173,9 @@ const ProductGrid = ({ selectedId }) => {
   const leftPercent = ((priceRange.low - priceLimits.min) / range) * 100;
   const widthPercent = ((priceRange.high - priceRange.low) / range) * 100;
   return (
-    <div className="w-full px-6 md:px-10 lg:px-14 py-8">
+  <>
+  {products?.length > 0 ? (
+      <div className="w-full px-6 md:px-10 lg:px-14 py-8">
       <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
         {/* FILTER PANEL */}
         <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6  rounded-xl shadow-md order-1">
@@ -299,6 +302,15 @@ const ProductGrid = ({ selectedId }) => {
 
       </div>
     </div>
+  ) :(
+  <NoData
+  Heading={"No Product Found !!"}
+  content={"Try changing filters or search with a different keyword."}
+  className={"mt-3 mb-3"}
+/>
+  )}
+  
+  </>
   );
 };
 

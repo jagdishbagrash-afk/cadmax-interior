@@ -1,14 +1,8 @@
 import ProductGrid from "@/components/ProductGrid";
 import Layout from "../common/Layout";
-import Sliderimage from "../../Assets/Images/seller.png";
-import Sliderimage1 from "../../Assets/Images/seller2.png";
-import Sliderimage2 from "../../Assets/Images/seller3.jpg";
-import Sliderimage3 from "../../Assets/Images/seller4.jpg";
 import ContactStyling from "../common/ContactStyling";
 import FeaturedCategories from "./CategoryCard";
 import ProductListBanner from "../../Assets/Images/desgin001.jpeg";
-
-import ThreeBanner from "./ThreeBanner";
 import { useEffect, useState } from "react";
 import Listing from "../api/Listing";
 import Banner from "@/components/Banner";

@@ -9,16 +9,16 @@ export default function NoData({ Heading, content, className }) {
       // <div className="w-full lg:w-1/2 relative pb-12 lg:pb-0">
           <div className={`relative text-center ${className}`}>
       <Image
-        src="/no-data.png" // replace with your actual image path
+        src="/videoframe_5402.png" // replace with your actual image path
         alt="Banner Icon"
         width={500}
         height={500}
-        className="mx-auto mt-2 mb-3 h-[80px] w-auto"
+        className="mx-auto mt-2 mb-3 h-[350px] w-auto"
       />
-      <h1 className="my-2 text-gray-800 font-bold text-lg lg:text-xl xl:text-2xl capitalize">
+      <h1 className="my-2 text-black font-bold text-lg lg:text-xl xl:text-2xl capitalize">
         {Heading}
       </h1>
-      <p className="my-2 text-gray-800">
+      <p className="my-2 text-black">
         {content}
       </p>
       {/* <button

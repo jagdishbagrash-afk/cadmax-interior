@@ -75,7 +75,7 @@ export default function VendorDetailPage() {
                             {/* TAGS */}
                             <div className="mt-5 flex flex-wrap gap-2 justify-center">
                                 <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
-                                    {vendor?.experience}
+                               Experience     {vendor?.experience}
                                 </span>
                                 {/* <span className="px-3 py-1 bg-gray-100 text-sm rounded-full">
                                     {vendor?.specialization}
