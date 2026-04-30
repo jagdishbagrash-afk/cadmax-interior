@@ -227,6 +227,7 @@ export default function Add() {
           <input
             type="file"
             accept="image/*"
+            required
             onChange={handleImageChange}
             className="border border-gray-300 rounded-lg p-2 w-full"
           />

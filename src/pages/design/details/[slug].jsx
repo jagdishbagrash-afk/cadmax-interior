@@ -13,6 +13,7 @@ import { FcNext } from "react-icons/fc";
 import toast from "react-hot-toast";
 import { MdClose } from "react-icons/md";
 import MultipleImages from "./MultipleImages";
+import Predictable from "../Predictable";
 
 export default function DesignLayout() {
     const [isOpen, setIsOpen] = useState(false);
@@ -291,6 +292,7 @@ export default function DesignLayout() {
                     </div> */}
                 </div>
             </div>
+            <Predictable/>
         </Layout>
     );
 }

@@ -371,6 +371,10 @@ class Listing extends Component {
     return Api.post("/contact-add", data)
   }
 
+   async Addcommon(data) {
+    return Api.post("/common/lead-form", data)
+  }
+
    async AddPaymentCreate(data) {
     return Api.post("/create", data)
   }

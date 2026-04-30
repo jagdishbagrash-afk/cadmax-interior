@@ -215,3 +215,8 @@ body {
 .policy-page .section {
   margin-bottom: 30px;
 }
+
+button{
+
+  cursor: pointer;
+}

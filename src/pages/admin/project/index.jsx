@@ -43,110 +43,113 @@ export default function Index() {
 
   return (
     <AdminLayout page={"Project List"}>
-      <div className="min-h-screen p-5 lg:p-[30px]">
+      <div className="min-h-screen bg-gray-50 p-4 md:p-8">
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-5">
-
-          <h2 className="text-[20px] font-extrabold uppercase text-[#171717]">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+          <h2 className="text-2xl md:text-3xl font-extrabold text-gray-800">
             Project List
           </h2>
 
           <div className="flex flex-wrap gap-3 items-center">
 
-            {/* 🔍 Search */}
+            {/* Search */}
             <input
               type="text"
               placeholder="Search project..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full md:w-[250px] px-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full md:w-[260px] px-4 py-2.5 rounded-xl border border-gray-200 bg-white shadow-sm focus:ring-2 focus:ring-blue-500 outline-none"
             />
 
+            {/* Add Button */}
             <Link
               href="/admin/project/add"
-              className="bg-blue-500 text-white px-4 py-2 rounded-md flex gap-2 items-center hover:bg-blue-600"
+              className="flex items-center gap-2 bg-blue-600 text-white px-5 py-2.5 rounded-xl shadow-md hover:bg-blue-700 transition"
             >
-              <MdAdd size={18} /> Project
+              <MdAdd size={18} /> Add Project
             </Link>
           </div>
         </div>
 
         {/* Cards */}
         {filteredData.length > 0 ? (
-          filteredData.map((item, index) => (
-            <div
-              key={index}
-              className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center shadow-lg border rounded-xl my-10 md:my-16 lg:my-20"
-            >
-              {/* Image */}
-              <div className="relative">
-                <img
-                  src={item.Image}
-                  alt={item.title}
-                  className="w-full h-[520px] object-cover rounded-t-xl md:rounded-l-xl md:rounded-tr-none"
-                />
-
-                {/* Overlay */}
-                <div className="absolute top-3 right-3 flex gap-3 bg-white/90 p-2 rounded-lg shadow-md">
-
-                  <Link
-                    href={`/admin/project/add?id=${item?._id}`}
-                    className="w-[42px] h-[42px] flex items-center justify-center rounded-lg border bg-white hover:bg-gray-100"
-                  >
-                    <MdEdit size={20} />
-                  </Link>
-
-                  <BlockUnblock
-                    Id={item._id}
-                    fetchData={fetchData}
-                    step={5}
-                    status={item?.deletedAt ? true : false}
+          <div className="space-y-10">
+            {filteredData.map((item, index) => (
+              <div
+                key={index}
+                className="grid md:grid-cols-2 gap-6 bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden"
+              >
+                {/* Image */}
+                <div className="relative group">
+                  <img
+                    src={item.Image}
+                    alt={item.title}
+                    className="w-full h-[260px] md:h-full object-cover group-hover:scale-105 transition duration-500"
                   />
+
+                  {/* Floating Actions */}
+                  <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                    <Link
+                      href={`/admin/project/add?id=${item?._id}`}
+                      className="w-10 h-10 flex items-center justify-center rounded-full bg-white shadow hover:bg-gray-100"
+                    >
+                      <MdEdit size={18} />
+                    </Link>
+
+                    <BlockUnblock
+                      Id={item._id}
+                      fetchData={fetchData}
+                      step={5}
+                      status={item?.deletedAt ? true : false}
+                    />
+                  </div>
+                </div>
+
+                {/* Content */}
+                <div className="p-5 md:p-7 flex flex-col justify-center">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-800">
+                      {item.title}
+                    </h2>
+
+                    <Link
+                      href={`/admin/project/add?id=${item?._id}`}
+                      className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg border bg-white"
+                    >
+                      <MdEdit size={18} />
+                    </Link>
+                  </div>
+
+                  <p className="text-sm text-gray-500 mb-4">
+                    {item.designed}
+                  </p>
+
+                  {/* Brief */}
+                  <div className="mb-4">
+                    <h3 className="font-semibold text-gray-800 mb-1">
+                      Client Brief
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {item?.brief}
+                    </p>
+                  </div>
+
+                  {/* Solution */}
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-1">
+                      Design Solution
+                    </h3>
+                    <p className="text-sm text-gray-600 leading-relaxed">
+                      {item?.solution}
+                    </p>
+                  </div>
                 </div>
               </div>
-
-              {/* Content */}
-              <div>
-                <h2 className="font-[900] uppercase text-[24px] mb-3 flex items-center gap-3">
-                  {item.title}
-
-                  <Link
-                    href={`/admin/project/add?id=${item?._id}`}
-                    className="w-[42px] h-[42px] flex items-center justify-center rounded-lg border bg-white hover:bg-gray-100"
-                  >
-                    <MdEdit size={20} />
-                  </Link>
-                </h2>
-
-                <p className="text-[14px] md:text-[16px] uppercase text-[#4D5466] mb-6">
-                  {item.designed}
-                </p>
-
-                {/* Brief */}
-                <div className="mb-5">
-                  <h3 className="font-bold text-[16px] md:text-[18px] mb-1">
-                    Client Brief
-                  </h3>
-                  <p className="text-[14px] md:text-[16px] text-[#4D5466]">
-                    {item?.brief}
-                  </p>
-                </div>
-
-                {/* Solution */}
-                <div>
-                  <h3 className="font-bold text-[16px] md:text-[18px] mb-1">
-                    Design Solution
-                  </h3>
-                  <p className="text-[14px] md:text-[16px] text-[#4D5466]">
-                    {item?.solution}
-                  </p>
-                </div>
-              </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : (
-          <div className="text-center py-20 text-gray-500 text-lg">
+          <div className="text-center py-20 text-gray-400 text-lg">
             No Projects Found
           </div>
         )}

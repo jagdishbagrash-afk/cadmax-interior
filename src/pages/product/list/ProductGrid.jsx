@@ -174,111 +174,113 @@ const ProductGrid = ({ selectedId }) => {
   const widthPercent = ((priceRange.high - priceRange.low) / range) * 100;
   return (
     <>
-      <div className="w-full px-6 md:px-10 lg:px-14 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
-          {/* FILTER PANEL */}
-          <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6  rounded-xl shadow-md order-2 md:order-1">
-            <div className="flex justify-between items-center border-b pb-4">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
-                Filters
-              </h3>
+      {products?.length > 0 ? (
 
-              <button
-                onClick={handleClearFilters}
-                className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-black hover:text-gray-500 transition"
-              >
-                Clear Filters
-              </button>
-            </div>
 
-            {/* ================= COLOR FILTER ================= */}
-            <div className="space-y-4">
-              <h4 className="text-sm font-semibold text-gray-700">Color</h4>
+        <div className="w-full px-6 md:px-10 lg:px-14 py-8">
+          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
+            {/* FILTER PANEL */}
+            <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6  rounded-xl shadow-md order-2 md:order-1">
+              <div className="flex justify-between items-center border-b pb-4">
+                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
+                  Filters
+                </h3>
 
-              <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
-                {color && color.map((c, i) => (
-                  <label key={i} className="flex items-center gap-2 cursor-pointer group">
-
-                    <input
-                      type="checkbox"
-                      checked={selectedColors.includes(c)}
-                      onChange={() => handleColorChange(c)}
-                      className="accent-black cursor-pointer"
-                    />
-
-                    <span
-                      className="w-4 h-4 rounded-full border shadow-sm"
-                      style={{ backgroundColor: c }}
-                    />
-
-                    <span className="capitalize text-gray-600 group-hover:text-black transition">
-                      {c}
-                    </span>
-
-                  </label>
-                ))}
+                <button
+                  onClick={handleClearFilters}
+                  className="cursor-pointer text-xs font-semibold uppercase tracking-wider text-black hover:text-gray-500 transition"
+                >
+                  Clear Filters
+                </button>
               </div>
-            </div>
 
-            {/* ================= PRICE FILTER ================= */}
-            <div className="space-y-5 border-t pt-5">
-              <h4 className="text-sm font-semibold text-gray-700">Price Range</h4>
+              {/* ================= COLOR FILTER ================= */}
+              <div className="space-y-4">
+                <h4 className="text-sm font-semibold text-gray-700">Color</h4>
 
-              <div className="relative w-full h-6">
-                {/* LOW RANGE */}
-                <input
-                  type="range"
-                  min={priceLimits.min}
-                  max={priceLimits.max}
-                  value={priceRange.low}
-                  onChange={(e) => handlePriceChange("low", e.target.value)}
-                  className="absolute w-full pointer-events-none appearance-none bg-transparent
+                <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm">
+                  {color && color.map((c, i) => (
+                    <label key={i} className="flex items-center gap-2 cursor-pointer group">
+
+                      <input
+                        type="checkbox"
+                        checked={selectedColors.includes(c)}
+                        onChange={() => handleColorChange(c)}
+                        className="accent-black cursor-pointer"
+                      />
+
+                      <span
+                        className="w-4 h-4 rounded-full border shadow-sm"
+                        style={{ backgroundColor: c }}
+                      />
+
+                      <span className="capitalize text-gray-600 group-hover:text-black transition">
+                        {c}
+                      </span>
+
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* ================= PRICE FILTER ================= */}
+              <div className="space-y-5 border-t pt-5">
+                <h4 className="text-sm font-semibold text-gray-700">Price Range</h4>
+
+                <div className="relative w-full h-6">
+                  {/* LOW RANGE */}
+                  <input
+                    type="range"
+                    min={priceLimits.min}
+                    max={priceLimits.max}
+                    value={priceRange.low}
+                    onChange={(e) => handlePriceChange("low", e.target.value)}
+                    className="absolute w-full pointer-events-none appearance-none bg-transparent
         [&::-webkit-slider-thumb]:pointer-events-auto
         [&::-webkit-slider-thumb]:appearance-none
         [&::-webkit-slider-thumb]:h-4
         [&::-webkit-slider-thumb]:w-4
         [&::-webkit-slider-thumb]:rounded-full
         [&::-webkit-slider-thumb]:bg-black"
-                />
+                  />
 
-                {/* HIGH RANGE */}
-                <input
-                  type="range"
-                  min={priceLimits.min}
-                  max={priceLimits.max}
-                  value={priceRange.high}
-                  onChange={(e) => handlePriceChange("high", e.target.value)}
-                  className="absolute w-full pointer-events-none appearance-none bg-transparent
+                  {/* HIGH RANGE */}
+                  <input
+                    type="range"
+                    min={priceLimits.min}
+                    max={priceLimits.max}
+                    value={priceRange.high}
+                    onChange={(e) => handlePriceChange("high", e.target.value)}
+                    className="absolute w-full pointer-events-none appearance-none bg-transparent
         [&::-webkit-slider-thumb]:pointer-events-auto
         [&::-webkit-slider-thumb]:appearance-none
         [&::-webkit-slider-thumb]:h-4
         [&::-webkit-slider-thumb]:w-4
         [&::-webkit-slider-thumb]:rounded-full
         [&::-webkit-slider-thumb]:bg-black"
-                />
+                  />
 
-                {/* TRACK */}
-                <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full"></div>
+                  {/* TRACK */}
+                  <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full"></div>
 
-                {/* ACTIVE RANGE */}
-                <div
-                  className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
-                  style={{
-                    left: `${Math.max(0, Math.min(100, leftPercent))}%`,
-                    width: `${Math.max(0, Math.min(100, widthPercent))}%`,
-                  }}
-                />
+                  {/* ACTIVE RANGE */}
+                  <div
+                    className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
+                    style={{
+                      left: `${Math.max(0, Math.min(100, leftPercent))}%`,
+                      width: `${Math.max(0, Math.min(100, widthPercent))}%`,
+                    }}
+                  />
+                </div>
+
+                <div className="flex justify-between text-xs font-medium text-gray-500">
+                  <span>₹{(priceRange.low ?? 0).toLocaleString()}</span>
+                  <span>₹{(priceRange.high ?? 0).toLocaleString()}</span>
+                </div>
               </div>
 
-              <div className="flex justify-between text-xs font-medium text-gray-500">
-                <span>₹{(priceRange.low ?? 0).toLocaleString()}</span>
-                <span>₹{(priceRange.high ?? 0).toLocaleString()}</span>
-              </div>
             </div>
 
-          </div>
-
-          {products?.length > 0 ? (
             <div className="order-1 md:order-2">
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {products && products?.map((item) => (
@@ -297,16 +299,19 @@ const ProductGrid = ({ selectedId }) => {
                 </div>
               )}
             </div>
-          ) : (
-            <NoData
-              Heading={"No Product Found !!"}
-              content={"Try changing filters or search with a different keyword."}
-              className={"mt-3 mb-3"}
-            />
-          )}
 
+          </div>
         </div>
-      </div>
+      ) : (
+
+        <NoData
+          Heading={"No Product Found !!"}
+          content={"Try changing filters or search with a different keyword."}
+          className={"mt-3 mb-3"}
+        />
+
+      )}
+
 
 
     </>

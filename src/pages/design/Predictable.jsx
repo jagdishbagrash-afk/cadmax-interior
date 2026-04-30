@@ -1,33 +1,34 @@
 import React from "react";
 import { FaCouch, FaShieldAlt, FaHeadset, FaShippingFast } from "react-icons/fa";
-
+import { MdEditRoad } from "react-icons/md";
+import { MdViewInAr } from "react-icons/md";
+import { MdLightbulbOutline } from "react-icons/md";
+import { MdVerified } from "react-icons/md";
 const Predictable = () => {
-  const items = [
-    {
-      id: 1,
-      icon: <FaCouch size={28} />,
-      title: "Complimentary Home Styling",
-      desc: "We're here to help curate your private sanctuary in your personal style.",
-    },
-    {
-      id: 2,
-      icon: <FaShieldAlt size={28} />,
-      title: "Warranty Coverage",
-      desc: "Every purchase is protected with at least a year of coverage, for peace of mind.",
-    },
-    {
-      id: 3,
-      icon: <FaHeadset size={28} />,
-      title: "Service Excellence",
-      desc: "Count on our dedicated team for support every step of the way.",
-    },
-    {
-      id: 4,
-      icon: <FaShippingFast size={28} />,
-      title: "Flat Rate Shipping",
-      desc: "Enjoy hassle-free delivery with a flat, low rate for all your purchases.",
-    },
-  ];
+
+
+const processData = [
+  {
+    title: "Site Study & 2D Planning",
+    desc: "Spatial assessment, functional zoning, and layout creation.",
+    icon: <MdEditRoad size={24}/>
+  },
+  {
+    title: "3D Modeling & Visualization",
+    desc: "Realistic renders enabling precise visualization.",
+    icon: <MdViewInAr size={24}/>
+  },
+  {
+    title: "Concept Development",
+    desc: "Color palette, mood boards, and design direction.",
+    icon: <MdLightbulbOutline size={24}/>
+  },
+  {
+    title: "Final Styling & Handover",
+    desc: "On-site detailing and final documentation.",
+    icon: <MdVerified size={24}/>
+  }
+];
 
   return (
     <section className="bg-[#F6F6F6] py-6 md:py-10">
@@ -46,7 +47,7 @@ const Predictable = () => {
 
         {/* Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {items.map((item) => (
+          {processData && processData?.map((item) => (
             <div
               key={item.id}
               className="bg-white rounded-2xl shadow-md hover:shadow-xl hover:-translate-y-2 transition duration-300 p-6 flex flex-col items-center text-center"

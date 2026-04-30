@@ -12,7 +12,7 @@ const DesignMenu = ({ textColor, active }) => {
         {
             _id: 1,
             name: "Residential",
-            Image: "/residential.jpg",
+            Image: "/render.webp",
             slug: "residential",
         },
         {

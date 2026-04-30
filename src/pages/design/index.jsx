@@ -10,6 +10,7 @@ import Slider2 from "../home/Slider2";
 import Button from "../common/Button";
 import Listing from "../api/Listing";
 import { useEffect, useState } from "react";
+import EnquiryModal from "./EnquiryModal";
 
 export default function Index() {
 
@@ -31,11 +32,48 @@ export default function Index() {
         fetchData();
     }, []);
 
+    const [isOpen, setIsOpen] = useState(false);
     return (
         <Layout>
-            <Banner Slider1={ProductListBanner}
-                title={"Get our latest designs"}
-                button={"SHOP OUR FURNITURE"} />
+
+            <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
+
+                <img
+                    src={ProductListBanner?.src}
+                    alt="Slide"
+                    className="object-cover w-full h-full"
+                />
+
+                <div className="absolute inset-0 bg-black/25"></div>
+
+                {/* Overlay Content */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+
+                    <h1
+                        className="
+                            font-[900]
+                            text-[18px]
+                            sm:text-[20px]
+                            lg:text-[24px]
+                            text-white
+                            uppercase
+                            Creato
+                            leading-[110%]
+                            tracking-[-0.02em]
+                            max-w-[90%]
+                            sm:max-w-[550px]
+                            mx-auto
+                          "
+                    >
+                        Get our latest designs
+                    </h1>
+
+
+
+
+                 <EnquiryModal/>
+                </div>
+            </div>
             <div className="w-full">
                 <div className="container mx-auto px-4 max-w-[1430px]">
                     <div className="max-w-5xl mx-auto mt-8 mb-12 md:mt-12 md:mb-20 flex justify-center">
@@ -113,6 +151,8 @@ export default function Index() {
 
                 </div>
             </div>
+
+  
         </Layout>
     );
 }
