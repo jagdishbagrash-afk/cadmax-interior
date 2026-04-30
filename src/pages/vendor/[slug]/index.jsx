@@ -107,7 +107,7 @@ export default function Index() {
                         Project Completed
                       </span>
                       <span className="font-semibold text-gray-800 truncate max-w-[140px] text-right">
-                        {p.sepectailze || "General"}
+                        {p.specialization || "General"}
                       </span>
                     </div>
                   </div>

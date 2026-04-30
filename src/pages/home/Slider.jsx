@@ -49,7 +49,7 @@ export default function Slider() {
   }
 
   return (
-    <div className="relative h-[425px] md:h-[560px] lg:h-[860px] md:mt-[-150px]">
+    <div className="relative h-[250px] sm:h-[300px] md:h-[560px] lg:h-[860px] md:mt-[-150px]">
       <Swiper
         key={banner.length} // 🔥 force re-init
         slidesPerView={1}

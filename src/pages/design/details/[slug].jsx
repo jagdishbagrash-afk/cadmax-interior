@@ -260,35 +260,35 @@ export default function DesignLayout() {
                     </div>
 
                     {/* Bottom Section: Technical Details */}
-                    <div className="bg-gray-50 border-t border-gray-100 p-8 lg:p-12">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {/* <div className="bg-gray-50 border-t border-gray-100 p-8 lg:p-12">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8"> */}
 
                             {/* Material Details */}
-                            <div className="space-y-2">
+                            {/* <div className="space-y-2">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Material Details</p>
                                 <p className="text-gray-800 font-medium text-lg leading-snug">
                                     {project.material_details || "Premium Finish, LED Lights, Italian Marble"}
                                 </p>
-                            </div>
+                            </div> */}
 
                             {/* Timeline */}
-                            <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                            {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Timeline</p>
                                 <p className="text-gray-800 font-medium text-lg">
                                     {project?.timeline || "25 Days"}
                                 </p>
-                            </div>
+                            </div> */}
 
                             {/* Design Cost */}
-                            <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                            {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Design Cost</p>
                                 <p className="text-black font-bold text-2xl">
                                     {project?.cost || "₹ 1,20,000"}
                                 </p>
-                            </div>
+                            </div> */}
 
-                        </div>
-                    </div>
+                        {/* </div>
+                    </div> */}
                 </div>
             </div>
         </Layout>
