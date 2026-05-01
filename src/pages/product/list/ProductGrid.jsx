@@ -1,3 +1,4 @@
+import Loader from "@/components/Loader";
 import Listing from "@/pages/api/Listing";
 import NoData from "@/pages/common/NoData";
 import ProductCard from "@/pages/common/ProductCard";
@@ -186,133 +187,134 @@ const ProductGrid = ({ selectedId }) => {
 
   return (
     <>
-      {isInitialLoading ? (
-        <div className="flex justify-center items-center py-20">
-          <p className="text-gray-500 text-sm">Loading products...</p>
-        </div>
-      ) : products.length === 0 ? (
-        <NoData
-          Heading={"No Product Found !!"}
-          content={"Try changing filters or search with a different keyword."}
-          className={"mt-3 mb-3"}
-        />
-      ) : (
-        <div className="w-full px-6 md:px-10 lg:px-14 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
+      <div className="w-full px-6 md:px-10 lg:px-14 py-8">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
 
-            <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6 rounded-xl shadow-md order-2 md:order-1">
+          {/* ================= FILTER PANEL (ALWAYS SHOW) ================= */}
+          <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6 rounded-xl shadow-md order-2 md:order-1">
 
-              <div className="flex justify-between items-center border-b pb-4">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
-                  Filters
-                </h3>
+            <div className="flex justify-between items-center border-b pb-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
+                Filters
+              </h3>
 
-                <button
-                  onClick={handleClearFilters}
-                  className="text-xs font-semibold uppercase text-black hover:text-gray-500"
-                >
-                  Clear Filters
-                </button>
-              </div>
-
-              {/* COLOR */}
-              <div className="space-y-4">
-                <h4 className="text-sm font-semibold text-gray-700">
-                  Color
-                </h4>
-
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                  {color.map((c, i) => (
-                    <label key={i} className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        checked={selectedColors.includes(c)}
-                        onChange={() => handleColorChange(c)}
-                      />
-                      <span
-                        className="w-4 h-4 rounded-full border"
-                        style={{ backgroundColor: c }}
-                      />
-                      <span>{c}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* PRICE */}
-              <div className="space-y-4 border-t pt-5">
-                <h4 className="text-sm font-semibold text-gray-700">
-                  Price Range
-                </h4>
-
-                <div className="relative w-full h-6">
-                  <input
-                    type="range"
-                    min={priceLimits.min}
-                    max={priceLimits.max}
-                    value={priceRange.low}
-                    onChange={(e) =>
-                      handlePriceChange("low", e.target.value)
-                    }
-                    className="absolute w-full"
-                  />
-
-                  <input
-                    type="range"
-                    min={priceLimits.min}
-                    max={priceLimits.max}
-                    value={priceRange.high}
-                    onChange={(e) =>
-                      handlePriceChange("high", e.target.value)
-                    }
-                    className="absolute w-full"
-                  />
-
-                  <div className="absolute top-1/2 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" />
-
-                  <div
-                    className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
-                    style={{
-                      left: `${leftPercent}%`,
-                      width: `${widthPercent}%`,
-                    }}
-                  />
-                </div>
-
-                <div className="flex justify-between text-xs">
-                  <span>₹{priceRange.low}</span>
-                  <span>₹{priceRange.high}</span>
-                </div>
-              </div>
+              <button
+                onClick={handleClearFilters}
+                className="text-xs font-semibold uppercase text-black hover:text-gray-500"
+              >
+                Clear Filters
+              </button>
             </div>
 
-            {/* ================= PRODUCTS ================= */}
-            <div className="order-1 md:order-2">
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {products.map((item) => (
-                  <ProductCard
-                    key={item._id || item.id}
-                    item={item}
-                  />
+            {/* COLOR */}
+            <div className="space-y-4">
+              <h4 className="text-sm font-semibold text-gray-700">Color</h4>
+
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                {color.map((c, i) => (
+                  <label key={i} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={selectedColors.includes(c)}
+                      onChange={() => handleColorChange(c)}
+                    />
+                    <span
+                      className="w-4 h-4 rounded-full border"
+                      style={{ backgroundColor: c }}
+                    />
+                    <span>{c}</span>
+                  </label>
                 ))}
               </div>
-
-              {hasMore && (
-                <div className="flex justify-center mt-10">
-                  <button
-                    onClick={handleLoadMore}
-                    disabled={loading}
-                    className="px-10 py-3 border text-sm font-bold"
-                  >
-                    {loading ? "LOADING..." : "LOAD MORE"}
-                  </button>
-                </div>
-              )}
             </div>
+
+            {/* PRICE */}
+            <div className="space-y-4 border-t pt-5 cursor-pointer">
+              <h4 className="text-sm font-semibold text-gray-700">
+                Price Range
+              </h4>
+
+              <div className="relative w-full h-6">
+                <input
+                  type="range"
+                  min={priceLimits.min}
+                  max={priceLimits.max}
+                  value={priceRange.low}
+                  onChange={(e) =>
+                    handlePriceChange("low", e.target.value)
+                  }
+                  className="absolute w-full"
+                />
+
+                <input
+                  type="range"
+                  min={priceLimits.min}
+                  max={priceLimits.max}
+                  value={priceRange.high}
+                  onChange={(e) =>
+                    handlePriceChange("high", e.target.value)
+                  }
+                  className="absolute w-full"
+                />
+
+                {/* <div className="absolute top-1/2 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" /> */}
+
+                <div
+                  className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
+                  style={{
+                    left: `${leftPercent}%`,
+                    width: `${widthPercent}%`,
+                  }}
+                />
+              </div>
+
+              <div className="flex justify-between text-xs">
+                <span>₹{priceRange.low}</span>
+                <span>₹{priceRange.high}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* ================= PRODUCTS / NODATA ================= */}
+          <div className="order-1 md:order-2">
+
+            {isInitialLoading ? (
+              <div className="flex justify-center items-center py-20">
+               <Loader />
+              </div>
+            ) : products.length === 0 ? (
+              <NoData
+                Heading={"No Product Found !!"}
+                content={"Try changing filters or search."}
+              />
+            ) : (
+              <>
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                  {products.map((item) => (
+                    <ProductCard
+                      key={item._id || item.id}
+                      item={item}
+                    />
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <div className="flex justify-center mt-10">
+                    <button
+                      onClick={handleLoadMore}
+                      disabled={loading}
+                      className="px-10 py-3 border text-sm font-bold"
+                    >
+                      {loading ? "LOADING..." : "LOAD MORE"}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
 
           </div>
         </div>
-      )}
+      </div>
     </>
   );
 };
