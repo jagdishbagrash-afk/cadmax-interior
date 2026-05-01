@@ -18,9 +18,7 @@ import Link from "next/link";
 export default function Index() {
   const { error, isLoading, Razorpay } = useRazorpay();
   const [data, setData] = useState([]);
-  console.log("data", data)
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
-  console.log("KEY:", process.env.NEXT_PUBLIC_RAZOPAY_KEY);
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
@@ -62,10 +60,16 @@ export default function Index() {
 
   const handlePaymentCreateSubmit = async (e) => {
     e.preventDefault();
+    if (formData.mobile.length !== 10) {
+      toast.error("Mobile number must be exactly 10 digits");
+      return;
+    }
+
     if (totalPrice === 0) {
       toast.error("Amount can't be 0!");
       return;
     }
+
     setLoading(true);
     const main = new Listing();
     try {
@@ -227,13 +231,14 @@ export default function Index() {
 
 
   useEffect(() => {
+    if (loading) return; // ⛔ wait karo
+
     if (!user) {
       toast.error("Please login to continue");
       router.push("/login");
     }
-  }, [user])
+  }, [user, loading]);
 
-  console.log("formData", formData)
 
   return (
     <Layout>
@@ -282,6 +287,8 @@ export default function Index() {
                         autoComplete="tel"
                         value={formData.mobile}
                         onChange={handleChange}
+                        maxLength={10}   // 👈 extra safety
+                        pattern="[0-9]{10}" // 👈 exactly 10 digits
                         className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
                         required
                       />
@@ -305,23 +312,23 @@ export default function Index() {
 
 
                     <div>
-                   <div className="flex justify-between items-center  text-center mt-2 "> 
-                       <label
-                        htmlFor="address"
-                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
-                      >
-                        Address *
-                      </label>
-
-                      {(!data || data.length === 0) && (
-                        <Link
-                          href={"/address"}
-                          className="mt-2 text-sm text-blue-600 underline mb-2"
+                      <div className="flex justify-between items-center  text-center mt-2 ">
+                        <label
+                          htmlFor="address"
+                          className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
                         >
-                          + Add New Address
-                        </Link>
-                      )}
-                   </div>
+                          Address *
+                        </label>
+
+                        {(!data || data.length === 0) && (
+                          <Link
+                            href={"/address"}
+                            className="mt-2 text-sm text-blue-600 underline mb-2"
+                          >
+                            + Add New Address
+                          </Link>
+                        )}
+                      </div>
 
                       <select
                         id="addressId"
@@ -341,7 +348,7 @@ export default function Index() {
                       </select>
 
                       {/* 👉 If no address */}
-                      
+
                     </div>
                   </div>
 
