@@ -276,7 +276,43 @@ export default function Index() {
             </p>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              <div className="flex gap-4 w-full">
+
+              <div className="block md:hidden w-full">
+                <Swiper
+                  slidesPerView={4}
+                  spaceBetween={10}
+                  className="w-full"
+                >
+                  {selectedVariant?.images?.map((img, index) => (
+                    <SwiperSlide key={index}>
+                      <div
+                        onClick={() => setCurrentIndex(index)}
+                        className={`relative aspect-square rounded-md overflow-hidden border cursor-pointer
+        ${currentIndex === index
+                            ? "border-black"
+                            : "border-gray-300"
+                          }`}
+                      >
+                        <Image
+                          src={img}
+                          alt={`Thumbnail ${index + 1}`}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+                <div className="flex-1 w-full md:max-w-[500px] mt-5 mb-3">
+                    <img
+                      src={selectedVariant?.images?.[currentIndex]}
+                      alt="Product"
+                      className="w-full h-full object-contain rounded-lg"
+                    />
+                </div>
+              </div>
+
+              <div className="hidden  md:flex   gap-4 w-full">
 
                 <div className="w-[80px]">
                   <Swiper
@@ -314,7 +350,6 @@ export default function Index() {
                   </Swiper>
                 </div>
 
-                {/* ================= RIGHT: MAIN IMAGE + ZOOM ================= */}
                 <div className="flex-1 w-full md:max-w-[500px]">
                   <div className="relative aspect-[4/5] z-50 rounded-lg overflow-visible">
                     {isMobile ? (
