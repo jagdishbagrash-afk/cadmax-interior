@@ -121,7 +121,6 @@ export default function EnquiryModal() {
       {/* Modal */}
       {isOpen && (
         <div 
-          onClick={() => setIsOpen(false)}
         className="fixed  h-full inset-0 z-[9999999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-3">
 
           <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
