@@ -36,18 +36,23 @@ export default function Register() {
     setLoading(true);
     try {
       const main = new Listing();
-      const res = await main.SendOTP({ phone: data.phone });
+      const res = await main.UserSendOTP({ phone: data.phone });
 
       if (res?.data?.status) {
         toast.success("OTP sent successfully");
         setStep(2);
       } else {
-        console.log("res?.data?.message ", res?.data?.message)
+        console.log("res?.data?.message ", res)
         toast.error(res?.data?.message || "OTP send failed");
       }
     } catch (err) {
-      console.log("err", err)
-      toast.error(err?.res?.data?.message || "OTP send failed");
+       const msg = err?.response?.data?.message;
+
+  if (msg?.includes("Already registered")) {
+    toast.error("Account already exists, please login");
+  } else {
+    toast.error(msg || "OTP send failed");
+  }
     }
     setLoading(false);
   };

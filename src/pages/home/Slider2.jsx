@@ -129,7 +129,7 @@ export default function Slider2() {
                     {/* Image */}
                     <div className="overflow-hidden rounded-md">
                       <img
-                        src={item?.Image}
+                        src={item?.Image ||  item?.multiple_images?.[0]}
                         alt={item?.title}
                         className="w-full h-[200px] sm:h-[260px] md:h-[300px] object-cover"
                       />

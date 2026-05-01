@@ -126,7 +126,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       {isOpen && (
         <Popup isOpen={isOpen} onClose={handleClose} size="max-w-lg">
           {/* Header */}
-          <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+          <div className="border-b border-black/10 z-[9999999] px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
             <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
               {status === true ? "Block" : "Unblock"}
             </h2>

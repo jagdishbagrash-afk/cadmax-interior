@@ -77,7 +77,7 @@ export default function Index() {
         </div>
 
         {/* TABLE CARD */}
-        <div className="bg-white rounded-2xl shadow-md border">
+        <div className="bg-white rounded-2xl shadow-md border Z-[0]">
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -93,6 +93,8 @@ export default function Index() {
                   <th className="px-6 py-3">Stock</th>
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Action</th>
+                  <th className="px-6 py-3">Delete</th>
+
                 </tr>
               </thead>
 
@@ -173,14 +175,19 @@ export default function Index() {
                             <MdEdit size={20} />
                           </Link>
 
-                          <BlockUnblock
+                         
+
+                        </div>
+                      </td>
+
+                   <td className="px-6 py-4 text-center text-gray-500">
+
+                         <BlockUnblock
                             Id={item._id}
                             fetchData={fetchData}
                             step={4}
                             status={item?.deletedAt ? true : false}
                           />
-
-                        </div>
                       </td>
 
                     </tr>

@@ -53,6 +53,9 @@ export default function Add() {
     }))
   );
 
+  const [images, setImages] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+
   const fetchProductData = async () => {
     try {
       const main = new Listing();
@@ -156,24 +159,51 @@ export default function Add() {
 
   const handleVariantImages = (index, files) => {
     const fileArr = Array.from(files);
-    const previews = fileArr.map(f => URL.createObjectURL(f));
+    const previews = fileArr.map(file => URL.createObjectURL(file));
 
     setVariants(prev =>
       prev.map((v, i) =>
         i === index
-          ? { ...v, images: fileArr, previews }
+          ? {
+            ...v,
+            images: [...v.images, ...fileArr],     // ✅ append images
+            previews: [...v.previews, ...previews] // ✅ append previews
+          }
           : v
       )
     );
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+  //   const handleVariantImages = (index, files) => {
+  //   const fileArr = Array.from(files);
+  //   const previews = fileArr.map(f => URL.createObjectURL(f));
+
+  //   setVariants(prev =>
+  //     prev.map((v, i) =>
+  //       i === index
+  //         ? {
+  //             ...v,
+  //             images: [...v.images, ...fileArr],       // ✅ append
+  //             previews: [...v.previews, ...previews]   // ✅ append
+  //           }
+  //         : v
+  //     )
+  //   );
+  // };
+
+  // const handleImageChange = (e) => {
+  //   const file = e.target.files[0];
+
+  //   if (file) {
+  //     // old preview cleanup
+  //     if (imagePreview) {
+  //       URL.revokeObjectURL(imagePreview);
+  //     }
+
+  //     setImage(file);
+  //     setImagePreview(URL.createObjectURL(file));
+  //   }
+  // };
 
   const removeVariantImage = (variantIndex, imageIndex) => {
     setVariants(prev =>
@@ -183,7 +213,6 @@ export default function Add() {
         const newImages = [...v.images];
         const newPreviews = [...v.previews];
 
-        // revoke object URL to avoid memory leak
         URL.revokeObjectURL(newPreviews[imageIndex]);
 
         newImages.splice(imageIndex, 1);
@@ -212,6 +241,11 @@ export default function Add() {
       toast.error("Select at least one color variant");
       return;
     }
+
+    if (!selectedVariants.every(v => v.images.length > 0)) {
+      toast.error("Each selected variant must have at least one image");
+      return;
+    }
     setLoading(true);
     try {
       const fd = new FormData();
@@ -226,11 +260,18 @@ export default function Add() {
         }))
       ));
 
+      // selectedVariants.forEach(v => {
+      //   v.images.forEach(img => {
+      //     fd.append(`variantImages_${v.color}`, img);
+      //   });
+      // });
+
       selectedVariants.forEach(v => {
         v.images.forEach(img => {
           fd.append(`variantImages_${v.color}`, img);
         });
       });
+
       fd.append("title", form.title);
       fd.append("description", form.description);
       fd.append("stock", form.stock);
@@ -320,7 +361,8 @@ export default function Add() {
     }
   };
 
-  // console.log("form", form);
+  console.log("form", form);
+  console.log("categories" ,categories)
 
   return (
     <AdminLayout page={"Product List"}>
@@ -395,7 +437,7 @@ export default function Add() {
               </option>
 
               {categories && categories?.map((cat) => (
-                <option key={cat?._id} value={cat?._id}>
+                <option key={cat?._id} value={cat?._id} className="text-black">
                   {cat?.name}
                 </option>
               ))}
@@ -417,7 +459,7 @@ export default function Add() {
 
               {subCategories &&
                 subCategories?.map((cat) => (
-                  <option key={cat?._id} value={cat?._id}>
+                  <option key={cat?._id} value={cat?._id} className="text-black">
                     {cat?.name}
                   </option>
                 ))}
@@ -520,6 +562,8 @@ export default function Add() {
                         className="mt-1 block w-full text-sm file:bg-blue-600 file:text-white file:px-4 file:py-1 file:border-none file:rounded cursor-pointer"
                       />
                     </div>
+
+
 
                     {/* Image Preview */}
                     {v.previews.length > 0 && (

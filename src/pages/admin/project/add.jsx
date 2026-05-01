@@ -4,9 +4,12 @@ import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import ImageUploader from "../services/services/ImageUploader";
 
 export default function Add() {
   const router = useRouter();
+  const [project, setProject] = useState([]);
+
   const { id } = router.query;
   const [form, setForm] = useState({
     title: "",
@@ -25,6 +28,7 @@ export default function Add() {
       const response = await main.getAllProjectId(id);
       const data = response?.data?.data;
       if (data) {
+        setProject(data)
         setForm({
           title: data.title || "",
           content: data.content || "",
@@ -78,6 +82,9 @@ export default function Add() {
       if (image instanceof File) {
         fd.append("image", image);
       }
+      images.forEach((img) => {
+        fd.append("images[]", img); // remove [] — most servers expect 'images' multiple times
+      });
       const main = new Listing();
       const res = await main.AddProject(fd);
       if (res?.data?.status) {
@@ -120,6 +127,9 @@ export default function Add() {
       if (image instanceof File) {
         fd.append("image", image);
       }
+      images.forEach((img) => {
+        fd.append("images[]", img); // remove [] — most servers expect 'images' multiple times
+      });
       const main = new Listing();
       const res = await main.editProject(id, fd);
       if (res?.data?.status) {
@@ -148,6 +158,8 @@ export default function Add() {
       setLoading(false);
     }
   };
+
+  const [images, setImages] = useState([]);
 
   // console.log("form", form);
 
@@ -227,7 +239,6 @@ export default function Add() {
           <input
             type="file"
             accept="image/*"
-            required
             onChange={handleImageChange}
             className="border border-gray-300 rounded-lg p-2 w-full"
           />
@@ -238,6 +249,13 @@ export default function Add() {
               className="mt-3 w-32 h-32 object-cover rounded-md border border-gray-200"
             />
           )}
+
+          <div>
+            <label className="text-sm font-semibold text-gray-700">
+              Project Images
+            </label>
+            <ImageUploader images={images} setImages={setImages} project={project} type={"services"} fetchData={fetchProjectData} />
+          </div>
           {/* Submit Button */}
           <button
             type="submit"

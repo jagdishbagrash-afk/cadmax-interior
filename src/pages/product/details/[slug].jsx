@@ -110,19 +110,6 @@ export default function Index() {
     }
   };
 
-  const handleClose = () => setShow(false);
-
-  const handleShow = (item, index) => {
-    // console.log("item", item);
-    // console.log("index", index);
-    setCurrentIndex(index);
-    setCurrentImage(item);
-    if (!show) {
-      setShow(true);
-    }
-  };
-
-
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -135,6 +122,18 @@ export default function Index() {
 
     return () => window.removeEventListener("resize", checkScreen);
   }, []);
+
+  const handleClose = () => setShow(false);
+
+  const handleShow = (item, index) => {
+    // console.log("item", item);
+    // console.log("index", index);
+    setCurrentIndex(index);
+    setCurrentImage(item);
+    if (!show) {
+      setShow(true);
+    }
+  };
 
   const GalleryModal = () => {
     return (
@@ -276,14 +275,48 @@ export default function Index() {
               | {ProductDetails?.subcategory?.name}
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+              <div className="flex gap-4 w-full">
 
-              {/* ================= LEFT: IMAGES ================= */}
-              <div className="flex flex-col md:flex-row gap-4 w-full">
+                <div className="w-[80px]">
+                  <Swiper
+                    direction="vertical"
+                    slidesPerView={5}
+                    spaceBetween={10}
+                    watchSlidesProgress
+                    onSwiper={setThumbsSwiper}
+                    modules={[Thumbs]}
+                    className="h-[500px]"
+                  >
+                    {selectedVariant?.images && selectedVariant?.images?.map((img, index) => (
+                      <SwiperSlide
+                        key={index}
+                        className="cursor-pointer"
+                        onMouseEnter={() => setCurrentIndex(index)}
+                        onClick={() => setCurrentIndex(index)}
+                      >
+                        <div
+                          className={`relative aspect-square rounded-md overflow-hidden border
+                            ${currentIndex === index
+                              ? "border-black"
+                              : "border-gray-300 hover:border-black"
+                            }`}
+                        >
+                          <Image
+                            src={img}
+                            alt={`Thumbnail ${index + 1}`}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                      </SwiperSlide>
+                    ))}
+                  </Swiper>
+                </div>
 
-                {/* 🖼️ MAIN IMAGE */}
-                <div className="order-1 md:order-2 flex-1 w-full md:max-w-[500px]">
-                  <div className="relative aspect-[4/5] rounded-lg overflow-hidden">
+                {/* ================= RIGHT: MAIN IMAGE + ZOOM ================= */}
+                <div className="flex-1 w-full md:max-w-[500px]">
+                  <div className="relative aspect-[4/5] z-50 rounded-lg overflow-visible">
                     {isMobile ? (
                       <img
                         src={selectedVariant?.images?.[currentIndex]}
@@ -307,145 +340,253 @@ export default function Index() {
                         zoomContainerHeight={520}
                         zoomLensScale={3}
                         distance={16}
-                      />
-                    )}
+                      />)}
+
                   </div>
                 </div>
 
-                {/* 📱💻 THUMBNAILS */}
-                <div className="order-2 md:order-1 w-full md:w-[80px]">
-
-                  <Swiper
-                    direction="horizontal"
-                    breakpoints={{
-                      768: {
-                        direction: "vertical",
-                        slidesPerView: 5,
-                      },
-                    }}
-                    slidesPerView={4}
-                    spaceBetween={8}
-                    modules={[Thumbs]}
-                    className="w-full md:h-[500px]"
-                  >
-                    {selectedVariant?.images?.map((img, index) => (
-                      <SwiperSlide
-                        key={index}
-                        onClick={() => setCurrentIndex(index)}
-                        className="cursor-pointer"
-                      >
-                        <div
-                          className={`relative aspect-square rounded-md overflow-hidden border
-              ${currentIndex === index
-                              ? "border-black"
-                              : "border-gray-300"
-                            }`}
-                        >
-                          <Image
-                            src={img}
-                            alt={`Thumbnail ${index + 1}`}
-                            fill
-                            className="object-cover"
-                          />
-                        </div>
-                      </SwiperSlide>
-                    ))}
-                  </Swiper>
-
-                </div>
               </div>
 
-              {/* ================= RIGHT: DETAILS ================= */}
+              {/* Right */}
               <div className="relative z-10">
-
-                <h1 className="text-xl md:text-2xl font-black uppercase mt-2">
+                <h1 className="text-2xl text-[#171717] font-black Creato mt-2 uppercase">
                   {ProductDetails?.title}
                 </h1>
 
-                <p className="text-[#4D5466] text-base md:text-lg mt-3 md:mt-4">
+                <p className="text-[#4D5466] text-lg font-medium mt-4 Creato">
                   {ProductDetails?.description}
                 </p>
 
-                <h2 className="text-2xl md:text-3xl font-bold mt-4 md:mt-6">
+                <h2 className="text-3xl text-[#171717] font-bold mt-6 Creato">
                   ₹{ProductDetails?.amount}
                 </h2>
 
-                <p className="text-sm md:text-base text-[#4D5466] mt-2">
+                <p className="text-base font-medium text-[#4D5466] mt-2 Creato">
                   Deliver in approximately 8–12 days
                 </p>
 
-                {/* 🎨 Variants */}
+                {/* Color Variants */}
                 {ProductDetails?.variants?.length > 0 && (
-                  <div className="mt-5 md:mt-6">
-                    <p className="text-sm text-[#4D5466] mb-3">
+                  <div className="mt-6">
+                    <p className="text-sm font-medium text-[#4D5466] mb-3">
                       Colour:{" "}
-                      <span className="capitalize text-black">
+                      <span className="capitalize text-[#171717]">
                         {selectedVariant?.color}
                       </span>
                     </p>
 
-                    <div className="flex gap-3 md:gap-4 flex-wrap">
-                      {ProductDetails?.variants?.map((variant, idx) => {
-                        const isActive =
-                          selectedVariant?.color === variant.color;
+                    <div className="flex gap-4">
+                      {ProductDetails &&
+                        ProductDetails.variants &&
+                        ProductDetails?.variants?.map((variant, idx) => {
+                          const isActive =
+                            selectedVariant?.color === variant.color;
 
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() => setSelectedVariant(variant)}
-                            className={`w-[90px] md:w-[110px] border rounded-md p-2 cursor-pointer
-                ${isActive
-                                ? "border-black"
-                                : "border-gray-200"
-                              }`}
-                          >
-                            <div className="w-full aspect-square relative rounded overflow-hidden">
-                              <Image
-                                src={variant.images?.[0]}
-                                alt={variant?.color}
-                                fill
-                                className="object-cover"
-                              />
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedVariant(variant)}
+                              className={`w-[110px] border rounded-md p-2 cursor-pointer transition
+                    ${isActive
+                                  ? "border-black"
+                                  : "border-gray-200 hover:border-gray-400"
+                                }
+                  `}
+                            >
+                              {/* Image */}
+                              <div className="w-full aspect-square relative rounded overflow-hidden">
+                                <Image
+                                  src={variant.images?.[0]}
+                                  alt={variant?.color}
+                                  fill
+                                  className="object-cover"
+                                />
+                              </div>
+
+                              {/* Color label */}
+                              <p className="mt-2 text-center text-sm font-medium capitalize">
+                                {variant?.color}
+                              </p>
                             </div>
-
-                            <p className="mt-2 text-center text-xs md:text-sm capitalize">
-                              {variant?.color}
-                            </p>
-                          </div>
-                        );
-                      })}
+                          );
+                        })}
                     </div>
                   </div>
                 )}
 
-                {/* 🛒 Buttons */}
+                {/* Buttons */}
                 <div className="mt-6 flex flex-col gap-3 w-full">
-
+                  {/* Row 1: Qty + Add to Cart */}
                   <div className="flex gap-3 w-full">
-                    {/* Qty */}
+                    {/* Quantity */}
                     <div className="w-24 border border-black rounded-md px-2 py-2 flex items-center justify-between">
-                      <button onClick={decreaseQty}>−</button>
-                      <span>{qty}</span>
-                      <button onClick={increaseQty}>+</button>
+                      <button
+                        onClick={decreaseQty}
+                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
+                      >
+                        −
+                      </button>
+
+                      <span className="text-md font-medium">{qty}</span>
+
+                      <button
+                        onClick={increaseQty}
+                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
+                      >
+                        +
+                      </button>
                     </div>
 
-                    {/* Add */}
+                    {/* Add to Cart */}
                     <button
-                      className="flex-1 border border-black py-3 rounded-md"
-                      onClick={() => handleAdd(false)}
+                      className="flex-1 border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer"
+                      onClick={() => {
+                        handleAdd(false);
+                      }}
                     >
                       ADD TO CART
                     </button>
                   </div>
 
+                  {/* Row 2: Buy Now */}
                   <button
-                    className="w-full bg-black text-white py-3 rounded-md"
-                    onClick={() => handleAdd(true)}
+                    className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer"
+                    onClick={() => {
+                      handleAdd(true);
+                    }}
                   >
                     BUY IT NOW
                   </button>
                 </div>
 
+                {/* Features */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-8 text-base text-[#4D5466] Creato">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#000000]">
+                      <FiTruck size={22} />
+                    </span>
+                    <p className="font-medium">
+                      Complimentary Delivery & Setup <br /> Above ₹20000{" "}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#000000]">
+                      <FiTruck size={22} />
+                    </span>
+                    <p className="font-medium">
+                      Complimentary Styling Services
+                    </p>{" "}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#000000]">
+                      <FiTruck size={22} />
+                    </span>
+                    <p className="font-medium">
+                      Quality Assured Warranty Coverage
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[#000000]">
+                      <FiTruck size={22} />
+                    </span>
+                    <p className="font-medium">Fast Local Service Support</p>{" "}
+                  </div>
+                </div>
+
+                {/* Accordion Sections */}
+                <div className="mt-10">
+                  {/* 1. Dimensions */}
+                  <div
+                    className="border-t border-gray-200 py-4 cursor-pointer"
+                    onClick={() => toggle(1)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-bold text-[#171717] uppercase">
+                        Dimensions
+                      </span>
+                      {open === 1 ? (
+                        <FaMinus size={20} />
+                      ) : (
+                        <FaPlus size={20} />
+                      )}
+                    </div>
+
+                    {open === 1 && (
+                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
+                        {ProductDetails?.dimensions}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 2. Materials & Features */}
+                  <div
+                    className="border-t border-gray-200 py-4 cursor-pointer"
+                    onClick={() => toggle(2)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-bold text-[#171717] uppercase">
+                        Materials & Features
+                      </span>
+                      {open === 2 ? (
+                        <FaMinus size={20} />
+                      ) : (
+                        <FaPlus size={20} />
+                      )}
+                    </div>
+
+                    {open === 2 && (
+                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
+                        {ProductDetails?.material}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 3. Product Care */}
+                  <div
+                    className="border-t border-gray-200 py-4 cursor-pointer"
+                    onClick={() => toggle(3)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-bold text-[#171717] uppercase">
+                        Product Care
+                      </span>
+                      {open === 3 ? (
+                        <FaMinus size={20} />
+                      ) : (
+                        <FaPlus size={20} />
+                      )}
+                    </div>
+
+                    {open === 3 && (
+                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
+                        {ProductDetails?.type}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* 4. Terms & Conditions */}
+                  <div
+                    className="border-t border-gray-200 py-4 cursor-pointer"
+                    onClick={() => toggle(4)}
+                  >
+                    <div className="flex justify-between items-center">
+                      <span className="text-base font-bold text-[#171717] uppercase">
+                        Terms & Conditions
+                      </span>
+                      {open === 4 ? (
+                        <FaMinus size={20} />
+                      ) : (
+                        <FaPlus size={20} />
+                      )}
+                    </div>
+
+                    {open === 4 && (
+                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
+                        {ProductDetails?.terms}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

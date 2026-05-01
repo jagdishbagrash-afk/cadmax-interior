@@ -334,6 +334,10 @@ class Listing extends Component {
     return Api.post("/user/send_otp", data)
   }
 
+    async UserSendOTP(data) {
+    return Api.post("/user/singup/send_otp", data)
+  }
+
   async VerifyOTP(data) {
     return Api.post("/user/otp_verify", data)
   }

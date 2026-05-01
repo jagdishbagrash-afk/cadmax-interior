@@ -8,6 +8,7 @@ import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
   const [data, setData] = useState([]);
+  console.log("data",data)
   const [search, setSearch] = useState("");
 
   const fetchData = async () => {
@@ -83,7 +84,7 @@ export default function Index() {
                 {/* Image */}
                 <div className="relative group">
                   <img
-                    src={item.Image}
+                    src={item.Image || item?.multiple_images?.[0]}
                     alt={item.title}
                     className="w-full h-[260px] md:h-full object-cover group-hover:scale-105 transition duration-500"
                   />

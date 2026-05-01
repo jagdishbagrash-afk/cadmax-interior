@@ -17,7 +17,7 @@ const Popup = ({ isOpen, onClose, children }) => {
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-50"
+      className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-[99999]"
       onClick={onClose}   // ✅ outside click closes modal
     >
       <div 

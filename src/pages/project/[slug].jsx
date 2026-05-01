@@ -4,19 +4,21 @@ import Layout from "../common/Layout";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Listing from "../api/Listing";
+import { MdArrowCircleLeft, MdArrowCircleRight, MdClose } from "react-icons/md";
 
 export default function ProjectDetailPage() {
     const router = useRouter();
     const { slug } = router.query;
 
     const [project, setProject] = useState(null);
+    console.log("project", project)
     const [loading, setLoading] = useState(true);
 
     const fetchData = async (slug) => {
         try {
             const main = new Listing();
             const response = await main.ProjectSlug(slug);
-
+            console.log("response", response)
             if (response?.data?.data) {
                 setProject(response.data.data);
             }
@@ -31,6 +33,26 @@ export default function ProjectDetailPage() {
         if (slug) fetchData(slug);
     }, [slug]);
 
+    const [SelectedImage, setSelectedImage] = useState("")
+    const [isOpen, setIsOpen] = useState(false);
+    const [currentIndex, setCurrentIndex] = useState(0);
+
+    const openModal = (index) => {
+        setCurrentIndex(index);
+        setIsOpen(true);
+    };
+
+    const closeModal = () => setIsOpen(false);
+
+    const prevImage = () =>
+        setCurrentIndex((prev) =>
+            prev === 0 ? project.multiple_images.length - 1 : prev - 1
+        );
+
+    const nextImage = () =>
+        setCurrentIndex((prev) =>
+            prev === project.multiple_images.length - 1 ? 0 : prev + 1
+        );
     return (
         <Layout>
             {/* ✅ LOADING STATE */}
@@ -43,7 +65,7 @@ export default function ProjectDetailPage() {
                     {/* ✅ HERO SECTION */}
                     <div className="relative w-full h-[260px] sm:h-[320px] md:h-[420px] lg:h-[520px] overflow-hidden md:mt-[-80px]">
                         <img
-                            src={project?.Image || "/fallback.jpg"}
+                            src={project?.Image || project?.multiple_images?.[0] || "/fallback.jpg"}
                             alt={project?.title}
                             className="object-cover w-full h-full"
                         />
@@ -122,8 +144,72 @@ export default function ProjectDetailPage() {
                             </div>
                         )}
 
+                        {project?.multiple_images?.length > 1 && (
+
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">
+                                    Project Gallery
+                                </h2>
+
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3 mb-3">
+                                    {project?.multiple_images?.map((img, i) => (
+                                        <div
+                                            key={i}
+                                            className="w-full h-[250px] md:h-[300px] overflow-hidden rounded-xl"
+                                        >
+                                            <img
+                                                src={img}
+                                                alt={`vendor-${i}`}
+                                                onClick={() => openModal(i)}
+                                                className="w-full h-full object-cover hover:scale-105 transition duration-300 cursor-pointer"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+
+
+
+                            </div>
+                        )}
+
                     </div>
                 </>
+            )}
+
+            {isOpen && (
+                <div className="fixed inset-0 bg-black/90 z-[9999] flex items-center justify-center p-4">
+
+                    {/* Close */}
+                    <button
+                        onClick={closeModal}
+                        className="absolute top-5 right-5 text-white text-4xl"
+                    >
+                        <MdClose />
+                    </button>
+
+                    {/* Prev */}
+                    <button
+                        onClick={prevImage}
+                        className="absolute left-5 text-white text-5xl top-1/2 -translate-y-1/2"
+                    >
+                        <MdArrowCircleLeft />
+                    </button>
+
+                    {/* Image */}
+                    <img
+                        src={project?.multiple_images[currentIndex]}
+                        className="max-w-full max-h-[90vh] object-contain rounded-lg"
+                    />
+
+                    {/* Next */}
+                    <button
+                        onClick={nextImage}
+                        className="absolute right-5 text-white text-5xl top-1/2 -translate-y-1/2"
+                    >
+                        <MdArrowCircleRight />
+                    </button>
+
+                </div>
             )}
         </Layout>
     );

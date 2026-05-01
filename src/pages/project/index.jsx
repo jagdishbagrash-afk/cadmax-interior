@@ -5,6 +5,7 @@ import Layout from "../common/Layout";
 import Button from "../common/Button";
 import Listing from "../api/Listing";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 export default function Index() {
     const [data, setData] = useState([]);
@@ -39,7 +40,8 @@ export default function Index() {
                     {data && data?.map((item, index) => {
                         const isReverse = index % 2 !== 0; // alternate layout
                         return (
-                            <div
+                            <Link
+href={`/project/${item?.slug}`}
                                 key={item.id}
                                 className={`grid grid-cols-1 md:grid-cols-3 gap-10 items-center my-4 md:my-8  ${isReverse ? "md:flex-row-reverse" : ""
                                     }`}
@@ -47,7 +49,7 @@ export default function Index() {
                                 <div className={`md:col-span-2 ${isReverse ? "md:order-2" : ""}`}>
 
                                     <img
-                                        src={item.Image}
+                                      src={item.Image || item?.multiple_images?.[0]}
                                         alt={item.title}
                                         className="w-full h-[480px] object-cover "
                                     />
@@ -109,7 +111,7 @@ export default function Index() {
                                         GET A QUOTE
                                     </button>
                                 </div>
-                            </div>
+                            </Link>
                         );
                     })}
                 </div>
