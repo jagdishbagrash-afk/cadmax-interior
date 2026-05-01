@@ -32,7 +32,7 @@ const FeaturedCategories = () => {
         try {
             const main = new Listing();
             const response = await main.categoryStatus();
-
+console.log("response" , response)
             if (response.data?.data) {
                 setCategories(response.data.data);
             }
