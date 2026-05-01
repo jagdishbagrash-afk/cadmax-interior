@@ -161,7 +161,7 @@ export default function EnquiryModal() {
                   className="w-full border p-2 rounded-lg"
                 >
                   <option value="design">Design</option>
-                  <option value="product">Vendor</option>
+                  {/* <option value="product">Vendor</option> */}
                 </select>
               </div>
 
