@@ -14,7 +14,7 @@ export default function Index() {
   const fetchData = async () => {
     try {
       const main = new Listing();
-      const response = await main.getAllProject();
+      const response = await main.getAllAdminProject();
       if (response.data?.data) {
         setData(response.data.data);
       } else {

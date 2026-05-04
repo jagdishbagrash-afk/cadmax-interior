@@ -320,14 +320,12 @@ export default function Index() {
                           Address *
                         </label>
 
-                        {(!data || data.length === 0) && (
                           <Link
                             href={"/address"}
                             className="mt-2 text-sm text-blue-600 underline mb-2"
                           >
                             + Add New Address
                           </Link>
-                        )}
                       </div>
 
                       <select
@@ -360,7 +358,7 @@ export default function Index() {
                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
                         : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
                   >
-                    {loading ? "Processing..." : "Complete Order"}
+                    {loading ? "Processing..." : "Proceed"}
                   </button>
                 </form>
               </div>

@@ -4,62 +4,60 @@ import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
-import ImageUploader from "../services/services/ImageUploader";
+import { MdAdd, MdDelete } from "react-icons/md";
 
 export default function Add() {
   const router = useRouter();
-  const [project, setProject] = useState([]);
-
   const { id } = router.query;
+
+  const [project, setProject] = useState({});
   const [form, setForm] = useState({
     title: "",
     content: "",
     brief: "",
     solution: "",
-    designed: ""
+    designed: "",
   });
+
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
-  const [loading, setLoading] = useState(false);
 
+  const [images, setImages] = useState([]);
+  const [dragIndex, setDragIndex] = useState(null);
+
+  const [loading, setLoading] = useState(false);
+  const [imgLoading, setImgLoading] = useState(false);
+
+  // ================= FETCH =================
   const fetchProjectData = async () => {
     try {
       const main = new Listing();
-      const response = await main.getAllProjectId(id);
-      const data = response?.data?.data;
+      const res = await main.getAllProjectId(id);
+      const data = res?.data?.data;
+
       if (data) {
-        setProject(data)
+        setProject(data);
         setForm({
           title: data.title || "",
           content: data.content || "",
           brief: data.brief || "",
-          material: data.material || "",
           solution: data.solution || "",
           designed: data.designed || "",
         });
         setImagePreview(data.Image || "");
-        setImage(null);
       }
-    } catch (error) {
-      console.log("Error:", error);
+    } catch (err) {
+      console.log(err);
     }
   };
-
 
   useEffect(() => {
-    if (id) {
-      fetchProjectData();
-    }
+    if (id) fetchProjectData();
   }, [id]);
 
-  // console.log("id", id);
-
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+  // ================= HANDLERS =================
+  const handleChange = (e) =>
+    setForm({ ...form, [e.target.name]: e.target.value });
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -69,202 +67,234 @@ export default function Add() {
     }
   };
 
+  const handleFileChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImages((prev) => [...prev, ...files]);
+  };
+
+  const removeImage = (index) => {
+    const updated = [...images];
+    updated.splice(index, 1);
+    setImages(updated);
+  };
+
+  const handleDragStart = (index) => setDragIndex(index);
+
+  const handleDrop = (index) => {
+    const updated = [...images];
+    const [dragged] = updated.splice(dragIndex, 1);
+    updated.splice(index, 0, dragged);
+    setImages(updated);
+  };
+
+  const makeCoverImage = (index) => {
+    const updated = [...images];
+    const [cover] = updated.splice(index, 1);
+    updated.unshift(cover);
+    setImages(updated);
+  };
+
+  const HandleDeleteImages = (img) => {
+    setProject((prev) => ({
+      ...prev,
+      multiple_images: prev.multiple_images.filter((i) => i !== img),
+    }));
+
+    toast.success("Image removed");
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+
     try {
       const fd = new FormData();
-      fd.append("title", form.title);
-      fd.append("content", form.content);
-      fd.append("solution", form.solution);
-      fd.append("brief", form.brief);
-      fd.append("designed", form.designed);
-      if (image instanceof File) {
-        fd.append("image", image);
-      }
-      images.forEach((img) => {
-        fd.append("images[]", img); // remove [] — most servers expect 'images' multiple times
-      });
+      Object.keys(form).forEach((k) => fd.append(k, form[k]));
+
+      if (image) fd.append("image", image);
+      images.forEach((img) => fd.append("images", img));
+
       const main = new Listing();
-      const res = await main.AddProject(fd);
+      const res = id
+        ? await main.editProject(id, fd)
+        : await main.AddProject(fd);
       if (res?.data?.status) {
-        toast.success(res?.data?.message);
-        setForm({
-          title: "",
-          description: "",
-          stock: "",
-          amount: "",
-          category: "",
-          subcategory: "",
-          dimensions: "",
-          material: "",
-          Project: "",
-          terms: "",
-        });
-        setImage(null);
+        toast.success(res.data.message);
         router.push("/admin/project");
-      } else {
-        toast.error(data.message || "Failed to add Project");
       }
-    } catch (error) {
-      toast.error("Internal Server Error");
-      console.error(error);
+    } catch {
+      toast.error("Server Error");
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEdit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const fd = new FormData();
-      fd.append("title", form.title);
-      fd.append("content", form.content);
-      fd.append("solution", form.solution);
-      fd.append("brief", form.brief);
-      fd.append("designed", form.designed);
-      if (image instanceof File) {
-        fd.append("image", image);
-      }
-      images.forEach((img) => {
-        fd.append("images[]", img); // remove [] — most servers expect 'images' multiple times
-      });
-      const main = new Listing();
-      const res = await main.editProject(id, fd);
-      if (res?.data?.status) {
-        router.push("/admin/project");
-        toast.success(res?.data?.message);
-        setForm({
-          title: "",
-          description: "",
-          stock: "",
-          amount: "",
-          category: "",
-          subcategory: "",
-          dimensions: "",
-          material: "",
-          Project: "",
-          terms: "",
-        });
-        setImage(null);
-      } else {
-        toast.error(data.message || "Failed to edit Project");
-      }
-    } catch (error) {
-      toast.error("Internal Server Error");
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const [images, setImages] = useState([]);
-
-  // console.log("form", form);
-
+  // ================= UI =================
   return (
-    <AdminLayout page={"Project List"}>
-      <div className="bg-white p-8 border border-blue-100">
-        <h1 className="text-2xl font-bold text-blue-600 mb-6">{id ? "Edit" : "Add"} Project</h1>
+    <AdminLayout page="Project List">
+      <div className="w-full mx-auto bg-white p-8 rounded-2xl shadow-lg border">
 
-        <form className="space-y-4" onSubmit={id ? handleEdit : handleSubmit}>
-          {/* Title */}
-          <label className="block text-gray-700 font-medium mt-4">
-            Project Title
-          </label>
-          <input
-            type="text"
-            name="title"
-            placeholder="Project Title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
+        <h1 className="text-3xl font-bold text-gray-800 mb-6">
+          {id ? "Edit Project" : "Add New Project"}
+        </h1>
 
-          <label className="block text-gray-700 font-medium mt-4">
-            Project Designed
-          </label>
-          <input
-            type="text"
-            name="designed"
-            placeholder="Project Designed"
-            value={form.designed}
-            onChange={handleChange}
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
-          {/* <label className="block text-gray-700 font-medium mt-4">
-            Project Description
-          </label>
-          <textarea
-            name="content"
-            placeholder="Project Description"
-            value={form.content}
-            onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          /> */}
-          <label className="block text-gray-700 font-medium mt-4">
-            Project Brieft
-          </label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* INPUTS */}
+          <div className="grid md:grid-cols-2 gap-4">
+            <input
+              name="title"
+              value={form.title}
+              onChange={handleChange}
+              placeholder="Project Title"
+              className="input"
+              required
+            />
+
+            <input
+              name="designed"
+              value={form.designed}
+              onChange={handleChange}
+              placeholder="Designed By"
+              className="input"
+            />
+          </div>
+
           <textarea
             name="brief"
-            placeholder="Project brief"
             value={form.brief}
             onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
+            placeholder="Project Brief"
+            className="input h-24"
           />
-          <label className="block text-gray-700 font-medium mt-4">
-            Project Solution
-          </label>
+
           <textarea
             name="solution"
-            placeholder="Project Solution"
             value={form.solution}
             onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
+            placeholder="Project Solution"
+            className="input h-24"
           />
 
-          {/* Image Upload */}
-          <label className="block text-gray-700 font-medium mt-4">
-            Project Image
-          </label>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleImageChange}
-            className="border border-gray-300 rounded-lg p-2 w-full"
-          />
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-3 w-32 h-32 object-cover rounded-md border border-gray-200"
-            />
-          )}
-
+          {/* SINGLE IMAGE */}
           <div>
-            <label className="text-sm font-semibold text-gray-700">
-              Project Images
-            </label>
-            <ImageUploader images={images} setImages={setImages} project={project} type={"services"} fetchData={fetchProjectData} />
+            <label className="label">Main Image</label>
+            <input type="file" onChange={handleImageChange} />
+
+            {imagePreview && (
+              <div className="mt-3 w-32 h-32 rounded-lg overflow-hidden border">
+                <img
+                  src={imagePreview}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
           </div>
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium mt-4 hover:bg-blue-700 transition cursor-pointer"
-          >
-            {loading ? "Submitting..." : `Submit`}
+
+          {/* MULTIPLE IMAGE */}
+          <div>
+            <label className="label">Project Images</label>
+
+            <div className="border-2 border-dashed p-8 rounded-xl text-center hover:bg-gray-50 cursor-pointer">
+              <MdAdd size={40} className="mx-auto text-gray-400" />
+              <p className="text-sm text-gray-500 mt-2">
+                Click or Drag Images
+              </p>
+              <input type="file" multiple onChange={handleFileChange} />
+            </div>
+
+            {/* NEW IMAGES */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+              {images.map((img, i) => (
+                <div
+                  key={i}
+                  draggable
+                  onDragStart={() => handleDragStart(i)}
+                  onDragOver={(e) => e.preventDefault()}
+                  onDrop={() => handleDrop(i)}
+                  className="relative group rounded-xl overflow-hidden border shadow-sm"
+                >
+                  <img
+                    src={URL.createObjectURL(img)}
+                    className="h-32 w-full object-cover"
+                  />
+
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col justify-center items-center gap-2 transition">
+                    <button
+                      onClick={() => removeImage(i)}
+                      className="bg-red-500 text-white px-2 py-1 text-xs rounded"
+                    >
+                      Remove
+                    </button>
+
+                    {i !== 0 && (
+                      <button
+                        onClick={() => makeCoverImage(i)}
+                        className="bg-yellow-500 text-white px-2 py-1 text-xs rounded"
+                      >
+                        Cover
+                      </button>
+                    )}
+                  </div>
+
+                  {i === 0 && (
+                    <span className="absolute top-2 left-2 bg-white text-xs px-2 py-1 rounded">
+                      Cover
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* EXISTING IMAGES */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              {project?.multiple_images?.map((img, i) => (
+                <div
+                  key={i}
+                  className="relative group rounded-xl overflow-hidden border shadow-sm"
+                >
+                  <img
+                    src={img}
+                    className="h-32 w-full object-cover"
+                  />
+
+                  <button
+                    onClick={() => HandleDeleteImages(img)}
+                    className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100"
+                  >
+                    {imgLoading ? "..." : <MdDelete size={18} />}
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* BUTTON */}
+          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-lg font-semibold transition">
+            {loading ? "Processing..." : id ? "Update Project" : "Add Project"}
           </button>
         </form>
       </div>
+
+      {/* CSS */}
+      <style jsx>{`
+        .input {
+          width: 100%;
+          border: 1px solid #ddd;
+          padding: 12px;
+          border-radius: 10px;
+          outline: none;
+        }
+        .input:focus {
+          border-color: #2563eb;
+        }
+        .label {
+          font-weight: 600;
+          display: block;
+          margin-bottom: 6px;
+        }
+      `}</style>
     </AdminLayout>
   );
 }

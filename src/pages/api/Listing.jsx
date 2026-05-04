@@ -226,6 +226,10 @@ class Listing extends Component {
     return Api.get(`/project/list`, data);
   }
 
+    async getAllAdminProject(data) {
+    return Api.get(`/admin/project/list`, data);
+  }
+
   async GetAllProdcuctColor(data) {
     return Api.get(`/product/color/by`, data);
   }
