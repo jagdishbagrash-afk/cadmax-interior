@@ -114,7 +114,7 @@ export default function EnquiryModal() {
           onClick={() => setIsOpen(true)}
           className="px-6 py-2 font-semibold uppercase text-sm bg-white border rounded-lg hover:bg-black hover:text-white transition"
         >
-          Enquire Now
+          INQUIRE NOW
         </button>
       </div>
 

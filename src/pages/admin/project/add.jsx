@@ -15,7 +15,7 @@ export default function Add() {
     title: "",
     content: "",
     brief: "",
-    solution: "",
+    solution: "hello",
     designed: "",
   });
 
@@ -168,13 +168,13 @@ export default function Add() {
             className="input h-24"
           />
 
-          <textarea
+          {/* <textarea
             name="solution"
             value={form.solution}
             onChange={handleChange}
             placeholder="Project Solution"
             className="input h-24"
-          />
+          /> */}
 
           {/* SINGLE IMAGE */}
           <div>

@@ -77,7 +77,7 @@ href={`/project/${item?.slug}`}
                                             </p>
                                         </div>
                                     </div>
-                                    <div className="space-y-5">
+                                    {/* <div className="space-y-5">
                                         <div className="space-y-2">
                                             <h3 className="Creato font-bold text-[16px] sm:text-[17px] md:text-[18px] leading-[1] tracking-[-0.02em] text-[#171717]">
                                                 Design Solution
@@ -86,7 +86,7 @@ href={`/project/${item?.slug}`}
                                                 {item?.solution}
                                             </p>
                                         </div>
-                                    </div>
+                                    </div> */}
 
                                     <button
                                         className="
