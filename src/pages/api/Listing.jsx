@@ -394,7 +394,14 @@ async DeleteImageUrl(data){
     return Api.post("/common/delete-image", data)
   
 }
-  render() {
+
+async deleteProjectImage(id, data){
+    return Api.post(`/project/delete-image/${id}`, data)
+  
+}
+  
+
+render() {
     return (
       <div>
         <></>

@@ -94,7 +94,6 @@ export default function ProjectDetailPage() {
                                 </h1>
 
                                 <div className="w-16 h-[3px] bg-red-600 mx-auto"></div>
-
                                 {/* Designed By */}
                                 {/* {project?.designed && (
                                     <p className="text-white/80 text-sm sm:text-base tracking-wide">

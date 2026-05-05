@@ -94,14 +94,31 @@ export default function Add() {
     setImages(updated);
   };
 
-  const HandleDeleteImages = (img) => {
-    setProject((prev) => ({
-      ...prev,
-      multiple_images: prev.multiple_images.filter((i) => i !== img),
-    }));
+const HandleDeleteImages = async (img) => {
+  try {
+    setImgLoading(true);
 
-    toast.success("Image removed");
-  };
+    const main = new Listing();
+
+    const res = await main.deleteProjectImage(id, {
+      image: img,
+    });
+
+    if (res?.data?.success) {
+      // remove from UI
+      setProject((prev) => ({
+        ...prev,
+        multiple_images: prev.multiple_images.filter((i) => i !== img),
+      }));
+
+      toast.success("Image deleted successfully");
+    }
+  } catch (err) {
+    toast.error("Delete failed");
+  } finally {
+    setImgLoading(false);
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
