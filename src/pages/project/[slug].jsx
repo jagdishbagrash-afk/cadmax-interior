@@ -95,11 +95,11 @@ export default function ProjectDetailPage() {
 
                                 <div className="w-16 h-[3px] bg-red-600 mx-auto"></div>
                                 {/* Designed By */}
-                                {/* {project?.designed && (
+                                {project?.designed && (
                                     <p className="text-white/80 text-sm sm:text-base tracking-wide">
                                         Designed by {project?.designed}
                                     </p>
-                                )} */}
+                                )}
                             </div>
                         </div>
                     </div>
@@ -119,7 +119,7 @@ export default function ProjectDetailPage() {
                             </div>
                         )}
 
-                        {/* Solution */}
+                        {/* Solution
                         {project?.solution && (
                             <div className="mb-8">
                                 <h2 className="text-xl sm:text-2xl font-semibold mb-3">
@@ -129,7 +129,7 @@ export default function ProjectDetailPage() {
                                     {project?.solution}
                                 </p>
                             </div>
-                        )}
+                        )} */}
 
                         {/* Extra Content */}
                         {project?.content && (
