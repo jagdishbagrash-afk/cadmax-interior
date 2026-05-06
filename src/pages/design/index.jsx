@@ -65,7 +65,7 @@ export default function Index() {
                             mx-auto
                           "
                     >
-                        Get our latest designs
+                     From Planning to Execution, CRAFted BY ExPerts
                     </h1>
 
 

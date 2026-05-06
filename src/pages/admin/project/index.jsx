@@ -137,14 +137,14 @@ export default function Index() {
                   </div>
 
                   {/* Solution */}
-                  <div>
+                  {/* <div>
                     <h3 className="font-semibold text-gray-800 mb-1">
                       Design Solution
                     </h3>
                     <p className="text-sm text-gray-600 leading-relaxed">
                       {item?.solution}
                     </p>
-                  </div>
+                  </div> */}
                 </div>
               </div>
             ))}

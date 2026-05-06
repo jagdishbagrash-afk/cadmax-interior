@@ -125,9 +125,11 @@ export default function Footer() {
           <span>•</span>
           <Link href="/privacy-policy" className="hover:text-white">Privacy Policy</Link>
           <span>•</span>
-          {/* <Link href="/refund" className="hover:text-white">Refund Policy</Link>
+          <Link href="/refund-policy" className="hover:text-white">Refund Policy</Link>
           <span>•</span>
-          <Link href="/cookies" className="hover:text-white">Cookie Policy</Link> */}
+          <Link href="/contact" className="hover:text-white">Contact</Link>
+             <span>•</span>
+          <Link href="/about" className="hover:text-white">About</Link>
         </div>
       </div>
     </footer>
