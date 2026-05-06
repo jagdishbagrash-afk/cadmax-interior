@@ -15,7 +15,7 @@ export default function About() {
                 />
 
                 {/* Section */}
-                <div className="container max-w-[1430px] mx-auto  px-4 py-12 flex flex-wrap  gap-8 items-center">
+                <div className="container max-w-[1430px] mx-auto  px-4 py-8 flex flex-wrap  gap-8 items-center">
                     <div className="w-full  md:w-[55%]" >
                         <h2 className="text-[#171717] font-[900] mb-2  text-[18px] md:text-[24px] uppercase Creato">
                             Designing Spaces, Creating Experiences
@@ -29,7 +29,7 @@ export default function About() {
                         </button>
                     </div>
 
-                     <div className="w-full  md:w-[43%]" >
+                     <div className="w-full  md:w-[40%]" >
                         <img
                             src="/commercial.jpeg"
                             alt="about"
