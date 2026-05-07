@@ -61,7 +61,7 @@ export default function Contact() {
     const handleForms = async (e) => {
         setLoading(true);
         e.preventDefault();
-        if (!Regs.name || !Regs.email || !Regs.phone_number || !Regs.services || !Regs.message) {
+        if (!Regs.name || !Regs.email || !Regs.phone_number || !Regs.message) {
             toast.error("Please fill out all fields.");
             setLoading(false);
             return;
@@ -85,7 +85,7 @@ export default function Contact() {
             const updatedRegs = {
                 ...Regs,
             };
-            const response = await main.contact(updatedRegs);
+            const response = await main.AddPostContact(updatedRegs);
             console.log("response", response)
             if (response?.data?.status) {
                 toast.success(response.data.message);
@@ -129,7 +129,7 @@ export default function Contact() {
 
                             {/* Heading */}
                             <div className="mb-6">
-                                 <h2 className="text-[#171717] font-[900] mb-2  text-[18px] md:text-[35px] uppercase Creato">
+                                <h2 className="text-[#171717] font-[900] mb-2  text-[18px] md:text-[35px] uppercase Creato">
                                     Get In Touch
                                 </h2>
                                 <p className="text-[#000112a6] text-[14px] md:text-[16px] Creato lg:text-[18px] mt-3">
@@ -181,7 +181,15 @@ export default function Contact() {
                                         type="tel"
                                         name="phone_number"
                                         value={Regs?.phone_number}
-                                        onChange={handleInputs}
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+
+                                            // Only digits allowed & max 10 digits
+                                            if (!/^\d{0,10}$/.test(value)) return;
+
+                                            handleInputs(e);
+                                        }}
+                                        maxLength={10}
                                         placeholder="your phone"
                                         className="border-b border-gray-400 bg-transparent outline-none py-2 text-[15px] text-[#555]"
                                     />
@@ -249,10 +257,10 @@ export default function Contact() {
 
                                         {/* Text */}
                                         <div>
- <h2 className="text-[#171717] font-[900] mb-2  text-[18px] md:text-[20px] uppercase Creato">
+                                            <h2 className="text-[#171717] font-[900] mb-2  text-[18px] md:text-[20px] uppercase Creato">
                                                 {item.title}
                                             </h2>
-                                  <p className="text-[#4D5466] font-[500] text-[16px]  
+                                            <p className="text-[#4D5466] font-[500] text-[16px]  
                        tracking-[-0.01em] text-center Creato">
                                                 {item.content}
                                             </p>

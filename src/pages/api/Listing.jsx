@@ -360,6 +360,12 @@ class Listing extends Component {
   async AddContact(data) {
     return Api.post("/contact-add", data)
   }
+
+   async AddPostContact(data) {
+    return Api.post("/contact-post-add", data)
+  }
+
+
   async LeadAdd(data) {
     return Api.post("/lead-add", data)
   }
