@@ -72,7 +72,7 @@ export default function ResidentialDesign() {
                                     </h3>
 
                                     {/* Book Now Button (Hidden by default) */}
-                                  <Link
+                                    {/* <Link
   href={`/booking`}
   className="
     opacity-100 translate-y-0 
@@ -89,7 +89,7 @@ export default function ResidentialDesign() {
   "
 >
   Book Now
-</Link>
+</Link> */}
                                 </div>
                             </Link>
 
