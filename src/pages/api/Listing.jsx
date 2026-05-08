@@ -99,6 +99,11 @@ class Listing extends Component {
     return Api.get("/services/subcategory/list",)
   }
 
+  async CartGet() {
+    return Api.get("/cart/get",)
+  }
+
+
   async CommonProject() {
     return Api.get("/common/project",)
   }
@@ -226,7 +231,7 @@ class Listing extends Component {
     return Api.get(`/project/list`, data);
   }
 
-    async getAllAdminProject(data) {
+  async getAllAdminProject(data) {
     return Api.get(`/admin/project/list`, data);
   }
 
@@ -242,6 +247,19 @@ class Listing extends Component {
     return Api.post(`/address/add`, data);
   }
 
+  async AddTocart(data) {
+    return Api.post(`/cart/add`, data);
+  }
+
+  async RemoveCart(productId, variant) {
+    return Api.get(
+      `/cart/remove/${productId}/${variant}`
+    );
+  }
+
+  async UpdateTocart(data) {
+    return Api.post(`/cart/update`, data);
+  }
   async getAllProjectId(id) {
     return Api.get(`/project/details/${id}`,);
   }
@@ -254,7 +272,7 @@ class Listing extends Component {
   async DeleteAdminUser(data) {
     return Api.get(`/admin/user/delete/${data}`);
   }
- async DeleteUser() {
+  async DeleteUser() {
     return Api.get(`/user/delete`);
   }
 
@@ -290,11 +308,11 @@ class Listing extends Component {
     return Api.get(`/get-booking`, data);
   }
 
-   async GetPayment() {
-    return Api.get(`/payment-get`, );
+  async GetPayment() {
+    return Api.get(`/payment-get`,);
   }
 
-  
+
   async GetBestSeller(data) {
     return Api.get(`/common/bestseller`, data);
   }
@@ -303,9 +321,9 @@ class Listing extends Component {
     return Api.get(`/common/product`, data);
   }
 
-    async GetVendorData(data) {
+  async GetVendorData(data) {
     return Api.get(`/vendor/get`, data);
-  } 
+  }
 
   async GetHomeList(data) {
     return Api.get(`/common/banner`, data);
@@ -338,7 +356,7 @@ class Listing extends Component {
     return Api.post("/user/send_otp", data)
   }
 
-    async UserSendOTP(data) {
+  async UserSendOTP(data) {
     return Api.post("/user/singup/send_otp", data)
   }
 
@@ -361,7 +379,7 @@ class Listing extends Component {
     return Api.post("/contact-add", data)
   }
 
-   async AddPostContact(data) {
+  async AddPostContact(data) {
     return Api.post("/contact-post-add", data)
   }
 
@@ -385,29 +403,29 @@ class Listing extends Component {
     return Api.post("/contact-add", data)
   }
 
-   async Addcommon(data) {
+  async Addcommon(data) {
     return Api.post("/common/lead-form", data)
   }
 
-   async AddPaymentCreate(data) {
+  async AddPaymentCreate(data) {
     return Api.post("/create", data)
   }
 
-   async PaymentSave(data) {
+  async PaymentSave(data) {
     return Api.post("/verify-payment", data)
   }
-async DeleteImageUrl(data){
+  async DeleteImageUrl(data) {
     return Api.post("/common/delete-image", data)
-  
-}
 
-async deleteProjectImage(id, data){
+  }
+
+  async deleteProjectImage(id, data) {
     return Api.post(`/project/delete-image/${id}`, data)
-  
-}
-  
 
-render() {
+  }
+
+
+  render() {
     return (
       <div>
         <></>

@@ -25,6 +25,7 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
+  console.log("user", user)
 
   const totalPrice = cartItemsRedux.reduce((sum, item) => {
     return sum + Number(item?.price * item?.quantity);
@@ -35,10 +36,20 @@ export default function Index() {
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
     name: user?.name || "",
-    mobile: user?.phone || "",
+    mobile: user?.phone ? String(user.phone) : "",  // ✅ FIX
     address: "",
     addressId: ""
   });
+
+  useEffect(() => {
+    if (user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: user?.name || "",
+        mobile: user?.phone ? String(user.phone) : ""
+      }));
+    }
+  }, [user]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,17 +64,36 @@ export default function Index() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleRemove = (id) => {
-    dispatch(removeItem(id));
+  const handleRemove = async (item) => {
+    try {
+      const main = new Listing();
+
+      const productId = item.productId || item.product?._id;
+      const variant = item.variant || item.selectedVariant;
+
+      const response = await main.RemoveCart(productId, variant);
+
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+
+        // ✅ refresh cart
+        FetchCart();
+      }
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to remove item"
+      );
+    }
   };
 
+  console.log("formData", formData)
 
   const handlePaymentCreateSubmit = async (e) => {
     e.preventDefault();
-    if (formData.mobile.length !== 10) {
-      toast.error("Mobile number must be exactly 10 digits");
-      return;
-    }
+   if (String(formData.mobile).length !== 10) {
+  toast.error("Mobile number must be exactly 10 digits");
+  return;
+}
 
     if (totalPrice === 0) {
       toast.error("Amount can't be 0!");
@@ -207,6 +237,25 @@ export default function Index() {
     }
   };
 
+  const [record, setRecord] = useState([])
+
+  console.log("|record", record)
+
+  const FetchCart = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.CartGet();
+      if (response?.data?.data) {
+        setRecord(response.data.data);
+      } else {
+        setData([]);
+      }
+
+    } catch (error) {
+      console.log(error);
+      setData([]);
+    }
+  };
 
   const fetchAddress = async () => {
     try {
@@ -226,18 +275,52 @@ export default function Index() {
 
   useEffect(() => {
     fetchAddress();
+    FetchCart();
   }, []);
 
 
 
   useEffect(() => {
-    if (loading) return; // ⛔ wait karo
-
-    if (!user) {
-      toast.error("Please login to continue");
-      router.push("/login");
+    if (!user) return;
+    if (user.role !== "customer") {
+      toast.error("Only customer can access this page");
+      router.push("/");
     }
-  }, [user, loading]);
+
+  }, [user]);
+
+  const handleQtyChange = async (item, type) => {
+    try {
+      const main = new Listing();
+
+      const newQty =
+        type === "increase"
+          ? item.quantity + 1
+          : item.quantity - 1;
+
+      // ⛔ safety
+      if (newQty < 1) return;
+
+      const response = await main.UpdateTocart({
+        productId: item.productId || item.product?._id,
+        variant: item.variant || item.selectedVariant,
+        quantity: newQty,
+      });
+
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+
+        // ✅ refresh cart
+        FetchCart();
+      }
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to update quantity"
+      );
+    }
+  };
+
+
 
 
   return (
@@ -296,19 +379,19 @@ export default function Index() {
 
                     {/* ADDRESS */}
                     {/* <div>
-                      <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                        Full Address *
-                      </label>
-                      <textarea
-                        id="address"
-                        name="address"
-                        placeholder="House No, Street, Landmark, City, Pincode"
-                        value={formData.address}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none h-32 resize-none"
-                        required
-                      />
-                    </div> */}
+                        <label htmlFor="address" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                          Full Address *
+                        </label>
+                        <textarea
+                          id="address"
+                          name="address"
+                          placeholder="House No, Street, Landmark, City, Pincode"
+                          value={formData.address}
+                          onChange={handleChange}
+                          className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none h-32 resize-none"
+                          required
+                        />
+                      </div> */}
 
 
                     <div>
@@ -320,12 +403,12 @@ export default function Index() {
                           Address *
                         </label>
 
-                          <Link
-                            href={"/address"}
-                            className="mt-2 text-sm text-blue-600 underline mb-2"
-                          >
-                            + Add New Address
-                          </Link>
+                        <Link
+                          href={"/address"}
+                          className="mt-2 text-sm text-blue-600 underline mb-2"
+                        >
+                          + Add New Address
+                        </Link>
                       </div>
 
                       <select
@@ -354,7 +437,7 @@ export default function Index() {
                     type="submit"
                     disabled={loading}
                     className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
-                    ${loading
+                      ${loading
                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
                         : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
                   >
@@ -380,12 +463,12 @@ export default function Index() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {cartItemsRedux?.map((item) => (
+                      {record?.items?.map((item) => (
                         <tr key={item.id} className="group">
                           <td className="py-4">
                             <div className="flex items-center gap-4">
                               <button
-                                onClick={() => handleRemove(item.id)}
+                                onClick={() => handleRemove(item)}
                                 className="text-gray-400 hover:text-red-500 transition-colors"
                                 title="Remove Item"
                               >
@@ -393,7 +476,7 @@ export default function Index() {
                               </button>
                               <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100">
                                 <Image
-                                  src={item?.imgUrl[0]}
+                                  src={item?.images[0]}
                                   fill
                                   alt={item?.name}
                                   className="object-contain p-1"
@@ -406,26 +489,30 @@ export default function Index() {
                           </td>
 
                           <td className="py-4 text-center">
-                            <div className="inline-flex items-center border border-gray-200 rounded-sm">
-                              <button
-                                onClick={() => dispatch(decrementQty(item?.id))}
-                                className="px-2 py-1 hover:bg-gray-100 disabled:opacity-30 transition"
-                                disabled={item.quantity === 1}
-                              >
-                                <FiMinus size={12} />
-                              </button>
-                              <span className="px-2 text-sm font-semibold w-8">{item?.quantity}</span>
-                              <button
-                                onClick={() => dispatch(incrementQty(item?.id))}
-                                className="px-2 py-1 hover:bg-gray-100 transition"
-                              >
-                                <FiPlus size={12} />
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleQtyChange(item, "decrease")}
+                              className="px-2 py-1 hover:bg-gray-100 disabled:opacity-30 transition"
+                              disabled={item.quantity === 1}
+                            >
+                              <FiMinus size={12} />
+                            </button>
+
+                            <span className="px-2 text-sm font-semibold w-8">
+                              {item?.quantity}
+                            </span>
+
+                            <button
+                              type="button"
+                              onClick={() => handleQtyChange(item, "increase")}
+                              className="px-2 py-1 hover:bg-gray-100 transition"
+                            >
+                              <FiPlus size={12} />
+                            </button>
                           </td>
 
                           <td className="py-4 text-right font-semibold text-gray-900">
-                            {formatMultiPrice(item.price * item.quantity, "INR")}
+                            {formatMultiPrice(item.unitPrice * item.quantity, "INR")}
                           </td>
                         </tr>
                       ))}
@@ -434,7 +521,7 @@ export default function Index() {
                       <tr className="border-t-2 border-black">
                         <td colSpan={2} className="py-6 text-lg font-bold">Total Amount</td>
                         <td className="py-6 text-right text-xl font-extrabold text-black">
-                          {formatMultiPrice(totalPrice, "INR")}
+                          {formatMultiPrice(record?.summary?.finalAmount, "INR")}
                         </td>
                       </tr>
                     </tfoot>

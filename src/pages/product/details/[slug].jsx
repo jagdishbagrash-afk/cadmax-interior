@@ -18,6 +18,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
+import toast from "react-hot-toast";
 
 export default function Index() {
   const router = useRouter();
@@ -40,14 +41,49 @@ export default function Index() {
   const toggle = (id) => {
     setOpen(open === id ? null : id);
   };
-
   const increaseQty = () => {
     setQty((prev) => {
       const maxStock = selectedVariant?.stock ?? 0;
-      return prev < maxStock ? prev + 1 : prev;
+      const newQty = prev < maxStock ? prev + 1 : prev;
+
+      handleQtyChange(newQty); // ✅ direct new qty
+
+      return newQty;
     });
   };
-  const decreaseQty = () => setQty((prev) => (prev > 1 ? prev - 1 : 1));
+
+  const decreaseQty = () => {
+    setQty((prev) => {
+      const newQty = prev > 1 ? prev - 1 : 1;
+
+      handleQtyChange(newQty); // ✅ direct new qty
+
+      return newQty;
+    });
+  };
+
+
+  const handleQtyChange = async (quantity) => {
+    try {
+      const main = new Listing();
+
+      const response = await main.UpdateTocart({
+        productId: ProductDetails?._id,
+        variant: selectedVariant?.color,
+        quantity: quantity, // ✅ direct final qty
+      });
+
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+      }
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to update quantity"
+      );
+    }
+  };
+
+
 
   const fetchData = async (id) => {
     try {
@@ -67,6 +103,7 @@ export default function Index() {
 
   const handleAdd = (redirect) => {
     const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
+
     const newItem = {
       id: id,
       name: ProductDetails?.title,
@@ -76,9 +113,34 @@ export default function Index() {
       product: ProductDetails,
       selectedVariant: selectedVariant?.color,
     };
+
+    // ✅ backend ke liye clean payload
+    HadleAddtocart({
+      productId: ProductDetails?._id,
+      quantity: qty,
+      variant: selectedVariant?.color
+    });
+
     dispatch(addItem(newItem));
+
     if (redirect) {
       router.push("/checkout");
+    }
+  };
+
+  const HadleAddtocart = async (cartData) => {
+    try {
+      const main = new Listing();
+
+      const response = await main.AddTocart(cartData); // 👈 full object
+
+      if (response?.data) {
+        toast.success(response.data.message);
+      }
+    } catch (err) {
+      toast.error(
+        err?.response?.data?.message || "Failed to add to cart"
+      );
     }
   };
 
@@ -304,11 +366,11 @@ export default function Index() {
                   ))}
                 </Swiper>
                 <div className="flex-1 w-full md:max-w-[500px] mt-5 mb-3">
-                    <img
-                      src={selectedVariant?.images?.[currentIndex]}
-                      alt="Product"
-                      className="w-full h-full object-contain rounded-lg"
-                    />
+                  <img
+                    src={selectedVariant?.images?.[currentIndex]}
+                    alt="Product"
+                    className="w-full h-full object-contain rounded-lg"
+                  />
                 </div>
               </div>
 

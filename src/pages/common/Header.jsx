@@ -14,6 +14,8 @@ import toast from "react-hot-toast";
 
 export default function Header() {
   const { user, setUser } = useRole();
+
+  const role = user?.role;
   const router = useRouter();
 
   const [scrolled, setScrolled] = useState(false);
@@ -88,7 +90,7 @@ export default function Header() {
 
         {/* RIGHT SIDE */}
         <div className="flex items-center gap-4">
-          {user ? (
+          {role === "customer" ? (
             <div className="relative">
               <FiUser
                 className={`cursor-pointer ${textColor}`}

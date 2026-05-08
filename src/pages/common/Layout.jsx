@@ -13,7 +13,7 @@ export default function Layout({ children }) {
     try {
       const main = new Listing();
       const response = await main.profileVerify(signal);
-
+console.log("response" ,response)
       if (response?.data?.data) {
         setUser(response.data.data);
       }

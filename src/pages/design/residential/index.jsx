@@ -27,6 +27,8 @@ export default function ResidentialDesign() {
     useEffect(() => {
         fetchData();
     }, []);
+
+    console.log("data" ,data)
     return (
         <Layout>
             <div
