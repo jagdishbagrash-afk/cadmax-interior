@@ -37,9 +37,7 @@ export default function Index() {
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Phone</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Email</th>
                                     <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Service Model</th>
-                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Area</th>
-                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Timline</th>
-                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">payment reference</th>
+                                    <th className="px-4 py-3 text-[14px] font-semibold text-gray-600 uppercase">Messages</th>
                                 </tr>
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-100">
@@ -50,9 +48,8 @@ export default function Index() {
                                             <td className="px-4 py-3 text-center">{item.phone_number}</td>
                                             <td className="px-4 py-3 text-center">{item.email}</td>
                                             <td className="px-4 py-3 text-center">{item.services}</td>
-                                            <td className="px-4 py-3 text-center">{item.area}</td>
-                                            <td className="px-4 py-3 text-center">{item.timeline}</td>
-                                            <td className="px-4 py-3 text-center">{item.payment}</td>
+                                            <td className="px-4 py-3 text-center">{item.
+message}</td>
                                         </tr>
                                     ))
                                 ) : (
