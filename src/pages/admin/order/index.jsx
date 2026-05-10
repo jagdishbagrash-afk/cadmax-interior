@@ -92,6 +92,10 @@ export default function Index() {
             <table className="min-w-full">
               <thead className="bg-gray-50">
                 <tr>
+                  <th className="px-6 py-4 text-center">
+                    Order Id
+                  </th>
+
                   <th className="px-6 py-4 text-center">Customer</th>
                   <th className="px-6 py-4 text-center">Price</th>
                   <th className="px-6 py-4 text-center">Mobile</th>
@@ -109,6 +113,10 @@ export default function Index() {
 
                   return (
                     <tr key={order._id} className="hover:bg-gray-50">
+
+                      <td className="px-6 py-4 text-center">
+                        {order.orderId}
+                      </td>
 
                       <td className="px-6 py-4 text-center">
                         {order.name}

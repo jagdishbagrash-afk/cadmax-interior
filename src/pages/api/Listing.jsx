@@ -15,6 +15,14 @@ class Listing extends Component {
   async profileVerify() {
     return Api.get("/user/profile")
   }
+
+
+ async TokenVerify() {
+    return Api.get("/add-notification")
+  }
+
+
+
   async AdminDashboard() {
     return Api.get("/admin/dasboard")
   }

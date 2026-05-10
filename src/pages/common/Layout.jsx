@@ -32,6 +32,35 @@ console.log("response" ,response)
     return () => controller.abort();
   }, []);
 
+
+const FecthToken = async (signal) => {
+  try {
+    const main = new Listing();
+
+    const response = await main.TokenVerifiy(signal);
+
+    const fcmToken = response?.token;
+
+    console.log("FCM Token:", fcmToken);
+
+    if (fcmToken) {
+      localStorage.setItem("fcmToken", fcmToken);
+    }
+
+    await main.SaveToken({
+      fcmToken: fcmToken,
+    });
+
+  } catch (error) {
+    console.error("Token error:", error);
+    setUser(null);
+  }
+};
+
+const  token
+
+useEffect(()=>{},[])
+
   if (loading) return null;
 
 
