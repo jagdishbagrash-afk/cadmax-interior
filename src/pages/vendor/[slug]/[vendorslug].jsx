@@ -111,7 +111,7 @@ export default function VendorDetailPage() {
                                     cta={{
                                         text: "Hire Now",
                                         redirect: "/login",
-                                        redirectAfterLogin: `/design/details/${slug}/${vendorslug}`,
+                                        redirectAfterLogin: `/vendor/${slug}/${vendorslug}`,
                                         autoSubmit: true,
                                         type: "vendors",
                                     }}

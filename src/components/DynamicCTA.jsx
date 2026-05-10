@@ -28,7 +28,7 @@ export default function DynamicCTA({ cta, record }) {
         name: record?.name || "",
         email: record?.email || "",
         phone: record?.phone || "",
-        message: record?.content || "",
+        message: "" || record?.content || "",
         pageurl: typeof window !== "undefined" ? window.location.href : "",
         services: cta?.types || "",
       };

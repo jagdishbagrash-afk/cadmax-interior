@@ -13,7 +13,6 @@ export default function Layout({ children }) {
     try {
       const main = new Listing();
       const response = await main.profileVerify(signal);
-console.log("response" ,response)
       if (response?.data?.data) {
         setUser(response.data.data);
       }
@@ -33,43 +32,18 @@ console.log("response" ,response)
   }, []);
 
 
-const FecthToken = async (signal) => {
-  try {
-    const main = new Listing();
 
-    const response = await main.TokenVerifiy(signal);
-
-    const fcmToken = response?.token;
-
-    console.log("FCM Token:", fcmToken);
-
-    if (fcmToken) {
-      localStorage.setItem("fcmToken", fcmToken);
-    }
-
-    await main.SaveToken({
-      fcmToken: fcmToken,
-    });
-
-  } catch (error) {
-    console.error("Token error:", error);
-    setUser(null);
-  }
-};
-
-const  token
-
-useEffect(()=>{},[])
+  useEffect(() => { }, [])
 
   if (loading) return null;
 
 
   return (
     <>
-     <Header />
-        <main>{children}</main>
-      
-        <Footer />
+      <Header />
+      <main>{children}</main>
+
+      <Footer />
     </>
   );
 }

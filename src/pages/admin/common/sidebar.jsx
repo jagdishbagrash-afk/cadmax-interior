@@ -31,7 +31,7 @@ function SideBar() {
     { name: "Payments", path: "/admin/payment", icon: <MdBorderAll /> },
 
     { name: "Leads", path: "/admin/lead", icon: <GiLeadPipe /> },
-    // { name: "Bookings", path: "/admin/booking", icon: <MdBookmarks /> },
+    { name: "Contacts", path: "/admin/contact", icon: <MdBookmarks /> },
     { name: "Projects", path: "/admin/project", icon: <MdTask /> },
 
     { name: "Concept", path: "/admin/services/services", icon: <AiFillProduct /> },
