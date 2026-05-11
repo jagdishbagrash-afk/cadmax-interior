@@ -25,13 +25,11 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  console.log("user", user)
+  const [record, setRecord] = useState([])
 
-  const totalPrice = cartItemsRedux.reduce((sum, item) => {
-    return sum + Number(item?.price * item?.quantity);
-  }, 0);
 
-  console.log("totalPrice", totalPrice)
+  const totalPrice = record?.summary?.finalAmount;
+
   const itemNames = cartItemsRedux.map((item) => item.name);
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
@@ -237,7 +235,6 @@ export default function Index() {
     }
   };
 
-  const [record, setRecord] = useState([])
 
   console.log("|record", record)
 

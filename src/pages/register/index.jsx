@@ -71,7 +71,7 @@ export default function Register() {
         otp: data.otp,
       });
 
-      if (res?.data?.status) {
+      if (res?.data?.success) {
         toast.success("Phone verified");
         setStep(3);
       } else {
