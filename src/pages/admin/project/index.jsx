@@ -8,7 +8,6 @@ import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
   const [data, setData] = useState([]);
-  console.log("data",data)
   const [search, setSearch] = useState("");
 
   const fetchData = async () => {

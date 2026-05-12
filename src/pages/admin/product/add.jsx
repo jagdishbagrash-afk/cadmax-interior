@@ -361,9 +361,6 @@ export default function Add() {
     }
   };
 
-  console.log("form", form);
-  console.log("categories" ,categories)
-
   return (
     <AdminLayout page={"Product List"}>
       <div className="bg-white p-8 border border-blue-100">

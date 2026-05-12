@@ -5,7 +5,6 @@ import { IoChevronDown } from "react-icons/io5";
 export function InputBox({ data: parentData = null, handleChange: parentHandleChange = null }) {
     const [localData, setLocalData] = useState({ state: "", city: "" });
     const [states, setStates] = useState([]);
-    console.log(states)
     const [cities, setCities] = useState([]);
 
     const usingParent = parentData && typeof parentHandleChange === "function";

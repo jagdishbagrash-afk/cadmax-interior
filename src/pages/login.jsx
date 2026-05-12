@@ -94,7 +94,6 @@ export default function Login() {
         otp: data.otp,
       });
 
-      console.log(res);
 
       if (res?.data?.success || res?.data?.status) {
         localStorage.setItem(

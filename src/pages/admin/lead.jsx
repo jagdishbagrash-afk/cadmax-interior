@@ -5,7 +5,6 @@ import AdminLayout from "./common/AdminLayout";
 
 export default function Index() {
   const [data, setData] = useState([]);
-  console.log("|data" ,data)
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 

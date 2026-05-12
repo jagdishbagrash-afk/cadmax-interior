@@ -226,10 +226,8 @@ export default function Index() {
       const response = await main.donationUserAdd(data);
       if (response?.data?.status) {
         // toast.success(response.data.message);
-        console.log("Render api success",response.data.message)
       } else {
         // toast.error(response.data.message);
-        console.log("Render api error",response.data.message)
       }
     } catch (error) {
       // toast.error(error?.response?.data?.data?.message || "An error occurred");

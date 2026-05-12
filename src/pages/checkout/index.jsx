@@ -21,16 +21,19 @@ export default function Index() {
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  const cartItemsRedux = useSelector((state) => state.cart.cartItems);
+  // const cartItemsRedux = useSelector((state) => state.cart.cartItems);
+  const [record, setRecord] = useState([])
+
+  const cartItems = record?.items || [];
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  const [record, setRecord] = useState([])
 
 
   const totalPrice = record?.summary?.finalAmount;
 
-  const itemNames = cartItemsRedux.map((item) => item.name);
+  // const itemNames = cartItemsRedux.map((item) => item.name);
+  const itemNames = cartItems.map((item) => item.name);
   // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -84,7 +87,6 @@ export default function Index() {
     }
   };
 
-  console.log("formData", formData)
 
   const handlePaymentCreateSubmit = async (e) => {
     e.preventDefault();
@@ -115,7 +117,6 @@ export default function Index() {
           description: "Payment for services",
           order_id: res.data.orderId,
           handler: function (response) {
-            console.log("response", response);
             localStorage.setItem("response", JSON.stringify(response));
             handleSubmit(response);
             toast.success("Payment Successful");
@@ -159,21 +160,28 @@ export default function Index() {
   };
 
   const handleSubmit = async (response) => {
-    console.log("response2", response)
-    if (!cartItemsRedux || cartItemsRedux.length === 0) {
+    if (!cartItems || cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
     }
     if (loading) { return; }
     setLoading(true);
     try {
-      const products = cartItemsRedux.map((item) => ({
-        id: item?.product?._id,
-        price: item?.price,
-        quantity: item?.quantity,
-        total: item?.price * item?.quantity,
-        variant: item?.selectedVariant,
-      }));
+      // const products = cartItemsRedux.map((item) => ({
+      //   id: item?.product?._id,
+      //   price: item?.price,
+      //   quantity: item?.quantity,
+      //   total: item?.price * item?.quantity,
+      //   variant: item?.selectedVariant,
+      // }));
+
+      const products = cartItems.map((item) => ({
+  id: item?.productId || item?._id,
+  price: item?.unitPrice,
+  quantity: item?.quantity,
+  total: item?.unitPrice * item?.quantity,
+  variant: item?.variant,
+}));
       const main = new Listing();
       const res = await main.AddOrder({
         name: formData?.name,
@@ -448,7 +456,7 @@ export default function Index() {
             <div className="w-full lg:w-7/12">
               <div className="sticky top-10">
                 <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
-                  Order Summary ({cartItemsRedux?.length || 0})
+                  Order Summary ({cartItems?.length || 0})
                 </h2>
                 <div className="overflow-x-auto">
                   <table className="w-full">
