@@ -67,9 +67,9 @@ export default function Login() {
       } else {
         toast.error(res?.data?.message || "Failed to send OTP");
       }
-
     } catch (err) {
       console.log(err);
+
       toast.error(
         err?.response?.data?.message || "Something went wrong"
       );
@@ -94,6 +94,8 @@ export default function Login() {
         otp: data.otp,
       });
 
+      console.log(res);
+
       if (res?.data?.success || res?.data?.status) {
         localStorage.setItem(
           "token",
@@ -107,14 +109,14 @@ export default function Login() {
         } else {
           router.push("/");
         }
-
       } else {
         toast.error(res?.data?.message || "Invalid OTP");
       }
-
     } catch (error) {
+      console.log(error);
+
       toast.error(
-        error?.response?.data?.message ||
+        error?.response?.data?.errors ||
           "Verification failed"
       );
     }
@@ -122,7 +124,17 @@ export default function Login() {
     setLoading(false);
   };
 
-  // ================= ENTER KEY =================
+  // ================= BACK BUTTON =================
+  const handleBack = () => {
+    setStep(1);
+
+    setData((prev) => ({
+      ...prev,
+      otp: "",
+    }));
+  };
+
+  // ================= SUBMIT =================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -135,7 +147,6 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-
       <div className="bg-white px-4 md:px-6 lg:px-16 pt-5 pb-10 lg:pb-20 rounded-[20px] lg:rounded-[40px] shadow-lg w-full max-w-[976px]">
 
         {/* LOGO */}
@@ -162,13 +173,11 @@ export default function Login() {
 
         {/* FORM */}
         <div className="max-w-[551px] mx-auto">
-
           <form onSubmit={handleSubmit}>
 
             {/* PHONE INPUT */}
             {step === 1 && (
               <div className="mb-5">
-
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Phone Number
                 </label>
@@ -181,14 +190,12 @@ export default function Login() {
                   placeholder="Enter mobile number"
                   className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
                 />
-
               </div>
             )}
 
             {/* OTP INPUT */}
             {step === 2 && (
               <div className="mb-5">
-
                 <label className="block text-sm font-medium mb-2 text-gray-700">
                   Enter OTP
                 </label>
@@ -199,20 +206,32 @@ export default function Login() {
                   value={data.otp}
                   onChange={handleChange}
                   placeholder="Enter 6 digit OTP"
+                  maxLength={6}
                   className="w-full h-[50px] px-4 rounded-lg border bg-gray-100 focus:outline-none focus:ring-2 focus:ring-black"
                 />
 
-                <p
-                  onClick={handleSendOTP}
-                  className="text-sm mt-2 text-right text-gray-500 cursor-pointer hover:text-black"
-                >
-                  Resend OTP
-                </p>
+                <div className="flex items-center justify-between mt-2">
+                  {/* BACK BUTTON */}
+                  <button
+                    type="button"
+                    onClick={handleBack}
+                    className="text-sm text-black font-medium hover:underline"
+                  >
+                    ← Back
+                  </button>
 
+                  {/* RESEND OTP */}
+                  <p
+                    onClick={handleSendOTP}
+                    className="text-sm text-gray-500 cursor-pointer hover:text-black"
+                  >
+                    Resend OTP
+                  </p>
+                </div>
               </div>
             )}
 
-            {/* BUTTON */}
+            {/* SUBMIT BUTTON */}
             <button
               type="submit"
               disabled={loading}
@@ -226,6 +245,7 @@ export default function Login() {
                 ? "Send OTP"
                 : "Login"}
             </button>
+
 
           </form>
         </div>

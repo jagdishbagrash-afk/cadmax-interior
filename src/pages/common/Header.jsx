@@ -127,6 +127,7 @@ export default function Header() {
           )}
 
           {/* CART */}
+          {role === "customer"  &&(
           <Link href="/checkout" className="relative">
             <FiShoppingBag className={textColor} />
             {cartCount > 0 && (
@@ -135,6 +136,7 @@ export default function Header() {
               </span>
             )}
           </Link>
+          )}
         </div>
 
         {/* MOBILE BUTTON */}
