@@ -19,9 +19,14 @@ import "swiper/css/navigation";
 import "swiper/css/thumbs";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import toast from "react-hot-toast";
+import { useRole } from "@/context/RoleContext";
 
 export default function Index() {
   const router = useRouter();
+  const { user, setUser } = useRole();
+
+  console.log("user", user)
+
   // console.log("router", router)
   const id = router?.query?.slug;
   const { error, isLoading, Razorpay } = useRazorpay();
@@ -102,10 +107,23 @@ export default function Index() {
   };
 
   const handleAdd = (redirect) => {
+
+    // User login check
+    if (!user || user?.role !== "customer") {
+      router.push("/login");
+      return;
+    }
+
+    // Product variant check
+    if (!selectedVariant) {
+      toast.error("Please select a variant");
+      return;
+    }
+
     const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
 
     const newItem = {
-      id: id,
+      id,
       name: ProductDetails?.title,
       price: ProductDetails?.amount,
       quantity: qty,
@@ -114,15 +132,19 @@ export default function Index() {
       selectedVariant: selectedVariant?.color,
     };
 
-    // ✅ backend ke liye clean payload
+    // Backend cart payload
     HadleAddtocart({
       productId: ProductDetails?._id,
       quantity: qty,
-      variant: selectedVariant?.color
+      variant: selectedVariant?.color,
     });
 
+    // Redux cart
     dispatch(addItem(newItem));
 
+    toast.success("Item added to cart");
+
+    // Redirect to checkout if needed
     if (redirect) {
       router.push("/checkout");
     }

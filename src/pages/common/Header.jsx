@@ -11,6 +11,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import DesignMenu from "./DesignMenu";
 import { FaRegAddressCard } from "react-icons/fa6";
 import toast from "react-hot-toast";
+import Listing from "../api/Listing";
 
 export default function Header() {
   const { user, setUser } = useRole();
@@ -43,6 +44,33 @@ export default function Header() {
     router.asPath.startsWith(path);
 
   /* CART COUNT */
+
+
+    const [record, setRecord] = useState([]);
+    console.log("record",record)
+  const FetchCart = async () => {
+      try {
+        const main = new Listing();
+        const response = await main.CartGet();
+        console.log(response)
+        if (response?.data?.data) {
+          setRecord(response.data.data?.items  );
+        } else {
+          setRecord([]);
+        }
+  
+      } catch (error) {
+        console.log(error);
+        setRecord([]);
+      }
+    };
+
+
+  useEffect(() => {
+    FetchCart();
+  }, []);
+
+
   useEffect(() => {
     const total = cartItemsRedux.reduce(
       (sum, item) => sum + (item.quantity || 0),
@@ -130,9 +158,9 @@ export default function Header() {
           {role === "customer"  &&(
           <Link href="/checkout" className="relative">
             <FiShoppingBag className={textColor} />
-            {cartCount > 0 && (
+            {record?.length > 0 && (
               <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white px-1 rounded-full">
-                {cartCount}
+                {record?.length}
               </span>
             )}
           </Link>

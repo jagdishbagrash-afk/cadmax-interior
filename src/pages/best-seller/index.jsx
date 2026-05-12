@@ -8,7 +8,6 @@ import Listing from "../api/Listing";
 export default function Index() {
     const [bestseller, setbestseller] = useState([])
 
-    console.log("bestseller", bestseller)
     const fetchData = async () => {
         try {
             const main = new Listing();
@@ -39,8 +38,6 @@ export default function Index() {
                             const product = item?.product ?? item;
                             return <ProductCard key={product?._id || idx} item={product} />;
                         })}
-
-
                     </div>
                 </div>
             </div>

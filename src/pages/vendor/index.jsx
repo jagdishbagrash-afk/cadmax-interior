@@ -29,8 +29,7 @@ export default function Index() {
     <Layout>
       <Banner
         Slider1={ProductListBanner}
-        title={"Book a Vendor"}
-        button={"Book a Vendor"}
+        title={" "}
       />
 
       <div className="bg-[#FFFFFF] py-6 md:py-10">

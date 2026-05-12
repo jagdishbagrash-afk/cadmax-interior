@@ -4,8 +4,6 @@ import { IoIosArrowDown } from "react-icons/io";
 import { useEffect, useRef, useState } from "react";
 import Listing from "../api/Listing";
 import c1 from "../../Assets/Images/c1.jpg";
-// ✅ Swiper imports
-// ✅ Swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay } from "swiper/modules";
 
@@ -16,22 +14,22 @@ const MegaMenu = ({ textColor, active }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
 
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      const main = new Listing();
-      const res = await main.categoryStatus();
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const main = new Listing();
+        const res = await main.categoryStatus();
 
-      if (res.data?.data) {
-        setCategories(res.data.data);
+        if (res.data?.data) {
+          setCategories(res.data.data);
+        }
+      } catch (error) {
+        console.error("API Error:", error);
       }
-    } catch (error) {
-      console.error("API Error:", error);
-    }
-  };
+    };
 
-  fetchData();
-}, []);
+    fetchData();
+  }, []);
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -69,50 +67,58 @@ useEffect(() => {
 
       {/* DROPDOWN */}
       <div
-        className={`absolute top-full left-0 right-0   bg-white shadow-xl z-50 transition-all duration-300 ${open
+        className={`absolute top-full left-0 right-0   bg-white/50 shadow-xl z-50 transition-all duration-300 ${open
           ? "opacity-100 translate-y-0 visible"
           : "opacity-0 -translate-y-5 invisible"
           }`}
       >
         <div className="container max-w-[1430px] mx-auto p-8">
-          {/* ✅ Swiper instead of grid */}
-            <Swiper
+          <Swiper
             modules={[Autoplay]}
-                 key={categories.length} // 🔥 force re-init
-        slidesPerView={1}
-        loop={categories.length > 1}
-        autoplay={{
-          delay: 2500,
-          disableOnInteraction: false,
-          pauseOnMouseEnter: false,
-        }}
-            spaceBetween={24} // ✅ spacing between cards
+            key={categories.length}
+            loop={categories.length > 3}
+            autoplay={{
+              delay: 2500,
+              disableOnInteraction: false,
+              pauseOnMouseEnter: true,
+            }}
+            spaceBetween={24}
+            slidesPerView={1}
             breakpoints={{
-              640: {
+              0: {
+                slidesPerView: 1,
+              },
+              768: {
                 slidesPerView: 2,
               },
               1024: {
-                slidesPerView: 4,
+                slidesPerView: 3,
               },
             }}
+            className="w-full"
           >
             {categories?.map((item) => (
               <SwiperSlide key={item._id}>
                 <Link
                   href={`/product/list/${item.slug}`}
                   onClick={() => setOpen(false)}
+                  className="block"
                 >
-                  <div className="h-[180px] md:h-[220px] overflow-hidden rounded-lg">
+                  {/* IMAGE */}
+                  <div className="h-[220px] overflow-hidden rounded-2xl shadow-lg">
                     <img
                       src={item.Image || c1.src}
                       alt={item.name}
-                      className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                      className="w-full h-full object-cover hover:scale-105 transition duration-500"
                     />
                   </div>
 
-                  <p className="text-center mt-2 text-black text-sm md:text-base">
-                    {item.name}
-                  </p>
+                  {/* TITLE */}
+                  <div className="mt-3 bg-white/70 backdrop-blur-md rounded-xl py-3 px-4 shadow-sm">
+                    <p className="text-center font-semibold text-black text-sm md:text-base uppercase tracking-wide">
+                      {item.name}
+                    </p>
+                  </div>
                 </Link>
               </SwiperSlide>
             ))}

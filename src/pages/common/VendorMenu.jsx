@@ -65,7 +65,7 @@ const VendorMenu = ({ textColor, active }) => {
 
             {/* DROPDOWN */}
             <div
-                className={`absolute top-full left-0 right-0   bg-white shadow-xl z-50 transition-all duration-300 ${open
+                className={`absolute top-full left-0 right-0   bg-white/50 shadow-xl z-50 transition-all duration-300 ${open
                     ? "opacity-100 translate-y-0 visible"
                     : "opacity-0 -translate-y-5 invisible"
                     }`}
@@ -106,9 +106,9 @@ const VendorMenu = ({ textColor, active }) => {
                                         />
                                     </div>
 
-                                    <p className="text-center mt-2 text-black text-sm md:text-base">
-                                        {item.name}
-                                    </p>
+                              <p className="text-center font-[500] mt-2 text-black text-sm md:text-base bg-white/50 backdrop-blur-sm py-2 rounded-md">
+  {item.name}
+</p>
                                 </Link>
                             </SwiperSlide>
                         ))}
