@@ -11,7 +11,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.GetServicesContact();
-
       if (response?.data?.data?.contactget) {
         setData(response.data.data.contactget);
       } else {
