@@ -21,7 +21,6 @@ export default function Index() {
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
-  // const cartItemsRedux = useSelector((state) => state.cart.cartItems);
   const [record, setRecord] = useState([])
 
   const cartItems = record?.items || [];
@@ -32,9 +31,7 @@ export default function Index() {
 
   const totalPrice = record?.summary?.finalAmount;
 
-  // const itemNames = cartItemsRedux.map((item) => item.name);
   const itemNames = cartItems.map((item) => item.name);
-  // FORM STATE (Only 3 inputs)
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",  // ✅ FIX
