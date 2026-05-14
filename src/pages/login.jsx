@@ -64,6 +64,7 @@ export default function Login() {
     // New User Check
     if (res?.data?.data?.isNewUser) {
       toast.error("Phone not registered. Please sign up first.");
+  setLoading(false);
       return;
     }
 
@@ -74,6 +75,7 @@ export default function Login() {
     } else {
       toast.error(res?.data?.message || "Failed to send OTP");
     }
+  setLoading(false);
 
   } catch (err) {
     console.log(err);
