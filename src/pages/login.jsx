@@ -64,7 +64,8 @@ export default function Login() {
       // New User Check
       if (res?.data?.data?.isNewUser) {
         toast.error("Please sign up first");
-        // window.location.href = "/register";
+        window.location.href = "/register";
+        return
       }
 
       // Existing User
