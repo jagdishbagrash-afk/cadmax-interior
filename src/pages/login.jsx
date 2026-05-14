@@ -60,7 +60,6 @@ export default function Login() {
     const res = await main.SendOTP({
       phone: data.phone,
     });
-
     // New User Check
     if (res?.data?.data?.isNewUser) {
       toast.error("Phone not registered. Please sign up first.");
