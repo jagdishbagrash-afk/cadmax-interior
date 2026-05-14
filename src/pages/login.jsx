@@ -61,6 +61,14 @@ export default function Login() {
         phone: data.phone,
       });
 
+      // New User Check
+      if (res?.data?.data?.isNewUser) {
+        toast.error("Please sign up first");
+        window.location.href = "/register";
+        return;
+      }
+
+      // Existing User
       if (res?.data?.success || res?.data?.status) {
         toast.success("OTP sent successfully");
         setStep(2);
@@ -116,7 +124,7 @@ export default function Login() {
 
       toast.error(
         error?.response?.data?.errors ||
-          "Verification failed"
+        "Verification failed"
       );
     }
 
@@ -241,8 +249,8 @@ export default function Login() {
                   ? "Sending OTP..."
                   : "Verifying..."
                 : step === 1
-                ? "Send OTP"
-                : "Login"}
+                  ? "Send OTP"
+                  : "Login"}
             </button>
 
 
