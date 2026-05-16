@@ -48,19 +48,17 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
 
   return (
     <div className="relative w-full" ref={containerRef}>
-      {/* Main Image Container */}
-      <div
-        className="relative w-full aspect-[4/5] cursor-crosshair overflow-hidden bg-gray-100"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
-      >
-        <img
-          src={imageSrc}
-          alt={alt}
-          className="w-full h-full object-cover"
-          style={{ objectFit: 'cover' }}
-        />
-      </div>
+  <div
+  className="relative w-full h-full min-h-full cursor-crosshair flex items-center justify-center"
+  onMouseMove={handleMouseMove}
+  onMouseLeave={handleMouseLeave}
+>
+  <img
+    src={imageSrc}
+    alt={alt}
+    className="w-full h-full object-contain"
+  />
+</div>
 
       {/* Zoom Lens Effect */}
       {/* {zoomPosition.show && (
@@ -364,71 +362,50 @@ export default function Index() {
               | {ProductDetails?.subcategory?.name}
             </p>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-              {/* Mobile View */}
-              <div className="block md:hidden w-full">
-                <Swiper
-                  slidesPerView={4}
-                  spaceBetween={10}
-                  className="w-full"
-                >
-                  {selectedVariant?.images?.map((img, index) => (
-                    <SwiperSlide key={index}>
-                      <div
-                        onClick={() => setCurrentIndex(index)}
-                        className={`relative aspect-square rounded-md overflow-hidden border cursor-pointer
-                          ${currentIndex === index ? "border-black" : "border-gray-300"}`}
-                      >
-                        <Image
-                          src={img}
-                          alt={`Thumbnail ${index + 1}`}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-                <div className="flex-1 w-full md:max-w-[500px] mt-5 mb-3">
-                  <img
-                    src={selectedVariant?.images?.[currentIndex]}
-                    alt="Product"
-                    className="w-full h-full object-contain rounded-lg"
-                  />
-                </div>
-              </div>
+            <div className="flex flex-col lg:flex-row gap-8 xl:gap-14 w-full">
 
-              {/* Desktop View */}
-              <div className="hidden md:flex gap-4 w-full">
-                <div className="w-[80px]">
+              {/* LEFT SIDE - PRODUCT GALLERY */}
+              <div className="w-full lg:w-[62%]">
+
+                {/* MOBILE VIEW */}
+                <div className="block md:hidden">
+
+                  {/* MAIN IMAGE */}
+                  <div className="w-full rounded-2xl overflow-hidden bg-[#F7F7F7]">
+                    <div className="relative w-full aspect-[4/5] flex items-center justify-center p-4">
+                      <img
+                        src={selectedVariant?.images?.[currentIndex]}
+                        alt="Product"
+                        className="w-full h-full object-contain rounded-xl"
+                      />
+                    </div>
+                  </div>
+
+                  {/* THUMBNAILS */}
                   <Swiper
-                    direction="vertical"
-                    slidesPerView={5}
-                    spaceBetween={10}
-                    watchSlidesProgress
-                    onSwiper={setThumbsSwiper}
-                    modules={[Thumbs]}
-                    className="h-[500px]"
+                    slidesPerView={4}
+                    spaceBetween={12}
+                    className="w-full mt-4"
                   >
-                    {selectedVariant?.images && selectedVariant?.images?.map((img, index) => (
-                      <SwiperSlide
-                        key={index}
-                        className="cursor-pointer"
-                        onMouseEnter={() => setCurrentIndex(index)}
-                        onClick={() => setCurrentIndex(index)}
-                      >
+                    {selectedVariant?.images?.map((img, index) => (
+                      <SwiperSlide key={index}>
                         <div
-                          className={`relative aspect-square rounded-md overflow-hidden border
-                            ${currentIndex === index
+                          onClick={() => setCurrentIndex(index)}
+                          className={`
+                relative aspect-square rounded-xl overflow-hidden 
+                border-2 cursor-pointer bg-[#F7F7F7]
+                transition-all duration-300
+                ${currentIndex === index
                               ? "border-black"
-                              : "border-gray-300 hover:border-black"
-                            }`}
+                              : "border-gray-200"
+                            }
+              `}
                         >
                           <Image
                             src={img}
                             alt={`Thumbnail ${index + 1}`}
                             fill
-                            className="object-cover"
+                            className="object-contain p-1"
                           />
                         </div>
                       </SwiperSlide>
@@ -436,223 +413,200 @@ export default function Index() {
                   </Swiper>
                 </div>
 
-                <div className="flex-1 w-full md:max-w-[500px]">
-                  <div className="relative w-full" style={{ paddingBottom: '125%' }}> {/* 4:5 aspect ratio */}
-                    {isMobile ? (
-                      <img
-                        src={selectedVariant?.images?.[currentIndex]}
-                        alt="Product"
-                        className="absolute inset-0 w-full h-full object-contain"
-                      />
-                    ) : (
-                      <div className="absolute inset-0">
-                        <CustomZoomOnHover
-                          imageSrc={selectedVariant?.images?.[currentIndex]}
-                          alt="Product Image"
-                          zoomScale={2.5}
-                        />
+                {/* DESKTOP VIEW */}
+                <div className="hidden md:flex gap-5">
+
+                  {/* THUMBNAILS */}
+                  <div className="w-[90px] shrink-0">
+                    <Swiper
+                      direction="vertical"
+                      slidesPerView={5}
+                      spaceBetween={14}
+                      watchSlidesProgress
+                      onSwiper={setThumbsSwiper}
+                      modules={[Thumbs]}
+                      className="h-[720px]"
+                    >
+                      {selectedVariant?.images?.map((img, index) => (
+                        <SwiperSlide
+                          key={index}
+                          onMouseEnter={() => setCurrentIndex(index)}
+                          onClick={() => setCurrentIndex(index)}
+                          className="cursor-pointer"
+                        >
+                          <div
+                            className={`
+                  relative aspect-square rounded-2xl overflow-hidden
+                  transition-all duration-300
+                  ${currentIndex === index
+                                ? "border-black"
+                                : "border-gray-200 hover:border-gray-400"
+                              }
+                `}
+                          >
+                            <Image
+                              src={img}
+                              alt={`Thumbnail ${index + 1}`}
+                              fill
+                              className="object-cover p-2 rounded-2xl"
+                            />
+                          </div>
+                        </SwiperSlide>
+                      ))}
+                    </Swiper>
+                  </div>
+
+                  {/* MAIN IMAGE */}
+                  <div className="flex-1">
+                    <div className="w-full rounded-3xl overflow-hidden ">
+
+                      <div className="relative w-full aspect-[4/5]">
+                        {isMobile ? (
+                          <div className="absolute inset-0 flex items-center justify-center p-6">
+                            <img
+                              src={selectedVariant?.images?.[currentIndex]}
+                              alt="Product"
+                              className="w-full h-full object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <div className="absolute inset-0 p-4">
+                            <CustomZoomOnHover
+                              imageSrc={selectedVariant?.images?.[currentIndex]}
+                              alt="Product Image"
+                              zoomScale={2.5}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
+
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Right Side - Product Info */}
-              <div className="relative z-10">
-                <h1 className="text-2xl text-[#171717] font-black Creato mt-2 uppercase">
-                  {ProductDetails?.title}
-                </h1>
+              {/* RIGHT SIDE - PRODUCT DETAILS */}
+              <div className="w-full lg:w-[42%]">
 
-                <p className="text-[#4D5466] text-lg font-medium mt-4 Creato">
-                  {ProductDetails?.description}
-                </p>
+                <div className="sticky top-24">
 
-                <h2 className="text-3xl text-[#171717] font-bold mt-6 Creato">
-                  ₹{ProductDetails?.amount}
-                </h2>
+                  <h1 className="text-3xl xl:text-4xl font-black uppercase text-[#171717] leading-tight">
+                    {ProductDetails?.title}
+                  </h1>
 
-                <p className="text-base font-medium text-[#4D5466] mt-2 Creato">
-                  Deliver in approximately 8–12 days
-                </p>
+                  <p className="text-[#4D5466] text-base xl:text-lg mt-5 leading-7 font-medium">
+                    {ProductDetails?.description}
+                  </p>
 
-                {/* Color Variants */}
-                {ProductDetails?.variants?.length > 0 && (
-                  <div className="mt-6">
-                    <p className="text-sm font-medium text-[#4D5466] mb-3">
-                      Colour:{" "}
-                      <span className="capitalize text-[#171717]">
-                        {selectedVariant?.color}
-                      </span>
-                    </p>
+                  {/* PRICE */}
+                  <div className="mt-7 flex items-end gap-3">
+                    <h2 className="text-4xl font-bold text-black">
+                      ₹{ProductDetails?.amount}
+                    </h2>
 
-                    <div className="flex gap-4 flex-wrap">
-                      {ProductDetails &&
-                        ProductDetails.variants &&
-                        ProductDetails?.variants?.map((variant, idx) => {
-                          const isActive = selectedVariant?.color === variant.color;
+                    <span className="text-sm text-[#4D5466] mb-1">
+                      Inclusive of all taxes
+                    </span>
+                  </div>
+
+                  <p className="text-[#4D5466] text-base mt-3 font-medium">
+                    Deliver in approximately 8–12 days
+                  </p>
+
+                  {/* COLOR VARIANTS */}
+                  {ProductDetails?.variants?.length > 0 && (
+                    <div className="mt-8">
+
+                      <p className="text-sm font-semibold mb-4 text-[#171717]">
+                        Colour :
+                        <span className="capitalize ml-2">
+                          {selectedVariant?.color}
+                        </span>
+                      </p>
+
+                      <div className="flex flex-wrap gap-4">
+                        {ProductDetails?.variants?.map((variant, idx) => {
+                          const isActive =
+                            selectedVariant?.color === variant?.color;
+
                           return (
                             <div
                               key={idx}
                               onClick={() => {
                                 setSelectedVariant(variant);
-                                setCurrentIndex(0); // Reset index when variant changes
+                                setCurrentIndex(0);
                               }}
-                              className={`w-[110px] border rounded-md p-2 cursor-pointer transition
-                                ${isActive ? "border-black" : "border-gray-200 hover:border-gray-400"}`}
+                              className={`
+                    w-[110px] rounded-2xl overflow-hidden 
+                    border-2 cursor-pointer bg-white
+                    transition-all duration-300
+                    ${isActive
+                                  ? "border-black shadow-md"
+                                  : "border-gray-200 hover:border-gray-400"
+                                }
+                  `}
                             >
-                              <div className="w-full aspect-square relative rounded overflow-hidden">
+                              <div className="relative aspect-square bg-[#F7F7F7]">
                                 <Image
                                   src={variant.images?.[0]}
                                   alt={variant?.color}
                                   fill
-                                  className="object-cover"
+                                  className="object-contain p-2"
                                 />
                               </div>
-                              <p className="mt-2 text-center text-sm font-medium capitalize">
+
+                              <p className="text-center text-sm font-semibold py-3 capitalize">
                                 {variant?.color}
                               </p>
                             </div>
                           );
                         })}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
-                {/* Buttons */}
-                <div className="mt-6 flex flex-col gap-3 w-full">
-                  <div className="flex gap-3 w-full">
-                    <div className="w-24 border border-black rounded-md px-2 py-2 flex items-center justify-between">
+                  {/* BUTTONS */}
+                  <div className="mt-8 space-y-4">
+
+                    <div className="flex gap-4">
+
+                      {/* QTY */}
+                      <div className="w-[130px] h-[54px] border border-black rounded-xl flex items-center justify-between px-4">
+                        <button
+                          onClick={decreaseQty}
+                          className="text-2xl cursor-pointer"
+                        >
+                          −
+                        </button>
+
+                        <span className="font-semibold text-lg">
+                          {qty}
+                        </span>
+
+                        <button
+                          onClick={increaseQty}
+                          className="text-2xl cursor-pointer"
+                        >
+                          +
+                        </button>
+                      </div>
+
+                      {/* CART */}
                       <button
-                        onClick={decreaseQty}
-                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
+                        onClick={handleAdd}
+                        className="flex-1 h-[54px] border border-black rounded-xl font-semibold hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
                       >
-                        −
-                      </button>
-                      <span className="text-md font-medium">{qty}</span>
-                      <button
-                        onClick={increaseQty}
-                        className="w-6 h-6 flex items-center justify-center text-lg hover:bg-gray-100 rounded cursor-pointer"
-                      >
-                        +
+                        ADD TO CART
                       </button>
                     </div>
+
+                    {/* BUY NOW */}
                     <button
-                      className="flex-1 border border-black py-3 font-medium rounded-md hover:bg-gray-100 cursor-pointer"
-                      onClick={handleAdd}
+                      onClick={handlecheckoutAdd}
+                      className="w-full h-[56px] rounded-xl bg-black text-white font-semibold hover:opacity-90 transition-all duration-300 cursor-pointer"
                     >
-                      ADD TO CART
+                      BUY IT NOW
                     </button>
-                  </div>
-                  <button
-                    className="w-full bg-black text-white py-3 font-medium rounded-md hover:bg-gray-800 cursor-pointer"
-                    onClick={handlecheckoutAdd}
-                  >
-                    BUY IT NOW
-                  </button>
-                </div>
-
-                {/* Features */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mt-8 text-base text-[#4D5466] Creato">
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Complimentary Delivery & Setup <br /> Above ₹20000{" "}
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Complimentary Styling Services
-                    </p>{" "}
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">
-                      Quality Assured Warranty Coverage
-                    </p>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-[#000000]">
-                      <FiTruck size={22} />
-                    </span>
-                    <p className="font-medium">Fast Local Service Support</p>{" "}
-                  </div>
-                </div>
-
-                {/* Accordion Sections */}
-                <div className="mt-10">
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(1)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Dimensions
-                      </span>
-                      {open === 1 ? <FaMinus size={20} /> : <FaPlus size={20} />}
-                    </div>
-                    {open === 1 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.dimensions}
-                      </p>
-                    )}
-                  </div>
-
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(2)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Materials & Features
-                      </span>
-                      {open === 2 ? <FaMinus size={20} /> : <FaPlus size={20} />}
-                    </div>
-                    {open === 2 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.material}
-                      </p>
-                    )}
-                  </div>
-
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(3)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Product Care
-                      </span>
-                      {open === 3 ? <FaMinus size={20} /> : <FaPlus size={20} />}
-                    </div>
-                    {open === 3 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.type}
-                      </p>
-                    )}
-                  </div>
-
-                  <div
-                    className="border-t border-gray-200 py-4 cursor-pointer"
-                    onClick={() => toggle(4)}
-                  >
-                    <div className="flex justify-between items-center">
-                      <span className="text-base font-bold text-[#171717] uppercase">
-                        Terms & Conditions
-                      </span>
-                      {open === 4 ? <FaMinus size={20} /> : <FaPlus size={20} />}
-                    </div>
-                    {open === 4 && (
-                      <p className="mt-3 text-[#4D5466] font-medium Creato text-lg leading-6">
-                        {ProductDetails?.terms}
-                      </p>
-                    )}
                   </div>
                 </div>
               </div>
