@@ -164,6 +164,16 @@ class Listing extends Component {
     return Api.post("/subcategory/add", data)
   }
 
+
+  async deleteSubCategory(id) {
+    return Api.get(`/subcategory/delete/${id}`);
+  }
+
+   async deleteCategory(id) {
+    return Api.get(`/category/delete/${id}`);
+  }
+  
+  
   async subcategoryList() {
     return Api.get("/subcategory/get",)
   }

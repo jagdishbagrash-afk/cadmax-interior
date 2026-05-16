@@ -7,10 +7,11 @@ import AddSubCategory from "./AddSubCategory";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../common/BlockUnblock";
 import dataimage from "../../../Assets/Images/c1.jpg"
+import toast from "react-hot-toast";
 
 export default function Index() {
   const [data, setData] = useState([]);
-
+  const [deletingId, setDeletingId] = useState(null);
   const [search, setSearch] = useState("");
 
   const fetchData = async () => {
@@ -33,7 +34,23 @@ export default function Index() {
     item.name.toLowerCase().includes(search.toLowerCase())
   );
 
-
+  // Frontend API call
+  const handleDeleteSubCategory = async (id) => {
+    try {
+      const main = new Listing();
+      const response = await main.deleteSubCategory(id); // You need to create this method
+      if (response.data?.status) {
+        toast.success(response.data.message);
+        // Refresh the list after successful deletion
+        fetchData();
+      } else {
+        toast.error(response.data?.message || "Failed to delete subcategory");
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      toast.error(error?.response?.data?.message || "Cannot delete - Subcategory is being used in products");
+    }
+  };
   return (
     <AdminLayout page={"SubCategory List"}>
 
@@ -81,13 +98,17 @@ export default function Index() {
                   </th>
 
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
-                    Name
+                   SubCatgory Name
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Created Date
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Action
+                  </th>
+
+                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
+                    Delete
                   </th>
                 </tr>
               </thead>
@@ -98,10 +119,13 @@ export default function Index() {
                   filteredData?.map((item) => (
                     <tr
                       key={item._id}
-                      className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
-                        }`}
+                      className={`transition
+    ${item?.status === false
+                          ? "bg-gray-100 text-gray-400 opacity-70"
+                          : "hover:bg-gray-50"
+                        }
+  `}
                     >
-
                       <td className="px-6 py-4 text-center">
                         <img
                           src={item.Image ? item.Image : dataimage?.src || dataimage?.src}
@@ -138,6 +162,23 @@ export default function Index() {
                             step={3}
                             status={item?.status === true ? false : true}
                           />
+                        </div>
+                      </td>
+
+                      <td className="px-6 py-4">
+                        <div className="flex justify-center items-center gap-3">
+
+                          <button
+                            onClick={() => handleDeleteSubCategory(item._id)}
+                            disabled={deletingId === item._id}
+                            className="cursor-pointer m-auto flex items-center justify-center
+                    w-[100px] h-[42px] rounded-lg 
+                    px-2 py-2
+                    border border-gray-200 shadow-sm  text-white  hover:text-black
+                    bg-red-500 hover:bg-gray-50 transition-all duration-200"
+                          >
+                            {deletingId === item._id ? "Deleting..." : "Delete"}
+                          </button>
                         </div>
                       </td>
                     </tr>

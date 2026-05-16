@@ -56,7 +56,7 @@ export default function Download() {
                     </a>
 
                     <a
-                        href="https://apps.apple.com/app/6761532500"
+                        href="https://apps.apple.com/in/app/cadmax-atelier/id6761532500"
                         target="_blank"
                         className="hover:scale-105 transition"
                     >

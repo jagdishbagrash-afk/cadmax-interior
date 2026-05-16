@@ -47,45 +47,45 @@ export default function Login() {
   };
 
   // ================= SEND OTP =================
- const handleSendOTP = async () => {
-  if (data.phone.length !== 10) {
-    return toast.error("Enter valid 10 digit phone number");
-  }
-
-  setLoading(true);
-
-  try {
-    const main = new Listing();
-
-    const res = await main.SendOTP({
-      phone: data.phone,
-    });
-    // New User Check
-    if (res?.data?.data?.isNewUser) {
-      toast.error("Phone not registered. Please sign up first.");
-  setLoading(false);
-      return;
+  const handleSendOTP = async () => {
+    if (data.phone.length !== 10) {
+      return toast.error("Enter valid 10 digit phone number");
     }
 
-    // Existing User
-    if (res?.data?.success || res?.data?.status) {
-      toast.success("OTP sent successfully");
-      setStep(2);
-    } else {
-      toast.error(res?.data?.message || "Failed to send OTP");
+    setLoading(true);
+
+    try {
+      const main = new Listing();
+
+      const res = await main.SendOTP({
+        phone: data.phone,
+      });
+      // New User Check
+      if (res?.data?.data?.isNewUser) {
+        toast.error("Phone not registered. Please sign up first.");
+        setLoading(false);
+        return;
+      }
+
+      // Existing User
+      if (res?.data?.success || res?.data?.status) {
+        toast.success("OTP sent successfully");
+        setStep(2);
+      } else {
+        toast.error(res?.data?.message || "Failed to send OTP");
+      }
+      setLoading(false);
+
+    } catch (err) {
+      console.log(err);
+
+      toast.error(
+        err?.response?.data?.message || "Something went wrong"
+      );
     }
-  setLoading(false);
 
-  } catch (err) {
-    console.log(err);
-
-    toast.error(
-      err?.response?.data?.message || "Something went wrong"
-    );
-  }
-
-  setLoading(false);
-};
+    setLoading(false);
+  };
 
   // ================= VERIFY OTP =================
   const handleVerifyOTP = async () => {
