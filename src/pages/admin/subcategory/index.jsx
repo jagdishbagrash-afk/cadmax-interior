@@ -98,7 +98,7 @@ export default function Index() {
                   </th>
 
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
-                   SubCatgory Name
+                    SubCatgory Name
                   </th>
                   <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
                     Created Date
@@ -164,23 +164,25 @@ export default function Index() {
                           />
                         </div>
                       </td>
+                      {item?.status === false && (
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center items-center gap-3">
 
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center items-center gap-3">
-
-                          <button
-                            onClick={() => handleDeleteSubCategory(item._id)}
-                            disabled={deletingId === item._id}
-                            className="cursor-pointer m-auto flex items-center justify-center
+                            <button
+                              onClick={() => handleDeleteSubCategory(item._id)}
+                              disabled={deletingId === item._id}
+                              className="cursor-pointer m-auto flex items-center justify-center
                     w-[100px] h-[42px] rounded-lg 
                     px-2 py-2
                     border border-gray-200 shadow-sm  text-white  hover:text-black
                     bg-red-500 hover:bg-gray-50 transition-all duration-200"
-                          >
-                            {deletingId === item._id ? "Deleting..." : "Delete"}
-                          </button>
-                        </div>
-                      </td>
+                            >
+                              {deletingId === item._id ? "Deleting..." : "Delete"}
+                            </button>
+                          </div>
+                        </td>
+                      )}
+
                     </tr>
                   ))
                 ) : (

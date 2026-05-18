@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
-import { MdAdd, MdEdit } from "react-icons/md";
+import { MdAdd, MdEdit, MdChevronLeft, MdChevronRight } from "react-icons/md";
 import Link from "next/link";
 import Listing from "@/pages/api/Listing";
 import moment from "moment";
@@ -11,6 +11,10 @@ import { formatMultiPrice } from "@/components/ValueDataHook";
 export default function Index() {
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
+
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const fetchData = async () => {
     try {
@@ -27,9 +31,28 @@ export default function Index() {
     fetchData();
   }, []);
 
+  // SEARCH FILTER
   const filteredData = data.filter((item) =>
     item.title?.toLowerCase().includes(search.toLowerCase())
   );
+
+  // PAGINATION LOGIC
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  const paginatedData = filteredData.slice(startIndex, endIndex);
+
+  // PAGE CHANGE
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  // RESET PAGE ON SEARCH
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
     <AdminLayout page={"Product List"}>
@@ -77,7 +100,7 @@ export default function Index() {
         </div>
 
         {/* TABLE CARD */}
-        <div className="bg-white rounded-2xl shadow-md border Z-[0]">
+        <div className="bg-white rounded-2xl shadow-md border z-[0]">
 
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
@@ -85,6 +108,10 @@ export default function Index() {
               {/* HEAD */}
               <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
                 <tr className="text-center">
+
+                  {/* INDEX */}
+                  <th className="px-6 py-3">#</th>
+
                   <th className="px-6 py-3">Image</th>
                   <th className="px-6 py-3">Title</th>
                   <th className="px-6 py-3">Category</th>
@@ -94,25 +121,33 @@ export default function Index() {
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Action</th>
                   <th className="px-6 py-3">Delete</th>
-
                 </tr>
               </thead>
 
               {/* BODY */}
+              {/* BODY */}
               <tbody className="divide-y">
 
-                {filteredData.length > 0 ? (
-                  filteredData.map((item) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item, index) => (
                     <tr
                       key={item._id}
                       className={`hover:bg-gray-50 transition
-                      ${item?.deletedAt ? "opacity-50" : ""}`}
+        ${item?.deletedAt ? "opacity-50" : ""}`}
                     >
+
+                      {/* INDEX */}
+                      <td className="px-6 py-4 text-center font-semibold text-gray-600">
+                        {startIndex + index + 1}
+                      </td>
 
                       {/* IMAGE */}
                       <td className="px-6 py-4 text-center">
                         <img
-                          src={item?.variants?.[0]?.images?.[0] || "/no-image.png"}
+                          src={
+                            item?.variants?.[0]?.images?.[0] ||
+                            "/no-image.png"
+                          }
                           className="w-16 h-16 object-cover rounded-lg border mx-auto"
                           alt="product"
                         />
@@ -141,7 +176,10 @@ export default function Index() {
                       {/* STOCK */}
                       <td className="px-6 py-4 text-left">
                         {item?.variants?.map((v) => (
-                          <div key={v.color} className="flex justify-between text-xs">
+                          <div
+                            key={v.color}
+                            className="flex justify-between text-xs"
+                          >
                             <span className="capitalize">{v.color}</span>
                             <span className="font-semibold">{v.stock}</span>
                           </div>
@@ -168,33 +206,35 @@ export default function Index() {
                           <Link
                             href={`/admin/product/edit?id=${item._id}`}
                             className="cursor-pointer m-auto flex items-center justify-center
-                    w-[42px] h-[42px] rounded-lg 
-                    border border-gray-200 shadow-sm 
-                    bg-white hover:bg-gray-50 transition-all duration-200"
+              w-[42px] h-[42px] rounded-lg 
+              border border-gray-200 shadow-sm 
+              bg-white hover:bg-gray-50 transition-all duration-200"
                           >
                             <MdEdit size={20} />
                           </Link>
 
-                         
-
                         </div>
                       </td>
 
-                   <td className="px-6 py-4 text-center text-gray-500">
+                      {/* DELETE */}
+                      <td className="px-6 py-4 text-center text-gray-500">
 
-                         <BlockUnblock
-                            Id={item._id}
-                            fetchData={fetchData}
-                            step={4}
-                            status={item?.deletedAt ? true : false}
-                          />
+                        <BlockUnblock
+                          Id={item._id}
+                          fetchData={fetchData}
+                          step={4}
+                          status={item?.deletedAt ? true : false}
+                        />
                       </td>
 
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={8} className="text-center py-10 text-gray-400">
+                    <td
+                      colSpan={10}
+                      className="text-center py-10 text-gray-400"
+                    >
                       No Products Found
                     </td>
                   </tr>
@@ -203,6 +243,69 @@ export default function Index() {
               </tbody>
             </table>
           </div>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4 border-t flex-wrap gap-3">
+
+              {/* LEFT */}
+              <p className="text-sm text-gray-500">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(endIndex, filteredData.length)} of{" "}
+                {filteredData.length} products
+              </p>
+
+              {/* RIGHT */}
+              <div className="flex items-center gap-2">
+
+                {/* PREV */}
+                <button
+                  onClick={() =>
+                    currentPage > 1 &&
+                    handlePageChange(currentPage - 1)
+                  }
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronLeft size={20} />
+                </button>
+
+                {/* PAGE NUMBERS */}
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(
+                    Math.max(currentPage - 3, 0),
+                    Math.min(currentPage + 2, totalPages)
+                  )
+                  .map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => handlePageChange(page)}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition
+                        ${currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "border hover:bg-gray-100"
+                        }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+
+                {/* NEXT */}
+                <button
+                  onClick={() =>
+                    currentPage < totalPages &&
+                    handlePageChange(currentPage + 1)
+                  }
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronRight size={20} />
+                </button>
+
+              </div>
+            </div>
+          )}
+
         </div>
       </div>
     </AdminLayout>

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import toast from "react-hot-toast";
@@ -16,10 +16,34 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
 
+  // 5 MIN TIMER
+  const [timer, setTimer] = useState(0);
+
   const [data, setData] = useState({
     phone: "",
     otp: "",
   });
+
+  // ================= TIMER EFFECT =================
+  useEffect(() => {
+    let interval;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  // FORMAT TIMER
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   // ================= HANDLE CHANGE =================
   const handleChange = (e) => {
@@ -48,6 +72,13 @@ export default function Login() {
 
   // ================= SEND OTP =================
   const handleSendOTP = async () => {
+    // BLOCK RESEND FOR 5 MIN
+    if (step === 2 && timer > 0) {
+      return toast.error(
+        `Please wait ${formatTime(timer)} before resending OTP`
+      );
+    }
+
     if (data.phone.length !== 10) {
       return toast.error("Enter valid 10 digit phone number");
     }
@@ -60,6 +91,7 @@ export default function Login() {
       const res = await main.SendOTP({
         phone: data.phone,
       });
+
       // New User Check
       if (res?.data?.data?.isNewUser) {
         toast.error("Phone not registered. Please sign up first.");
@@ -70,12 +102,16 @@ export default function Login() {
       // Existing User
       if (res?.data?.success || res?.data?.status) {
         toast.success("OTP sent successfully");
+
         setStep(2);
+
+        // START 5 MIN TIMER
+        setTimer(300);
       } else {
         toast.error(res?.data?.message || "Failed to send OTP");
       }
-      setLoading(false);
 
+      setLoading(false);
     } catch (err) {
       console.log(err);
 
@@ -103,7 +139,6 @@ export default function Login() {
         otp: data.otp,
       });
 
-
       if (res?.data?.success || res?.data?.status) {
         localStorage.setItem(
           "token",
@@ -125,7 +160,7 @@ export default function Login() {
 
       toast.error(
         error?.response?.data?.errors ||
-        "Verification failed"
+          "Verification failed"
       );
     }
 
@@ -140,6 +175,9 @@ export default function Login() {
       ...prev,
       otp: "",
     }));
+
+    // RESET TIMER
+    setTimer(0);
   };
 
   // ================= SUBMIT =================
@@ -219,6 +257,7 @@ export default function Login() {
                 />
 
                 <div className="flex items-center justify-between mt-2">
+
                   {/* BACK BUTTON */}
                   <button
                     type="button"
@@ -229,12 +268,21 @@ export default function Login() {
                   </button>
 
                   {/* RESEND OTP */}
-                  <p
+                  <button
+                    type="button"
                     onClick={handleSendOTP}
-                    className="text-sm text-gray-500 cursor-pointer hover:text-black"
+                    disabled={timer > 0}
+                    className={`text-sm font-medium transition ${
+                      timer > 0
+                        ? "text-gray-400 cursor-not-allowed"
+                        : "text-black hover:underline"
+                    }`}
                   >
-                    Resend OTP
-                  </p>
+                    {timer > 0
+                      ? `Resend OTP in ${formatTime(timer)}`
+                      : "Resend OTP"}
+                  </button>
+
                 </div>
               </div>
             )}
@@ -250,10 +298,9 @@ export default function Login() {
                   ? "Sending OTP..."
                   : "Verifying..."
                 : step === 1
-                  ? "Send OTP"
-                  : "Login"}
+                ? "Send OTP"
+                : "Login"}
             </button>
-
 
           </form>
         </div>
