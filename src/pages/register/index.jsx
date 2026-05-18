@@ -1,5 +1,5 @@
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
@@ -8,8 +8,12 @@ import { useRouter } from "next/router";
 export default function Register() {
   const router = useRouter();
 
+  // ================= STATES =================
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
+
+  // 5 MIN TIMER
+  const [timer, setTimer] = useState(0);
 
   const [data, setData] = useState({
     phone: "",
@@ -33,6 +37,7 @@ export default function Register() {
 
   // ================= BACK BUTTON =================
   const handleBack = () => {
+
     // STEP 2 → STEP 1
     if (step === 2) {
       setStep(1);
@@ -41,6 +46,9 @@ export default function Register() {
         ...prev,
         otp: "",
       }));
+
+      // RESET TIMER
+      setTimer(0);
     }
 
     // STEP 3 → STEP 2
@@ -66,6 +74,8 @@ export default function Register() {
 
       if (res?.data?.status) {
         toast.success("OTP sent successfully");
+        setTimer(300);
+
         setStep(2);
       } else {
         toast.error(
@@ -146,7 +156,7 @@ export default function Register() {
       } else {
         toast.error(
           res?.data?.message ||
-            "Registration failed"
+          "Registration failed"
         );
       }
 
@@ -163,6 +173,27 @@ export default function Register() {
     }
 
     setLoading(false);
+  };
+
+
+  useEffect(() => {
+    let interval;
+
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    }
+
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  // FORMAT TIMER
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
   return (
@@ -274,12 +305,21 @@ export default function Register() {
                   ← Back
                 </button>
 
-                <p
+                <button
+                  type="button"
                   onClick={sendOTP}
-                  className="text-sm cursor-pointer text-gray-500 hover:text-black"
+                  disabled={timer > 0}
+                  className={`text-sm font-medium transition
+      ${timer > 0
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-black hover:underline"
+                    }`}
                 >
-                  Resend OTP
-                </p>
+                  {timer > 0
+                    ? `Resend OTP in ${formatTime(timer)}`
+                    : "Resend OTP"}
+                </button>
+
 
               </div>
 
