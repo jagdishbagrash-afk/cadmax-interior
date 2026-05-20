@@ -187,11 +187,11 @@ const ProductGrid = ({ selectedId }) => {
 
   return (
     <>
-      <div className="w-full px-6 md:px-10 lg:px-14 py-8">
+      <div className="w-full px-4 md:px-10 lg:px-14 py-4 md:py-8">
         <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] gap-8">
 
           {/* ================= FILTER PANEL (ALWAYS SHOW) ================= */}
-          <div className="bg-white p-2 md:p-6 sticky top-24 h-max space-y-6 rounded-xl shadow-md order-2 md:order-1">
+          <div className="bg-white p-4 md:p-6 sticky top-24 h-max space-y-6 rounded-xl shadow-md order-2 md:order-1">
 
             <div className="flex justify-between items-center border-b pb-4">
               <h3 className="text-sm font-bold uppercase tracking-wider text-gray-800">
@@ -260,7 +260,7 @@ const ProductGrid = ({ selectedId }) => {
                 {/* <div className="absolute top-1/2 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" /> */}
 
                 <div
-                  className="absolute top-1/2 h-1 bg-black -translate-y-1/2 rounded-full"
+                  className="absolute top-1/2 h-1  -translate-y-1/2 rounded-full"
                   style={{
                     left: `${leftPercent}%`,
                     width: `${widthPercent}%`,
@@ -276,7 +276,7 @@ const ProductGrid = ({ selectedId }) => {
           </div>
 
           {/* ================= PRODUCTS / NODATA ================= */}
-          <div className="order-1 md:order-2">
+          <div className="order-1  md:order-2">
 
             {isInitialLoading ? (
               <div className="flex justify-center items-center py-20">
@@ -289,7 +289,7 @@ const ProductGrid = ({ selectedId }) => {
               />
             ) : (
               <>
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
                   {products.map((item) => (
                     <ProductCard
                       key={item._id || item.id}

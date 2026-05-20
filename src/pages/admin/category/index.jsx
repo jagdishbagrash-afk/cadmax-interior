@@ -43,7 +43,6 @@
         const response = await main.deleteCategory(id); // You need to create this method
         if (response.data?.status) {
           toast.success(response.data.message);
-          // Refresh the list after successful deletion
           fetchData();
         } else {
           toast.error(response.data?.message || "Failed to delete subcategory");

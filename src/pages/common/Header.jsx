@@ -46,24 +46,24 @@ export default function Header() {
   /* CART COUNT */
 
 
-    const [record, setRecord] = useState([]);
-    console.log("record",record)
+  const [record, setRecord] = useState([]);
+  console.log("record", record)
   const FetchCart = async () => {
-      try {
-        const main = new Listing();
-        const response = await main.CartGet();
-        console.log(response)
-        if (response?.data?.data) {
-          setRecord(response.data.data?.items  );
-        } else {
-          setRecord([]);
-        }
-  
-      } catch (error) {
-        console.log(error);
+    try {
+      const main = new Listing();
+      const response = await main.CartGet();
+      console.log(response)
+      if (response?.data?.data) {
+        setRecord(response.data.data?.items);
+      } else {
         setRecord([]);
       }
-    };
+
+    } catch (error) {
+      console.log(error);
+      setRecord([]);
+    }
+  };
 
 
   useEffect(() => {
@@ -90,11 +90,10 @@ export default function Header() {
 
   return (
     <header
-      className={`sticky top-0 z-[100] transition-all duration-300 ${
-        scrolled
-          ? "bg-white shadow-md"
-          : "bg-white/30"
-      }`}
+      className={`sticky top-0 z-[100] transition-all duration-300 ${scrolled
+        ? "bg-white shadow-md"
+        : "bg-white/30"
+        }`}
     >
       <nav className="max-w-[1430px] container bg-transparent  mx-auto flex items-center justify-between px-6 xl:px-0 py-3 md:py-0">
 
@@ -121,12 +120,13 @@ export default function Header() {
           {role === "customer" ? (
             <div className="relative">
               <FiUser
+                 size={24}
                 className={`cursor-pointer ${textColor}`}
                 onClick={() => setDropdownOpen(!dropdownOpen)}
               />
 
               {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
+                <div className="hidden md:block absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
                   <ul className="text-black">
                     <Link href="/orders" className="block px-4 py-2 hover:bg-gray-100">
                       Order History
@@ -153,36 +153,89 @@ export default function Header() {
               <Link href="/register">Signup</Link>
             </div>
           )}
+          {role === "customer" && (
+            <Link
+              href="/checkout"
+              className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-all duration-200"
+            >
+              <FiShoppingBag className={`${textColor} text-[22px]`} />
 
-          {/* CART */}
-          {role === "customer"  &&(
-          <Link href="/checkout" className="relative">
-            <FiShoppingBag className={textColor} />
-            {record?.length > 0 && (
-              <span className="absolute -top-2 -right-2 text-xs bg-red-500 text-white px-1 rounded-full">
-                {record?.length}
-              </span>
-            )}
-          </Link>
+              {record?.length > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full shadow-md">
+                  {record?.length > 99 ? "99+" : record?.length}
+                </span>
+              )}
+            </Link>
           )}
+          <button
+            className={`md:hidden ${textColor}`}
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            {menuOpen ? <HiOutlineX size={22} /> : <HiOutlineMenu size={22} />}
+          </button>
         </div>
 
         {/* MOBILE BUTTON */}
-        <button
-          className={`md:hidden ${textColor}`}
-          onClick={() => setMenuOpen(!menuOpen)}
-        >
-          {menuOpen ? <HiOutlineX size={22} /> : <HiOutlineMenu size={22} />}
-        </button>
+
       </nav>
 
       {/* MOBILE MENU */}
       {menuOpen && (
-        <div className="md:hidden bg-white border-t">
-          <ul className="flex flex-col p-4 space-y-3 text-black">
-            <Link href="/product">PRODUCT</Link>
-            <Link href="/design">DESIGN</Link>
-            <Link href="/vendor">VENDOR</Link>
+        <div className="md:hidden bg-white border-t border-gray-200 shadow-lg rounded-b-2xl">
+          <ul className="flex flex-col p-4 space-y-2 text-black text-[15px] font-medium">
+
+            <Link
+              href="/product"
+              className="px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+            >
+              PRODUCT
+            </Link>
+
+            <Link
+              href="/design"
+              className="px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+            >
+              DESIGN
+            </Link>
+
+            <Link
+              href="/vendor"
+              className="px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+            >
+              VENDOR
+            </Link>
+
+            {role === "customer" && (
+              <div className="border-t pt-2 mt-2 space-y-2">
+                <Link
+                  href="/orders"
+                  className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                >
+                  Order History
+                </Link>
+
+                <Link
+                  href="/setting"
+                  className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                >
+                  Settings
+                </Link>
+
+                <Link
+                  href="/address"
+                  className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                >
+                  Address
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  className="w-full text-left px-4 py-3 rounded-xl text-red-500 hover:bg-red-50 transition-all duration-200"
+                >
+                  Logout
+                </button>
+              </div>
+            )}
           </ul>
         </div>
       )}

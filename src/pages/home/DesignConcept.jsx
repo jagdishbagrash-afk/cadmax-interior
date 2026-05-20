@@ -55,18 +55,17 @@ const DesignConcept = () => {
                         >
                             <img
                                 src={data[0]?.Image || "/fallback.jpg"}
-                                alt={data[0]?.name || "design"}
+                                alt={data[0]?.title || "design"}
                                 className="w-full h-full md:h-[630px] object-cover transform hover:scale-105 transition duration-500"
                             />
                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                 <h3 className="text-white font-[900] text-[18px] leading-[100%] tracking-[-0.02em] text-center uppercase Creato">
-                                    {data[0]?.name}
+                                    {data[0]?.title}
                                 </h3>
                             </div>
                         </Link>
                     )}
 
-                    {/* ✅ Slider Section */}
                     <div className="lg:col-span-2">
                         <Swiper
                             slidesPerView={1}
@@ -86,7 +85,7 @@ const DesignConcept = () => {
                                             >
                                                 <img
                                                     src={item?.Image || "/fallback.jpg"}
-                                                    alt={item?.name || "design"}
+                                                    alt={item?.title || "design"}
                                                     className="w-full h-full object-cover group-hover:scale-105 transition duration-700"
                                                 />
 

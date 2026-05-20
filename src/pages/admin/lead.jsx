@@ -2,13 +2,19 @@
 import { useEffect, useState } from "react";
 import Listing from "@/pages/api/Listing";
 import AdminLayout from "./common/AdminLayout";
+import toast from "react-hot-toast";
+import { MdDelete } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
   const [filteredData, setFilteredData] = useState([]);
 
-  // 📡 Fetch Data
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  // Fetch Data
   const fetchData = async () => {
     try {
       const main = new Listing();
@@ -32,7 +38,7 @@ export default function Index() {
     fetchData();
   }, []);
 
-  // 🔍 Search Logic (Safe)
+  // Search
   useEffect(() => {
     const result = data.filter((item) => {
       const searchValue = search.toLowerCase();
@@ -49,106 +55,278 @@ export default function Index() {
     });
 
     setFilteredData(result);
+    setCurrentPage(1);
   }, [search, data]);
+
+  // Pagination Logic
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  // Status Update
+  const handleStatusChange = async (id, status) => {
+    try {
+      const main = new Listing();
+
+      const response = await main.LeadStatusUpdate(id, {
+        status,
+      });
+
+      if (response?.data?.status) {
+        toast.success("Status Updated");
+
+        const updated = data.map((item) =>
+          item._id === id ? { ...item, status } : item
+        );
+
+        setData(updated);
+        fetchData();
+      }
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+
+  // Delete Lead
+  const handleDelete = async (id) => {
+    try {
+      const main = new Listing();
+
+      const response = await main.LeadDelete(id);
+
+      if (response?.data?.status) {
+        toast.success("Lead Deleted");
+
+        const updated = data.filter((item) => item._id !== id);
+
+        setData(updated);
+      }
+    } catch (error) {
+      toast.error("Failed to delete lead");
+    }
+  };
+
+  // Status Color Classes
+  const getStatusClasses = (status) => {
+    switch (status) {
+
+      case "pending":
+        return "bg-yellow-100 text-yellow-700 border-yellow-200";
+
+      case "contacted":
+        return "bg-blue-100 text-blue-700 border-blue-200";
+
+      case "completed":
+        return "bg-green-100 text-green-700 border-green-200";
+
+      case "rejected":
+        return "bg-red-100 text-red-700 border-red-200";
+
+      default:
+        return "bg-gray-100 text-gray-700 border-gray-200";
+    }
+  };
 
   return (
     <AdminLayout page={"Lead List"}>
-      <div className="px-4 py-2 lg:px-4 lg:py-2.5">
-        <div className="bg-white rounded-[20px] mb-[10px] p-2 shadow-sm">
+      <div className="px-3 py-3 lg:px-5">
+
+        <div className="bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
 
           {/* Header */}
-          <div className="px-4 py-3 flex flex-wrap justify-between items-center border-b border-black/10 gap-3">
-            <h2 className="text-[16px] lg:text-[18px] font-medium text-[#1E1E1E]">
-              Lead Listing
-            </h2>
+          <div className="p-4 border-b border-gray-100 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
-            {/* 🔍 Search */}
+            <div>
+              <h2 className="text-xl font-semibold text-[#171717]">
+                Lead Listing
+              </h2>
+
+              <p className="text-sm text-gray-500 mt-1">
+                Total Leads : {filteredData?.length}
+              </p>
+            </div>
+
+            {/* Search */}
             <input
               type="text"
               placeholder="Search name, phone, source..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="border px-4 py-2 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-400 w-full sm:w-[250px]"
+              className="
+                w-full lg:w-[320px]
+                border border-gray-200
+                px-4 py-3 rounded-xl
+                text-sm outline-none
+                focus:ring-2 focus:ring-black/10
+              "
             />
+
           </div>
 
           {/* Table */}
-          <div className="overflow-x-auto rounded-xl border border-gray-200 mt-4">
-            <table className="min-w-full divide-y divide-gray-200">
+          <div className="overflow-x-auto">
 
-              {/* Table Head */}
-              <thead className="bg-gray-50 sticky top-0 z-10">
+            <table className="min-w-[1400px] w-full">
+
+              {/* Head */}
+              <thead className="bg-[#FAFAFA] border-b border-gray-100">
+
                 <tr>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Name</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Phone</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Email</th>
-                
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Page URL</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Source</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Type</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Services</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Category</th>
-                  <th className="px-4 py-3 text-sm font-semibold text-gray-600 uppercase text-center">Message</th>
+                  {[
+                    "Name",
+                    "Phone",
+                    "Email",
+                    "Page URL",
+                    "Source",
+                    "Type",
+                    "Services",
+                    "Category",
+                    "Status",
+                    "Message",
+                    "Action",
+                  ].map((head) => (
+                    <th
+                      key={head}
+                      className="
+                        px-4 py-4 text-center
+                        text-xs font-bold uppercase
+                        text-[#6B7280]
+                      "
+                    >
+                      {head}
+                    </th>
+                  ))}
                 </tr>
+
               </thead>
 
-              {/* Table Body */}
-              <tbody className="bg-white divide-y divide-gray-100">
-                {filteredData?.length > 0 ? (
-                  filteredData.map((item) => {
-                    // 🧠 Normalize Data
+              {/* Body */}
+              <tbody>
 
-                    const name = item?.assignedTo?.name  || item?.name || "N/A";
-                    const phone =  item?.assignedTo?.phone || item?.phone || "N/A";
-                    const email =  item?.assignedTo?.email || item?.email || "N/A";
+                {paginatedData?.length > 0 ? (
+                  paginatedData.map((item) => {
 
-                    const pageurl = item?.pageurl || "N/A";
-                    const source = item?.source || "N/A";
-                    const type = item?.type || "Lead";
-                    const services = item?.services || "N/A";
-                    const category = item?.category || "N/A";
-                    const message = item?.message || "N/A";
+                    const name =
+                      item?.assignedTo?.name || item?.name || "N/A";
+
+                    const phone =
+                      item?.assignedTo?.phone || item?.phone || "N/A";
+
+                    const email =
+                      item?.assignedTo?.email || item?.email || "N/A";
 
                     return (
-                      <tr key={item._id} className="hover:bg-gray-50 transition">
+                      <tr
+                        key={item?._id}
+                        className="border-b border-gray-100 hover:bg-gray-50 transition"
+                      >
 
-                        {/* Name */}
-                        <td className="px-4 py-3 text-center">{name}</td>
+                        <td className="px-4 py-4 text-center font-medium">
+                          {name}
+                        </td>
 
-                        {/* Phone */}
-                        <td className="px-4 py-3 text-center">{phone}</td>
-                        <td className="px-4 py-3 text-center">{email}</td>
+                        <td className="px-4 py-4 text-center">
+                          {phone}
+                        </td>
 
+                        <td className="px-4 py-4 text-center">
+                          {email}
+                        </td>
 
-                        {/* Page URL */}
-                        <td className="px-4 py-3 text-center max-w-[200px] truncate">
-                          {pageurl !== "N/A" ? (
+                        <td className="px-4 py-4 text-center">
+                          {item?.pageurl ? (
                             <a
-                              href={pageurl}
+                              href={item?.pageurl}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="text-blue-600 underline"
                             >
                               Open Link
                             </a>
-                          ) : "N/A"}
+                          ) : (
+                            "N/A"
+                          )}
                         </td>
 
-                        {/* Source */}
-                        <td className="px-4 py-3 text-center">{source}</td>
+                        <td className="px-4 py-4 text-center">
+                          {item?.source || "N/A"}
+                        </td>
 
-                        {/* Type */}
-                        <td className="px-4 py-3 text-center capitalize">{type}</td>
+                        <td className="px-4 py-4 text-center capitalize">
+                          {item?.type || "Lead"}
+                        </td>
 
-                        {/* Services */}
-                        <td className="px-4 py-3 text-center capitalize">{services}</td>
+                        <td className="px-4 py-4 text-center capitalize">
+                          {item?.services || "N/A"}
+                        </td>
 
-                        {/* Category */}
-                        <td className="px-4 py-3 text-center capitalize">{category}</td>
+                        <td className="px-4 py-4 text-center capitalize">
+                          {item?.category || "N/A"}
+                        </td>
 
-                        {/* Message */}
-                        <td className="px-4 py-3 text-center max-w-[250px] truncate">
-                          {message}
+                        {/* STATUS */}
+                        <td className="px-4 py-4 text-center">
+
+                          <select
+                            value={item?.status || "pending"}
+                            onChange={(e) =>
+                              handleStatusChange(
+                                item?._id,
+                                e.target.value
+                              )
+                            }
+                            className={`
+    px-3 py-2 rounded-xl text-sm font-medium
+    border outline-none capitalize
+    transition-all duration-200
+    ${getStatusClasses(item?.status)}
+  `}
+                          >
+                            <option value="pending">
+                              Pending
+                            </option>
+
+                            <option value="contacted">
+                              Contacted
+                            </option>
+
+                            <option value="completed">
+                              Completed
+                            </option>
+
+                            <option value="rejected">
+                              Rejected
+                            </option>
+                          </select>
+
+                        </td>
+
+                        {/* MESSAGE */}
+                        <td className="px-4 py-4 text-center max-w-[250px] truncate">
+                          {item?.message || "N/A"}
+                        </td>
+
+                        {/* ACTION */}
+                        <td className="px-4 py-4 text-center">
+
+                          <button
+                            onClick={() =>
+                              handleDelete(item?._id)
+                            }
+                            className="
+                              w-10 h-10 rounded-xl
+                              bg-red-50 text-red-500
+                              hover:bg-red-100
+                              flex items-center justify-center
+                              mx-auto transition
+                            "
+                          >
+                            <MdDelete size={18} />
+                          </button>
+
                         </td>
 
                       </tr>
@@ -156,16 +334,77 @@ export default function Index() {
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="px-6 py-10 text-center text-gray-500">
+                    <td
+                      colSpan={11}
+                      className="text-center py-14 text-gray-500"
+                    >
                       No Leads Found
                     </td>
                   </tr>
                 )}
+
               </tbody>
 
             </table>
+
           </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+
+            <div className="p-4 flex items-center justify-center gap-2 border-t border-gray-100 flex-wrap">
+
+              {/* Prev */}
+              <button
+                disabled={currentPage === 1}
+                onClick={() =>
+                  setCurrentPage((prev) => prev - 1)
+                }
+                className="
+                  px-4 py-2 rounded-xl border
+                  disabled:opacity-40
+                "
+              >
+                Prev
+              </button>
+
+              {/* Page Numbers */}
+              {[...Array(totalPages)]?.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPage(index + 1)}
+                  className={`
+                    w-10 h-10 rounded-xl border text-sm
+                    ${currentPage === index + 1
+                      ? "bg-black text-white"
+                      : "bg-white"
+                    }
+                  `}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              {/* Next */}
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() =>
+                  setCurrentPage((prev) => prev + 1)
+                }
+                className="
+                  px-4 py-2 rounded-xl border
+                  disabled:opacity-40
+                "
+              >
+                Next
+              </button>
+
+            </div>
+
+          )}
+
         </div>
+
       </div>
     </AdminLayout>
   );

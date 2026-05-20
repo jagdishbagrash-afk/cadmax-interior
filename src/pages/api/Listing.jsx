@@ -17,7 +17,7 @@ class Listing extends Component {
   }
 
 
- async TokenVerify() {
+  async TokenVerify() {
     return Api.get("/add-notification")
   }
 
@@ -169,11 +169,11 @@ class Listing extends Component {
     return Api.get(`/subcategory/delete/${id}`);
   }
 
-   async deleteCategory(id) {
+  async deleteCategory(id) {
     return Api.get(`/category/delete/${id}`);
   }
-  
-  
+
+
   async subcategoryList() {
     return Api.get("/subcategory/get",)
   }
@@ -239,6 +239,15 @@ class Listing extends Component {
 
   async getProductbyCategory(id) {
     return Api.get(`/product/category/${id}`);
+  }
+
+
+  async LeadDelete(id) {
+    return Api.delete(`/lead/delete/${id}`);
+  }
+
+    async LeadStatusUpdate(id ,status) {
+    return Api.post(`/lead-status-update/${id}` ,status);
   }
 
   async getProductbySubcategory(id) {

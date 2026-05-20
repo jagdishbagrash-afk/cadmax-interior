@@ -48,17 +48,17 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
 
   return (
     <div className="relative w-full" ref={containerRef}>
-  <div
-  className="relative w-full h-full min-h-full cursor-crosshair flex items-center justify-center"
-  onMouseMove={handleMouseMove}
-  onMouseLeave={handleMouseLeave}
->
-  <img
-    src={imageSrc}
-    alt={alt}
-    className="w-full h-full object-contain"
-  />
-</div>
+      <div
+        className="relative w-full h-full min-h-full cursor-crosshair flex items-center justify-center"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+      >
+        <img
+          src={imageSrc}
+          alt={alt}
+          className="w-full h-full object-contain"
+        />
+      </div>
 
       {/* Zoom Lens Effect */}
       {/* {zoomPosition.show && (
@@ -109,6 +109,7 @@ export default function Index() {
   const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [open, setOpen] = useState(null);
   const [ProductDetails, setProductDetails] = useState(null);
+  console.log("ProductDetails", ProductDetails)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
@@ -352,60 +353,103 @@ export default function Index() {
 
   return (
     <Layout>
-      <div className="w-full md:py-14 flex flex-col justify-center">
-        <div className="w-full container max-w-[1350px] mx-auto px-6 xl:px-0 py-3">
-          <div className="bg-white">
-            <p className="text-base text-[#4D5466] tracking-widest mb-6 uppercase">
-              <span className="text-[#171717]">
-                {ProductDetails?.category?.name}{" "}
-              </span>
-              | {ProductDetails?.subcategory?.name}
-            </p>
+      <div className="w-full bg-white">
+        <div className="container max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 lg:py-12">
 
-            <div className="flex flex-col lg:flex-row gap-8 xl:gap-14 w-full">
+          {/* BREADCRUMB */}
+          <p className="text-[11px] sm:text-xs md:text-sm text-[#6B7280] uppercase tracking-[2px] mb-5 md:mb-8">
+            <span className="text-black font-semibold">
+              {ProductDetails?.category?.name}
+            </span>{" "}
+            / {ProductDetails?.subcategory?.name}
+          </p>
 
-              {/* LEFT SIDE - PRODUCT GALLERY */}
-              <div className="w-full lg:w-[62%]">
+          {/* MAIN SECTION */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-14">
 
-                {/* MOBILE VIEW */}
-                <div className="block md:hidden">
+            {/* =====================================
+          LEFT SIDE - PRODUCT GALLERY
+      ===================================== */}
+            <div className="w-full">
 
-                  {/* MAIN IMAGE */}
-                  <div className="w-full rounded-2xl overflow-hidden bg-[#F7F7F7]">
-                    <div className="relative w-full aspect-[4/5] flex items-center justify-center p-4">
-                      <img
-                        src={selectedVariant?.images?.[currentIndex]}
-                        alt="Product"
-                        className="w-full h-full object-contain rounded-xl"
-                      />
-                    </div>
-                  </div>
+              {/* MOBILE + TABLET */}
+              <div className="block lg:hidden">
 
-                  {/* THUMBNAILS */}
+                {/* MAIN IMAGE */}
+                <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-3xl overflow-hidden">
+
+                  <img
+                    src={selectedVariant?.images?.[currentIndex]}
+                    alt="Product"
+                    className="w-full h-full object-contain p-4 sm:p-6"
+                  />
+
+                </div>
+
+                {/* THUMBNAILS */}
+                <Swiper
+                  slidesPerView={4}
+                  spaceBetween={12}
+                  className="mt-4"
+                >
+                  {selectedVariant?.images?.map((img, index) => (
+                    <SwiperSlide key={index}>
+                      <div
+                        onClick={() => setCurrentIndex(index)}
+                        className={`
+                    relative aspect-square rounded-2xl overflow-hidden
+                    border-2 cursor-pointer bg-[#F7F7F7]
+                    transition-all duration-300
+                    ${currentIndex === index
+                            ? "border-black"
+                            : "border-gray-200"
+                          }
+                  `}
+                      >
+                        <Image
+                          src={img}
+                          alt="thumb"
+                          fill
+                          className="object-contain p-2"
+                        />
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
+              </div>
+
+              {/* DESKTOP */}
+              <div className="hidden lg:flex gap-5">
+
+                {/* THUMBNAILS */}
+                <div className="w-[90px] shrink-0">
+
                   <Swiper
-                    slidesPerView={4}
-                    spaceBetween={12}
-                    className="w-full mt-4"
+                    direction="vertical"
+                    slidesPerView={5}
+                    spaceBetween={14}
+                    modules={[Thumbs]}
+                    className="h-[700px]"
                   >
                     {selectedVariant?.images?.map((img, index) => (
                       <SwiperSlide key={index}>
                         <div
-                          onClick={() => setCurrentIndex(index)}
+                          onMouseEnter={() => setCurrentIndex(index)}
                           className={`
-                relative aspect-square rounded-xl overflow-hidden 
-                border-2 cursor-pointer bg-[#F7F7F7]
-                transition-all duration-300
-                ${currentIndex === index
+                      relative aspect-square rounded-2xl overflow-hidden
+                      border-2 cursor-pointer bg-[#F7F7F7]
+                      transition-all duration-300
+                      ${currentIndex === index
                               ? "border-black"
                               : "border-gray-200"
                             }
-              `}
+                    `}
                         >
                           <Image
                             src={img}
-                            alt={`Thumbnail ${index + 1}`}
+                            alt="thumb"
                             fill
-                            className="object-contain p-1"
+                            className="object-contain p-2"
                           />
                         </div>
                       </SwiperSlide>
@@ -413,209 +457,249 @@ export default function Index() {
                   </Swiper>
                 </div>
 
-                {/* DESKTOP VIEW */}
-                <div className="hidden md:flex gap-5">
+                {/* MAIN IMAGE */}
+                <div className="flex-1">
 
-                  {/* THUMBNAILS */}
-                  <div className="w-[90px] shrink-0">
-                    <Swiper
-                      direction="vertical"
-                      slidesPerView={5}
-                      spaceBetween={14}
-                      watchSlidesProgress
-                      onSwiper={setThumbsSwiper}
-                      modules={[Thumbs]}
-                      className="h-[720px]"
-                    >
-                      {selectedVariant?.images?.map((img, index) => (
-                        <SwiperSlide
-                          key={index}
-                          onMouseEnter={() => setCurrentIndex(index)}
-                          onClick={() => setCurrentIndex(index)}
-                          className="cursor-pointer"
-                        >
-                          <div
-                            className={`
-                  relative aspect-square rounded-2xl overflow-hidden
-                  transition-all duration-300
-                  ${currentIndex === index
-                                ? "border-black"
-                                : "border-gray-200 hover:border-gray-400"
-                              }
-                `}
-                          >
-                            <Image
-                              src={img}
-                              alt={`Thumbnail ${index + 1}`}
-                              fill
-                              className="object-cover p-2 rounded-2xl"
-                            />
-                          </div>
-                        </SwiperSlide>
-                      ))}
-                    </Swiper>
-                  </div>
+                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
 
-                  {/* MAIN IMAGE */}
-                  <div className="flex-1">
-                    <div className="w-full rounded-3xl overflow-hidden ">
-
-                      <div className="relative w-full aspect-[4/5]">
-                        {isMobile ? (
-                          <div className="absolute inset-0 flex items-center justify-center p-6">
-                            <img
-                              src={selectedVariant?.images?.[currentIndex]}
-                              alt="Product"
-                              className="w-full h-full object-contain"
-                            />
-                          </div>
-                        ) : (
-                          <div className="absolute inset-0 p-4">
-                            <CustomZoomOnHover
-                              imageSrc={selectedVariant?.images?.[currentIndex]}
-                              alt="Product Image"
-                              zoomScale={2.5}
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* RIGHT SIDE - PRODUCT DETAILS */}
-              <div className="w-full lg:w-[42%]">
-
-                <div className="sticky top-24">
-
-                  <h1 className="text-3xl xl:text-4xl font-black uppercase text-[#171717] leading-tight">
-                    {ProductDetails?.title}
-                  </h1>
-
-                  <p className="text-[#4D5466] text-base xl:text-lg mt-5 leading-7 font-medium">
-                    {ProductDetails?.description}
-                  </p>
-
-                  {/* PRICE */}
-                  <div className="mt-7 flex items-end gap-3">
-                    <h2 className="text-4xl font-bold text-black">
-                      ₹{ProductDetails?.amount}
-                    </h2>
-
-                    <span className="text-sm text-[#4D5466] mb-1">
-                      Inclusive of all taxes
-                    </span>
-                  </div>
-
-                  <p className="text-[#4D5466] text-base mt-3 font-medium">
-                    Deliver in approximately 8–12 days
-                  </p>
-
-                  {/* COLOR VARIANTS */}
-                  {ProductDetails?.variants?.length > 0 && (
-                    <div className="mt-8">
-
-                      <p className="text-sm font-semibold mb-4 text-[#171717]">
-                        Colour :
-                        <span className="capitalize ml-2">
-                          {selectedVariant?.color}
-                        </span>
-                      </p>
-
-                      <div className="flex flex-wrap gap-4">
-                        {ProductDetails?.variants?.map((variant, idx) => {
-                          const isActive =
-                            selectedVariant?.color === variant?.color;
-
-                          return (
-                            <div
-                              key={idx}
-                              onClick={() => {
-                                setSelectedVariant(variant);
-                                setCurrentIndex(0);
-                              }}
-                              className={`
-                    w-[110px] rounded-2xl overflow-hidden 
-                    border-2 cursor-pointer bg-white
-                    transition-all duration-300
-                    ${isActive
-                                  ? "border-black shadow-md"
-                                  : "border-gray-200 hover:border-gray-400"
-                                }
-                  `}
-                            >
-                              <div className="relative aspect-square bg-[#F7F7F7]">
-                                <Image
-                                  src={variant.images?.[0]}
-                                  alt={variant?.color}
-                                  fill
-                                  className="object-contain p-2"
-                                />
-                              </div>
-
-                              <p className="text-center text-sm font-semibold py-3 capitalize">
-                                {variant?.color}
-                              </p>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* BUTTONS */}
-                  <div className="mt-8 space-y-4">
-
-                    <div className="flex gap-4">
-
-                      {/* QTY */}
-                      <div className="w-[130px] h-[54px] border border-black rounded-xl flex items-center justify-between px-4">
-                        <button
-                          onClick={decreaseQty}
-                          className="text-2xl cursor-pointer"
-                        >
-                          −
-                        </button>
-
-                        <span className="font-semibold text-lg">
-                          {qty}
-                        </span>
-
-                        <button
-                          onClick={increaseQty}
-                          className="text-2xl cursor-pointer"
-                        >
-                          +
-                        </button>
-                      </div>
-
-                      {/* CART */}
-                      <button
-                        onClick={handleAdd}
-                        className="flex-1 h-[54px] border border-black rounded-xl font-semibold hover:bg-black hover:text-white transition-all duration-300 cursor-pointer"
-                      >
-                        ADD TO CART
-                      </button>
+                    <div className="absolute inset-0 p-6">
+                      <CustomZoomOnHover
+                        imageSrc={selectedVariant?.images?.[currentIndex]}
+                        alt="Product"
+                        zoomScale={2.5}
+                      />
                     </div>
 
-                    {/* BUY NOW */}
-                    <button
-                      onClick={handlecheckoutAdd}
-                      className="w-full h-[56px] rounded-xl bg-black text-white font-semibold hover:opacity-90 transition-all duration-300 cursor-pointer"
-                    >
-                      BUY IT NOW
-                    </button>
                   </div>
+
                 </div>
               </div>
             </div>
+
+            {/* =====================================
+          RIGHT SIDE - PRODUCT INFO
+      ===================================== */}
+            <div className="w-full">
+
+              <div className="lg:sticky lg:top-24">
+
+                {/* TITLE */}
+                <h1 className="text-[26px] sm:text-[32px] xl:text-[42px] leading-tight font-black uppercase text-black">
+                  {ProductDetails?.title}
+                </h1>
+
+                {/* DESCRIPTION */}
+                <p className="mt-4 text-[15px] sm:text-base leading-7 text-[#4D5466] font-medium text-justify">
+                  {ProductDetails?.description}
+                </p>
+
+                {/* PRICE */}
+                <div className="mt-6 flex items-end gap-3 flex-wrap">
+
+                  <h2 className="text-3xl sm:text-4xl font-bold text-black">
+                    ₹{ProductDetails?.amount}
+                  </h2>
+
+                  <span className="text-sm text-[#6B7280]">
+                    Inclusive of all taxes
+                  </span>
+
+                </div>
+
+                {/* DELIVERY */}
+                <div className="mt-3 flex items-center gap-2 text-sm text-[#4D5466]">
+                  <FiTruck className="text-lg" />
+                  Deliver in approximately 8–12 days
+                </div>
+
+                {/* =====================================
+              VARIANTS
+          ===================================== */}
+                {ProductDetails?.variants?.length > 0 && (
+                  <div className="mt-8">
+
+                    <p className="text-sm font-semibold text-black mb-4">
+                      Colour :
+                      <span className="capitalize ml-2">
+                        {selectedVariant?.color}
+                      </span>
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+
+                      {ProductDetails?.variants?.map((variant, idx) => {
+
+                        const isActive =
+                          selectedVariant?.color === variant?.color;
+
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => {
+                              setSelectedVariant(variant);
+                              setCurrentIndex(0);
+                            }}
+                            className={`
+                        rounded-2xl overflow-hidden border-2
+                        cursor-pointer transition-all duration-300
+                        bg-white
+                        ${isActive
+                                ? "border-black shadow-lg"
+                                : "border-gray-200"
+                              }
+                      `}
+                          >
+
+                            <div className="relative aspect-square bg-[#F7F7F7]">
+                              <Image
+                                src={variant.images?.[0]}
+                                alt={variant?.color}
+                                fill
+                                className="object-contain p-3"
+                              />
+                            </div>
+
+                            <p className="text-center py-3 text-sm font-semibold capitalize">
+                              {variant?.color}
+                            </p>
+
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* =====================================
+              BUTTONS
+          ===================================== */}
+                <div className="mt-8 space-y-4">
+
+                  <div className="flex flex-col sm:flex-row gap-4">
+
+                    {/* QUANTITY */}
+                    <div className="w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5">
+
+                      <button
+                        onClick={decreaseQty}
+                        className="text-xl font-bold"
+                      >
+                        −
+                      </button>
+
+                      <span className="font-semibold text-lg">
+                        {qty}
+                      </span>
+
+                      <button
+                        onClick={increaseQty}
+                        className="text-xl font-bold"
+                      >
+                        +
+                      </button>
+
+                    </div>
+
+                    {/* ADD TO CART */}
+                    <button
+                      onClick={handleAdd}
+                      className="
+                w-full h-[35px] md:h-[58px]
+                rounded-2xl bg-white text-black
+                border-1 border-[#000000]
+                font-semibold tracking-wide
+                hover:opacity-90
+                transition-all duration-300
+                "
+                    >
+                      ADD TO CART
+                    </button>
+
+                  </div>
+
+                  {/* BUY NOW */}
+                  <button
+                    onClick={handlecheckoutAdd}
+                    className="
+                     w-full h-[35px] md:h-[58px]
+                rounded-2xl bg-black text-white
+                font-semibold tracking-wide
+                hover:opacity-90
+                transition-all duration-300
+              "
+                  >
+                    BUY IT NOW
+                  </button>
+                </div>
+
+                {/* =====================================
+              ACCORDION
+          ===================================== */}
+                <div className="mt-10 border-t border-gray-200">
+
+                  {[
+                    {
+                      id: 1,
+                      title: "Dimensions",
+                      content: ProductDetails?.dimensions,
+                    },
+                    {
+                      id: 2,
+                      title: "Materials & Features",
+                      content: ProductDetails?.material,
+                    },
+                    {
+                      id: 3,
+                      title: "Product Care",
+                      content: ProductDetails?.type,
+                    },
+                    {
+                      id: 4,
+                      title: "Terms & Conditions",
+                      content: ProductDetails?.terms,
+                    },
+                  ].map((item) => (
+                    <div
+                      key={item.id}
+                      className="border-b border-gray-200 py-5"
+                    >
+
+                      <div
+                        onClick={() => toggle(item.id)}
+                        className="flex items-center justify-between cursor-pointer"
+                      >
+                        <h3 className="text-[15px] sm:text-base font-bold uppercase text-black">
+                          {item.title}
+                        </h3>
+
+                        {open === item.id ? (
+                          <FaMinus size={18} />
+                        ) : (
+                          <FaPlus size={18} />
+                        )}
+                      </div>
+
+                      {open === item.id && (
+                        <p className="mt-4 text-[15px] leading-7 text-[#4D5466]">
+                          {item.content}
+                        </p>
+                      )}
+
+                    </div>
+                  ))}
+                </div>
+
+              </div>
+            </div>
           </div>
-          <Related selectedId={ProductDetails?.subcategory?._id} />
+
+          {/* RELATED PRODUCTS */}
+          <div className="mt-12 md:mt-16">
+            <Related selectedId={ProductDetails?.subcategory?._id} />
+          </div>
+
         </div>
       </div>
-      {show && <GalleryModal />}
     </Layout>
   );
 }
