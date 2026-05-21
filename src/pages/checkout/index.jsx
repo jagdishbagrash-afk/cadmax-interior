@@ -17,6 +17,26 @@ import Link from "next/link";
 
 export default function Index() {
   const { error, isLoading, Razorpay } = useRazorpay();
+
+  const FetchGetCart = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.CartGet();
+  
+      if (response?.data?.data?.items) {
+        localStorage.setItem(
+          "cartItems",
+          JSON.stringify(response.data.data.items)
+        );
+  
+      } else {
+        localStorage.removeItem("cartItems");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const [data, setData] = useState([]);
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const router = useRouter();
@@ -230,6 +250,7 @@ export default function Index() {
         toast.success(response.data.message);
         router.push(`/success`);
         dispatch(clearCart());
+        FetchGetCart();
       } else {
         toast.error(response.data.message);
       }

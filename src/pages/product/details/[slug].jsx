@@ -116,6 +116,28 @@ export default function Index() {
 
   const dispatch = useDispatch();
 
+
+const FetchCart = async () => {
+  try {
+    const main = new Listing();
+    const response = await main.CartGet();
+
+    if (response?.data?.data?.items) {
+      localStorage.setItem(
+        "cartItems",
+        JSON.stringify(response.data.data.items)
+      );
+
+    } else {
+      localStorage.removeItem("cartItems");
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+  
+
+
   const toggle = (id) => {
     setOpen(open === id ? null : id);
   };
@@ -194,6 +216,7 @@ export default function Index() {
     });
     dispatch(addItem(newItem));
     toast.success("Item added to cart");
+      FetchCart();
   };
 
   const handlecheckoutAdd = (redirect) => {
@@ -223,6 +246,7 @@ export default function Index() {
     dispatch(addItem(newItem));
     toast.success("Item added to cart");
     router.push("/checkout");
+      FetchCart();
   };
 
   const HadleAddtocart = async (cartData) => {

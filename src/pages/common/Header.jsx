@@ -46,29 +46,8 @@ export default function Header() {
   /* CART COUNT */
 
 
-  const [record, setRecord] = useState([]);
-  console.log("record", record)
-  const FetchCart = async () => {
-    try {
-      const main = new Listing();
-      const response = await main.CartGet();
-      console.log(response)
-      if (response?.data?.data) {
-        setRecord(response.data.data?.items);
-      } else {
-        setRecord([]);
-      }
-
-    } catch (error) {
-      console.log(error);
-      setRecord([]);
-    }
-  };
-
-
-  useEffect(() => {
-    FetchCart();
-  }, []);
+const record = JSON.parse(localStorage.getItem("cartItems"));
+console.log(record);
 
 
   useEffect(() => {
