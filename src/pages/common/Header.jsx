@@ -46,8 +46,15 @@ export default function Header() {
   /* CART COUNT */
 
 
-const record = JSON.parse(localStorage.getItem("cartItems"));
-console.log(record);
+const [record, setRecord] = useState([]);
+
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const cartData = JSON.parse(localStorage.getItem("cartItems")) || [];
+    setRecord(cartData);
+    console.log(cartData);
+  }
+}, []);
 
 
   useEffect(() => {
