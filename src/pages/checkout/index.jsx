@@ -17,18 +17,23 @@ import Link from "next/link";
 
 export default function Index() {
   const { error, isLoading, Razorpay } = useRazorpay();
+  const [finalCartItems, setFinalCartItems] = useState([]);
+
+console.log("finalCartItems" ,finalCartItems)
+
+
 
   const FetchGetCart = async () => {
     try {
       const main = new Listing();
       const response = await main.CartGet();
-  
+
       if (response?.data?.data?.items) {
         localStorage.setItem(
           "cartItems",
           JSON.stringify(response.data.data.items)
         );
-  
+
       } else {
         localStorage.removeItem("cartItems");
       }
@@ -37,19 +42,50 @@ export default function Index() {
     }
   };
 
+  const router = useRouter();
+
+  const type = router.query.type;
+
+
+  const [buyNowData, setBuyNowData] = useState(null);
+
+  useEffect(() => {
+
+    if (type === "buy-now") {
+
+      const item = JSON.parse(
+        localStorage.getItem("buyNowItem")
+      );
+
+      if (item) {
+        setBuyNowData(item);
+      }
+    }
+
+  }, [type]);
+
+  console.log("buyNowData", buyNowData)
+
   const [data, setData] = useState([]);
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [record, setRecord] = useState([])
 
-  const cartItems = record?.items || [];
+
+
+  const cartItems = finalCartItems || [];
+
+  console.log("cartItems", cartItems)
 
   const dispatch = useDispatch();
   const { user } = useRole();
 
 
-  const totalPrice = record?.summary?.finalAmount;
+  const totalPrice = cartItems.reduce(
+    (acc, item) =>
+      acc + (item.unitPrice * item.quantity),
+    0
+  );
 
   const itemNames = cartItems.map((item) => item.name);
   const [formData, setFormData] = useState({
@@ -94,7 +130,6 @@ export default function Index() {
       if (response?.data?.status) {
         toast.success(response.data.message);
 
-        // ✅ refresh cart
         FetchCart();
       }
     } catch (err) {
@@ -107,10 +142,10 @@ export default function Index() {
 
   const handlePaymentCreateSubmit = async (e) => {
     e.preventDefault();
-   if (String(formData.mobile).length !== 10) {
-  toast.error("Mobile number must be exactly 10 digits");
-  return;
-}
+    if (String(formData.mobile).length !== 10) {
+      toast.error("Mobile number must be exactly 10 digits");
+      return;
+    }
 
     if (totalPrice === 0) {
       toast.error("Amount can't be 0!");
@@ -184,21 +219,15 @@ export default function Index() {
     if (loading) { return; }
     setLoading(true);
     try {
-      // const products = cartItemsRedux.map((item) => ({
-      //   id: item?.product?._id,
-      //   price: item?.price,
-      //   quantity: item?.quantity,
-      //   total: item?.price * item?.quantity,
-      //   variant: item?.selectedVariant,
-      // }));
 
       const products = cartItems.map((item) => ({
-  id: item?.productId || item?._id,
-  price: item?.unitPrice,
-  quantity: item?.quantity,
-  total: item?.unitPrice * item?.quantity,
-  variant: item?.variant,
-}));
+        id: item?.product?._id || item?.productId,
+        price: item?.unitPrice || item?.price,
+        quantity: item?.quantity,
+        total:
+          (item?.unitPrice || item?.price) * item?.quantity,
+        variant: item?.variant || item?.selectedVariant,
+      }));
       const main = new Listing();
       const res = await main.AddOrder({
         name: formData?.name,
@@ -247,9 +276,17 @@ export default function Index() {
         "OrderID": Orderdatas,
       });
       if (response?.data?.status) {
+
+        if (type === "buy-now") {
+          localStorage.removeItem("buyNowItem");
+        }
+
         toast.success(response.data.message);
+
         router.push(`/success`);
+
         dispatch(clearCart());
+
         FetchGetCart();
       } else {
         toast.error(response.data.message);
@@ -262,7 +299,6 @@ export default function Index() {
   };
 
 
-  console.log("|record", record)
 
   const FetchCart = async () => {
     try {
@@ -279,6 +315,50 @@ export default function Index() {
       setData([]);
     }
   };
+
+  useEffect(() => {
+
+    const apiItems = record?.items || [];
+
+    // normal cart
+    if (type !== "buy-now") {
+      setFinalCartItems(apiItems);
+      return;
+    }
+
+    // no buy now item
+    if (!buyNowData) {
+      setFinalCartItems(apiItems);
+      return;
+    }
+
+    const buyNowItem = {
+      productId: buyNowData?.productId,
+      title: buyNowData?.name,
+      images: buyNowData?.images || [],
+      variant: buyNowData?.variant,
+      quantity: buyNowData?.quantity,
+      unitPrice: buyNowData?.price,
+      itemTotal:
+        buyNowData?.price * buyNowData?.quantity,
+    };
+
+    // duplicate prevent
+    const alreadyExists = apiItems.some(
+      (item) =>
+        item?.productId === buyNowItem?.productId &&
+        item?.variant === buyNowItem?.variant
+    );
+
+    const mergedItems = alreadyExists
+      ? apiItems
+      : [...apiItems, buyNowItem];
+
+    setFinalCartItems(mergedItems);
+
+  }, [record, buyNowData, type]);
+
+  console.log("|record", record)
 
   const fetchAddress = async () => {
     try {
@@ -297,9 +377,11 @@ export default function Index() {
   };
 
   useEffect(() => {
+
     fetchAddress();
+
     FetchCart();
-  }, []);
+  }, [type]);
 
 
 
@@ -486,7 +568,7 @@ export default function Index() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-gray-100">
-                      {record?.items?.map((item) => (
+                      {finalCartItems?.map((item) => (
                         <tr key={item.id} className="group">
                           <td className="py-4">
                             <div className="flex items-center gap-4">
@@ -498,15 +580,16 @@ export default function Index() {
                                 <FaRegTrashCan size={16} />
                               </button>
                               <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100">
-                                <Image
-                                  src={item?.images[0]}
-                                  fill
-                                  alt={item?.name}
-                                  className="object-contain p-1"
+                                <img
+                                  src={
+                                    item?.images?.[0]?.startsWith("http")
+                                      ? item.images[0]
+                                      : "/placeholder.png"
+                                  }
                                 />
                               </div>
                               <span className="font-medium text-sm text-gray-900 line-clamp-2">
-                                {item?.name}
+                                {item?.title}
                               </span>
                             </div>
                           </td>
@@ -544,7 +627,7 @@ export default function Index() {
                       <tr className="border-t-2 border-black">
                         <td colSpan={2} className="py-6 text-lg font-bold">Total Amount</td>
                         <td className="py-6 text-right text-xl font-extrabold text-black">
-                          {formatMultiPrice(record?.summary?.finalAmount, "INR")}
+                          {formatMultiPrice(totalPrice, "INR")}
                         </td>
                       </tr>
                     </tfoot>

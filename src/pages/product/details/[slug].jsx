@@ -138,6 +138,8 @@ const FetchCart = async () => {
   
 
 
+
+
   const toggle = (id) => {
     setOpen(open === id ? null : id);
   };
@@ -219,35 +221,61 @@ const FetchCart = async () => {
       FetchCart();
   };
 
-  const handlecheckoutAdd = (redirect) => {
-    if (!user || user?.role !== "customer") {
-      router.push("/login");
-      return;
-    }
-    if (!selectedVariant) {
-      toast.error("Please select a variant");
-      return;
-    }
-    const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
-    const newItem = {
+const handlecheckoutAdd = (redirect = false) => {
+
+  if (!user || user?.role !== "customer") {
+    router.push("/login");
+    return;
+  }
+
+  if (!selectedVariant) {
+    toast.error("Please select a variant");
+    return;
+  }
+
+  const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
+
+  const newItem = {
+    id,
+    name: ProductDetails?.title,
+    price: ProductDetails?.amount,
+    quantity: qty,
+    imgUrl: selectedVariant?.images?.[0],
+    product: ProductDetails,
+    selectedVariant: selectedVariant?.color,
+  };
+
+  // BUY NOW
+  if (redirect) {
+
+    const buyNowItem = {
       id,
       name: ProductDetails?.title,
       price: ProductDetails?.amount,
       quantity: qty,
       imgUrl: selectedVariant?.images?.[0],
-      product: ProductDetails,
-      selectedVariant: selectedVariant?.color,
-    };
-    HadleAddtocart({
       productId: ProductDetails?._id,
-      quantity: qty,
       variant: selectedVariant?.color,
-    });
-    dispatch(addItem(newItem));
-    toast.success("Item added to cart");
-    router.push("/checkout");
-      FetchCart();
-  };
+      images: selectedVariant?.images,
+    };
+
+    localStorage.setItem(
+      "buyNowItem",
+      JSON.stringify(buyNowItem)
+    );
+
+    router.push("/checkout?type=buy-now");
+
+    return;
+  }
+
+  // CART
+  dispatch(addItem(newItem));
+
+  toast.success("Item added to cart");
+};
+
+ 
 
   const HadleAddtocart = async (cartData) => {
     try {

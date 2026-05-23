@@ -4,6 +4,7 @@ import Listing from "@/pages/api/Listing";
 import AdminLayout from "./common/AdminLayout";
 import toast from "react-hot-toast";
 import { MdDelete } from "react-icons/md";
+import moment from "moment";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -19,7 +20,7 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.Leadget();
-
+      console.log("response", response)
       if (response?.data?.data) {
         setData(response.data.data);
         setFilteredData(response.data.data);
@@ -130,6 +131,8 @@ export default function Index() {
     }
   };
 
+  console.log("paginatedData" , paginatedData)
+
   return (
     <AdminLayout page={"Lead List"}>
       <div className="px-3 py-3 lg:px-5">
@@ -184,6 +187,7 @@ export default function Index() {
                     "Type",
                     "Services",
                     "Category",
+                    "Created Date",
                     "Status",
                     "Message",
                     "Action",
@@ -191,10 +195,11 @@ export default function Index() {
                     <th
                       key={head}
                       className="
-                        px-4 py-4 text-center
-                        text-xs font-bold uppercase
-                        text-[#6B7280]
-                      "
+          px-4 py-4 text-center
+          text-xs font-bold uppercase
+          text-[#6B7280]
+          whitespace-nowrap
+        "
                     >
                       {head}
                     </th>
@@ -224,19 +229,23 @@ export default function Index() {
                         className="border-b border-gray-100 hover:bg-gray-50 transition"
                       >
 
-                        <td className="px-4 py-4 text-center font-medium">
+                        {/* NAME */}
+                        <td className="px-4 py-4 text-center font-medium whitespace-nowrap">
                           {name}
                         </td>
 
-                        <td className="px-4 py-4 text-center">
+                        {/* PHONE */}
+                        <td className="px-4 py-4 text-center whitespace-nowrap">
                           {phone}
                         </td>
 
-                        <td className="px-4 py-4 text-center">
+                        {/* EMAIL */}
+                        <td className="px-4 py-4 text-center whitespace-nowrap">
                           {email}
                         </td>
 
-                        <td className="px-4 py-4 text-center">
+                        {/* PAGE URL */}
+                        <td className="px-4 py-4 text-center whitespace-nowrap">
                           {item?.pageurl ? (
                             <a
                               href={item?.pageurl}
@@ -251,20 +260,33 @@ export default function Index() {
                           )}
                         </td>
 
-                        <td className="px-4 py-4 text-center">
+                        {/* SOURCE */}
+                        <td className="px-4 py-4 text-center capitalize whitespace-nowrap">
                           {item?.source || "N/A"}
                         </td>
 
-                        <td className="px-4 py-4 text-center capitalize">
+                        {/* TYPE */}
+                        <td className="px-4 py-4 text-center capitalize whitespace-nowrap">
                           {item?.type || "Lead"}
                         </td>
 
-                        <td className="px-4 py-4 text-center capitalize">
+                        {/* SERVICES */}
+                        <td className="px-4 py-4 text-center capitalize whitespace-nowrap">
                           {item?.services || "N/A"}
                         </td>
 
-                        <td className="px-4 py-4 text-center capitalize">
+                        {/* CATEGORY */}
+                        <td className="px-4 py-4 text-center capitalize whitespace-nowrap">
                           {item?.category || "N/A"}
+                        </td>
+
+                        {/* CREATED DATE */}
+                        <td className="px-4 py-4 text-center whitespace-nowrap">
+                          {item?.createdAt
+                            ? moment(item?.createdAt).format(
+                              "DD MMM YYYY, hh:mm A"
+                            )
+                            : "N/A"}
                         </td>
 
                         {/* STATUS */}
@@ -279,11 +301,11 @@ export default function Index() {
                               )
                             }
                             className={`
-    px-3 py-2 rounded-xl text-sm font-medium
-    border outline-none capitalize
-    transition-all duration-200
-    ${getStatusClasses(item?.status)}
-  `}
+                px-3 py-2 rounded-xl text-sm font-medium
+                border outline-none capitalize
+                transition-all duration-200
+                ${getStatusClasses(item?.status)}
+              `}
                           >
                             <option value="pending">
                               Pending
@@ -305,8 +327,10 @@ export default function Index() {
                         </td>
 
                         {/* MESSAGE */}
-                        <td className="px-4 py-4 text-center max-w-[250px] truncate">
-                          {item?.message || "N/A"}
+                        <td className="px-4 py-4 text-center max-w-[250px]">
+                          <p className="line-clamp-2 break-words">
+                            {item?.message || "N/A"}
+                          </p>
                         </td>
 
                         {/* ACTION */}
@@ -317,12 +341,12 @@ export default function Index() {
                               handleDelete(item?._id)
                             }
                             className="
-                              w-10 h-10 rounded-xl
-                              bg-red-50 text-red-500
-                              hover:bg-red-100
-                              flex items-center justify-center
-                              mx-auto transition
-                            "
+                w-10 h-10 rounded-xl
+                bg-red-50 text-red-500
+                hover:bg-red-100
+                flex items-center justify-center
+                mx-auto transition
+              "
                           >
                             <MdDelete size={18} />
                           </button>
@@ -335,7 +359,7 @@ export default function Index() {
                 ) : (
                   <tr>
                     <td
-                      colSpan={11}
+                      colSpan={12}
                       className="text-center py-14 text-gray-500"
                     >
                       No Leads Found

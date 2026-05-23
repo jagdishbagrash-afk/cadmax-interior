@@ -5,6 +5,7 @@ import Listing from "../api/Listing";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import SuccessPopup from "@/components/SuccessPopup";
 
 export default function EnquiryModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -13,6 +14,7 @@ export default function EnquiryModal() {
 
   const router = useRouter();
   const { user } = useRole();
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const [form, setForm] = useState({
     type: "design",
@@ -89,7 +91,7 @@ export default function EnquiryModal() {
       if (res?.data?.status) {
         toast.success("Enquiry sent successfully ✅");
         setIsOpen(false);
-
+        setSuccessOpen(true);
         setForm({
           type: "design",
           services: "commercial",
@@ -120,8 +122,8 @@ export default function EnquiryModal() {
 
       {/* Modal */}
       {isOpen && (
-        <div 
-        className="fixed  h-full inset-0 z-[9999999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-3">
+        <div
+          className="fixed  h-full inset-0 z-[9999999] flex items-center justify-center bg-black/70 backdrop-blur-sm px-3">
 
           <div className="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 relative">
 
@@ -229,6 +231,12 @@ export default function EnquiryModal() {
           </div>
         </div>
       )}
+
+      <SuccessPopup
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+      />
+
     </>
   );
 }

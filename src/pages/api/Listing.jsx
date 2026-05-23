@@ -402,6 +402,14 @@ class Listing extends Component {
   async AddOrder(data) {
     return Api.post("/order/add", data)
   }
+
+ async globalSearch(search) {
+  return Api.get("/global-search", {
+    params: {
+      search: search,
+    },
+  });
+}
   async AddContact(data) {
     return Api.post("/contact-add", data)
   }
