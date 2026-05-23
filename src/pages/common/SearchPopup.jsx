@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BsFillSearchHeartFill } from "react-icons/bs";
 import { FiSearch } from "react-icons/fi";
 import { HiOutlineX } from "react-icons/hi";
@@ -7,8 +7,9 @@ import Image from "next/image";
 import toast from "react-hot-toast";
 import Listing from "../api/Listing";
 
-function SearchPopup({ textColor }) {
+function SearchPopup({ textColor = "text-black" }) {
     const router = useRouter();
+    const inputRef = useRef(null);
 
     const [searchOpen, setSearchOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -19,6 +20,15 @@ function SearchPopup({ textColor }) {
 
     // LOADING
     const [loading, setLoading] = useState(false);
+
+    // AUTO FOCUS
+    useEffect(() => {
+        if (searchOpen) {
+            setTimeout(() => {
+                inputRef.current?.focus();
+            }, 100);
+        }
+    }, [searchOpen]);
 
     /* SEARCH API */
     useEffect(() => {
@@ -40,15 +50,10 @@ function SearchPopup({ textColor }) {
             setLoading(true);
 
             const main = new Listing();
-
-            // API CALL
-            // req.query.search backend me jayega
             const res = await main.globalSearch(search);
 
-            console.log("SEARCH RESPONSE", res?.data);
-
             if (res?.data?.data) {
-                setProducts(res?.data?.data?.products || {});
+                setProducts(res?.data?.data?.products || []);
                 setDesigns(res?.data?.data?.design || {});
             }
         } catch (err) {
@@ -83,45 +88,54 @@ function SearchPopup({ textColor }) {
     };
 
     // DESIGN ARRAY
- // DESIGN ARRAY
-const allDesigns = [
-    ...(designs?.modern || []),
-    ...(designs?.classic || []),
-    ...(designs?.contemporary || []),
-    ...(designs?.common || []),
-];
+    const allDesigns = [
+        ...(designs?.modern || []),
+        ...(designs?.classic || []),
+        ...(designs?.contemporary || []),
+        ...(designs?.common || []),
+    ];
+
     return (
         <>
             {/* SEARCH BUTTON */}
             <button
                 onClick={() => setSearchOpen(true)}
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-all duration-200"
+                className="flex items-center justify-center w-11 h-11 rounded-full hover:bg-black/5 transition-all duration-300"
             >
                 <FiSearch className={`${textColor} text-[22px]`} />
             </button>
 
             {/* SEARCH POPUP */}
             {searchOpen && (
-                <div className="fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm flex items-start justify-center pt-20 px-4">
+                <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-start justify-center px-4 py-10 animate-fadeIn">
 
-                    <div className="w-full max-w-5xl bg-white rounded-3xl shadow-2xl overflow-hidden">
+                    {/* POPUP */}
+                    <div className="w-full max-w-6xl bg-white rounded-[32px] shadow-[0_20px_80px_rgba(0,0,0,0.25)] overflow-hidden border border-gray-200">
 
                         {/* HEADER */}
-                        <div className="flex items-center justify-between px-2 py-2 border-b">
-                            <h2 className="text-2xl font-bold text-black">
-                                Search Products & Designs
-                            </h2>
+                        <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+
+                            <div>
+                                <h2 className="text-[26px] font-bold text-black">
+                                    Search Products & Designs
+                                </h2>
+
+                                <p className="text-sm text-gray-500 mt-1">
+                                    Find premium products and interior designs
+                                </p>
+                            </div>
 
                             <button
                                 onClick={() => setSearchOpen(false)}
-                                className="w-10 h-10 rounded-full hover:bg-gray-100 flex items-center justify-center"
+                                className="w-11 h-11 rounded-full bg-gray-100 hover:bg-black hover:text-white flex items-center justify-center transition-all duration-300"
                             >
                                 <HiOutlineX size={24} />
                             </button>
                         </div>
 
                         {/* SEARCH INPUT */}
-                        <div className="px-2 py-2 border-b">
+                        <div className="px-6 md:px-8 py-5 border-b border-gray-100 bg-white">
+
                             <form
                                 onSubmit={handleSearch}
                                 className="relative"
@@ -129,47 +143,56 @@ const allDesigns = [
                                 <BsFillSearchHeartFill className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 text-[22px]" />
 
                                 <input
+                                    ref={inputRef}
                                     type="text"
-                                    placeholder="Search products or designs..."
+                                    placeholder="Search products, categories, designs..."
                                     value={search}
                                     onChange={(e) =>
                                         setSearch(e.target.value)
                                     }
-                                    className="w-full h-[40px] pl-14 pr-4 rounded-2xl border border-gray-300 outline-none focus:border-black text-[16px]"
+                                    className="w-full h-[62px] pl-14 pr-5 rounded-2xl border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-black focus:ring-4 focus:ring-black/5 text-[17px] font-medium transition-all duration-300"
                                 />
                             </form>
 
                             {/* MESSAGE */}
                             {search.length > 0 &&
                                 search.length < 3 && (
-                                    <p className="text-sm text-red-500 mt-2">
-                                        Please enter minimum 3 characters
+                                    <p className="text-sm text-red-500 mt-3">
+                                        Please enter at least 3 characters
                                     </p>
                                 )}
                         </div>
 
                         {/* RESULTS */}
-                        <div className="max-h-[450px] overflow-y-auto">
+                        <div className="max-h-[70vh] overflow-y-auto custom-scrollbar">
 
                             {/* LOADING */}
                             {loading && (
-                                <div className="p-10 text-center">
-                                    <p className="text-gray-500">
+                                <div className="py-20 flex flex-col items-center justify-center">
+
+                                    <div className="w-12 h-12 border-[3px] border-gray-200 border-t-black rounded-full animate-spin"></div>
+
+                                    <p className="text-gray-500 mt-5 text-lg">
                                         Searching...
                                     </p>
                                 </div>
                             )}
 
                             {/* PRODUCTS */}
-                            {/* PRODUCTS */}
                             {!loading && products?.length > 0 && (
-                                <div className="p-5 border-b">
+                                <div className="p-6 md:p-8 border-b border-gray-100">
 
-                                    <h3 className="text-xl font-semibold text-black mb-5">
-                                        Products
-                                    </h3>
+                                    <div className="flex items-center justify-between mb-6">
+                                        <h3 className="text-2xl font-bold text-black">
+                                            Products
+                                        </h3>
 
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <span className="text-sm bg-black text-white px-3 py-1 rounded-full">
+                                            {products?.length} Results
+                                        </span>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
                                         {products.map((item, index) => {
 
@@ -195,33 +218,41 @@ const allDesigns = [
                                                             "product"
                                                         )
                                                     }
-                                                    className="group flex items-center gap-4 border rounded-2xl p-3 hover:shadow-xl hover:border-black cursor-pointer transition-all duration-300"
+                                                    className="group bg-white border border-gray-200 rounded-3xl p-4 hover:border-black hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1"
                                                 >
 
-                                                    {/* IMAGE */}
-                                                    <div className="w-[50px] h-[50px] rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
-                                                        <Image
-                                                            src={productImage}
-                                                            alt={item?.title}
-                                                            width={50}
-                                                            height={50}
-                                                            className="w-full h-full object-cover group-hover:scale-105 transition-all duration-300"
-                                                        />
-                                                    </div>
+                                                    <div className="flex items-center gap-4">
 
-                                                    {/* CONTENT */}
-                                                    <div className="flex-1 min-w-0">
+                                                        {/* IMAGE */}
+                                                        <div className="w-[90px] h-[90px] rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                                            <Image
+                                                                src={productImage}
+                                                                alt={item?.title}
+                                                                width={90}
+                                                                height={90}
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-all duration-500"
+                                                            />
+                                                        </div>
 
-                                                        {/* TITLE */}
-                                                        <h4 className="text-[17px] font-semibold text-black line-clamp-1">
-                                                            {item?.title}
-                                                        </h4>
-                                                        {/* PRICE */}
-                                                        {productPrice && (
-                                                            <p className="text-black font-bold mt-1 text-[16px]">
-                                                                ₹{productPrice}
-                                                            </p>
-                                                        )}
+                                                        {/* CONTENT */}
+                                                        <div className="flex-1 min-w-0">
+
+                                                            {/* TITLE */}
+                                                            <h4 className="text-[18px] font-semibold text-black line-clamp-2 leading-[28px]">
+                                                                {item?.title}
+                                                            </h4>
+
+                                                            {/* PRICE */}
+                                                            {productPrice && (
+                                                                <p className="text-black font-bold mt-3 text-[18px]">
+                                                                    ₹{productPrice}
+                                                                </p>
+                                                            )}
+
+                                                            <button className="mt-3 text-sm font-medium text-black underline underline-offset-4">
+                                                                View Details
+                                                            </button>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
@@ -233,13 +264,19 @@ const allDesigns = [
                             {/* DESIGNS */}
                             {!loading &&
                                 allDesigns?.length > 0 && (
-                                    <div className="p-5">
+                                    <div className="p-6 md:p-8">
 
-                                        <h3 className="text-xl font-semibold text-black mb-5">
-                                            Designs
-                                        </h3>
+                                        <div className="flex items-center justify-between mb-6">
+                                            <h3 className="text-2xl font-bold text-black">
+                                                Designs
+                                            </h3>
 
-                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                            <span className="text-sm bg-gray-100 px-3 py-1 rounded-full">
+                                                {allDesigns?.length} Results
+                                            </span>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
 
                                             {allDesigns.map((item, index) => (
                                                 <div
@@ -250,30 +287,39 @@ const allDesigns = [
                                                             "design"
                                                         )
                                                     }
-                                                    className="flex items-center gap-4 border rounded-2xl p-3 hover:shadow-lg hover:border-black cursor-pointer transition-all duration-300"
+                                                    className="group bg-white border border-gray-200 rounded-3xl overflow-hidden hover:border-black hover:shadow-2xl cursor-pointer transition-all duration-300 hover:-translate-y-1"
                                                 >
-                                                    <div className="w-[80px] h-[80px] rounded-xl overflow-hidden bg-gray-100 flex-shrink-0">
+
+                                                    {/* IMAGE */}
+                                                    <div className="relative w-full h-[220px] overflow-hidden">
                                                         <Image
                                                             src={
                                                                 item?.Image ||
-                                                                item?.multiple_images[0] ||
+                                                                item?.multiple_images?.[0] ||
                                                                 "/CADMAX.png"
                                                             }
                                                             alt={item?.title}
-                                                            width={80}
-                                                            height={80}
-                                                            className="w-full h-full object-cover"
+                                                            fill
+                                                            className="object-cover group-hover:scale-110 transition-all duration-700"
                                                         />
+
+                                                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"></div>
+
+                                                        <span className="absolute bottom-4 left-4 bg-white/90 backdrop-blur-md text-black text-xs font-semibold px-3 py-1 rounded-full capitalize">
+                                                            {item?.concept || "Design"}
+                                                        </span>
                                                     </div>
 
-                                                    <div className="flex-1">
-                                                        <h4 className="text-[16px] font-semibold text-black line-clamp-1">
+                                                    {/* CONTENT */}
+                                                    <div className="p-5">
+
+                                                        <h4 className="text-[18px] font-semibold text-black line-clamp-2 leading-[30px]">
                                                             {item?.title}
                                                         </h4>
 
-                                                        <p className="text-sm text-gray-500 mt-1 capitalize">
-                                                            {item?.concept || "Design"}
-                                                        </p>
+                                                        <button className="mt-4 text-sm font-medium text-black underline underline-offset-4">
+                                                            Explore Design
+                                                        </button>
                                                     </div>
                                                 </div>
                                             ))}
@@ -281,19 +327,23 @@ const allDesigns = [
                                     </div>
                                 )}
 
-                            {/* NO RESULT */}
+                            {/* EMPTY STATE */}
                             {!loading &&
                                 search.length >= 3 &&
                                 products?.length === 0 &&
                                 allDesigns?.length === 0 && (
-                                    <div className="p-12 text-center">
+                                    <div className="py-24 px-6 text-center">
 
-                                        <h3 className="text-xl font-semibold text-gray-700">
+                                        <div className="w-24 h-24 mx-auto rounded-full bg-gray-100 flex items-center justify-center">
+                                            <FiSearch className="text-[40px] text-gray-400" />
+                                        </div>
+
+                                        <h3 className="text-2xl font-bold text-gray-800 mt-6">
                                             No Results Found
                                         </h3>
 
-                                        <p className="text-gray-500 mt-2">
-                                            Try another keyword
+                                        <p className="text-gray-500 mt-3 text-lg">
+                                            Try searching with another keyword
                                         </p>
                                     </div>
                                 )}
