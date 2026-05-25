@@ -11,7 +11,7 @@ export default function Slider() {
   const [banner, setBanner] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // 🔥 Fetch Data
+  // Fetch Data
   const fetchDatas = async () => {
     try {
       const main = new Listing();
@@ -34,24 +34,24 @@ export default function Slider() {
     fetchDatas();
   }, []);
 
-  // 🔴 Loading State
+  // Loading State
   if (loading) {
     return (
-      <div className="w-full h-[425px] md:h-[560px] lg:h-[860px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full h-[320px] sm:h-[400px] md:h-[560px] lg:h-[860px] bg-gray-200 animate-pulse flex items-center justify-center">
         <p className="text-gray-500">Loading slider...</p>
       </div>
     );
   }
 
-  // 🔴 No Data
+  // No Data
   if (!banner.length) {
     return null;
   }
 
   return (
-    <div className="relative h-[250px] sm:h-[300px] md:h-[560px] lg:h-[860px] md:mt-[-150px]">
+    <div className="relative h-[320px] sm:h-[400px] md:h-[560px] lg:h-[860px] md:mt-[-150px] overflow-hidden">
       <Swiper
-        key={banner.length} // 🔥 force re-init
+        key={banner.length}
         slidesPerView={1}
         loop={banner.length > 1}
         autoplay={{
@@ -70,35 +70,39 @@ export default function Slider() {
               <img
                 src={slide?.Image}
                 alt={`Slide ${index}`}
-                className="object-cover w-full h-full"
+                className="
+                  w-full h-full
+                  object-contain sm:object-cover
+                  object-center
+                  bg-black
+                "
               />
 
               {/* Overlay */}
-              <div className="absolute inset-0 bg-black/50"></div>
+              <div className="absolute inset-0 bg-black/40"></div>
 
-              {/* Content */}
-              {/* <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                
-                <h1 className="text-white font-extrabold text-[18px] md:text-[28px] lg:text-[42px] uppercase leading-tight max-w-[800px]">
-                  {slide?.title || "Elevate Every Room with Premium Interiors"}
-                </h1>
+              {/* Optional Content */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="text-center text-white px-4">
+                  {slide?.title && (
+                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
+                      {slide.title}
+                    </h2>
+                  )}
 
-                <p className="text-white mt-3 md:mt-4 text-sm md:text-base max-w-[600px]">
-                  {slide?.description ||
-                    "Built-to-last furniture and complete interior solutions tailored for your lifestyle."}
-                </p>
+                  {slide?.description && (
+                    <p className="text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-6">
+                      {slide.description}
+                    </p>
+                  )}
 
-                <div className="flex flex-wrap justify-center gap-3 mt-5">
-                  <Button
-                    title="Shop Product"
-                    classes="bg-white text-black px-5 py-2 rounded-md"
-                  />
-                  <Button
-                    title="Request Concept"
-                    classes="border border-white text-white px-5 py-2 rounded-md"
-                  />
+                  {slide?.buttonText && (
+                    <Button>
+                      {slide.buttonText}
+                    </Button>
+                  )}
                 </div>
-              </div> */}
+              </div>
 
             </div>
           </SwiperSlide>
