@@ -263,12 +263,9 @@ const handlecheckoutAdd = (redirect = false) => {
       "buyNowItem",
       JSON.stringify(buyNowItem)
     );
-
-    router.push("/checkout?type=buy-now");
-
+    router.push("/buy-now?type=buy-now");
     return;
   }
-
   // CART
   dispatch(addItem(newItem));
 
