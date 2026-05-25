@@ -77,6 +77,10 @@ export default function DesignLayout() {
         }
     }, [user, project]);
 
+    const [successOpen, setSuccessOpen] = useState(false);
+
+
+
     const handleSubmit = async (e) => {
         if (e?.preventDefault) e.preventDefault();
 
@@ -94,6 +98,7 @@ export default function DesignLayout() {
 
             if (res?.data?.status) {
                 toast.success(res?.data?.message);
+                setSuccessOpen(true);
             } else {
                 toast.error(res?.data?.message || "Something went wrong");
             }
@@ -264,35 +269,40 @@ export default function DesignLayout() {
                     {/* <div className="bg-gray-50 border-t border-gray-100 p-8 lg:p-12">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8"> */}
 
-                            {/* Material Details */}
-                            {/* <div className="space-y-2">
+                    {/* Material Details */}
+                    {/* <div className="space-y-2">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Material Details</p>
                                 <p className="text-gray-800 font-medium text-lg leading-snug">
                                     {project.material_details || "Premium Finish, LED Lights, Italian Marble"}
                                 </p>
                             </div> */}
 
-                            {/* Timeline */}
-                            {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                    {/* Timeline */}
+                    {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Timeline</p>
                                 <p className="text-gray-800 font-medium text-lg">
                                     {project?.timeline || "25 Days"}
                                 </p>
                             </div> */}
 
-                            {/* Design Cost */}
-                            {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
+                    {/* Design Cost */}
+                    {/* <div className="space-y-2 border-l-0 md:border-l md:pl-8 border-gray-200">
                                 <p className="font-black text-xs uppercase tracking-widest text-gray-400">Design Cost</p>
                                 <p className="text-black font-bold text-2xl">
                                     {project?.cost || "₹ 1,20,000"}
                                 </p>
                             </div> */}
 
-                        {/* </div>
+                    {/* </div>
                     </div> */}
                 </div>
             </div>
-            <Predictable/>
+            <Predictable />
+            <SuccessPopup
+                open={successOpen}
+                onClose={() => setSuccessOpen(false)}
+            />
+
         </Layout>
     );
 }
