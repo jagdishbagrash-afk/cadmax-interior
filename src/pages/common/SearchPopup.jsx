@@ -110,31 +110,31 @@ function SearchPopup({ textColor = "text-black" }) {
                 <div className="fixed inset-0 z-[99999] bg-black/60 backdrop-blur-md flex items-start justify-center px-4 py-10 animate-fadeIn">
 
                     {/* POPUP */}
-                    <div className="w-full max-w-6xl bg-white rounded-[32px] shadow-[0_20px_80px_rgba(0,0,0,0.25)] overflow-hidden border border-gray-200">
+                    <div className="w-full md:max-w-5xl bg-white rounded-[32px] shadow-[0_20px_80px_rgba(0,0,0,0.25)] overflow-hidden border border-gray-200">
 
                         {/* HEADER */}
-                        <div className="flex items-center justify-between px-6 md:px-8 py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
+                        <div className="flex items-center justify-between px-2 py-3 md:px-8 md:py-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white">
 
                             <div>
-                                <h2 className="text-[26px] font-bold text-black">
+                                <span className="text-[14px] md:text-[26px] font-semibold text-black">
                                     Search Products & Designs
-                                </h2>
+                                </span>
 
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-[10px] md:text-sm text-gray-500 mt-1">
                                     Find premium products and interior designs
                                 </p>
                             </div>
 
                             <button
                                 onClick={() => setSearchOpen(false)}
-                                className="w-11 h-11 rounded-full bg-gray-100 hover:bg-black hover:text-white flex items-center justify-center transition-all duration-300"
+                                className="w-8 h-8 rounded-full bg-gray-100 hover:bg-black hover:text-white flex items-center justify-center transition-all duration-300"
                             >
                                 <HiOutlineX size={24} />
                             </button>
                         </div>
 
                         {/* SEARCH INPUT */}
-                        <div className="px-6 md:px-8 py-5 border-b border-gray-100 bg-white">
+                        <div className="px-4 md:px-8 py-3 md:py-5 border-b border-gray-100 bg-white">
 
                             <form
                                 onSubmit={handleSearch}
@@ -150,7 +150,7 @@ function SearchPopup({ textColor = "text-black" }) {
                                     onChange={(e) =>
                                         setSearch(e.target.value)
                                     }
-                                    className="w-full h-[62px] pl-14 pr-5 rounded-2xl border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-black focus:ring-4 focus:ring-black/5 text-[17px] font-medium transition-all duration-300"
+                                    className="w-full h-[30px] md:h-[62px] pl-14 pr-5 rounded-2xl border border-gray-200 bg-gray-50 focus:bg-white outline-none focus:border-black focus:ring-4 focus:ring-black/5 text-[17px] font-medium transition-all duration-300"
                                 />
                             </form>
 
@@ -180,7 +180,7 @@ function SearchPopup({ textColor = "text-black" }) {
 
                             {/* PRODUCTS */}
                             {!loading && products?.length > 0 && (
-                                <div className="p-6 md:p-8 border-b border-gray-100">
+                                <div className="p-4  md:p-8 border-b border-gray-100">
 
                                     <div className="flex items-center justify-between mb-6">
                                         <h3 className="text-2xl font-bold text-black">
@@ -264,7 +264,7 @@ function SearchPopup({ textColor = "text-black" }) {
                             {/* DESIGNS */}
                             {!loading &&
                                 allDesigns?.length > 0 && (
-                                    <div className="p-6 md:p-8">
+                                    <div className="p-4 md:p-8">
 
                                         <div className="flex items-center justify-between mb-6">
                                             <h3 className="text-2xl font-bold text-black">
