@@ -18,6 +18,13 @@ export default function ProductCard({ item }) {
         {/* IMAGE */}
         <div className="relative w-full h-[280px] sm:h-[320px] md:h-[360px] lg:h-[450px] overflow-hidden bg-[#F8F8F8]">
 
+          {/* ✅ Discount Badge */}
+          {item?.discount_amount > 0 && (
+            <div className="absolute top-3 left-3 z-20 bg-red-500 text-white text-[11px] md:text-xs font-bold px-3 py-1 rounded-md shadow-md">
+              {item.discount_amount}% OFF
+            </div>
+          )}
+
           {/* Default Image */}
           <img
             src={image?.[0] || "/no-image.png"}
@@ -50,7 +57,7 @@ export default function ProductCard({ item }) {
         </div>
 
         {/* TEXT AREA */}
-      <div className="bg-white pt-4 pb-2 relative z-10">
+        <div className="bg-white pt-4 pb-2 relative z-10">
 
           {/* TITLE */}
           <h3
@@ -67,17 +74,28 @@ export default function ProductCard({ item }) {
           </h3>
 
           {/* PRICE */}
-          <p
-            className="
-              mt-2
-              text-[18px] sm:text-[20px]
-              font-black
-              text-black
-              uppercase
-            "
-          >
-            ₹{item?.amount}
-          </p>
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
+
+            {/* ✅ Final Price */}
+            <p
+              className="
+                text-[18px] sm:text-[20px]
+                font-black
+                text-black
+                uppercase
+              "
+            >
+              ₹{item?.final_amount || item?.amount}
+            </p>
+
+            {/* ✅ Original Price */}
+            {item?.discount_amount > 0 && (
+              <span className="text-sm text-gray-400 line-through">
+                ₹{item?.amount}
+              </span>
+            )}
+
+          </div>
 
         </div>
 

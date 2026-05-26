@@ -505,21 +505,28 @@ const handlecheckoutAdd = (redirect = false) => {
                 </div>
 
                 {/* MAIN IMAGE */}
-                <div className="flex-1">
+              {/* MAIN IMAGE */}
+<div className="flex-1">
 
-                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
+  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
 
-                    <div className="absolute inset-0 p-6">
-                      <CustomZoomOnHover
-                        imageSrc={selectedVariant?.images?.[currentIndex]}
-                        alt="Product"
-                        zoomScale={2.5}
-                      />
-                    </div>
+    {/* ✅ Discount Badge */}
+    {ProductDetails?.discount_amount > 0 && (
+      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2  shadow-lg">
+        {ProductDetails?.discount_amount}% OFF
+      </div>
+    )}
 
-                  </div>
+    <div className="absolute inset-0 p-6">
+      <CustomZoomOnHover
+        imageSrc={selectedVariant?.images?.[currentIndex]}
+        alt="Product"
+        zoomScale={2.5}
+      />
+    </div>
 
-                </div>
+  </div>
+</div>
               </div>
             </div>
 
@@ -541,17 +548,33 @@ const handlecheckoutAdd = (redirect = false) => {
                 </p>
 
                 {/* PRICE */}
-                <div className="mt-6 flex items-end gap-3 flex-wrap">
+           {/* PRICE */}
+<div className="mt-6 flex items-end gap-3 flex-wrap">
 
-                  <h2 className="text-3xl sm:text-4xl font-bold text-black">
-                    ₹{ProductDetails?.amount}
-                  </h2>
+  {/* ✅ Discount Price */}
+  <h2 className="text-3xl sm:text-4xl font-bold text-black">
+    ₹{ProductDetails?.final_amount || ProductDetails?.amount}
+  </h2>
 
-                  <span className="text-sm text-[#6B7280]">
-                    Inclusive of all taxes
-                  </span>
+  {/* ✅ Original Price */}
+  {ProductDetails?.discount_amount > 0 && (
+    <span className="text-lg text-gray-400 line-through">
+      ₹{ProductDetails?.amount}
+    </span>
+  )}
 
-                </div>
+  {/* ✅ Discount Badge */}
+  {ProductDetails?.discount_amount > 0 && (
+    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+      {ProductDetails?.discount_amount}% OFF
+    </span>
+  )}
+
+  <span className="text-sm text-[#6B7280]">
+    Inclusive of all taxes
+  </span>
+
+</div>
 
                 {/* DELIVERY */}
                 <div className="mt-3 flex items-center gap-2 text-sm text-[#4D5466]">

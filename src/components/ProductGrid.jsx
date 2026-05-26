@@ -18,6 +18,7 @@ export default function ProductGrid({
     ? products.slice(0, 8)
     : [];
 
+
   return (
     <section className="bg-[#ffffff] py-4 md:py-8">
       <div className="container mx-auto px-4 max-w-[1430px]">

@@ -37,6 +37,7 @@ export default function Index() {
     }
   };
 
+
   const [data, setData] = useState([]);
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const router = useRouter();
@@ -103,6 +104,8 @@ export default function Index() {
       );
     }
   };
+
+  console.log("totalPrice" ,totalPrice)
 
 
   const handlePaymentCreateSubmit = async (e) => {
@@ -485,61 +488,128 @@ export default function Index() {
                         <th className="pb-3 text-right text-xs font-bold uppercase text-gray-400">Total</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {record?.items?.map((item) => (
-                        <tr key={item.id} className="group">
-                          <td className="py-4">
-                            <div className="flex items-center gap-4">
-                              <button
-                                onClick={() => handleRemove(item)}
-                                className="text-gray-400 hover:text-red-500 transition-colors"
-                                title="Remove Item"
-                              >
-                                <FaRegTrashCan size={16} />
-                              </button>
-                              <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100">
-                                <Image
-                                  src={item?.images[0]}
-                                  fill
-                                  alt={item?.name}
-                                  className="object-contain p-1"
-                                />
-                              </div>
-                              <span className="font-medium text-sm text-gray-900 line-clamp-2">
-                                {item?.name}
-                              </span>
-                            </div>
-                          </td>
+                  <tbody className="divide-y divide-gray-100">
+  {record?.items?.map((item) => {
 
-                          <td className="py-4 text-center">
-                            <button
-                              type="button"
-                              onClick={() => handleQtyChange(item, "decrease")}
-                              className="px-2 py-1 hover:bg-gray-100 disabled:opacity-30 transition"
-                              disabled={item.quantity === 1}
-                            >
-                              <FiMinus size={12} />
-                            </button>
+    // ✅ Prices
+    const originalPrice =
+      item?.amount || item?.unitPrice;
 
-                            <span className="px-2 text-sm font-semibold w-8">
-                              {item?.quantity}
-                            </span>
+    const finalPrice =
+      item?.final_amount || item?.unitPrice;
 
-                            <button
-                              type="button"
-                              onClick={() => handleQtyChange(item, "increase")}
-                              className="px-2 py-1 hover:bg-gray-100 transition"
-                            >
-                              <FiPlus size={12} />
-                            </button>
-                          </td>
+    const discount =
+      item?.discount_amount || 10;
 
-                          <td className="py-4 text-right font-semibold text-gray-900">
-                            {formatMultiPrice(item.unitPrice * item.quantity, "INR")}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
+    return (
+      <tr key={item.id} className="group">
+
+        <td className="py-4">
+          <div className="flex items-center gap-4">
+
+            <button
+              onClick={() => handleRemove(item)}
+              className="text-gray-400 hover:text-red-500 transition-colors"
+              title="Remove Item"
+            >
+              <FaRegTrashCan size={16} />
+            </button>
+
+            {/* IMAGE */}
+            <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100 rounded overflow-hidden">
+
+              {/* ✅ Discount Badge */}
+              {discount > 0 && (
+                <div className="absolute top-0 left-0 z-20 bg-red-500 text-white text-[9px] font-bold px-1 py-[2px]">
+                  {discount}% OFF
+                </div>
+              )}
+
+              <Image
+                src={item?.images[0]}
+                fill
+                alt={item?.name}
+                className="object-contain p-1"
+              />
+            </div>
+
+            {/* TITLE + PRICE */}
+            <div>
+              <span className="font-medium text-sm text-gray-900 line-clamp-2 block">
+                {item?.name}
+              </span>
+
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
+
+                {/* ✅ Final Price */}
+                <span className="text-sm font-bold text-black">
+                  {formatMultiPrice(finalPrice, "INR")}
+                </span>
+
+                {/* ✅ Original Price */}
+                {discount > 0 && (
+                  <span className="text-xs text-gray-400 line-through">
+                    {formatMultiPrice(originalPrice, "INR")}
+                  </span>
+                )}
+
+              </div>
+            </div>
+
+          </div>
+        </td>
+
+        {/* QTY */}
+        <td className="py-4 text-center">
+          <button
+            type="button"
+            onClick={() => handleQtyChange(item, "decrease")}
+            className="px-2 py-1 hover:bg-gray-100 disabled:opacity-30 transition"
+            disabled={item.quantity === 1}
+          >
+            <FiMinus size={12} />
+          </button>
+
+          <span className="px-2 text-sm font-semibold w-8">
+            {item?.quantity}
+          </span>
+
+          <button
+            type="button"
+            onClick={() => handleQtyChange(item, "increase")}
+            className="px-2 py-1 hover:bg-gray-100 transition"
+          >
+            <FiPlus size={12} />
+          </button>
+        </td>
+
+        {/* TOTAL */}
+        <td className="py-4 text-right">
+
+          {/* ✅ Final Total */}
+          <div className="font-semibold text-gray-900">
+            {formatMultiPrice(
+              finalPrice * item.quantity,
+              "INR"
+            )}
+          </div>
+
+          {/* ✅ Original Total */}
+          {discount > 0 && (
+            <div className="text-xs text-gray-400 line-through">
+              {formatMultiPrice(
+                originalPrice * item.quantity,
+                "INR"
+              )}
+            </div>
+          )}
+
+        </td>
+
+      </tr>
+    );
+  })}
+</tbody>
                     <tfoot>
                       <tr className="border-t-2 border-black">
                         <td colSpan={2} className="py-6 text-lg font-bold">Total Amount</td>

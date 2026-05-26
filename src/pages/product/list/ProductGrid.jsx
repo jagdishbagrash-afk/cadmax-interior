@@ -280,7 +280,7 @@ const ProductGrid = ({ selectedId }) => {
 
             {isInitialLoading ? (
               <div className="flex justify-center items-center py-20">
-               <Loader />
+                <Loader />
               </div>
             ) : products.length === 0 ? (
               <NoData
@@ -291,10 +291,20 @@ const ProductGrid = ({ selectedId }) => {
               <>
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
                   {products.map((item) => (
-                    <ProductCard
+                    <div
                       key={item._id || item.id}
-                      item={item}
-                    />
+                      className="relative"
+                    >
+
+                      {/* ✅ Discount Badge */}
+                      {item?.discount_amount > 0 && (
+                        <div className="absolute top-3 left-3 z-20 bg-red-500 text-white text-[11px] md:text-xs font-bold px-2 py-1 rounded-md shadow-md">
+                          {item.discount_amount}% OFF
+                        </div>
+                      )}
+
+                      <ProductCard item={item} />
+                    </div>
                   ))}
                 </div>
 
