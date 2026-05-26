@@ -11,6 +11,7 @@ import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
 import DesignMenu from "./DesignMenu";
 import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
+import Listing from "../api/Listing";
 
 export default function Header() {
   const { user, setUser } = useRole();
@@ -19,13 +20,10 @@ export default function Header() {
   const router = useRouter();
 
   const [scrolled, setScrolled] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // SEARCH STATES
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [search, setSearch] = useState("");
 
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
 
@@ -40,6 +38,48 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+const [cartCount, setCartCount] = useState(0);
+
+/* FETCH CART */
+const FetchCart = async () => {
+  try {
+    const main = new Listing();
+    const response = await main.CartGet();
+
+    const items = response?.data?.data?.items || [];
+
+    // SET COUNT
+    const totalQuantity = items.reduce(
+      (sum, item) => sum + (item.quantity || 1),
+      0
+    );
+
+    setCartCount(totalQuantity);
+
+    // OPTIONAL LOCAL STORAGE UPDATE
+    localStorage.setItem("cartItems", JSON.stringify(items));
+
+  } catch (error) {
+    console.log(error);
+
+    setCartCount(0);
+    localStorage.removeItem("cartItems");
+  }
+};
+
+/* INITIAL LOAD */
+useEffect(() => {
+  FetchCart();
+}, []);
+
+/* REAL TIME AUTO REFRESH */
+useEffect(() => {
+  const interval = setInterval(() => {
+    FetchCart();
+  }, 2000);
+
+  return () => clearInterval(interval);
+}, []);
   /* TEXT COLOR */
   const textColor = scrolled ? "text-black" : "text-black";
 
@@ -59,14 +99,6 @@ export default function Header() {
     }
   }, []);
 
-  useEffect(() => {
-    const total = cartItemsRedux.reduce(
-      (sum, item) => sum + (item.quantity || 0),
-      0
-    );
-
-    setCartCount(total);
-  }, [cartItemsRedux]);
 
   /* LOGOUT */
   const handleLogout = () => {
@@ -77,8 +109,7 @@ export default function Header() {
     router.push("/");
   };
 
-  /* SEARCH SUBMIT */
- 
+ console.log("cartCount",cartCount)
 
   return (
     <>
@@ -186,11 +217,11 @@ export default function Header() {
                   className={`${textColor} text-[22px]`}
                 />
 
-                {record?.length > 0 && (
+                {cartCount > 0 && (
                   <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 flex items-center justify-center text-[10px] font-semibold bg-red-500 text-white rounded-full shadow-md">
-                    {record?.length > 99
+                    {cartCount > 99
                       ? "99+"
-                      : record?.length}
+                      : cartCount}
                   </span>
                 )}
               </Link>

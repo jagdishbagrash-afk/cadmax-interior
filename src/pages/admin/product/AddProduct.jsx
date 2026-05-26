@@ -23,6 +23,7 @@ export default function AddProduct({ fetchDatas, isEdit = false, item }) {
     category: "",
     file: null,
     preview: "",
+    discount_amount :""
   });
 
   /* =======================
@@ -42,6 +43,8 @@ export default function AddProduct({ fetchDatas, isEdit = false, item }) {
         description: item.description || "",
         stock: item.stock || "",
         amount: item.amount || "",
+        discount_amount: item.discount_amount || "",
+
         superCategory: item?.superCategory?._id || "",
         subcategory: item?.subcategory?._id || "",
         category: item?.category?._id || "",
@@ -166,6 +169,8 @@ export default function AddProduct({ fetchDatas, isEdit = false, item }) {
       fd.append("description", formData.description);
       fd.append("stock", formData.stock);
       fd.append("amount", formData.amount);
+      fd.append("discount_amount", formData.discount_amount);
+
       fd.append("superCategory", formData.superCategory);
       fd.append("subcategory", formData.subcategory);
       fd.append("category", formData.category);
@@ -256,6 +261,10 @@ export default function AddProduct({ fetchDatas, isEdit = false, item }) {
             <input required type="number" placeholder="Amount"
               value={formData.amount}
               onChange={e => handleInputChange("amount", e.target.value)} />
+
+                  <input required type="number" placeholder="discount_amount"
+              value={formData.discount_amount}
+              onChange={e => handleInputChange("discount_amount", e.target.value)} />
 
             <input type="file" accept="image/*" onChange={handleImageChange} />
 

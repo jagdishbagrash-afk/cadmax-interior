@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { MdClose } from "react-icons/md";
 import MultipleImages from "./MultipleImages";
 import Predictable from "../Predictable";
+import SuccessPopup from "@/components/SuccessPopup";
 
 export default function DesignLayout() {
     const [isOpen, setIsOpen] = useState(false);
@@ -178,7 +179,7 @@ export default function DesignLayout() {
 
                 </div>
             </div>
-            <div className="w-full min-h-screen bg-white p-4 md:p-10 font-sans">
+            <div className="w-full  bg-white p-4 md:p-10 font-sans">
                 {/* Main Container */}
                 <div className=" ">
 
@@ -256,12 +257,9 @@ export default function DesignLayout() {
                                     }}
                                     className="w-full sm:w-auto px-10 py-4 font-bold uppercase tracking-widest text-sm bg-black text-white hover:bg-gray-800 cursor-pointer"
                                 >
-                                    Craft for You
+                                  {loading ? "Loading..."  :" Craft for You"}
                                 </button>
-
-
                             </div>
-
                         </div>
                     </div>
 

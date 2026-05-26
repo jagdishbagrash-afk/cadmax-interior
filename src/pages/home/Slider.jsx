@@ -11,7 +11,6 @@ export default function Slider() {
   const [banner, setBanner] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fetch Data
   const fetchDatas = async () => {
     try {
       const main = new Listing();
@@ -37,7 +36,7 @@ export default function Slider() {
   // Loading State
   if (loading) {
     return (
-      <div className="w-full h-[320px] sm:h-[400px] md:h-[560px] lg:h-[860px] bg-gray-200 animate-pulse flex items-center justify-center">
+      <div className="w-full h-[220px] sm:h-[400px] lg:h-screen bg-gray-200 animate-pulse flex items-center justify-center">
         <p className="text-gray-500">Loading slider...</p>
       </div>
     );
@@ -49,7 +48,7 @@ export default function Slider() {
   }
 
   return (
-    <div className="relative h-[320px] sm:h-[400px] md:h-[560px] lg:h-[860px] md:mt-[-150px] overflow-hidden">
+    <div className="relative w-full overflow-hidden md:mt-[-120px]">
       <Swiper
         key={banner.length}
         slidesPerView={1}
@@ -60,50 +59,85 @@ export default function Slider() {
           pauseOnMouseEnter: false,
         }}
         modules={[Autoplay]}
-        className="w-full h-full"
+        className="w-full"
       >
         {banner.map((slide, index) => (
           <SwiperSlide key={index}>
-            <div className="relative w-full h-full">
-
+            <div
+              className="
+                relative
+                w-full
+                h-[220px]
+                sm:h-[350px]
+                md:h-[500px]
+                lg:h-screen
+                overflow-hidden
+              "
+            >
               {/* Image */}
               <img
                 src={slide?.Image}
                 alt={`Slide ${index}`}
                 className="
-                  w-full h-full
-                  object-contain sm:object-cover
+                  w-full
+                  h-full
+                  object-cover
                   object-center
-                  bg-black
                 "
               />
 
               {/* Overlay */}
-              <div className="absolute inset-0 bg-black/40"></div>
+              <div className="absolute inset-0 bg-black/20 md:bg-black/40"></div>
 
-              {/* Optional Content */}
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <div className="text-center text-white px-4">
+              {/* Content */}
+              <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
+                <div className="text-center text-white max-w-4xl">
+                  
                   {slide?.title && (
-                    <h2 className="text-2xl sm:text-4xl md:text-5xl font-bold mb-4">
+                    <h2
+                      className="
+                        text-xl
+                        sm:text-3xl
+                        md:text-5xl
+                        lg:text-6xl
+                        font-bold
+                        mb-3
+                        md:mb-5
+                        leading-tight
+                      "
+                    >
                       {slide.title}
                     </h2>
                   )}
 
                   {slide?.description && (
-                    <p className="text-sm sm:text-base md:text-lg max-w-2xl mx-auto mb-6">
+                    <p
+                      className="
+                        text-xs
+                        sm:text-sm
+                        md:text-lg
+                        lg:text-xl
+                        max-w-2xl
+                        mx-auto
+                        mb-4
+                        md:mb-6
+                        leading-relaxed
+                      "
+                    >
                       {slide.description}
                     </p>
                   )}
 
                   {slide?.buttonText && (
-                    <Button>
-                      {slide.buttonText}
-                    </Button>
+                    <div className="flex justify-center">
+                      <Button>
+                        {slide.buttonText}
+                      </Button>
+                    </div>
                   )}
+
                 </div>
               </div>
-
             </div>
           </SwiperSlide>
         ))}

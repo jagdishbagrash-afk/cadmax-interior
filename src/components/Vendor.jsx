@@ -53,11 +53,11 @@ export default function Vendor({
               <SwiperSlide key={item?._id || idx}>
                 <Link
                   href={`/vendor/${item?.VendorCategory?.slug}/${item?.slug}`}
-                  className="group block rounded-2xl overflow-hidden shadow hover:shadow-xl transition bg-white"
+                  className="group block rounded-2xl overflow-hidden shadow  transition bg-white"
                 >
 
                   {/* Image */}
-                  <div className="relative w-full h-[260px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
+                  <div className="relative w-full h-[300px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
 
                     <img
                       src={item?.Image || "/no-image.png"}

@@ -106,10 +106,8 @@ export default function Index() {
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
   const [open, setOpen] = useState(null);
   const [ProductDetails, setProductDetails] = useState(null);
-  console.log("ProductDetails", ProductDetails)
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);

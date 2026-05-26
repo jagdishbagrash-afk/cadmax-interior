@@ -34,6 +34,7 @@ export default function Add() {
     material: "",
     type: "",
     terms: "",
+    discount_amount :""
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -67,6 +68,8 @@ export default function Add() {
       material: data.material,
       type: data.type,
       terms: data.terms,
+      discount_amount :  data.discount_amount , 
+
     });
 
     setImagePreview(data.image || "");
@@ -195,6 +198,7 @@ export default function Add() {
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
       fd.append("type", form.type);
+      fd.append("discount_amount", form.discount_amount);
       fd.append("terms", form.terms);
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       const selectedVariants = variants.filter(v => v.selected);
@@ -276,15 +280,15 @@ export default function Add() {
 
           {/* Stock & Price */}
           <div className="grid grid-cols-2 gap-4">
-            {/* <input
+            <input
               type="number"
-              name="stock"
-              placeholder="Stock"
-              value={form.stock}
+              name="discount_amount"
+              placeholder="discount_amount"
+              value={form.discount_amount}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
               required
-            /> */}
+            />
             <input
               type="number"
               name="amount"
