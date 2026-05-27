@@ -48,8 +48,6 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-
-
   const totalPrice = record?.summary?.finalAmount;
 
   const itemNames = cartItems.map((item) => item.name);
