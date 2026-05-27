@@ -176,7 +176,7 @@ export default function Index() {
       setLoading(false);
     }
   };
-
+console.log("cartItems" ,cartItems)
   const handleSubmit = async (response) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -185,19 +185,11 @@ export default function Index() {
     if (loading) { return; }
     setLoading(true);
     try {
-      // const products = cartItemsRedux.map((item) => ({
-      //   id: item?.product?._id,
-      //   price: item?.price,
-      //   quantity: item?.quantity,
-      //   total: item?.price * item?.quantity,
-      //   variant: item?.selectedVariant,
-      // }));
-
       const products = cartItems.map((item) => ({
   id: item?.productId || item?._id,
-  price: item?.unitPrice,
+  price: item?.final_amount,
   quantity: item?.quantity,
-  total: item?.unitPrice * item?.quantity,
+  total: item?.final_amount * item?.quantity,
   variant: item?.variant,
 }));
       const main = new Listing();
