@@ -280,7 +280,7 @@ export default function Add() {
 
           {/* Stock & Price */}
           <div className="grid grid-cols-2 gap-4">
-            <input
+            {/* <input
               type="number"
               name="discount_amount"
               placeholder="discount_amount"
@@ -288,7 +288,7 @@ export default function Add() {
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
               required
-            />
+            /> */}
             <input
               type="number"
               name="amount"
@@ -374,7 +374,7 @@ export default function Add() {
           <textarea
             type="text"
             name="type"
-            placeholder="Product Type"
+            placeholder="Product Care"
             value={form.type}
             onChange={handleChange}
             rows="3"

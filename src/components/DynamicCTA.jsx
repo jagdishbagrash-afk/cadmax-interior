@@ -5,12 +5,14 @@ import toast from "react-hot-toast";
 import { useState } from "react";
 import Listing from "@/pages/api/Listing";
 import { useRole } from "@/context/RoleContext";
+import SuccessPopup from "./SuccessPopup";
 
 export default function DynamicCTA({ cta, record }) {
   const { user } = useRole();
   const router = useRouter();
 
   const [loading, setLoading] = useState(false);
+  const [successOpen, setSuccessOpen] = useState(false);
 
   const handleSubmit = async () => {
     try {
@@ -36,6 +38,7 @@ export default function DynamicCTA({ cta, record }) {
       const res = await main.LeadAdd(payload);
 
       if (res?.data?.status) {
+        setSuccessOpen(true);
         toast.success(res?.data?.message || "Submitted successfully");
       } else {
         toast.error(res?.data?.message || "Something went wrong");
@@ -74,12 +77,19 @@ export default function DynamicCTA({ cta, record }) {
   };
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={loading}
-      className="w-full md:w-auto px-6 cursor-pointer py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-    >
-      {loading ? "Processing..." : cta?.text || "Submit"}
-    </button>
+    <>
+      <button
+        onClick={handleClick}
+        disabled={loading}
+        className="w-full md:w-auto px-6 cursor-pointer py-3 bg-black text-white font-semibold rounded-xl hover:bg-gray-800 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? "Processing..." : cta?.text || "Submit"}
+      </button>
+
+      <SuccessPopup
+        open={successOpen}
+        onClose={() => setSuccessOpen(false)}
+      />
+    </>
   );
 }

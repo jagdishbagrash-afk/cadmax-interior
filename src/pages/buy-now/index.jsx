@@ -405,9 +405,9 @@ export default function Index() {
                             {formatMultiPrice(subtotal, "INR")}
                           </span>
 
-                          <span className="text-green-600 font-medium text-sm">
+                          {/* <span className="text-green-600 font-medium text-sm">
                             Save {discountTotal} %
-                          </span>
+                          </span> */}
                         </div>
 
                         <div className="text-2xl font-bold">

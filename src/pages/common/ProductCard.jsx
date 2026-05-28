@@ -1,3 +1,4 @@
+import { formatPrice } from "@/components/formatPrice";
 import Link from "next/link";
 import React from "react";
 
@@ -19,11 +20,11 @@ export default function ProductCard({ item }) {
         <div className="relative w-full h-[280px] sm:h-[320px] md:h-[360px] lg:h-[450px] overflow-hidden bg-[#F8F8F8]">
 
           {/* ✅ Discount Badge */}
-          {item?.discount_amount > 0 && (
+          {/* {item?.discount_amount > 0 && (
             <div className="absolute top-3 left-3 z-20 bg-red-500 text-white text-[11px] md:text-xs font-bold px-3 py-1 rounded-md shadow-md">
               {item.discount_amount}% OFF
             </div>
-          )}
+          )} */}
 
           {/* Default Image */}
           <img
@@ -85,13 +86,14 @@ export default function ProductCard({ item }) {
                 uppercase
               "
             >
-              ₹{item?.final_amount || item?.amount}
+                ₹{formatPrice(item?.final_amount || item?.amount)}
+
             </p>
 
             {/* ✅ Original Price */}
             {item?.discount_amount > 0 && (
               <span className="text-sm text-gray-400 line-through">
-                ₹{item?.amount}
+                ₹{formatPrice(item?.amount)}
               </span>
             )}
 

@@ -508,11 +508,11 @@ console.log("cartItems" ,cartItems)
             <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100 rounded overflow-hidden">
 
               {/* ✅ Discount Badge */}
-              {discount > 0 && (
+              {/* {discount > 0 && (
                 <div className="absolute top-0 left-0 z-20 bg-red-500 text-white text-[9px] font-bold px-1 py-[2px]">
                   {discount}% OFF
                 </div>
-              )}
+              )} */}
 
               <Image
                 src={item?.images[0]}

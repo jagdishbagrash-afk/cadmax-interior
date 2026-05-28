@@ -57,12 +57,12 @@ export default function Vendor({
                 >
 
                   {/* Image */}
-                  <div className="relative w-full h-[300px] md:h-[300px] lg:h-80 overflow-hidden bg-gray-100">
+                  <div className="relative w-full h-[300px]  lg:h-80 overflow-hidden bg-gray-100">
 
                     <img
                       src={item?.Image || "/no-image.png"}
                       alt={item?.name}
-                      className="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0"
+                      className="absolute inset-0 w-full h-full object-cover object-top transition-opacity duration-300 group-hover:opacity-0"
                     />
 
                     <img
@@ -84,7 +84,7 @@ export default function Vendor({
 
                   {/* Content */}
                   <div className="p-4 space-y-2">
-                    <h3 className="mt-3 text-sm font-medium text-[#171717] uppercase Creato">
+                    <h3 className="mt-2 text-sm font-medium text-[#171717] uppercase Creato">
                       {item?.name}
                     </h3>
 
