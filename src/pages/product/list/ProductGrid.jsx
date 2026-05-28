@@ -297,11 +297,11 @@ const ProductGrid = ({ selectedId }) => {
                     >
 
                       {/* ✅ Discount Badge */}
-                      {item?.discount_amount > 0 && (
+                      {/* {item?.discount_amount > 0 && (
                         <div className="absolute top-3 left-3 z-20 bg-red-500 text-white text-[11px] md:text-xs font-bold px-2 py-1 rounded-md shadow-md">
                           {item.discount_amount}% OFF
                         </div>
-                      )}
+                      )} */}
 
                       <ProductCard item={item} />
                     </div>

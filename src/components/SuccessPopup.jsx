@@ -23,16 +23,13 @@ export default function SuccessPopup({
   const router = useRouter();
 
   return (
-    <AnimatePresence>
 
+    <>
       {open && (
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+        <div
           className="
-            fixed inset-0 z-[99999]
+            fixed inset-0 !z-[999999999]
             bg-black/60 backdrop-blur-sm
             flex items-center justify-center
             p-4
@@ -40,7 +37,7 @@ export default function SuccessPopup({
         >
 
           {/* POPUP */}
-          <motion.div
+          <div
             initial={{
               opacity: 0,
               scale: 0.85,
@@ -62,6 +59,7 @@ export default function SuccessPopup({
             className="
               relative
               w-full max-w-[450px]
+              max-w-[300px]
               rounded-[32px]
               bg-white
               shadow-[0_20px_80px_rgba(0,0,0,0.25)]
@@ -91,7 +89,7 @@ export default function SuccessPopup({
 
                 <div
                   className="
-                    w-[110px] h-[110px]
+                    w-[90px] h-[90px]
                     rounded-full
                     bg-[#F1FAF1]
                     flex items-center justify-center
@@ -100,7 +98,7 @@ export default function SuccessPopup({
 
                   <div
                     className="
-                      w-[72px] h-[72px]
+                      w-[60px] h-[60px]
                       rounded-full
                       bg-[#43A047]
                       flex items-center justify-center
@@ -120,7 +118,7 @@ export default function SuccessPopup({
               {/* TITLE */}
               <h2
                 className="
-                  mt-8
+                  mt-3
                   text-[24px]
                   leading-[38px]
                   font-bold
@@ -133,7 +131,7 @@ export default function SuccessPopup({
               {/* DESCRIPTION */}
               <p
                 className="
-                  mt-4
+                  mt-2
                   text-[15px]
                   leading-7
                   text-[#666]
@@ -147,7 +145,7 @@ export default function SuccessPopup({
               {/* CONTACT BOX */}
               <div
                 className="
-                  mt-7
+                  mt-3
                   rounded-[24px]
                   bg-[#F7F7F7]
                   px-5 py-5
@@ -205,8 +203,8 @@ export default function SuccessPopup({
               <button
                 onClick={() => router.push("/")}
                 className="
-                  mt-8
-                  w-full h-[58px]
+                  mt-4
+                  w-full h-[40px]
                   rounded-2xl
                   bg-black
                   hover:bg-[#111]
@@ -226,9 +224,9 @@ export default function SuccessPopup({
               </button>
 
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

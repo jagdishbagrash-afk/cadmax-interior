@@ -32,7 +32,6 @@ export default function Index() {
         fetchData();
     }, []);
 
-    const [isOpen, setIsOpen] = useState(false);
     return (
         <Layout>
 
