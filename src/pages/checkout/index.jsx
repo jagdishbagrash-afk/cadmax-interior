@@ -151,7 +151,6 @@ export default function Index() {
             color: "#F37254",
           },
         };
-
         const rzp = new Razorpay(options);
         rzp.on("payment.failed", function (response) {
           const error = response.error;
