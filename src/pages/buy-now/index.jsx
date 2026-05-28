@@ -88,9 +88,17 @@ export default function Index() {
     setFormData({ ...formData, [name]: value });
   };
 
-  // TOTAL PRICE
-  const totalPrice =
+  // PRICE CALCULATIONS
+  const subtotal =
     (product?.price || 0) * (product?.quantity || 1);
+
+  const discountTotal =
+    (product?.discount_amount || 0) *
+    (product?.quantity || 1);
+
+  const finalTotal =
+    (product?.final_amount || 0) *
+    (product?.quantity || 1);
 
   // PAYMENT
   const handlePaymentCreateSubmit = async (e) => {
@@ -112,7 +120,7 @@ export default function Index() {
       const main = new Listing();
 
       const res = await main.AddPaymentCreate({
-        amount: totalPrice,
+        amount: finalTotal,
         currency: "INR",
         receipt: "receipt#1",
       });
@@ -120,7 +128,7 @@ export default function Index() {
       if (res?.data?.orderId) {
         const options = {
           key: RAZOPAY_KEY,
-          amount: totalPrice,
+          amount: finalTotal,
           currency: "INR",
           name: "Cadmaxatelier",
           description: "Product Payment",
@@ -137,7 +145,7 @@ export default function Index() {
           },
 
           theme: {
-            color: "#000000",
+            color: "#F37254",
           },
         };
 
@@ -168,8 +176,10 @@ export default function Index() {
         {
           id: product?.productId,
           price: product?.price,
+          discount_amount: product?.discount_amount,
+          final_amount: product?.final_amount,
           quantity: product?.quantity,
-          total: totalPrice,
+          total: finalTotal,
           variant: product?.variant,
         },
       ];
@@ -179,7 +189,11 @@ export default function Index() {
         mobile: formData.mobile,
         addressId: formData.addressId,
         product: productData,
-        amount: totalPrice,
+
+        subtotal,
+        discountAmount: discountTotal,
+        amount: finalTotal,
+
         PaymentId: response.razorpay_payment_id,
       });
 
@@ -216,7 +230,7 @@ export default function Index() {
         payment_id: paymentId,
         currency: "INR",
         product_name: [product?.name],
-        amount: totalPrice,
+        amount: finalTotal,
         type: "product",
         payment_status,
         OrderID: Orderdatas,
@@ -335,11 +349,10 @@ export default function Index() {
                     type="submit"
                     disabled={loading}
                     className={`w-full py-4 mt-8 font-bold transition
-                    ${
-                      loading
+                    ${loading
                         ? "bg-gray-300 cursor-not-allowed"
                         : "bg-black text-white hover:bg-gray-800"
-                    }`}
+                      }`}
                   >
                     {loading ? "Processing..." : "Pay Now"}
                   </button>
@@ -384,22 +397,40 @@ export default function Index() {
                         Quantity: {product?.quantity}
                       </p>
 
-                      <div className="mt-3 text-xl font-bold">
-                        {formatMultiPrice(totalPrice, "INR")}
+                      {/* PRICE */}
+                      <div className="mt-3 space-y-1">
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-400 line-through text-sm">
+                            {formatMultiPrice(subtotal, "INR")}
+                          </span>
+
+                          <span className="text-green-600 font-medium text-sm">
+                            Save {discountTotal} %
+                          </span>
+                        </div>
+
+                        <div className="text-2xl font-bold">
+                          {formatMultiPrice(finalTotal, "INR")}
+                        </div>
                       </div>
                     </div>
                   </div>
                 )}
 
                 {/* TOTAL */}
-                <div className="border-t mt-8 pt-6 flex justify-between items-center">
-                  <span className="text-lg font-semibold">
-                    Total Amount
-                  </span>
+                <div className="border-t mt-8 pt-6 space-y-3">
 
-                  <span className="text-2xl font-bold">
-                    {formatMultiPrice(totalPrice, "INR")}
-                  </span>
+                  <div className="flex justify-between items-center pt-4">
+                    <span className="text-lg font-semibold">
+                      Final Amount
+                    </span>
+
+                    <span className="text-2xl font-bold">
+                      {formatMultiPrice(finalTotal, "INR")}
+                    </span>
+                  </div>
+
                 </div>
               </div>
             </div>

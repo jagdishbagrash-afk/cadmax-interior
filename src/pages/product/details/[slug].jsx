@@ -250,6 +250,8 @@ const handlecheckoutAdd = (redirect = false) => {
       id,
       name: ProductDetails?.title,
       price: ProductDetails?.amount,
+      discount_amount : ProductDetails?.discount_amount,
+      final_amount  : ProductDetails?.final_amount ,
       quantity: qty,
       imgUrl: selectedVariant?.images?.[0],
       productId: ProductDetails?._id,
