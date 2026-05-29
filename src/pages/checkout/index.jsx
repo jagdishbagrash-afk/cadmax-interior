@@ -103,7 +103,6 @@ export default function Index() {
     }
   };
 
-  console.log("totalPrice" ,totalPrice)
 
 
   const handlePaymentCreateSubmit = async (e) => {
