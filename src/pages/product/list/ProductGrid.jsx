@@ -32,7 +32,7 @@ const ProductGrid = ({ selectedId }) => {
     try {
       const main = new Listing();
       const response = await main.GetAllProdcuctColor();
-
+console.log("response" ,response)
       if (response?.data?.data) {
         const min = response.data.data.lowestPrice ?? 0;
         const max = response.data.data.highestPrice ?? 0;
