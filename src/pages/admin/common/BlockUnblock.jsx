@@ -57,6 +57,11 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     const main = new Listing();
     return main.Servicesdelete(Id);
   };
+
+    const handleServicesType = () => {
+    const main = new Listing();
+    return main.ServicesTypedelete(Id);
+  };
   /* -------------------- MAIN HANDLER -------------------- */
 
   const handleClick = async (e) => {
@@ -107,7 +112,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
         className="cursor-pointer m-auto flex items-center justify-center
                     w-[42px] h-[42px] rounded-lg 
                     border border-gray-200 shadow-sm 
-                    bg-white hover:bg-gray-50 transition-all duration-200"
+                    bg-white  transition-all duration-200" 
       >
         {status === true ? (
           <FaUndo
@@ -126,7 +131,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
       {isOpen && (
         <Popup isOpen={isOpen} onClose={handleClose} size="max-w-lg">
           {/* Header */}
-          <div className="border-b border-black/10 z-[9999999] px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+          <div className="border-b border-black/10 !z-[99999999999] px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
             <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
               {status === true ? "Block" : "Unblock"}
             </h2>

@@ -72,7 +72,7 @@ export default function Index() {
                   data.map((item) => (
                     <tr
                       key={item?._id}
-                      className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
+                      className={`transition hover:bg-gray-50 ${item?.deletedAt ? "opacity-50" : ""
                         }`}
                     >
                       {/* Image */}
