@@ -1,5 +1,5 @@
 export const formatPrice = (price) => {
   if (!price) return "0";
 
-  return Number(price).toLocaleString("en-IN");
+  return Math.floor(Number(price)).toLocaleString("en-IN");
 };

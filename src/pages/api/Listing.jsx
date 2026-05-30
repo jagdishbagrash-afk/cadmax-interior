@@ -77,6 +77,10 @@ class Listing extends Component {
     return Api.get(`/services/type/delete/${id}`)
   }
 
+   async ServiceSubcategorydelete(id) {
+    return Api.get(`/services/subcategory/delete/${id}`)
+  }
+
   async vendorcategoryList() {
     return Api.get("/vendor/category/list",)
   }
