@@ -96,7 +96,7 @@ export default function Index() {
             <ResidentialDesign Residentialservices={data?.Residentialservices} />
             <CommercialDesign Commercialservices={data?.Commercialservices} />
             {/* <Vendor /> */}
-            <Execution />
+            {/* <Execution /> */}
             <Slider2 />
             <div className="relative w-full h-full md:h-[450px]">
                 <img
