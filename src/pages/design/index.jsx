@@ -20,6 +20,7 @@ export default function Index() {
         try {
             const main = new Listing();
             const response = await main.ServciesType();
+            console.log("response" ,response)
             if (response.data?.data) {
                 setData(response.data.data);
             }
@@ -93,8 +94,8 @@ export default function Index() {
                 </div>
             </div>
             <Predictable />
-            <ResidentialDesign Residentialservices={data?.Residentialservices} />
-            <CommercialDesign Commercialservices={data?.Commercialservices} />
+            <ResidentialDesign Residentialservices={data?.residentialServices} />
+            <CommercialDesign Commercialservices={data?.commercialServices} />
             {/* <Vendor /> */}
             {/* <Execution /> */}
             <Slider2 />
