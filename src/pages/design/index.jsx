@@ -93,8 +93,8 @@ export default function Index() {
                     </div>
                 </div>
             </div>
-            <Predictable />
             <ResidentialDesign Residentialservices={data?.residentialServices} />
+            <Predictable />
             <CommercialDesign Commercialservices={data?.commercialServices} />
             {/* <Vendor /> */}
             {/* <Execution /> */}
