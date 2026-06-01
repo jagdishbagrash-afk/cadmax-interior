@@ -9,6 +9,7 @@ import Banner from "@/components/Banner";
 import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
+import { formatPrice } from "@/components/formatPrice";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -411,7 +412,7 @@ export default function Index() {
                         </div>
 
                         <div className="text-2xl font-bold">
-                          {formatMultiPrice(finalTotal, "INR")}
+                          {formatPrice(finalTotal, "INR")}
                         </div>
                       </div>
                     </div>
@@ -427,7 +428,7 @@ export default function Index() {
                     </span>
 
                     <span className="text-2xl font-bold">
-                      {formatMultiPrice(finalTotal, "INR")}
+                      {formatPrice(finalTotal, "INR")}
                     </span>
                   </div>
 
