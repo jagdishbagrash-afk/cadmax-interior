@@ -49,7 +49,9 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  const totalPrice = record?.summary?.finalAmount;
+  console.log("record?.summary?.finalAmount" ,record)
+  const finalAmount = record.summary.finalAmount
+  const totalPrice = formatPrice(finalAmount);
 
   const itemNames = cartItems.map((item) => item.name);
   const [formData, setFormData] = useState({
@@ -122,7 +124,7 @@ export default function Index() {
     const main = new Listing();
     try {
       const res = await main.AddPaymentCreate({
-        "amount": totalPrice,
+        "amount": (totalPrice),
         "currency": "INR",
         "receipt": "receipt#1"
       });
