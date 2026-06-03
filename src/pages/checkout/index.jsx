@@ -49,8 +49,7 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  console.log("record?.summary?.finalAmount" ,record)
-  const finalAmount = record.summary.finalAmount
+  const finalAmount = record?.summary?.finalAmount
   const totalPrice = formatPrice(finalAmount);
 
   const itemNames = cartItems.map((item) => item.name);
@@ -177,7 +176,6 @@ export default function Index() {
       setLoading(false);
     }
   };
-console.log("cartItems" ,cartItems)
   const handleSubmit = async (response) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -256,7 +254,6 @@ console.log("cartItems" ,cartItems)
   };
 
 
-  console.log("|record", record)
 
   const FetchCart = async () => {
     try {

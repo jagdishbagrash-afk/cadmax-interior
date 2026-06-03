@@ -9,7 +9,7 @@ const ProductGrid = ({ selectedId }) => {
 
   const [products, setProducts] = useState([]);
   const [page, setPage] = useState(1);
-  const [limit] = useState(10);
+  const [limit] = useState(9);
   const [hasMore, setHasMore] = useState(true);
 
   const [selectedColors, setSelectedColors] = useState([]);
@@ -32,7 +32,6 @@ const ProductGrid = ({ selectedId }) => {
     try {
       const main = new Listing();
       const response = await main.GetAllProdcuctColor();
-console.log("response" ,response)
       if (response?.data?.data) {
         const min = response.data.data.lowestPrice ?? 0;
         const max = response.data.data.highestPrice ?? 0;
@@ -59,46 +58,60 @@ console.log("response" ,response)
   }, []);
 
   // ================= FETCH PRODUCTS =================
-  const fetchProjectData = async (pageNo = 1, reset = false) => {
+  const fetchProjectData = async (
+    pageNo = 1,
+    reset = false,
+    customFilters = null
+  ) => {
     try {
-      if (loading) return;
-
       setLoading(true);
 
-      const filters = {
-        ...(selectedColors.length > 0 && {
-          color: selectedColors.join(","),
-        }),
-        lowPrice: priceRange.low,
-        highPrice: priceRange.high,
-      };
+      const filters =
+        customFilters || {
+          ...(selectedColors.length > 0 && {
+            color: selectedColors.join(","),
+          }),
+          lowPrice: priceRange.low,
+          highPrice: priceRange.high,
+        };
 
       const main = new Listing();
 
-      const response = await main.getAllProductSubCategroy(
-        selectedId,
-        pageNo,
-        limit,
-        filters
-      );
+      const response =
+        await main.getAllProductSubCategroy(
+          selectedId,
+          pageNo,
+          limit,
+          filters
+        );
 
       const resData = response?.data?.data;
+
       const newProducts = resData?.data || [];
-      const pagination = resData?.pagination;
+
+      const pagination = resData?.pagination || {};
 
       if (reset) {
         setProducts(newProducts);
       } else {
-        setProducts((prev) => [...prev, ...newProducts]);
+        setProducts((prev) => [
+          ...prev,
+          ...newProducts,
+        ]);
       }
 
-      setHasMore(pagination?.page < pagination?.totalPages);
+      setHasMore(
+        pagination.page < pagination.totalPages
+      );
     } catch (error) {
-      console.log("Error:", error);
+      console.log(error);
     } finally {
       setLoading(false);
     }
   };
+
+  // ================= INIT LOAD =================
+
 
   // ================= INIT LOAD =================
   useEffect(() => {
@@ -109,7 +122,18 @@ console.log("response" ,response)
     setHasMore(true);
 
     fetchProjectData(1, true);
-  }, [selectedId, selectedColors]);
+  }, [selectedId]);
+
+  // ================= FILTER CHANGE =================
+  useEffect(() => {
+    if (!selectedId) return;
+
+    setProducts([]);
+    setPage(1);
+    setHasMore(true);
+
+    fetchProjectData(1, true);
+  }, [selectedColors, priceRange]);
 
   // ================= LOAD MORE =================
   const handleLoadMore = () => {
