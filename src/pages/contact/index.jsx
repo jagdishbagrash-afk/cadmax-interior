@@ -86,7 +86,6 @@ export default function Contact() {
                 ...Regs,
             };
             const response = await main.AddPostContact(updatedRegs);
-            console.log("response", response)
             if (response?.data?.status) {
                 toast.success(response.data.message);
                 setRegs({

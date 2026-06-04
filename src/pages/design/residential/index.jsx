@@ -28,7 +28,6 @@ export default function ResidentialDesign() {
         fetchData();
     }, []);
 
-    console.log("data" ,data)
     return (
         <Layout>
             <div

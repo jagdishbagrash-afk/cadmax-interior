@@ -20,7 +20,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.Leadget();
-      console.log("response", response)
       if (response?.data?.data) {
         setData(response.data.data);
         setFilteredData(response.data.data);
@@ -131,7 +130,6 @@ export default function Index() {
     }
   };
 
-  console.log("paginatedData" , paginatedData)
 
   return (
     <AdminLayout page={"Lead List"}>

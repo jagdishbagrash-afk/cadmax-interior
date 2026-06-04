@@ -115,7 +115,6 @@ export default function Header() {
     router.push("/");
   };
 
-  console.log("cartCount", cartCount)
 
   return (
     <>
