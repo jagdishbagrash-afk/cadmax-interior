@@ -87,8 +87,7 @@ export default function Index() {
     try {
       const main = new Listing();
       const res = await main.ServciesType(slug);
-      const list = res?.data?.data?.Residentialservices || [];
-
+      const list = res?.data?.data?.residentialServices || [];
       setCategories(list);
 
       if (list.length) {

@@ -12,7 +12,6 @@ export default function Index() {
   const [search, setSearch] = useState("");
   const [data, setData] = useState([]);
 
-  // PAGINATION
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
 
@@ -117,7 +116,9 @@ export default function Index() {
                   <th className="px-6 py-3">Category</th>
                   <th className="px-6 py-3">SubCategory</th>
                   <th className="px-6 py-3">Price</th>
+                  <th className="px-6 py-3">Final Price</th>
                   <th className="px-6 py-3">Stock</th>
+                  <th className="px-6 py-3">Stock Status</th>
                   <th className="px-6 py-3">Date</th>
                   <th className="px-6 py-3">Action</th>
                   <th className="px-6 py-3">Delete</th>
@@ -172,16 +173,28 @@ export default function Index() {
                       <td className="px-6 py-4 text-center font-semibold text-gray-700">
                         {formatMultiPrice(item?.amount, "INR")}
                       </td>
+                      <td className="px-6 py-4 text-center">
+                        <span className="font-bold text-green-600">
+                          {formatMultiPrice(
+                            item?.final_amount || item?.amount,
+                            "INR"
+                          )}
+                        </span>
+                      </td>
 
-                      {/* STOCK */}
                       <td className="px-6 py-4 text-left">
                         {item?.variants?.map((v) => (
                           <div
                             key={v.color}
                             className="flex justify-between text-xs"
                           >
-                            <span className="capitalize">{v.color}</span>
-                            <span className="font-semibold">{v.stock}</span>
+                            <span className="capitalize">
+                              {v.color}
+                            </span>
+
+                            <span className="font-semibold">
+                              {v.stock}
+                            </span>
                           </div>
                         ))}
 
@@ -192,6 +205,18 @@ export default function Index() {
                             0
                           )}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <span
+                          className={`px-3 py-1 rounded-full text-xs font-semibold ${item?.stock_status === "out_of_stock"
+                              ? "bg-red-100 text-red-700"
+                              : "bg-green-100 text-green-700"
+                            }`}
+                        >
+                          {item?.stock_status === "out_of_stock"
+                            ? "Out Of Stock"
+                            : "In Stock"}
+                        </span>
                       </td>
 
                       {/* DATE */}

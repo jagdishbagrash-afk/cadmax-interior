@@ -28,7 +28,6 @@ export default function ResidentialDesign() {
         fetchData();
     }, []);
 
-    console.log("data" ,data)
     return (
         <Layout>
             <div
@@ -39,7 +38,7 @@ export default function ResidentialDesign() {
                 <div className="container mx-auto px-4 max-w-[1430px]">
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-5">
-                        {data?.Residentialservices?.map((item, index) => (
+                        {data?.residentialServices?.map((item, index) => (
                             <Link
                                 href={`/design/residential/${item.slug}`}
                                 key={index}

@@ -32,7 +32,6 @@ export default function Index() {
         fetchData();
     }, []);
 
-    const [isOpen, setIsOpen] = useState(false);
     return (
         <Layout>
 
@@ -93,11 +92,11 @@ export default function Index() {
                     </div>
                 </div>
             </div>
+            <ResidentialDesign Residentialservices={data?.residentialServices} />
             <Predictable />
-            <ResidentialDesign Residentialservices={data?.Residentialservices} />
-            <CommercialDesign Commercialservices={data?.Commercialservices} />
+            <CommercialDesign Commercialservices={data?.commercialServices} />
             {/* <Vendor /> */}
-            <Execution />
+            {/* <Execution /> */}
             <Slider2 />
             <div className="relative w-full h-full md:h-[450px]">
                 <img

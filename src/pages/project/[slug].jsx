@@ -11,14 +11,12 @@ export default function ProjectDetailPage() {
     const { slug } = router.query;
 
     const [project, setProject] = useState(null);
-    console.log("project", project)
     const [loading, setLoading] = useState(true);
 
     const fetchData = async (slug) => {
         try {
             const main = new Listing();
             const response = await main.ProjectSlug(slug);
-            console.log("response", response)
             if (response?.data?.data) {
                 setProject(response.data.data);
             }

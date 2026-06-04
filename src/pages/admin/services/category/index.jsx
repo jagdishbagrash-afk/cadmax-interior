@@ -14,7 +14,6 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.ServicesSubCategoryList();
-
       if (response.data?.data) {
         setData(response.data.data);
       }
@@ -85,7 +84,7 @@ export default function Index() {
 
                       {/* Name */}
                       <td className="px-6 py-4 text-center text-[15px] text-gray-800">
-                        {item.name}
+                        {item.title}
                       </td>
 
                       {/* Created Date */}

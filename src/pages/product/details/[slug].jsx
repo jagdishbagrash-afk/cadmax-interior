@@ -21,6 +21,7 @@ import "swiper/css/thumbs";
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import toast from "react-hot-toast";
 import { useRole } from "@/context/RoleContext";
+import { formatPrice } from "@/components/formatPrice";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
@@ -49,7 +50,13 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
   return (
     <div className="relative w-full" ref={containerRef}>
       <div
-        className="relative w-full h-full min-h-full cursor-crosshair flex items-center justify-center"
+        className="
+    relative w-full
+    aspect-[4/5]
+    cursor-crosshair
+    flex items-center justify-center
+    overflow-hidden
+  "
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -99,7 +106,6 @@ export default function Index() {
   const router = useRouter();
   const { user, setUser } = useRole();
 
-  console.log("user", user)
 
   const id = router?.query?.slug;
   const { error, isLoading, Razorpay } = useRazorpay();
@@ -115,25 +121,25 @@ export default function Index() {
   const dispatch = useDispatch();
 
 
-const FetchCart = async () => {
-  try {
-    const main = new Listing();
-    const response = await main.CartGet();
+  const FetchCart = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.CartGet();
 
-    if (response?.data?.data?.items) {
-      localStorage.setItem(
-        "cartItems",
-        JSON.stringify(response.data.data.items)
-      );
+      if (response?.data?.data?.items) {
+        localStorage.setItem(
+          "cartItems",
+          JSON.stringify(response.data.data.items)
+        );
 
-    } else {
-      localStorage.removeItem("cartItems");
+      } else {
+        localStorage.removeItem("cartItems");
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
-  }
-};
-  
+  };
+
 
 
 
@@ -179,6 +185,7 @@ const FetchCart = async () => {
     try {
       const main = new Listing();
       const response = await main.GetAllProductsId(id);
+      console.log(response)
       if (response.data?.status) {
         setProductDetails(response.data?.data);
       } else {
@@ -216,63 +223,63 @@ const FetchCart = async () => {
     });
     dispatch(addItem(newItem));
     toast.success("Item added to cart");
-      FetchCart();
+    FetchCart();
   };
 
-const handlecheckoutAdd = (redirect = false) => {
+  const handlecheckoutAdd = (redirect = false) => {
 
-  if (!user || user?.role !== "customer") {
-    router.push("/login");
-    return;
-  }
+    if (!user || user?.role !== "customer") {
+      router.push("/login");
+      return;
+    }
 
-  if (!selectedVariant) {
-    toast.error("Please select a variant");
-    return;
-  }
+    if (!selectedVariant) {
+      toast.error("Please select a variant");
+      return;
+    }
 
-  const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
+    const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
 
-  const newItem = {
-    id,
-    name: ProductDetails?.title,
-    price: ProductDetails?.amount,
-    quantity: qty,
-    imgUrl: selectedVariant?.images?.[0],
-    product: ProductDetails,
-    selectedVariant: selectedVariant?.color,
-  };
-
-  // BUY NOW
-  if (redirect) {
-
-    const buyNowItem = {
+    const newItem = {
       id,
       name: ProductDetails?.title,
       price: ProductDetails?.amount,
-      discount_amount : ProductDetails?.discount_amount,
-      final_amount  : ProductDetails?.final_amount ,
       quantity: qty,
       imgUrl: selectedVariant?.images?.[0],
-      productId: ProductDetails?._id,
-      variant: selectedVariant?.color,
-      images: selectedVariant?.images,
+      product: ProductDetails,
+      selectedVariant: selectedVariant?.color,
     };
 
-    localStorage.setItem(
-      "buyNowItem",
-      JSON.stringify(buyNowItem)
-    );
-    router.push("/buy-now?type=buy-now");
-    return;
-  }
-  // CART
-  dispatch(addItem(newItem));
+    // BUY NOW
+    if (redirect) {
 
-  toast.success("Item added to cart");
-};
+      const buyNowItem = {
+        id,
+        name: ProductDetails?.title,
+        price: ProductDetails?.amount,
+        discount_amount: ProductDetails?.discount_amount,
+        final_amount: ProductDetails?.final_amount,
+        quantity: qty,
+        imgUrl: selectedVariant?.images?.[0],
+        productId: ProductDetails?._id,
+        variant: selectedVariant?.color,
+        images: selectedVariant?.images,
+      };
 
- 
+      localStorage.setItem(
+        "buyNowItem",
+        JSON.stringify(buyNowItem)
+      );
+      router.push("/buy-now?type=buy-now");
+      return;
+    }
+    // CART
+    dispatch(addItem(newItem));
+
+    toast.success("Item added to cart");
+  };
+
+
 
   const HadleAddtocart = async (cartData) => {
     try {
@@ -399,7 +406,7 @@ const handlecheckoutAdd = (redirect = false) => {
       </div>
     );
   };
-
+  const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   return (
     <Layout>
       <div className="w-full bg-white">
@@ -485,20 +492,21 @@ const handlecheckoutAdd = (redirect = false) => {
                         <div
                           onMouseEnter={() => setCurrentIndex(index)}
                           className={`
-                      relative aspect-square rounded-2xl overflow-hidden
-                      border-2 cursor-pointer bg-[#F7F7F7]
-                      transition-all duration-300
-                      ${currentIndex === index
+      relative w-full h-[120px]
+      rounded-xl overflow-hidden
+      border-2 cursor-pointer bg-[#F7F7F7]
+      transition-all duration-300
+      ${currentIndex === index
                               ? "border-black"
                               : "border-gray-200"
                             }
-                    `}
+    `}
                         >
                           <Image
                             src={img}
                             alt="thumb"
                             fill
-                            className="object-contain p-2"
+                            className="object-cover"
                           />
                         </div>
                       </SwiperSlide>
@@ -507,28 +515,29 @@ const handlecheckoutAdd = (redirect = false) => {
                 </div>
 
                 {/* MAIN IMAGE */}
-              {/* MAIN IMAGE */}
-<div className="flex-1">
+                {/* MAIN IMAGE */}
+                <div className="flex-1">
 
-  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
+                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
 
-    {/* ✅ Discount Badge */}
-    {ProductDetails?.discount_amount > 0 && (
-      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2  shadow-lg">
-        {ProductDetails?.discount_amount}% OFF
-      </div>
-    )}
+                    {/* ✅ Discount Badge */}
+                    {isOutOfStock && (
+                      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2  shadow-lg">
 
-    <div className="absolute inset-0 p-6">
-      <CustomZoomOnHover
-        imageSrc={selectedVariant?.images?.[currentIndex]}
-        alt="Product"
-        zoomScale={2.5}
-      />
-    </div>
+                        Out Of Stock
+                      </div>
+                    )}
 
-  </div>
-</div>
+                    <div className="absolute inset-0 p-2">
+                      <CustomZoomOnHover
+                        imageSrc={selectedVariant?.images?.[currentIndex]}
+                        alt="Product"
+                        zoomScale={2.5}
+                      />
+                    </div>
+
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -550,33 +559,32 @@ const handlecheckoutAdd = (redirect = false) => {
                 </p>
 
                 {/* PRICE */}
-           {/* PRICE */}
-<div className="mt-6 flex items-end gap-3 flex-wrap">
+                <div className="mt-6 flex items-end gap-3 flex-wrap">
 
-  {/* ✅ Discount Price */}
-  <h2 className="text-3xl sm:text-4xl font-bold text-black">
-    ₹{ProductDetails?.final_amount || ProductDetails?.amount}
-  </h2>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-black">
+                    ₹{formatPrice(ProductDetails?.final_amount || ProductDetails?.amount)}
 
-  {/* ✅ Original Price */}
-  {ProductDetails?.discount_amount > 0 && (
-    <span className="text-lg text-gray-400 line-through">
-      ₹{ProductDetails?.amount}
-    </span>
-  )}
+                  </h2>
 
-  {/* ✅ Discount Badge */}
-  {ProductDetails?.discount_amount > 0 && (
-    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-      {ProductDetails?.discount_amount}% OFF
-    </span>
-  )}
+                  {ProductDetails?.discount_amount > 0 && (
+                    <span className="text-lg text-gray-400 line-through">
 
-  <span className="text-sm text-[#6B7280]">
-    Inclusive of all taxes
-  </span>
+                      ₹{formatPrice(ProductDetails?.amount)}
+                    </span>
+                  )}
 
-</div>
+                  {/* ✅ Discount Badge */}
+                  {isOutOfStock && (
+                    <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                      Out Of Stock
+                    </span>
+                  )}
+
+                  <span className="text-sm text-[#6B7280]">
+                    Inclusive of all taxes
+                  </span>
+
+                </div>
 
                 {/* DELIVERY */}
                 <div className="mt-3 flex items-center gap-2 text-sm text-[#4D5466]">
@@ -645,37 +653,39 @@ const handlecheckoutAdd = (redirect = false) => {
                 {/* =====================================
               BUTTONS
           ===================================== */}
-                <div className="mt-8 space-y-4">
+                {!isOutOfStock && (
 
-                  <div className="flex flex-col sm:flex-row gap-4">
+                  <div className="mt-8 space-y-4">
 
-                    {/* QUANTITY */}
-                    <div className="w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5">
+                    <div className="flex flex-col sm:flex-row gap-4">
 
+                      {/* QUANTITY */}
+                      <div className="w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5">
+
+                        <button
+                          onClick={decreaseQty}
+                          className="text-xl font-bold"
+                        >
+                          −
+                        </button>
+
+                        <span className="font-semibold text-lg">
+                          {qty}
+                        </span>
+
+                        <button
+                          onClick={increaseQty}
+                          className="text-xl font-bold"
+                        >
+                          +
+                        </button>
+
+                      </div>
+
+                      {/* ADD TO CART */}
                       <button
-                        onClick={decreaseQty}
-                        className="text-xl font-bold"
-                      >
-                        −
-                      </button>
-
-                      <span className="font-semibold text-lg">
-                        {qty}
-                      </span>
-
-                      <button
-                        onClick={increaseQty}
-                        className="text-xl font-bold"
-                      >
-                        +
-                      </button>
-
-                    </div>
-
-                    {/* ADD TO CART */}
-                    <button
-                      onClick={handleAdd}
-                      className="
+                        onClick={handleAdd}
+                        className="
                 w-full h-[35px] md:h-[58px]
                 rounded-2xl bg-white text-black
                 border-1 border-[#000000]
@@ -683,30 +693,27 @@ const handlecheckoutAdd = (redirect = false) => {
                 hover:opacity-90
                 transition-all duration-300
                 "
-                    >
-                      ADD TO CART
-                    </button>
+                      >
+                        ADD TO CART
+                      </button>
 
-                  </div>
+                    </div>
 
-                  {/* BUY NOW */}
-                  <button
-                    onClick={handlecheckoutAdd}
-                    className="
+                    {/* BUY NOW */}
+                    <button
+                      onClick={handlecheckoutAdd}
+                      className="
                      w-full h-[35px] md:h-[58px]
                 rounded-2xl bg-black text-white
                 font-semibold tracking-wide
                 hover:opacity-90
                 transition-all duration-300
               "
-                  >
-                    BUY IT NOW
-                  </button>
-                </div>
+                    >
+                      BUY IT NOW
+                    </button>
+                  </div>)}
 
-                {/* =====================================
-              ACCORDION
-          ===================================== */}
                 <div className="mt-10 border-t border-gray-200">
 
                   {[
