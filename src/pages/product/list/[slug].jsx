@@ -8,7 +8,7 @@ import "swiper/css";
 import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
-import ProductGrid from "@/components/ProductGrid";
+import ProductGrid from "./ProductGrid";
 
 export default function Index() {
   const router = useRouter();
