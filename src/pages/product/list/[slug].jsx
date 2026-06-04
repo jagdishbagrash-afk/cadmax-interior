@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Layout from "@/pages/common/Layout";
-import ProductGrid from "./ProductGrid";
+import ProductGrid from "@/components/ProductGrid";
 import { useRouter } from "next/router";
 import ProductListBanner from "../../../Assets/Images/ProductListBanner.png";
 import { Swiper, SwiperSlide } from "swiper/react";
