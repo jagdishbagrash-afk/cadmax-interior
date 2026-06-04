@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Layout from "@/pages/common/Layout";
-import ProductGrid from "@/components/ProductGrid";
 import { useRouter } from "next/router";
 import ProductListBanner from "../../../Assets/Images/ProductListBanner.png";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -9,6 +8,7 @@ import "swiper/css";
 import "swiper/css/autoplay";
 import { Autoplay } from "swiper/modules";
 import Listing from "@/pages/api/Listing";
+import ProductGrid from "./ProductGrid";
 
 export default function Index() {
   const router = useRouter();
