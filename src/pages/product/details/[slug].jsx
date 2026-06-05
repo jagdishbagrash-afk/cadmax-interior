@@ -653,66 +653,69 @@ export default function Index() {
                 {/* =====================================
               BUTTONS
           ===================================== */}
-                {!isOutOfStock && (
+                <div className="mt-8 space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
 
-                  <div className="mt-8 space-y-4">
-
-                    <div className="flex flex-col sm:flex-row gap-4">
-
-                      {/* QUANTITY */}
-                      <div className="w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5">
-
-                        <button
-                          onClick={decreaseQty}
-                          className="text-xl font-bold"
-                        >
-                          −
-                        </button>
-
-                        <span className="font-semibold text-lg">
-                          {qty}
-                        </span>
-
-                        <button
-                          onClick={increaseQty}
-                          className="text-xl font-bold"
-                        >
-                          +
-                        </button>
-
-                      </div>
-
-                      {/* ADD TO CART */}
+                    {/* QUANTITY */}
+                    <div
+                      className={`w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5 ${isOutOfStock ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                    >
                       <button
-                        onClick={handleAdd}
-                        className="
-                w-full h-[35px] md:h-[58px]
-                rounded-2xl bg-white text-black
-                border-1 border-[#000000]
-                font-semibold tracking-wide
-                hover:opacity-90
-                transition-all duration-300
-                "
+                        onClick={decreaseQty}
+                        disabled={isOutOfStock}
+                        className="text-xl font-bold"
                       >
-                        ADD TO CART
+                        −
                       </button>
 
+                      <span className="font-semibold text-lg">{qty}</span>
+
+                      <button
+                        onClick={increaseQty}
+                        disabled={isOutOfStock}
+                        className="text-xl font-bold"
+                      >
+                        +
+                      </button>
                     </div>
 
-                    {/* BUY NOW */}
+                    {/* ADD TO CART */}
                     <button
-                      onClick={handlecheckoutAdd}
-                      className="
-                     w-full h-[35px] md:h-[58px]
-                rounded-2xl bg-black text-white
-                font-semibold tracking-wide
-                hover:opacity-90
-                transition-all duration-300
-              "
+                      onClick={handleAdd}
+                      disabled={isOutOfStock}
+                      className={`
+        w-full h-[35px] md:h-[58px]
+        rounded-2xl border border-black font-semibold tracking-wide
+        transition-all duration-300
+        ${isOutOfStock
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-white text-black hover:opacity-90"
+                        }
+      `}
                     >
-                      BUY IT NOW
+                      {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
                     </button>
-                  </div>)}
+
+                  </div>
+
+                  {/* BUY NOW */}
+                  <button
+                    onClick={handlecheckoutAdd}
+                    disabled={isOutOfStock}
+                    className={`
+      w-full h-[35px] md:h-[58px]
+      rounded-2xl font-semibold tracking-wide
+      transition-all duration-300
+      ${isOutOfStock
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-black text-white hover:opacity-90"
+                      }
+    `}
+                  >
+                    {isOutOfStock ? "OUT OF STOCK" : "BUY IT NOW"}
+                  </button>
+                </div>
 
                 <div className="mt-10 border-t border-gray-200">
 
