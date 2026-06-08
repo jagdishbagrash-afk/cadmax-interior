@@ -83,7 +83,7 @@ export default function Index() {
       const response = await main.ServciesType(id);
 
       if (response.data?.data) {
-        const list = response.data.data?.Commercialservices || [];
+        const list = response.data.data?.commercialServices || [];
         setCategories(list);
 
         if (list.length > 0) {

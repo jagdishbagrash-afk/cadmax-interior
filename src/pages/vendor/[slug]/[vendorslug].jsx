@@ -13,7 +13,6 @@ export default function VendorDetailPage() {
 
     const [vendor, setVendor] = useState(null);
 
-    console.log("vendor", vendor)
     const [loading, setLoading] = useState(true);
 
     const fetchData = async (vendorslug) => {

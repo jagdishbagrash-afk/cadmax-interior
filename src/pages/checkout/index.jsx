@@ -14,6 +14,7 @@ import Banner from "@/components/Banner";
 import BannerImages from "../../Assets/Images/Frame18.jpg"
 import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import Link from "next/link";
+import { formatPrice } from "@/components/formatPrice";
 
 export default function Index() {
   const { error, isLoading, Razorpay } = useRazorpay();
@@ -48,7 +49,8 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  const totalPrice = record?.summary?.finalAmount;
+  const finalAmount = record?.summary?.finalAmount
+  const totalPrice = formatPrice(finalAmount);
 
   const itemNames = cartItems.map((item) => item.name);
   const [formData, setFormData] = useState({
@@ -103,7 +105,6 @@ export default function Index() {
     }
   };
 
-  console.log("totalPrice" ,totalPrice)
 
 
   const handlePaymentCreateSubmit = async (e) => {
@@ -122,7 +123,7 @@ export default function Index() {
     const main = new Listing();
     try {
       const res = await main.AddPaymentCreate({
-        "amount": totalPrice,
+        "amount": (totalPrice),
         "currency": "INR",
         "receipt": "receipt#1"
       });
@@ -175,7 +176,6 @@ export default function Index() {
       setLoading(false);
     }
   };
-console.log("cartItems" ,cartItems)
   const handleSubmit = async (response) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Your cart is empty");
@@ -254,7 +254,6 @@ console.log("cartItems" ,cartItems)
   };
 
 
-  console.log("|record", record)
 
   const FetchCart = async () => {
     try {
@@ -525,20 +524,20 @@ console.log("cartItems" ,cartItems)
             {/* TITLE + PRICE */}
             <div>
               <span className="font-medium text-sm text-gray-900 line-clamp-2 block">
-                {item?.name}
+                {item?.title}
               </span>
 
               <div className="flex items-center gap-2 mt-1 flex-wrap">
 
                 {/* ✅ Final Price */}
                 <span className="text-sm font-bold text-black">
-                  {formatMultiPrice(finalPrice, "INR")}
+                  {formatPrice(finalPrice, "INR")}
                 </span>
 
                 {/* ✅ Original Price */}
                 {discount > 0 && (
                   <span className="text-xs text-gray-400 line-through">
-                    {formatMultiPrice(originalPrice, "INR")}
+                    {formatPrice(originalPrice, "INR")}
                   </span>
                 )}
 
@@ -577,7 +576,7 @@ console.log("cartItems" ,cartItems)
 
           {/* ✅ Final Total */}
           <div className="font-semibold text-gray-900">
-            {formatMultiPrice(
+            {formatPrice(
               finalPrice * item.quantity,
               "INR"
             )}
@@ -586,7 +585,7 @@ console.log("cartItems" ,cartItems)
           {/* ✅ Original Total */}
           {discount > 0 && (
             <div className="text-xs text-gray-400 line-through">
-              {formatMultiPrice(
+              {formatPrice(
                 originalPrice * item.quantity,
                 "INR"
               )}
@@ -603,7 +602,7 @@ console.log("cartItems" ,cartItems)
                       <tr className="border-t-2 border-black">
                         <td colSpan={2} className="py-6 text-lg font-bold">Total Amount</td>
                         <td className="py-6 text-right text-xl font-extrabold text-black">
-                          {formatMultiPrice(record?.summary?.finalAmount, "INR")}
+                          {formatPrice(record?.summary?.finalAmount, "INR")}
                         </td>
                       </tr>
                     </tfoot>

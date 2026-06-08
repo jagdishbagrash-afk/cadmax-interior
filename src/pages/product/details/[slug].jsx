@@ -191,6 +191,7 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.GetAllProductsId(id);
+      console.log(response)
       if (response.data?.status) {
         setProductDetails(response.data?.data);
       } else {
@@ -411,7 +412,7 @@ export default function Index() {
       </div>
     );
   };
-
+  const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   return (
     <Layout>
       <div className="w-full bg-white">
@@ -526,11 +527,12 @@ export default function Index() {
                   <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
 
                     {/* ✅ Discount Badge */}
-                    {/* {ProductDetails?.discount_amount > 0 && (
+                    {isOutOfStock && (
                       <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2  shadow-lg">
-                        {ProductDetails?.discount_amount}% OFF
+
+                        Out Of Stock
                       </div>
-                    )} */}
+                    )}
 
                     <div className="absolute inset-0 p-2">
                       <CustomZoomOnHover
@@ -578,11 +580,11 @@ export default function Index() {
                   )}
 
                   {/* ✅ Discount Badge */}
-                  {/* {ProductDetails?.discount_amount > 0 && (
+                  {isOutOfStock && (
                     <span className="bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-                      {ProductDetails?.discount_amount}% OFF
+                      Out Of Stock
                     </span>
-                  )} */}
+                  )}
 
                   <span className="text-sm text-[#6B7280]">
                     Inclusive of all taxes
@@ -658,45 +660,47 @@ export default function Index() {
               BUTTONS
           ===================================== */}
                 <div className="mt-8 space-y-4">
-
                   <div className="flex flex-col sm:flex-row gap-4">
 
                     {/* QUANTITY */}
-                    <div className="w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5">
-
+                    <div
+                      className={`w-full sm:w-[150px] h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5 ${isOutOfStock ? "opacity-50 pointer-events-none" : ""
+                        }`}
+                    >
                       <button
                         onClick={decreaseQty}
+                        disabled={isOutOfStock}
                         className="text-xl font-bold"
                       >
                         −
                       </button>
 
-                      <span className="font-semibold text-lg">
-                        {qty}
-                      </span>
+                      <span className="font-semibold text-lg">{qty}</span>
 
                       <button
                         onClick={increaseQty}
+                        disabled={isOutOfStock}
                         className="text-xl font-bold"
                       >
                         +
                       </button>
-
                     </div>
 
                     {/* ADD TO CART */}
                     <button
                       onClick={handleAdd}
-                      className="
-                w-full h-[35px] md:h-[58px]
-                rounded-2xl bg-white text-black
-                border-1 border-[#000000]
-                font-semibold tracking-wide
-                hover:opacity-90
-                transition-all duration-300
-                "
+                      disabled={isOutOfStock}
+                      className={`
+        w-full h-[35px] md:h-[58px]
+        rounded-2xl border border-black font-semibold tracking-wide
+        transition-all duration-300
+        ${isOutOfStock
+                          ? "bg-gray-200 text-gray-500 cursor-not-allowed"
+                          : "bg-white text-black hover:opacity-90"
+                        }
+      `}
                     >
-                      ADD TO CART
+                      {isOutOfStock ? "OUT OF STOCK" : "ADD TO CART"}
                     </button>
 
                   </div>
@@ -704,15 +708,18 @@ export default function Index() {
                   {/* BUY NOW */}
                   <button
                     onClick={handlecheckoutAdd}
-                    className="
-                     w-full h-[35px] md:h-[58px]
-                rounded-2xl bg-black text-white
-                font-semibold tracking-wide
-                hover:opacity-90
-                transition-all duration-300
-              "
+                    disabled={isOutOfStock}
+                    className={`
+      w-full h-[35px] md:h-[58px]
+      rounded-2xl font-semibold tracking-wide
+      transition-all duration-300
+      ${isOutOfStock
+                        ? "bg-gray-400 text-white cursor-not-allowed"
+                        : "bg-black text-white hover:opacity-90"
+                      }
+    `}
                   >
-                    BUY IT NOW
+                    {isOutOfStock ? "OUT OF STOCK" : "BUY IT NOW"}
                   </button>
 
                   {/* WISHLIST BUTTON */}

@@ -5,9 +5,7 @@ import Listing from "@/pages/api/Listing";
 import Layout from "@/pages/common/Layout";
 export default function Index() {
   const router = useRouter();
-  console.log("router", router)
   const slug = router.query.slug;
-  console.log("slug", slug)
   const [ProductDetail, setProductDetails] = useState([])
   const fetchData = async (slug) => {
     try {

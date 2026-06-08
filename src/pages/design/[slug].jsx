@@ -26,7 +26,6 @@ export default function Index() {
         try {
             const main = new Listing();
             const response = await main.GetAllConceptType(id);
-            console.log("response", response)
             setRecord(response.data.data.record)
             const data = response?.data?.data?.services;
 

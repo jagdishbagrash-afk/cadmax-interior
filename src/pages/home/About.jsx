@@ -11,6 +11,7 @@ import Frame18 from "../../Assets/Images/Frame18.jpg"
 import Button from "../common/Button";
 import Link from "next/link";
 
+
 export default function About() {
     const router = useRouter();
 

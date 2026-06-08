@@ -9,7 +9,6 @@ import { Autoplay } from "swiper/modules";
 
 const DesignConcept = () => {
     const [data, setData] = useState([]);
-    console.log("data", data)
 
     const fetchData = async () => {
         try {
@@ -37,7 +36,6 @@ const DesignConcept = () => {
         return groups;
     }, [data]);
 
-    console.log("groupedData", groupedData)
     return (
         <section className="bg-white py-4 md:py-8">
             <div className="container mx-auto px-4 max-w-[1430px]">

@@ -77,6 +77,10 @@ class Listing extends Component {
     return Api.get(`/services/type/delete/${id}`)
   }
 
+  async ServiceSubcategorydelete(id) {
+    return Api.get(`/services/subcategory/delete/${id}`)
+  }
+
   async vendorcategoryList() {
     return Api.get("/vendor/category/list",)
   }
@@ -265,8 +269,8 @@ class Listing extends Component {
     return Api.delete(`/lead/delete/${id}`);
   }
 
-    async LeadStatusUpdate(id ,status) {
-    return Api.post(`/lead-status-update/${id}` ,status);
+  async LeadStatusUpdate(id, status) {
+    return Api.post(`/lead-status-update/${id}`, status);
   }
 
   async getProductbySubcategory(id) {
@@ -422,13 +426,13 @@ class Listing extends Component {
     return Api.post("/order/add", data)
   }
 
- async globalSearch(search) {
-  return Api.get("/global-search", {
-    params: {
-      search: search,
-    },
-  });
-}
+  async globalSearch(search) {
+    return Api.get("/global-search", {
+      params: {
+        search: search,
+      },
+    });
+  }
   async AddContact(data) {
     return Api.post("/contact-add", data)
   }

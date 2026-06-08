@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
 import { FiUser, FiShoppingBag, FiSearch, FiHeart } from "react-icons/fi";
+=======
+>>>>>>> a489d8d10491bfc59cf528e0d0272d67d2a410c7
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
@@ -12,7 +15,14 @@ import DesignMenu from "./DesignMenu";
 import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
-
+import {
+  FiUser,
+  FiShoppingBag,
+  FiMapPin,
+  FiSettings,
+  FiLogOut,
+} from "react-icons/fi";
+import { DiJava } from "react-icons/di";
 export default function Header() {
   const { user, setUser } = useRole();
 
@@ -38,48 +48,48 @@ export default function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-const [cartCount, setCartCount] = useState(0);
+  const [cartCount, setCartCount] = useState(0);
 
-/* FETCH CART */
-const FetchCart = async () => {
-  try {
-    const main = new Listing();
-    const response = await main.CartGet();
+  /* FETCH CART */
+  const FetchCart = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.CartGet();
 
-    const items = response?.data?.data?.items || [];
+      const items = response?.data?.data?.items || [];
 
-    // SET COUNT
-    const totalQuantity = items.reduce(
-      (sum, item) => sum + (item.quantity || 1),
-      0
-    );
+      // SET COUNT
+      const totalQuantity = items.reduce(
+        (sum, item) => sum + (item.quantity || 1),
+        0
+      );
 
-    setCartCount(totalQuantity);
+      setCartCount(totalQuantity);
 
-    // OPTIONAL LOCAL STORAGE UPDATE
-    localStorage.setItem("cartItems", JSON.stringify(items));
+      // OPTIONAL LOCAL STORAGE UPDATE
+      localStorage.setItem("cartItems", JSON.stringify(items));
 
-  } catch (error) {
-    console.log(error);
+    } catch (error) {
+      console.log(error);
 
-    setCartCount(0);
-    localStorage.removeItem("cartItems");
-  }
-};
+      setCartCount(0);
+      localStorage.removeItem("cartItems");
+    }
+  };
 
-/* INITIAL LOAD */
-useEffect(() => {
-  FetchCart();
-}, []);
-
-/* REAL TIME AUTO REFRESH */
-useEffect(() => {
-  const interval = setInterval(() => {
+  /* INITIAL LOAD */
+  useEffect(() => {
     FetchCart();
-  }, 2000);
+  }, []);
 
-  return () => clearInterval(interval);
-}, []);
+  /* REAL TIME AUTO REFRESH */
+  useEffect(() => {
+    const interval = setInterval(() => {
+      FetchCart();
+    }, 2000);
+
+    return () => clearInterval(interval);
+  }, []);
   /* TEXT COLOR */
   const textColor = scrolled ? "text-black" : "text-black";
 
@@ -111,17 +121,15 @@ useEffect(() => {
     router.push("/");
   };
 
- console.log("cartCount",cartCount)
 
   return (
     <>
       <header
-        className={`sticky top-0 z-[100] transition-all duration-300 ${
-          scrolled ? "bg-white shadow-md" : "bg-white/30"
-        }`}
+        className={`sticky top-0 z-[100] transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-white/30"
+          }`}
       >
         <nav className="max-w-[1430px] container bg-transparent mx-auto flex items-center justify-between px-6 xl:px-0 py-3 md:py-0">
-          
+
           {/* LOGO */}
           <Link href="/" className="mt-2 mb-2">
             <Image
@@ -155,7 +163,7 @@ useEffect(() => {
           <div className="flex items-center gap-4">
 
             {/* SEARCH ICON */}
-        <SearchPopup textColor={textColor}/>
+            <SearchPopup textColor={textColor} />
 
             {/* USER */}
             {role === "customer" ? (
@@ -169,13 +177,38 @@ useEffect(() => {
                 />
 
                 {dropdownOpen && (
-                  <div className="hidden md:block absolute right-0 mt-2 w-48 bg-white border rounded-md shadow-lg">
-                    <ul className="text-black">
+                  <div className="hidden md:block absolute -right-4 mt-3 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+
+                    {/* Profile Header */}
+                    <div  
+                    onClick={() => setDropdownOpen(false)}
+                     className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">
+                      <Link href="/profile"  className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                          {user?.name?.charAt(0)?.toUpperCase() || "U"}
+                        </div>
+
+                        <div className="min-w-0">
+                          <h3 className="font-semibold truncate">
+                            {user?.name || "User"}
+                          </h3>
+
+                          <p className="text-sm text-white/80 truncate">
+                            {user?.email || ""}
+                          </p>
+                        </div>
+                      </Link>
+                    </div>
+
+                    {/* Menu Items */}
+                    <div className="py-2">
                       <Link
                         href="/orders"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
                       >
-                        Order History
+                        <FiShoppingBag size={18} />
+                        <span>Order History</span>
                       </Link>
 
                       <Link
@@ -187,25 +220,32 @@ useEffect(() => {
 
                       <Link
                         href="/setting"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
                       >
-                        Settings
+                        <FiSettings size={18} />
+                        <span>Settings</span>
                       </Link>
 
                       <Link
                         href="/address"
-                        className="block px-4 py-2 hover:bg-gray-100"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
                       >
-                        Address
+                        <FiMapPin size={18} />
+                        <span>Address</span>
                       </Link>
 
-                      <li
+                      <div className="border-t border-gray-100 my-1" />
+
+                      <button
                         onClick={handleLogout}
-                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                        className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-all duration-200"
                       >
-                        Logout
-                      </li>
-                    </ul>
+                        <FiLogOut size={18} />
+                        <span>Logout</span>
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -319,7 +359,7 @@ useEffect(() => {
       </header>
 
       {/* SEARCH POPUP */}
- 
+
     </>
   );
 }
