@@ -95,6 +95,8 @@ export default function Header() {
     router.asPath.startsWith(path);
 
   /* CART */
+  const wishlistCount = useSelector((state) => state.wishlist.count);
+
   const [record, setRecord] = useState([]);
 
   useEffect(() => {
@@ -206,6 +208,13 @@ export default function Header() {
                       </Link>
 
                       <Link
+                        href="/wishlist"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        Wishlist
+                      </Link>
+
+                      <Link
                         href="/setting"
                         onClick={() => setDropdownOpen(false)}
                         className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
@@ -309,6 +318,13 @@ export default function Header() {
                     className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
                   >
                     Order History
+                  </Link>
+
+                  <Link
+                    href="/wishlist"
+                    className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                  >
+                    Wish List
                   </Link>
 
                   <Link

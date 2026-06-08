@@ -61,7 +61,7 @@ const MegaMenu = ({ textColor, active }) => {
             e.preventDefault();
             setOpen(!open);
           }}
-          className="cursor-pointer"
+          className={`cursor-pointer ${textColor}`}
         />
       </div>
 
