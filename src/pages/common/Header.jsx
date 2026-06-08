@@ -177,7 +177,7 @@ export default function Header() {
                     <div  
                     onClick={() => setDropdownOpen(false)}
                      className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">
-                      <Link href="/profile"  className="flex items-center gap-3">
+                      <Link href="/setting"  className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
                           {user?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
