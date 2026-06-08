@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../common/Layout";
 import ProductImage from "../../../Assets/Images/ProductDetail.png";
 import Image from "next/image";
-import { FiTruck } from "react-icons/fi";
+import { FiTruck, FiHeart } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
@@ -22,6 +22,8 @@ import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
 import toast from "react-hot-toast";
 import { useRole } from "@/context/RoleContext";
 import { formatPrice } from "@/components/formatPrice";
+import useWishlist from "@/hooks/useWishlist";
+import { useSelector } from "react-redux";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
@@ -117,6 +119,10 @@ export default function Index() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+
+  const { toggleWishlist } = useWishlist();
+  const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
+  const isWishlisted = ProductDetails && wishlistIds.includes(ProductDetails._id);
 
   const dispatch = useDispatch();
 
@@ -707,6 +713,19 @@ export default function Index() {
               "
                   >
                     BUY IT NOW
+                  </button>
+
+                  {/* WISHLIST BUTTON */}
+                  <button
+                    onClick={() => toggleWishlist(ProductDetails?._id)}
+                    className={`w-full h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${
+                      isWishlisted
+                        ? "bg-red-50 border-red-200 text-red-500"
+                        : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
+                    }`}
+                  >
+                    <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
+                    {isWishlisted ? 'REMOVE FROM WISHLIST' : 'ADD TO WISHLIST'}
                   </button>
                 </div>
 

@@ -59,7 +59,7 @@ const VendorMenu = ({ textColor, active }) => {
                         e.preventDefault();
                         setOpen(!open);
                     }}
-                    className="cursor-pointer"
+                    className={`cursor-pointer ${textColor}`}
                 />
             </div>
 
@@ -74,7 +74,7 @@ const VendorMenu = ({ textColor, active }) => {
                 <div className="max-w-[1200px] mx-auto p-8">
                     <Swiper
                         modules={[Autoplay]}
-                        key={categories.length} // 🔥 force re-init
+                        key={categories.length} //  force re-init
                         slidesPerView={1}
                         loop={categories.length > 1}
                         autoplay={{

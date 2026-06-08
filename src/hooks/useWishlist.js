@@ -1,0 +1,63 @@
+import { useCallback } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useRole } from "@/context/RoleContext";
+import { useRouter } from "next/router";
+import toast from "react-hot-toast";
+import Listing from "@/pages/api/Listing";
+import {
+  addToWishlistLocal,
+  removeFromWishlistLocal,
+  setWishlist,
+} from "@/redux/wishlistSlice";
+
+export default function useWishlist() {
+  const dispatch = useDispatch();
+  const { user } = useRole();
+  const router = useRouter();
+  const count = useSelector((state) => state.wishlist.count);
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const main = new Listing();
+      const response = await main.WishlistGet();
+      if (response?.data?.status && response?.data?.data?.productIds) {
+        dispatch(setWishlist(response.data.data.productIds));
+      }
+    } catch (error) {
+      console.log("Error fetching wishlist:", error);
+    }
+  }, [dispatch]);
+
+  const toggleWishlist = useCallback(
+    async (productId) => {
+      if (!user || user?.role !== "customer") {
+        toast.error("Please login first");
+        router.push("/login");
+        return;
+      }
+
+      try {
+        const main = new Listing();
+        const response = await main.WishlistToggle(productId);
+
+        if (response?.data?.status) {
+          const { isWishlisted } = response.data.data;
+          if (isWishlisted) {
+            dispatch(addToWishlistLocal(productId));
+            toast.success("Added to Wishlist");
+          } else {
+            dispatch(removeFromWishlistLocal(productId));
+            toast.success("Removed from Wishlist");
+          }
+        }
+      } catch (error) {
+        const message =
+          error?.response?.data?.message || "Something went wrong";
+        toast.error(message);
+      }
+    },
+    [user, dispatch, router]
+  );
+
+  return { toggleWishlist, fetchWishlist, count };
+}

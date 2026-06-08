@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { FiUser, FiShoppingBag, FiSearch } from "react-icons/fi";
+import { FiUser, FiShoppingBag, FiSearch, FiHeart } from "react-icons/fi";
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
@@ -89,6 +89,8 @@ useEffect(() => {
     router.asPath.startsWith(path);
 
   /* CART */
+  const wishlistCount = useSelector((state) => state.wishlist.count);
+
   const [record, setRecord] = useState([]);
 
   useEffect(() => {
@@ -174,6 +176,13 @@ useEffect(() => {
                         className="block px-4 py-2 hover:bg-gray-100"
                       >
                         Order History
+                      </Link>
+
+                      <Link
+                        href="/wishlist"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        Wishlist
                       </Link>
 
                       <Link
@@ -273,6 +282,13 @@ useEffect(() => {
                     className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
                   >
                     Order History
+                  </Link>
+
+                  <Link
+                    href="/wishlist"
+                    className="block px-4 py-3 rounded-xl hover:bg-gray-100 transition-all duration-200"
+                  >
+                    Wish List
                   </Link>
 
                   <Link

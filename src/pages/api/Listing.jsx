@@ -111,6 +111,25 @@ class Listing extends Component {
     return Api.get("/cart/get",)
   }
 
+  async WishlistGet() {
+    return Api.get("/wishlist/get")
+  }
+
+  async WishlistAdd(productId) {
+    return Api.post("/wishlist/add", { productId })
+  }
+
+  async WishlistRemove(productId) {
+    return Api.post("/wishlist/remove", { productId })
+  }
+
+  async WishlistToggle(productId) {
+    return Api.post("/wishlist/toggle", { productId })
+  }
+
+  async WishlistDelete(productId) {
+    return Api.delete(`/wishlist/delete/${productId}`)
+  }
 
   async CommonProject() {
     return Api.get("/common/project",)
