@@ -12,10 +12,13 @@ import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
 import {
+  FiUser,
+  FiShoppingBag,
   FiMapPin,
   FiSettings,
   FiLogOut,
 } from "react-icons/fi";
+import { FiHeart } from "react-icons/fi";
 import { DiJava } from "react-icons/di";
 export default function Header() {
   const { user, setUser } = useRole();
@@ -205,12 +208,14 @@ export default function Header() {
                         <span>Order History</span>
                       </Link>
 
-                      <Link
-                        href="/wishlist"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                      >
-                        Wishlist
-                      </Link>
+                    <Link
+  href="/wishlist"
+  onClick={() => setDropdownOpen(false)}
+  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
+>
+  <FiHeart size={18} />
+  <span>Wishlist</span>
+</Link>
 
                       <Link
                         href="/setting"
