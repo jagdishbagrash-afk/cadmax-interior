@@ -3,6 +3,7 @@ import Header from "./Header";
 import Footer from "./Footer";
 import { useRole } from "@/context/RoleContext";
 import Listing from "../api/Listing";
+import useWishlist from "@/hooks/useWishlist";
 
 export default function Layout({ children }) {
   const { user, setUser } = useRole();
@@ -24,6 +25,8 @@ export default function Layout({ children }) {
     }
   };
 
+  const { fetchWishlist } = useWishlist();
+
   useEffect(() => {
     const controller = new AbortController();
     fetchData(controller.signal);
@@ -31,9 +34,11 @@ export default function Layout({ children }) {
     return () => controller.abort();
   }, []);
 
-
-
-  useEffect(() => { }, [])
+  useEffect(() => {
+    if (user?.role === "customer") {
+      fetchWishlist();
+    }
+  }, [user, fetchWishlist]);
 
   if (loading) return null;
 
@@ -41,7 +46,7 @@ export default function Layout({ children }) {
   return (
     <>
       <Header />
-      <main>{children}</main>
+     <main>{children}</main>
 
       <Footer />
     </>
