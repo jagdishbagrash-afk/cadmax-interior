@@ -46,7 +46,7 @@ export default function ProductCard({ item }) {
           </button>
 
             {item?.stock_status === "out_of_stock" && (
-    <div className="absolute top-3 right-3 z-20 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
+    <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
       Out Of Stock
     </div>
   )}
