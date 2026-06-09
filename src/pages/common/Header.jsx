@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
+<<<<<<< HEAD
+import { FiUser, FiShoppingBag, FiSearch, FiHeart } from "react-icons/fi";
+=======
+>>>>>>> a489d8d10491bfc59cf528e0d0272d67d2a410c7
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
@@ -216,6 +220,13 @@ export default function Header() {
   <FiHeart size={18} />
   <span>Wishlist</span>
 </Link>
+
+                      <Link
+                        href="/wishlist"
+                        className="block px-4 py-2 hover:bg-gray-100"
+                      >
+                        Wishlist
+                      </Link>
 
                       <Link
                         href="/setting"
