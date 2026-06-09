@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from "react";
 import moment from "moment";
-import AdminLayout from "../common/AdminLayout";
+import AdminLayout from "../../common/AdminLayout";
 import AddSubCategory from "./AddSubCategory";
 import Listing from "@/pages/api/Listing";
-import BlockUnblock from "../common/BlockUnblock";
-import dataimage from "../../../Assets/Images/c1.jpg"
+import dataimage from "../../../../Assets/Images/c1.jpg"
 import toast from "react-hot-toast";
+import BlockUnblock from "../../common/BlockUnblock";
 
 export default function Index() {
   const [data, setData] = useState([]);
@@ -30,8 +30,18 @@ export default function Index() {
     fetchData();
   }, []);
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const currentData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
   );
 
   // Frontend API call
@@ -51,6 +61,10 @@ export default function Index() {
       toast.error(error?.response?.data?.message || "Cannot delete - Subcategory is being used in products");
     }
   };
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [data]);
   return (
     <AdminLayout page={"SubCategory List"}>
 
@@ -115,8 +129,8 @@ export default function Index() {
 
               {/* Body */}
               <tbody className="bg-white divide-y divide-gray-100">
-                {filteredData.length > 0 ? (
-                  filteredData?.map((item) => (
+                {currentData.length > 0 ? (
+                  currentData?.map((item) => (
                     <tr
                       key={item._id}
                       className={`transition
@@ -197,6 +211,53 @@ export default function Index() {
                 )}
               </tbody>
             </table>
+
+            <div className="flex items-center justify-between px-4 py-4 border-t bg-white">
+              <p className="text-sm text-gray-600">
+                Showing {(currentPage - 1) * itemsPerPage + 1} to{" "}
+                {Math.min(currentPage * itemsPerPage, filteredData.length)} of{" "}
+                {filteredData.length} entries
+              </p>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  className={`px-3 py-1 rounded border ${currentPage === 1
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                    }`}
+                >
+                  Previous
+                </button>
+
+                {Array.from({ length: totalPages }, (_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentPage(index + 1)}
+                    className={`px-3 py-1 rounded border ${currentPage === index + 1
+                        ? "bg-blue-600 text-white"
+                        : "bg-white hover:bg-gray-100"
+                      }`}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className={`px-3 py-1 rounded border ${currentPage === totalPages
+                      ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                      : "bg-white hover:bg-gray-100"
+                    }`}
+                >
+                  Next
+                </button>
+              </div>
+            </div>
           </div>
 
         </div>

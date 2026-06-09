@@ -1,12 +1,12 @@
   "use client";
   import { useEffect, useState } from "react";
   import moment from "moment";
-  import AdminLayout from "../common/AdminLayout";
   import CategoryAdd from "./CategoryAdd";
   import Listing from "@/pages/api/Listing";
-  import BlockUnblock from "../common/BlockUnblock";
-  import dataimage from "../../../Assets/Images/c1.jpg"
+import BlockUnblock from "../../common/BlockUnblock";
+import dataimage from "../../../../Assets/Images/c1.jpg"
   import toast from "react-hot-toast";
+import AdminLayout from "../../common/AdminLayout";
 
   export default function Index() {
     const [data, setData] = useState([]);

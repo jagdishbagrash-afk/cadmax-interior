@@ -12,8 +12,6 @@ import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
 import {
-  FiUser,
-  FiShoppingBag,
   FiMapPin,
   FiSettings,
   FiLogOut,
