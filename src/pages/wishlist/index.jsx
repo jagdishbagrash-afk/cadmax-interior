@@ -33,7 +33,7 @@ export default function WishlistPage() {
       if (response?.data?.status && response?.data?.data) {
         const data = response.data.data;
         console.log("data",data)
-        const items = data.productIds || [];
+        const items = data.products || [];
         dispatch(setWishlist(items));
         setProducts(items);
         setRecommendations(data.recommendations || []);
