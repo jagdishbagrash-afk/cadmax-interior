@@ -59,7 +59,7 @@ export default function Footer() {
           <h3 className="text-white mt-2 mb-4">SHOP</h3>
           <ul className="space-y-2 text-sm">
             <li><Link href="/product/list/furniture" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Furniture</Link></li>
-            <li><Link href="/product/list/lamps" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Lamps & Lights</Link></li>
+            <li><Link href="/product/list/lamps-lights" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Lamps & Lights</Link></li>
             <li><Link href="/product/list/upholstery" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Upholstery</Link></li>
           </ul>
         </div>
@@ -95,7 +95,7 @@ export default function Footer() {
           <HiUsers className="text-[#D4AF37]" size={32} />
           <h3 className="text-white mt-2 mb-4">VENDORS</h3>
           <ul className="space-y-2 text-sm">
-            <li><Link href="/vendor/civil" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Civil Contractor</Link></li>
+            <li><Link href="/vendor/civil-contractor" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Civil Contractor</Link></li>
             <li><Link href="/vendor/electrician" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Electrician</Link></li>
             <li><Link href="/vendor/plumber" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Plumber</Link></li>
             <li><Link href="/vendor/carpenter" className="flex items-center gap-2 hover:text-[#D4AF37]"><FaAngleRight /> Carpenter</Link></li>

@@ -34,10 +34,13 @@ export default function Add() {
     material: "",
     type: "",
     terms: "",
+    subsubcategory :"",
     discount_amount :""
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
+    const [subSubCategories, setSubSubCategories] = useState([]);
+  
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,6 +67,7 @@ export default function Add() {
       amount: data.amount,
       category: data.category?._id || "",
       subcategory: data.subcategory?._id || "",
+      subsubcategory : data.subsubcategory?._id || "",
       dimensions: data.dimensions,
       material: data.material,
       type: data.type,
@@ -184,6 +188,29 @@ export default function Add() {
       )
     );
 
+
+     const fetchSubSubCategories = async () => {
+    try {
+      const main = new Listing();
+      const response = await main.getproductsubcategory(form?.subcategory);
+console.log("response",response)
+      if (response.data?.data) {
+        setSubSubCategories(response.data.data);
+      } else {
+        setSubSubCategories([]);
+      }
+    } catch (error) {
+      console.log("Error:", error);
+      setSubSubCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    if (form?.subcategory) {
+      fetchSubSubCategories();
+    }
+  }, [form?.subcategory]);
+
   const handleEdit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -195,6 +222,7 @@ export default function Add() {
       fd.append("amount", form.amount);
       fd.append("category", form.category); // must be _id
       fd.append("subcategory", form.subcategory);
+      fd.append("subsubcategory", form.subsubcategory);
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
       fd.append("type", form.type);
@@ -310,7 +338,7 @@ export default function Add() {
           </div>
 
           {/* Category / Subcategory */}
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <select
               name="category"
               value={form.category}
@@ -352,6 +380,28 @@ export default function Add() {
               {subCategories &&
                 subCategories?.map((cat) => (
                   <option key={cat?._id} value={cat?._id}>
+                    {cat?.name}
+                  </option>
+                ))}
+            </select>
+
+            <select
+              name="subsubcategory"
+              value={form.subsubcategory}
+              onChange={handleChange}
+              disabled={!form.subcategory} // 🔹 Disable if category is empty
+              className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
+                ${!form.subcategory ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}
+              `}
+              required
+            >
+              <option value="" disabled>
+                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory Category first"}
+              </option>
+
+              {subSubCategories &&
+                subSubCategories?.map((cat) => (
+                  <option key={cat?._id} value={cat?._id} className="text-black">
                     {cat?.name}
                   </option>
                 ))}

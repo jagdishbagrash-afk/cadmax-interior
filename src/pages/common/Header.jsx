@@ -12,6 +12,8 @@ import DesignMenu from "./DesignMenu";
 import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
+
+
 import { DiJava } from "react-icons/di";
 export default function Header() {
   const { user, setUser } = useRole();
@@ -173,7 +175,7 @@ export default function Header() {
                     <div  
                     onClick={() => setDropdownOpen(false)}
                      className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">
-                      <Link href="/profile"  className="flex items-center gap-3">
+                      <Link href="/setting"  className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
                           {user?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
@@ -201,14 +203,16 @@ export default function Header() {
                         <span>Order History</span>
                       </Link>
 
-                      <Link
-                        href="/wishlist"
-                        onClick={() => setDropdownOpen(false)}
-                        className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
-                      >
-                        <FiHeart size={18} />
-                        <span>Wishlist</span>
-                      </Link>
+                    <Link
+  href="/wishlist"
+  onClick={() => setDropdownOpen(false)}
+  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
+>
+  <FiHeart size={18} />
+  <span>Wishlist</span>
+</Link>
+
+                      
 
                       <Link
                         href="/setting"
