@@ -35,6 +35,8 @@ export default function Index() {
     item.title?.toLowerCase().includes(search.toLowerCase())
   );
 
+  console.log("filteredData",filteredData)
+
   // PAGINATION LOGIC
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
@@ -75,19 +77,25 @@ export default function Index() {
             />
 
             <Link
-              href="/admin/category"
+              href="/admin/product/category"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
             >
               Category
             </Link>
 
             <Link
-              href="/admin/subcategory"
+              href="/admin/product/subcategory"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
             >
               Subcategory
             </Link>
 
+ <Link
+              href="/admin/product/subsubcategory"
+              className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
+            >
+              Subsubcategory
+            </Link>
             <Link
               href="/admin/product/add"
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-1 text-sm"
@@ -115,6 +123,8 @@ export default function Index() {
                   <th className="px-6 py-3">Title</th>
                   <th className="px-6 py-3">Category</th>
                   <th className="px-6 py-3">SubCategory</th>
+                  <th className="px-6 py-3">Sub Sub Category</th>
+
                   <th className="px-6 py-3">Price</th>
                   <th className="px-6 py-3">Final Price</th>
                   <th className="px-6 py-3">Stock</th>
@@ -167,6 +177,10 @@ export default function Index() {
                       {/* SUBCATEGORY */}
                       <td className="px-6 py-4 text-center capitalize">
                         {item?.subcategory?.name || "-"}
+                      </td>
+
+                       <td className="px-6 py-4 text-center capitalize">
+                        {item?.subsubcategory?.name || "-"}
                       </td>
 
                       {/* PRICE */}

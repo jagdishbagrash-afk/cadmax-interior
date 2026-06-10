@@ -188,8 +188,16 @@ class Listing extends Component {
   }
 
 
+  async subsubcategory(data) {
+    return Api.post("/productsubsubcategory/add", data)
+  }
+
   async deleteSubCategory(id) {
     return Api.get(`/subcategory/delete/${id}`);
+  }
+
+  async deleteproductsubsubcategory(id) {
+    return Api.get(`/productsubsubcategory/delete/${id}`);
   }
 
   async deleteCategory(id) {
@@ -201,12 +209,20 @@ class Listing extends Component {
     return Api.get("/subcategory/get",)
   }
 
+  async subsubcategoryList() {
+    return Api.get("/productsubsubcategory/get",)
+  }
+
   async VendorGet() {
     return Api.get("/vendor/get",)
   }
 
   async getSubcategorybyCategory(id) {
     return Api.get(`/subcategory/category/${id}`)
+  }
+
+  async getproductsubcategory(id) {
+    return Api.get(`/productsubsubcategory/subcategory/${id}`)
   }
 
   async subcategoryStatus() {
@@ -217,10 +233,17 @@ class Listing extends Component {
     return Api.get(`/subcategory/status/${id}`)
   }
 
+  async productsubsubcategorystatus(id) {
+    return Api.get(`/productsubsubcategory/status/${id}`)
+  }
+
   async SubcategoryUpdate(id, formData) {
     return Api.post(`/subcategory/update/${id}`, formData);
   }
 
+  async productsubsubcategory(id, formData) {
+    return Api.post(`/productsubsubcategory/update/${id}`, formData);
+  }
   async productAdd(data) {
     return Api.post(`/product/add`, data);
   }
