@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-<<<<<<< HEAD
-import { FiUser, FiShoppingBag, FiSearch, FiHeart } from "react-icons/fi";
-=======
->>>>>>> a489d8d10491bfc59cf528e0d0272d67d2a410c7
+import { FiUser, FiShoppingBag, FiSearch, FiHeart, FiMapPin, FiSettings, FiLogOut } from "react-icons/fi";
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
@@ -15,14 +12,8 @@ import DesignMenu from "./DesignMenu";
 import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
-import {
-  FiUser,
-  FiShoppingBag,
-  FiMapPin,
-  FiSettings,
-  FiLogOut,
-} from "react-icons/fi";
-import { FiHeart } from "react-icons/fi";
+
+
 import { DiJava } from "react-icons/di";
 export default function Header() {
   const { user, setUser } = useRole();
@@ -221,12 +212,7 @@ export default function Header() {
   <span>Wishlist</span>
 </Link>
 
-                      <Link
-                        href="/wishlist"
-                        className="block px-4 py-2 hover:bg-gray-100"
-                      >
-                        Wishlist
-                      </Link>
+                      
 
                       <Link
                         href="/setting"
