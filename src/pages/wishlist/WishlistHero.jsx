@@ -3,7 +3,7 @@ import { FiHeart } from 'react-icons/fi';
 
 export default function WishlistHero({ count = 0 }) {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-amber-900 via-amber-800 to-amber-700 mb-8">
+    <div className="relative overflow-hidden rounded-2xl bg-[#000000] mb-8">
       {/* Background Pattern */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full border-[20px] border-white" />
