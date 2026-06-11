@@ -8,11 +8,11 @@ import { useRouter } from "next/router";
 import Listing from "../api/Listing";
 import { setWishlist, removeFromWishlistLocal } from "@/redux/wishlistSlice";
 import toast from "react-hot-toast";
-import WishlistHero from "@/components/wishlist/WishlistHero";
-import WishlistCard from "@/components/wishlist/WishlistCard";
-import WishlistSortBar from "@/components/wishlist/WishlistSortBar";
-import WishlistEmptyState from "@/components/wishlist/WishlistEmptyState";
-import WishlistRecommendations from "@/components/wishlist/WishlistRecommendations";
+import WishlistHero from "./WishlistHero";
+import WishlistEmptyState from "./WishlistEmptyState";
+import WishlistSortBar from "./WishlistSortBar";
+import WishlistCard from "./WishlistCard";
+import WishlistRecommendations from "./WishlistRecommendations";
 
 export default function WishlistPage() {
   const { user } = useRole();
@@ -32,6 +32,7 @@ export default function WishlistPage() {
       const response = await main.WishlistGet();
       if (response?.data?.status && response?.data?.data) {
         const data = response.data.data;
+        console.log("data",data)
         const items = data.products || [];
         dispatch(setWishlist(items));
         setProducts(items);
@@ -117,7 +118,7 @@ export default function WishlistPage() {
 
   return (
     <Layout>
-      <div className="max-w-[1280px] mx-auto px-4 py-6">
+        <div className="container mx-auto px-4 max-w-[1430px]">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
           <Link href="/" className="hover:text-amber-700 transition-colors">
