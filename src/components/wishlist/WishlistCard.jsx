@@ -64,7 +64,7 @@ export default function WishlistCard({
           <img
             src={getFirstImage()}
             alt={product?.title || 'Product'}
-            className="w-full h-full object-contain p-4 group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-contain p-2 md:p-4 group-hover:scale-110 transition-transform duration-500"
             onError={() => setImgError(true)}
           />
         ) : (
@@ -76,16 +76,16 @@ export default function WishlistCard({
       </Link>
 
       {/* Content Section */}
-      <div className="p-1 md:p-2">
+      <div className="p-2 md:p-4">
         {/* Title */}
         <Link href={`/product/details/${product?.slug}`}>
-          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-amber-700 transition-colors min-h-[2.5rem]">
+          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 hover:text-amber-700 transition-colors min-h-[1.5rem]">
             {product?.title || 'Product'}
           </h3>
         </Link>
 
         {/* Brand Badge */}
-        <div className="">
+        <div className="mt-1 ">
           <span className="inline-block text-[10px] font-bold uppercase tracking-[2px] text-amber-700 bg-amber-50 px-2 py-0.5 rounded">
             Cadmax Atelier Exclusive
           </span>
@@ -93,7 +93,7 @@ export default function WishlistCard({
 
         {/* Price Section */}
         <div className="mt-2 flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-lg font-bold text-gray-900">
+          <span className="text-base md:text-lg font-bold text-gray-900">
             ₹{formatPrice(displayPrice)}
           </span>
           {discount && (
@@ -153,7 +153,7 @@ export default function WishlistCard({
         <div className="mt-3 flex items-center gap-2">
           <Link
             href={`/product/details/${product?.slug}`}
-            className="flex-1 px-3 py-2 bg-black text-white text-xs font-semibold uppercase tracking-wider text-center hover:bg-gray-800 transition-colors rounded-lg flex items-center justify-center gap-1.5"
+            className="flex-1 px-2 md:px-3 py-1.5 md:py-2 bg-black text-white text-[10px] md:text-xs font-semibold uppercase tracking-wider text-center hover:bg-gray-800 transition-colors rounded-lg flex items-center justify-center gap-1"
           >
             <FiShoppingBag className="text-sm" />
             View Details
