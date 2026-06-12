@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import Layout from "../common/Layout";
 import Link from "next/link";
-import { FiArrowLeft } from "react-icons/fi";
+import { FiArrowLeft, FiSearch } from "react-icons/fi";
 import { useSelector, useDispatch } from "react-redux";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
@@ -24,6 +24,8 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState(null);
   const [sort, setSort] = useState("recent");
+  const [authChecked, setAuthChecked] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const fetchWishlistProducts = async () => {
     try {
@@ -50,12 +52,14 @@ export default function WishlistPage() {
   };
 
   useEffect(() => {
-    if (!user || user?.role !== "customer") {
-      router.push("/login");
-      return;
+    
+    setAuthChecked(true);
+    if (user?.role === "customer") {
+      fetchWishlistProducts();
+    } else {
+      setLoading(false);
     }
-    fetchWishlistProducts();
-  }, [user]);
+  }, [user?.role]);
 
   const handleRemove = async (productId) => {
     setRemoving(productId);
@@ -76,9 +80,19 @@ export default function WishlistPage() {
     }
   };
 
-  // Sort products
-  const sortedProducts = useMemo(() => {
-    const items = [...products];
+  // Filter then sort products
+  const filteredProducts = useMemo(() => {
+    // First filter by search query (if 3+ characters)
+    let items = products;
+    if (searchQuery.length >= 3) {
+      const q = searchQuery.toLowerCase();
+      items = products.filter((item) => {
+        const title = (item.title || item.name || "").toLowerCase();
+        return title.includes(q);
+      });
+    }
+    // Then sort
+    items = [...items];
     switch (sort) {
       case "price-low":
         return items.sort(
@@ -101,7 +115,7 @@ export default function WishlistPage() {
       default:
         return items;
     }
-  }, [products, sort]);
+  }, [products, sort, searchQuery]);
 
   if (loading) {
     return (
@@ -139,20 +153,42 @@ export default function WishlistPage() {
             <WishlistSortBar
               sort={sort}
               onSortChange={setSort}
-              totalCount={products.length}
+              totalCount={filteredProducts.length}
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
             />
 
             {/* Product Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-              {sortedProducts.map((item, idx) => (
-                <WishlistCard
-                  key={item._id || idx}
-                  product={item}
-                  onRemove={handleRemove}
-                  removing={removing}
-                />
-              ))}
-            </div>
+            {filteredProducts.length === 0 && searchQuery.length >= 3 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-center">
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-5">
+                  <FiSearch className="text-gray-400 text-3xl" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-700 mb-2">
+                  No results found
+                </h3>
+                <p className="text-sm text-gray-400 max-w-sm">
+                  We couldn't find any wishlist items matching "<span className="font-medium text-gray-600">{searchQuery}</span>". Try a different search term.
+                </p>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="mt-5 px-5 py-2 text-xs font-semibold uppercase tracking-wider bg-black text-white rounded hover:bg-gray-800 transition-colors"
+                >
+                  Clear Search
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+                {filteredProducts.map((item, idx) => (
+                  <WishlistCard
+                    key={item._id || idx}
+                    product={item}
+                    onRemove={handleRemove}
+                    removing={removing}
+                  />
+                ))}
+              </div>
+            )}
 
             {/* Recommendations */}
             <WishlistRecommendations products={recommendations} />
