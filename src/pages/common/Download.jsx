@@ -26,9 +26,11 @@ export default function Download() {
             <div className="relative z-10 max-w-[1300px] mx-auto px-4 text-center">
 
                 {/* Top Small Text */}
-                <p className="text-yellow-400 tracking-widest uppercase text-[16px] font-[500] mb-3">
-                    — Unlock Your Potential —
-                </p>
+                <div className="inline-block px-6 py-2 bg-black/40 backdrop-blur-sm rounded-full mb-4">
+                    <p className="text-yellow-400 tracking-widest uppercase text-[14px] md:text-[16px] font-[500]">
+                        — Unlock Your Potential —
+                    </p>
+                </div>
 
                 {/* Heading */}
                 <h2 className="text-white text-3xl md:text-5xl font-bold leading-tight mb-6">
