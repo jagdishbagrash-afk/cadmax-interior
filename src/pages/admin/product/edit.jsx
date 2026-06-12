@@ -34,13 +34,13 @@ export default function Add() {
     material: "",
     type: "",
     terms: "",
-    subsubcategory :"",
-    discount_amount :""
+    subsubcategory: "",
+    discount_amount: ""
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-    const [subSubCategories, setSubSubCategories] = useState([]);
-  
+  const [subSubCategories, setSubSubCategories] = useState([]);
+
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
@@ -49,10 +49,16 @@ export default function Add() {
     AVAILABLE_COLORS.map((c) => ({
       color: c.name,
       hex: c.hex,
+
+      title: "",
+      amount: "",
+      discount_amount: 10,
+
       selected: false,
       stock: "",
-      images: [], // ✅ existing URLs
-      newImages: [], // ✅ new File objects
+
+      images: [],
+      newImages: [],
     }))
   );
 
@@ -67,12 +73,12 @@ export default function Add() {
       amount: data.amount,
       category: data.category?._id || "",
       subcategory: data.subcategory?._id || "",
-      subsubcategory : data.subsubcategory?._id || "",
+      subsubcategory: data.subsubcategory?._id || "",
       dimensions: data.dimensions,
       material: data.material,
       type: data.type,
       terms: data.terms,
-      discount_amount :  data.discount_amount , 
+      discount_amount: data.discount_amount,
 
     });
 
@@ -84,13 +90,34 @@ export default function Add() {
         return found
           ? {
             ...v,
+
             selected: true,
-            stock: found.stock,
+
+            title: found.title || "",
+            amount: found.amount || "",
+            discount_amount:
+              found.discount_amount || 10,
+
+            stock: found.stock || "",
+
             images: found.images || [],
             newImages: [],
           }
           : v;
       })
+    );
+  };
+  const updateVariantField = (
+    index,
+    field,
+    value
+  ) => {
+    setVariants((prev) =>
+      prev.map((v, i) =>
+        i === index
+          ? { ...v, [field]: value }
+          : v
+      )
     );
   };
 
@@ -189,11 +216,11 @@ export default function Add() {
     );
 
 
-     const fetchSubSubCategories = async () => {
+  const fetchSubSubCategories = async () => {
     try {
       const main = new Listing();
       const response = await main.getproductsubcategory(form?.subcategory);
-console.log("response",response)
+      console.log("response", response)
       if (response.data?.data) {
         setSubSubCategories(response.data.data);
       } else {
@@ -230,12 +257,39 @@ console.log("response",response)
       fd.append("terms", form.terms);
       Object.entries(form).forEach(([k, v]) => fd.append(k, v));
       const selectedVariants = variants.filter(v => v.selected);
+
+      for (const variant of selectedVariants) {
+        if (!variant.title) {
+          toast.error(
+            `Title required for ${variant.color}`
+          );
+          setLoading(false);
+          return;
+        }
+
+        if (!variant.amount) {
+          toast.error(
+            `Price required for ${variant.color}`
+          );
+          setLoading(false);
+          return;
+        }
+      }
       fd.append(
         "variants",
         JSON.stringify(
           selectedVariants.map(v => ({
             color: v.color,
+
+            title: v.title,
+
+            amount: v.amount,
+
+            discount_amount:
+              v.discount_amount,
+
             stock: v.stock,
+
             images: v.images
           }))
         )
@@ -452,6 +506,39 @@ console.log("response",response)
                 className={`rounded-lg border p-4 transition 
       ${v.selected ? "bg-blue-50 border-blue-400" : "bg-gray-50"}`}
               >
+
+                <div className="grid grid-cols-1 md:grid-cols-2 mb-4 gap-3">
+
+                  <input
+                    type="text"
+                    placeholder="Variant Title"
+                    value={v.title}
+                    onChange={(e) =>
+                      updateVariantField(
+                        i,
+                        "title",
+                        e.target.value
+                      )
+                    }
+                    className="border px-3 py-2 rounded-lg"
+                  />
+
+                  <input
+                    type="number"
+                    placeholder="Price"
+                    value={v.amount}
+                    onChange={(e) =>
+                      updateVariantField(
+                        i,
+                        "amount",
+                        e.target.value
+                      )
+                    }
+                    className="border px-3 py-2 rounded-lg"
+                  />
+
+
+                </div>
 
                 {/* Header */}
                 <label className="flex items-center justify-between cursor-pointer">

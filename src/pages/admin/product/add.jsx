@@ -46,18 +46,33 @@ export default function Add() {
   const [loading, setLoading] = useState(false);
 
   const [variants, setVariants] = useState(
-    AVAILABLE_COLORS.map(c => ({
-      color: c.name,
-      hex: c.hex,
-      selected: false,
-      stock: "",
-      images: [],
-      previews: []
-    }))
-  );
+  AVAILABLE_COLORS.map(c => ({
+    color: c.name,
+    title: "",
+    hex: c.hex,
+
+    amount: "",
+    discount_amount: 10,
+
+    selected: false,
+    stock: "",
+    images: [],
+    previews: []
+  }))
+);
 
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
+
+  const updateVariantField = (index, field, value) => {
+  setVariants(prev =>
+    prev.map((v, i) =>
+      i === index
+        ? { ...v, [field]: value }
+        : v
+    )
+  );
+};
 
   const fetchProductData = async () => {
     try {
@@ -184,6 +199,8 @@ console.log("response",response)
     );
   };
 
+
+
   const handleVariantImages = (index, files) => {
     const fileArr = Array.from(files);
     const previews = fileArr.map(file => URL.createObjectURL(file));
@@ -256,13 +273,25 @@ console.log("response",response)
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const selectedVariants = variants
-      .filter(v => v.selected)
-      .map(({ color, stock, images }) => ({
-        color,
-        stock,
-        images
-      }));
+   const selectedVariants = variants
+  .filter(v => v.selected)
+  .map(
+    ({
+      color,
+      title,
+      amount,
+      discount_amount,
+      stock,
+      images
+    }) => ({
+      color,
+      title,
+      amount,
+      discount_amount,
+      stock,
+      images
+    })
+  );
 
     if (!selectedVariants.length) {
       toast.error("Select at least one color variant");
@@ -280,18 +309,19 @@ console.log("response",response)
         fd.append(key, value);
       });
 
-      fd.append("variants", JSON.stringify(
-        selectedVariants.map(({ color, stock }) => ({
-          color,
-          stock
-        }))
-      ));
+     fd.append(
+  "variants",
+  JSON.stringify(
+    selectedVariants.map(v => ({
+      color: v.color,
+      title: v.title,
+      amount: v.amount,
+      discount_amount: v.discount_amount,
+      stock: v.stock
+    }))
+  )
+);
 
-      // selectedVariants.forEach(v => {
-      //   v.images.forEach(img => {
-      //     fd.append(`variantImages_${v.color}`, img);
-      //   });
-      // });
 
       selectedVariants.forEach(v => {
         v.images.forEach(img => {
@@ -439,7 +469,6 @@ console.log("response",response)
               value={form.amount}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
             />
             <input
               type="text"
@@ -448,7 +477,6 @@ console.log("response",response)
               value={form.dimensions}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
             />
           </div>
 
@@ -560,6 +588,29 @@ console.log("response",response)
                 className="border rounded-lg p-4 bg-gray-50 hover:shadow transition"
               >
                 {/* Header Row */}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 mb-4  gap-3">
+  <input
+    type="text"
+    placeholder="Variant Title"
+    value={v.title}
+    onChange={(e) =>
+      updateVariantField(i, "title", e.target.value)
+    }
+    className="border px-3 py-2 rounded"
+  />
+
+  <input
+    type="text"
+    placeholder="Price"
+    value={v.amount}
+    onChange={(e) =>
+      updateVariantField(i, "amount", e.target.value)
+    }
+    className="border px-3 py-2 rounded"
+  />
+
+</div>
                 <div className="flex items-center justify-between">
 
                   <label className="flex items-center gap-3 cursor-pointer">
@@ -597,7 +648,6 @@ console.log("response",response)
                         value={v.stock}
                         onChange={(e) => updateVariantStock(i, e.target.value)}
                         className="w-full mt-1 rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
-                        required
                       />
                     </div>
 

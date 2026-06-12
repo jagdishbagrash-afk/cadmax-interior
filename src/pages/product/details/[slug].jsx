@@ -213,19 +213,20 @@ export default function Index() {
       return;
     }
     const id = `${selectedVariant?.color}_${ProductDetails?._id}`;
-    const newItem = {
-      id,
-      name: ProductDetails?.title,
-      price: ProductDetails?.amount,
-      quantity: qty,
-      imgUrl: selectedVariant?.images?.[0],
-      product: ProductDetails,
-      selectedVariant: selectedVariant?.color,
-    };
-    HadleAddtocart({
-      productId: ProductDetails?._id,
-      quantity: qty,
-      variant: selectedVariant?.color,
+   const newItem = {
+  id,
+  name: ProductDetails?.title,
+  price: selectedVariant?.amount, // ✅
+  final_amount: selectedVariant?.final_amount,
+  quantity: qty,
+  imgUrl: selectedVariant?.images?.[0],
+  product: ProductDetails,
+  selectedVariant: selectedVariant?.title,
+};
+     HadleAddtocart({
+  productId: ProductDetails?._id,
+  quantity: qty,
+  variant: selectedVariant?.title, // ✅
     });
     dispatch(addItem(newItem));
     toast.success("Item added to cart");
@@ -249,11 +250,12 @@ export default function Index() {
     const newItem = {
       id,
       name: ProductDetails?.title,
-      price: ProductDetails?.amount,
+      price: selectedVariant?.amount, // ✅
+      final_amount: selectedVariant?.final_amount,
       quantity: qty,
       imgUrl: selectedVariant?.images?.[0],
       product: ProductDetails,
-      selectedVariant: selectedVariant?.color,
+      selectedVariant: selectedVariant?.title,
     };
 
     // BUY NOW
@@ -262,9 +264,9 @@ export default function Index() {
       const buyNowItem = {
         id,
         name: ProductDetails?.title,
-        price: ProductDetails?.amount,
-        discount_amount: ProductDetails?.discount_amount,
-        final_amount: ProductDetails?.final_amount,
+        price: selectedVariant?.amount,
+        discount_amount: selectedVariant?.discount_amount,
+        final_amount: selectedVariant?.final_amount,
         quantity: qty,
         imgUrl: selectedVariant?.images?.[0],
         productId: ProductDetails?._id,
@@ -567,17 +569,25 @@ export default function Index() {
                 {/* PRICE */}
                 <div className="mt-6 flex items-end gap-3 flex-wrap">
 
-                  <h2 className="text-3xl sm:text-4xl font-bold text-black">
-                    ₹{formatPrice(ProductDetails?.final_amount || ProductDetails?.amount)}
+              <h2 className="text-3xl sm:text-4xl font-bold text-black">
+  ₹{formatPrice(
+    selectedVariant?.final_amount ||
+    ProductDetails?.final_amount ||
+    ProductDetails?.amount
+  )}
+</h2>
 
-                  </h2>
-
-                  {ProductDetails?.discount_amount > 0 && (
-                    <span className="text-lg text-gray-400 line-through">
-
-                      ₹{formatPrice(ProductDetails?.amount)}
-                    </span>
-                  )}
+{(
+  selectedVariant?.discount_amount ||
+  ProductDetails?.discount_amount
+) > 0 && (
+  <span className="text-lg text-gray-400 line-through">
+    ₹{formatPrice(
+      selectedVariant?.amount ||
+      ProductDetails?.amount
+    )}
+  </span>
+)}
 
                   {/* ✅ Discount Badge */}
                   {isOutOfStock && (
@@ -645,9 +655,23 @@ export default function Index() {
                               />
                             </div>
 
-                            <p className="text-center py-3 text-sm font-semibold capitalize">
-                              {variant?.color}
-                            </p>
+                   <div className="p-3 text-center">
+  <p className="font-semibold text-sm">
+    {variant?.title}
+  </p>
+
+  <p className="text-xs text-gray-500 mt-1">
+    {variant?.color}
+  </p>
+
+  {Number(variant?.final_amount || variant?.amount) > 0 && (
+    <p className="text-sm font-bold mt-2">
+      ₹{formatPrice(
+        variant?.final_amount || variant?.amount
+      )}
+    </p>
+  )}
+</div>
 
                           </div>
                         );
