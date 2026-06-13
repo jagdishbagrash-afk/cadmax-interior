@@ -29,15 +29,16 @@ export default function Add() {
     description: "",
     stock: "",
     amount: "",
+    discount_amount: "10",
     category: "",
     subcategory: "",
     dimensions: "",
     material: "",
     type: "",
-    discount_amount : "",
     terms: "",
-    subsubcategory :""
+    subsubcategory: ""
   });
+  
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [subSubCategories, setSubSubCategories] = useState([]);
@@ -46,33 +47,26 @@ export default function Add() {
   const [loading, setLoading] = useState(false);
 
   const [variants, setVariants] = useState(
-  AVAILABLE_COLORS.map(c => ({
-    color: c.name,
-    title: "",
-    hex: c.hex,
-
-    amount: "",
-    discount_amount: 10,
-
-    selected: false,
-    stock: "",
-    images: [],
-    previews: []
-  }))
-);
-
-  const [images, setImages] = useState([]);
-  const [imagePreviews, setImagePreviews] = useState([]);
-
-  const updateVariantField = (index, field, value) => {
-  setVariants(prev =>
-    prev.map((v, i) =>
-      i === index
-        ? { ...v, [field]: value }
-        : v
-    )
+    AVAILABLE_COLORS.map(c => ({
+      color: c.name,
+      hex: c.hex,
+      selected: false,
+      title: `${c.name.charAt(0).toUpperCase() + c.name.slice(1)} Variant`,
+      stock: "",
+      images: [],
+      previews: []
+    }))
   );
-};
+
+  // New state for price sections
+  const [priceSections, setPriceSections] = useState([
+    {
+      title: "",
+      amount: "",
+      discount_amount: "10",
+      final_amount: 0
+    }
+  ]);
 
   const fetchProductData = async () => {
     try {
@@ -86,16 +80,51 @@ export default function Add() {
           description: data.description || "",
           stock: data.stock ?? "",
           amount: data.amount ?? "",
+          discount_amount: data.discount_amount ?? "10",
           category: data.category?._id || "",
           subcategory: data.subcategory?._id || "",
           dimensions: data.dimensions || "",
           material: data.material || "",
           type: data.type || "",
           terms: data.terms || "",
-          subsubcategory : data.subsubcategory?._id || ""
+          subsubcategory: data.subsubcategory?._id || ""
         });
         setImagePreview(data.image || "");
         setImage(null);
+
+        // Load variants if exists
+        if (data.variants && data.variants.length > 0) {
+          const updatedVariants = AVAILABLE_COLORS.map(color => {
+            const existingVariant = data.variants.find(v => v.color === color.name);
+            if (existingVariant) {
+              return {
+                color: color.name,
+                hex: color.hex,
+                selected: true,
+                title: existingVariant.title || `${color.name.charAt(0).toUpperCase() + color.name.slice(1)} Variant`,
+                stock: existingVariant.stock,
+                images: [],
+                previews: [],
+                existingImages: existingVariant.images || []
+              };
+            }
+            return {
+              color: color.name,
+              hex: color.hex,
+              selected: false,
+              title: `${color.name.charAt(0).toUpperCase() + color.name.slice(1)} Variant`,
+              stock: "",
+              images: [],
+              previews: []
+            };
+          });
+          setVariants(updatedVariants);
+        }
+
+        // Load price sections
+        if (data.product_price_section && data.product_price_section.length > 0) {
+          setPriceSections(data.product_price_section);
+        }
       }
     } catch (error) {
       console.log("Error:", error);
@@ -138,19 +167,17 @@ export default function Add() {
     fetchCategories();
   }, []);
 
-
   useEffect(() => {
     if (form?.category) {
       fetchSubCategories();
     }
   }, [form?.category]);
 
-
   const fetchSubSubCategories = async () => {
     try {
       const main = new Listing();
       const response = await main.getproductsubcategory(form?.subcategory);
-console.log("response",response)
+      console.log("response", response)
       if (response.data?.data) {
         setSubSubCategories(response.data.data);
       } else {
@@ -174,8 +201,6 @@ console.log("response",response)
     }
   }, [id]);
 
-  // console.log("id", id);
-
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -191,6 +216,14 @@ console.log("response",response)
     );
   };
 
+  const updateVariantTitle = (index, value) => {
+    setVariants(prev =>
+      prev.map((v, i) =>
+        i === index ? { ...v, title: value } : v
+      )
+    );
+  };
+
   const updateVariantStock = (index, value) => {
     setVariants(prev =>
       prev.map((v, i) =>
@@ -198,8 +231,6 @@ console.log("response",response)
       )
     );
   };
-
-
 
   const handleVariantImages = (index, files) => {
     const fileArr = Array.from(files);
@@ -210,44 +241,13 @@ console.log("response",response)
         i === index
           ? {
             ...v,
-            images: [...v.images, ...fileArr],     // ✅ append images
-            previews: [...v.previews, ...previews] // ✅ append previews
+            images: [...v.images, ...fileArr],
+            previews: [...v.previews, ...previews]
           }
           : v
       )
     );
   };
-
-  //   const handleVariantImages = (index, files) => {
-  //   const fileArr = Array.from(files);
-  //   const previews = fileArr.map(f => URL.createObjectURL(f));
-
-  //   setVariants(prev =>
-  //     prev.map((v, i) =>
-  //       i === index
-  //         ? {
-  //             ...v,
-  //             images: [...v.images, ...fileArr],       // ✅ append
-  //             previews: [...v.previews, ...previews]   // ✅ append
-  //           }
-  //         : v
-  //     )
-  //   );
-  // };
-
-  // const handleImageChange = (e) => {
-  //   const file = e.target.files[0];
-
-  //   if (file) {
-  //     // old preview cleanup
-  //     if (imagePreview) {
-  //       URL.revokeObjectURL(imagePreview);
-  //     }
-
-  //     setImage(file);
-  //     setImagePreview(URL.createObjectURL(file));
-  //   }
-  // };
 
   const removeVariantImage = (variantIndex, imageIndex) => {
     setVariants(prev =>
@@ -271,27 +271,47 @@ console.log("response",response)
     );
   };
 
+  // Price Section Handlers
+  const addPriceSection = () => {
+    setPriceSections([
+      ...priceSections,
+      {
+        title: "",
+        amount: "",
+        discount_amount: "10",
+        final_amount: 0
+      }
+    ]);
+  };
+
+  const removePriceSection = (index) => {
+    setPriceSections(priceSections.filter((_, i) => i !== index));
+  };
+
+  const updatePriceSection = (index, field, value) => {
+    const updated = [...priceSections];
+    updated[index][field] = value;
+    
+    // Auto-calculate final amount
+    if (field === 'amount' || field === 'discount_amount') {
+      const amount = parseFloat(updated[index].amount) || 0;
+      const discount = parseFloat(updated[index].discount_amount) || 10;
+      updated[index].final_amount = amount - (amount * discount) / 100;
+    }
+    
+    setPriceSections(updated);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-   const selectedVariants = variants
-  .filter(v => v.selected)
-  .map(
-    ({
-      color,
-      title,
-      amount,
-      discount_amount,
-      stock,
-      images
-    }) => ({
-      color,
-      title,
-      amount,
-      discount_amount,
-      stock,
-      images
-    })
-  );
+    const selectedVariants = variants
+      .filter(v => v.selected)
+      .map(({ color, title, stock, images, existingImages }) => ({
+        color,
+        title,
+        stock,
+        images: images.length > 0 ? images : (existingImages || [])
+      }));
 
     if (!selectedVariants.length) {
       toast.error("Select at least one color variant");
@@ -302,6 +322,18 @@ console.log("response",response)
       toast.error("Each selected variant must have at least one image");
       return;
     }
+
+    // Validate price sections
+    const validPriceSections = priceSections.filter(section => section.title && section.amount);
+    if (validPriceSections.length > 0) {
+      for (const section of validPriceSections) {
+        if (!section.title || !section.amount) {
+          toast.error("Each price section must have a title and amount");
+          return;
+        }
+      }
+    }
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -309,23 +341,21 @@ console.log("response",response)
         fd.append(key, value);
       });
 
-     fd.append(
-  "variants",
-  JSON.stringify(
-    selectedVariants.map(v => ({
-      color: v.color,
-      title: v.title,
-      amount: v.amount,
-      discount_amount: v.discount_amount,
-      stock: v.stock
-    }))
-  )
-);
+      fd.append("variants", JSON.stringify(
+        selectedVariants.map(({ color, title, stock }) => ({
+          color,
+          title,
+          stock
+        }))
+      ));
 
+      fd.append("product_price_section", JSON.stringify(validPriceSections));
 
       selectedVariants.forEach(v => {
         v.images.forEach(img => {
-          fd.append(`variantImages_${v.color}`, img);
+          if (img instanceof File) {
+            fd.append(`variantImages_${v.color}`, img);
+          }
         });
       });
 
@@ -334,16 +364,18 @@ console.log("response",response)
       fd.append("stock", form.stock);
       fd.append("amount", form.amount);
       fd.append("discount_amount", form.discount_amount);
-      fd.append("category", form.category); // must be _id
+      fd.append("category", form.category);
       fd.append("subcategory", form.subcategory);
       fd.append("subsubcategory", form.subsubcategory);
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
       fd.append("type", form.type);
       fd.append("terms", form.terms);
+      
       if (image instanceof File) {
         fd.append("image", image);
       }
+      
       const main = new Listing();
       const res = await main.productAdd(fd);
       if (res?.data?.status) {
@@ -353,6 +385,7 @@ console.log("response",response)
           description: "",
           stock: "",
           amount: "",
+          discount_amount: "10",
           category: "",
           subcategory: "",
           dimensions: "",
@@ -363,7 +396,7 @@ console.log("response",response)
         setImage(null);
         router.push("/admin/product");
       } else {
-        toast.error(data.message || "Failed to add product");
+        toast.error(res?.data?.message || "Failed to add product");
       }
     } catch (error) {
       toast.error("Internal Server Error");
@@ -375,6 +408,18 @@ console.log("response",response)
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    
+    const selectedVariants = variants
+      .filter(v => v.selected)
+      .map(({ color, title, stock, images, existingImages }) => ({
+        color,
+        title,
+        stock,
+        images: images.length > 0 ? images : (existingImages || [])
+      }));
+
+    const validPriceSections = priceSections.filter(section => section.title && section.amount);
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -383,35 +428,42 @@ console.log("response",response)
       fd.append("stock", form.stock);
       fd.append("amount", form.amount);
       fd.append("discount_amount", form.discount_amount);
-      fd.append("category", form.category); // must be _id
+      fd.append("category", form.category);
       fd.append("subcategory", form.subcategory);
+      fd.append("subsubcategory", form.subsubcategory);
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
       fd.append("type", form.type);
       fd.append("terms", form.terms);
+      fd.append("variants", JSON.stringify(
+        selectedVariants.map(({ color, title, stock, images }) => ({
+          color,
+          title,
+          stock,
+          images: images.filter(img => typeof img === 'string') // Keep existing image URLs
+        }))
+      ));
+      fd.append("product_price_section", JSON.stringify(validPriceSections));
+      
+      selectedVariants.forEach(v => {
+        v.images.forEach(img => {
+          if (img instanceof File) {
+            fd.append(`variantImages_${v.color}`, img);
+          }
+        });
+      });
+      
       if (image instanceof File) {
         fd.append("image", image);
       }
+      
       const main = new Listing();
       const res = await main.editProduct(id, fd);
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        setForm({
-          title: "",
-          description: "",
-          stock: "",
-          amount: "",
-          category: "",
-          subcategory: "",
-          dimensions: "",
-          material: "",
-          type: "",
-          terms: "",
-        });
-        setImage(null);
         router.push("/admin/product");
       } else {
-        toast.error(data.message || "Failed to edit product");
+        toast.error(res?.data?.message || "Failed to edit product");
       }
     } catch (error) {
       toast.error("Internal Server Error");
@@ -420,8 +472,6 @@ console.log("response",response)
       setLoading(false);
     }
   };
-
-  console.log("subSubCategories" ,subSubCategories)
 
   return (
     <AdminLayout page={"Product List"}>
@@ -452,16 +502,15 @@ console.log("response",response)
           />
 
           {/* Stock & Price */}
-          <div className="grid grid-cols-2 gap-4">
-            {/* <input
+          <div className="grid grid-cols-3 gap-4">
+            <input
               type="number"
               name="discount_amount"
-              placeholder="discount_amount"
+              placeholder="Discount %"
               value={form.discount_amount}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            /> */}
+            />
             <input
               type="number"
               name="amount"
@@ -477,6 +526,7 @@ console.log("response",response)
               value={form.dimensions}
               onChange={handleChange}
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              required
             />
           </div>
 
@@ -489,10 +539,7 @@ console.log("response",response)
               className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none capitalize"
               required
             >
-              <option value="" disabled>
-                Select Category
-              </option>
-
+              <option value="" disabled>Select Category</option>
               {categories && categories?.map((cat) => (
                 <option key={cat?._id} value={cat?._id} className="text-black">
                   {cat?.name}
@@ -504,51 +551,42 @@ console.log("response",response)
               name="subcategory"
               value={form.subcategory}
               onChange={handleChange}
-              disabled={!form.category} // 🔹 Disable if category is empty
+              disabled={!form.category}
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
-                ${!form.category ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}
-              `}
+                ${!form.category ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}`}
               required
             >
               <option value="" disabled>
                 {form.category ? "Select SubCategory" : "Select a Category first"}
               </option>
-
-              {subCategories &&
-                subCategories?.map((cat) => (
-                  <option key={cat?._id} value={cat?._id} className="text-black">
-                    {cat?.name}
-                  </option>
-                ))}
+              {subCategories && subCategories?.map((cat) => (
+                <option key={cat?._id} value={cat?._id} className="text-black">
+                  {cat?.name}
+                </option>
+              ))}
             </select>
 
-             <select
+            <select
               name="subsubcategory"
               value={form.subsubcategory}
               onChange={handleChange}
-              disabled={!form.subcategory} // 🔹 Disable if category is empty
+              disabled={!form.subcategory}
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
-                ${!form.subcategory ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}
-              `}
-              required
+                ${!form.subcategory ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}`}
             >
               <option value="" disabled>
-                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory Category first"}
+                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory first"}
               </option>
-
-              {subSubCategories &&
-                subSubCategories?.map((cat) => (
-                  <option key={cat?._id} value={cat?._id} className="text-black">
-                    {cat?.name}
-                  </option>
-                ))}
+              {subSubCategories && subSubCategories?.map((cat) => (
+                <option key={cat?._id} value={cat?._id} className="text-black">
+                  {cat?.name}
+                </option>
+              ))}
             </select>
           </div>
 
-          {/* New String Fields */}
-
+          {/* Material, Type, Terms */}
           <textarea
-            type="text"
             name="material"
             placeholder="Material"
             value={form.material}
@@ -559,7 +597,6 @@ console.log("response",response)
           />
 
           <textarea
-            type="text"
             name="type"
             placeholder="Product Care"
             value={form.type}
@@ -579,40 +616,59 @@ console.log("response",response)
             required
           />
 
+          {/* Price Sections Component */}
+          <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
+              <button
+                type="button"
+                onClick={addPriceSection}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+              >
+                + Add Section
+              </button>
+            </div>
+
+            {priceSections.map((section, idx) => (
+              <div key={idx} className="border rounded-lg p-4 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <input
+                    type="text"
+                    placeholder="Section Title (e.g., Standard Pack)"
+                    value={section.title}
+                    onChange={(e) => updatePriceSection(idx, 'title', e.target.value)}
+                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount (₹)"
+                    value={section.amount}
+                    onChange={(e) => updatePriceSection(idx, 'amount', e.target.value)}
+                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
+
+                  
+                    {priceSections.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePriceSection(idx)}
+                        className="bg-red-600 text-white px-3 rounded-lg hover:bg-red-700"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Color Variants Component */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
             <h2 className="text-xl font-semibold text-gray-800">🎨 Color Variants</h2>
 
             {variants.map((v, i) => (
-              <div
-                key={v.color}
-                className="border rounded-lg p-4 bg-gray-50 hover:shadow transition"
-              >
-                {/* Header Row */}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 mb-4  gap-3">
-  <input
-    type="text"
-    placeholder="Variant Title"
-    value={v.title}
-    onChange={(e) =>
-      updateVariantField(i, "title", e.target.value)
-    }
-    className="border px-3 py-2 rounded"
-  />
-
-  <input
-    type="text"
-    placeholder="Price"
-    value={v.amount}
-    onChange={(e) =>
-      updateVariantField(i, "amount", e.target.value)
-    }
-    className="border px-3 py-2 rounded"
-  />
-
-</div>
+              <div key={v.color} className="border rounded-lg p-4 bg-gray-50 hover:shadow transition">
                 <div className="flex items-center justify-between">
-
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
@@ -620,23 +676,18 @@ console.log("response",response)
                       onChange={() => toggleVariant(i)}
                       className="w-4 h-4"
                     />
-
                     <span
                       className="w-6 h-6 rounded-full border shadow"
                       style={{ backgroundColor: v.hex }}
                     />
-
                     <span className="capitalize font-medium text-gray-700">
                       {v.color}
                     </span>
                   </label>
-
                 </div>
 
-                {/* Expanded Section */}
                 {v.selected && (
                   <div className="mt-4 pl-6 space-y-4">
-
                     {/* Stock Input */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
@@ -648,6 +699,7 @@ console.log("response",response)
                         value={v.stock}
                         onChange={(e) => updateVariantStock(i, e.target.value)}
                         className="w-full mt-1 rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+                        required
                       />
                     </div>
 
@@ -659,12 +711,11 @@ console.log("response",response)
                       <input
                         type="file"
                         multiple
+                        accept="image/*"
                         onChange={(e) => handleVariantImages(i, e.target.files)}
                         className="mt-1 block w-full text-sm file:bg-blue-600 file:text-white file:px-4 file:py-1 file:border-none file:rounded cursor-pointer"
                       />
                     </div>
-
-
 
                     {/* Image Preview */}
                     {v.previews.length > 0 && (
@@ -674,8 +725,8 @@ console.log("response",response)
                             <img
                               src={src}
                               className="w-20 h-20 object-cover rounded-lg border shadow-sm"
+                              alt={`Preview ${idx}`}
                             />
-
                             <button
                               type="button"
                               onClick={() => removeVariantImage(i, idx)}
@@ -688,19 +739,34 @@ console.log("response",response)
                         ))}
                       </div>
                     )}
+
+                    {/* Existing Images Preview for Edit */}
+                    {v.existingImages && v.existingImages.length > 0 && v.previews.length === 0 && (
+                      <div className="flex gap-3 flex-wrap mt-2">
+                        {v.existingImages.map((src, idx) => (
+                          <div key={idx} className="relative group">
+                            <img
+                              src={src}
+                              className="w-20 h-20 object-cover rounded-lg border shadow-sm"
+                              alt={`Existing ${idx}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium mt-4 hover:bg-blue-700 transition cursor-pointer"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium mt-4 hover:bg-blue-700 transition cursor-pointer disabled:bg-gray-400"
           >
-            {loading ? "Submitting..." : `Submit`}
+            {loading ? "Submitting..." : (id ? "Update Product" : "Add Product")}
           </button>
         </form>
       </div>
