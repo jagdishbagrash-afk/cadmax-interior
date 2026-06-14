@@ -186,7 +186,7 @@ const ProductGrid = ({ selectedId }) => {
         if (priceDebounceRef.current) {
             clearTimeout(priceDebounceRef.current);
         }
-
+        
         priceDebounceRef.current = setTimeout(() => {
             prevFilterRef.current = ""; // Reset so useEffect triggers
             setPriceRange((currentRange) => {
