@@ -502,15 +502,8 @@ export default function Add() {
           />
 
           {/* Stock & Price */}
-          <div className="grid grid-cols-3 gap-4">
-            <input
-              type="number"
-              name="discount_amount"
-              placeholder="Discount %"
-              value={form.discount_amount}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+          <div className="grid grid-cols-2 gap-4">
+          
             <input
               type="number"
               name="amount"
@@ -584,39 +577,7 @@ export default function Add() {
               ))}
             </select>
           </div>
-
-          {/* Material, Type, Terms */}
-          <textarea
-            name="material"
-            placeholder="Material"
-            value={form.material}
-            onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
-
-          <textarea
-            name="type"
-            placeholder="Product Care"
-            value={form.type}
-            onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
-
-          <textarea
-            name="terms"
-            placeholder="Terms & Conditions"
-            value={form.terms}
-            onChange={handleChange}
-            rows="3"
-            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            required
-          />
-
-          {/* Price Sections Component */}
+  {/* Price Sections Component */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
@@ -652,7 +613,7 @@ export default function Add() {
                       <button
                         type="button"
                         onClick={() => removePriceSection(idx)}
-                        className="bg-red-600 text-white px-3 rounded-lg hover:bg-red-700"
+                        className="w-full max-w-[50px] bg-red-600 text-white px-3 rounded-lg hover:bg-red-700"
                       >
                         ✕
                       </button>
@@ -661,6 +622,38 @@ export default function Add() {
               </div>
             ))}
           </div>
+          {/* Material, Type, Terms */}
+          <textarea
+            name="material"
+            placeholder="Material"
+            value={form.material}
+            onChange={handleChange}
+            rows="3"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+            required
+          />
+
+          <textarea
+            name="type"
+            placeholder="Product Care"
+            value={form.type}
+            onChange={handleChange}
+            rows="3"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+            required
+          />
+
+          <textarea
+            name="terms"
+            placeholder="Terms & Conditions"
+            value={form.terms}
+            onChange={handleChange}
+            rows="3"
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+            required
+          />
+
+        
 
           {/* Color Variants Component */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">

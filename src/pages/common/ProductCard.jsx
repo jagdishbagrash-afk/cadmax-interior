@@ -10,6 +10,19 @@ export default function ProductCard({ item }) {
   const { toggleWishlist } = useWishlist();
   const isWishlisted = wishlistIds.includes(item?._id);
 
+  const displayPrice =
+    item?.final_amount > 0
+      ? item.final_amount
+      : item?.product_price_section?.[0]?.final_amount > 0
+        ? item.product_price_section[0].final_amount
+        : item?.product_price_section?.[0]?.amount > 0
+          ? item.product_price_section[0].amount
+          : item?.amount;
+
+  const originalPrice =
+    item?.amount > 0
+      ? item.amount
+      : item?.product_price_section?.[0]?.amount || 0;
   const image =
     item?.variants?.find((v) => v.images?.length)?.images;
 
@@ -37,19 +50,18 @@ export default function ProductCard({ item }) {
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
             <FiHeart
-              className={`text-lg transition-all duration-200 ${
-                isWishlisted
+              className={`text-lg transition-all duration-200 ${isWishlisted
                   ? "fill-red-500 text-red-500"
                   : "text-gray-600 hover:text-red-400"
-              }`}
+                }`}
             />
           </button>
 
-            {item?.stock_status === "out_of_stock" && (
-    <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
-      Out Of Stock
-    </div>
-  )}
+          {item?.stock_status === "out_of_stock" && (
+            <div className="absolute top-3 left-3 z-20 bg-red-600 text-white text-xs font-semibold px-3 py-1 rounded">
+              Out Of Stock
+            </div>
+          )}
 
           {/* Default Image */}
           <img
@@ -103,24 +115,24 @@ export default function ProductCard({ item }) {
           <div className="mt-2 flex items-center gap-2 flex-wrap">
 
             {/* ✅ Final Price */}
-            <p
-              className="
-                text-[18px] sm:text-[20px]
-                font-black
-                text-black
-                uppercase
-              "
-            >
-                ₹{formatPrice(item?.final_amount || item?.amount)}
+            <div className="mt-2 flex items-center gap-2 flex-wrap">
+              <p
+                className="
+      text-[18px] sm:text-[20px]
+      font-black
+      text-black
+      uppercase
+    "
+              >
+                ₹{formatPrice(displayPrice)}
+              </p>
 
-            </p>
-
-            {/* ✅ Original Price */}
-            {item?.discount_amount > 0 && (
-              <span className="text-sm text-gray-400 line-through">
-                ₹{formatPrice(item?.amount)}
-              </span>
-            )}
+              {originalPrice > displayPrice && (
+                <span className="text-sm text-gray-400 line-through">
+                  ₹{formatPrice(originalPrice)}
+                </span>
+              )}
+            </div>
 
           </div>
 

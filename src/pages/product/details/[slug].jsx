@@ -23,6 +23,7 @@ import { formatPrice } from "@/components/formatPrice";
 import useWishlist from "@/hooks/useWishlist";
 import { useSelector } from "react-redux";
 import ReviewsSection from "@/components/reviews/ReviewsSection";
+import Link from "next/link";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
@@ -93,7 +94,14 @@ export default function Index() {
   const router = useRouter();
   const { user, setUser } = useRole();
 
+  const {
+    subcategory,
+    subsubcategory,
+    type,
+  } = router.query;
+
   const id = router?.query?.slug;
+
   const { error, isLoading, Razorpay } = useRazorpay();
   const RAZOPAY_KEY = process.env.NEXT_PUBLIC_RAZOPAY_KEY;
   const [qty, setQty] = useState(1);
@@ -105,10 +113,14 @@ export default function Index() {
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
 
+  // ================= NEW: SORT STATE FOR RELATED PRODUCTS =================
+  const [relatedSortBy, setRelatedSortBy] = useState("");
+
   const { toggleWishlist } = useWishlist();
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const isWishlisted = ProductDetails && wishlistIds.includes(ProductDetails._id);
 
+  console.log("ProductDetails", ProductDetails)
   const dispatch = useDispatch();
 
   // Get the current price based on main amount or selected price section
@@ -130,7 +142,6 @@ export default function Index() {
   // Get display price
   const getDisplayPrice = () => {
     const currentPrice = getCurrentPrice();
-    console.log("Current Price:", currentPrice);
     if (currentPrice.final_amount > 0) {
       return currentPrice.final_amount;
     }
@@ -193,7 +204,7 @@ export default function Index() {
 
   const handleQtyChange = async (quantity) => {
     try {
-    const currentPrice = getCurrentPrice();
+      const currentPrice = getCurrentPrice();
       const main = new Listing();
       const response = await main.UpdateTocart({
         productId: ProductDetails?._id,
@@ -211,21 +222,97 @@ export default function Index() {
     }
   };
 
-  const fetchData = async (id) => {
+
+
+  const fetchData = async (
+    slug,
+    subcategory = "",
+    subsubcategory = "",
+    type = ""
+  ) => {
     try {
       const main = new Listing();
-      const response = await main.GetAllProductsId(id);
-      console.log("response", response)
-      if (response.data?.status) {
-        setProductDetails(response.data?.data);
+
+      console.log("API PARAMS", {
+        slug,
+        subcategory,
+        subsubcategory,
+        type,
+      });
+
+      const response = await main.GetAllProductsId(
+        slug,
+        subcategory,
+        subsubcategory,
+        type
+      );
+
+      console.log("API RESPONSE", response?.data);
+
+      if (response?.data?.status) {
+        setProductDetails(response.data.data);
       } else {
         setProductDetails(null);
       }
     } catch (error) {
-      console.log("Error:", error);
+      console.log("API ERROR", error);
       setProductDetails(null);
     }
   };
+
+
+useEffect(() => {
+  if (!router.isReady || !id) return;
+
+  // subsubcategory page
+  if (
+    type === "subsubcategory" &&
+    subcategory &&
+    subsubcategory
+  ) {
+    fetchData(
+      id,
+      subcategory,
+      subsubcategory,
+      type
+    );
+    return;
+  }
+
+  // normal product page
+  if (!type) {
+    fetchData(id);
+  }
+}, [
+  router.isReady,
+  id,
+  subcategory,
+  subsubcategory,
+  type,
+]);
+
+
+  const [subSubCategories, setSubSubCategories] = useState([]);
+
+  const fetchSubSubCategories = async (subsubcategoryId) => {
+    if (!subsubcategoryId) return;
+
+    try {
+      const main = new Listing();
+      const response = await main.getproductsubcategory(subsubcategoryId);
+
+      setSubSubCategories(response?.data?.data || []);
+    } catch (error) {
+      console.log(error);
+      setSubSubCategories([]);
+    }
+  };
+
+  useEffect(() => {
+    if (!ProductDetails?.subcategory?._id) return;
+
+    fetchSubSubCategories(ProductDetails.subcategory._id);
+  }, [ProductDetails?.subcategory?._id]);
 
   const handleAdd = () => {
     if (!user || user?.role !== "customer") {
@@ -236,10 +323,9 @@ export default function Index() {
       toast.error("Please select a variant");
       return;
     }
-    
+
     const currentPrice = getCurrentPrice();
     const finalPrice = getDisplayPrice();
-    console.log("Adding to cart with price:", selectedPriceSection);
     const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}`;
     const newItem = {
       id,
@@ -257,7 +343,7 @@ export default function Index() {
       productId: ProductDetails?._id,
       quantity: qty,
       variant: selectedVariant?.color,
-      priceSection : selectedPriceSection,
+      priceSection: selectedPriceSection,
       price: currentPrice?.final_amount || currentPrice?.amount || 0,
     });
     dispatch(addItem(newItem));
@@ -278,7 +364,7 @@ export default function Index() {
 
     const currentPrice = getCurrentPrice();
     const finalPrice = getDisplayPrice();
-    
+
     const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}`;
 
     const newItem = {
@@ -336,16 +422,12 @@ export default function Index() {
   };
 
   useEffect(() => {
-    if (id) fetchData(id);
-  }, [id]);
-
-  useEffect(() => {
     if (ProductDetails && ProductDetails?.variants?.length) {
       setSelectedVariant(ProductDetails.variants[0]);
     }
     // Auto-select first price section if main amount is 0 and price sections exist
-    if (ProductDetails?.product_price_section?.length > 0 && 
-        (!ProductDetails?.amount || ProductDetails?.amount === 0)) {
+    if (ProductDetails?.product_price_section?.length > 0 &&
+      (!ProductDetails?.amount || ProductDetails?.amount === 0)) {
       setSelectedPriceSection(ProductDetails.product_price_section[0]);
     }
   }, [ProductDetails]);
@@ -453,7 +535,12 @@ export default function Index() {
       </div>
     );
   };
-  
+
+  // ================= NEW: SORT HANDLER FOR RELATED PRODUCTS =================
+  const handleRelatedSortChange = (e) => {
+    setRelatedSortBy(e.target.value);
+  };
+
   const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   const currentPriceData = getCurrentPrice();
   const displayPrice = getDisplayPrice();
@@ -631,9 +718,62 @@ export default function Index() {
                   Deliver in approximately 8–12 days
                 </div>
 
-                {/* =====================================
-              PRICE SECTIONS (When main amount is 0)
-          ===================================== */}
+                {subSubCategories?.length > 0 && (
+                  <div className="mt-8">
+                    <p className="text-sm font-semibold text-black mb-4">
+                      Size :
+                      <span className="capitalize ml-2">
+                        {
+                          subSubCategories?.find(
+                            (item) => item?._id === ProductDetails?.subsubcategory
+                          )?.name
+                        }
+                      </span>
+                    </p>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                      {subSubCategories?.map((item) => {
+                        const isActive =
+                          item?._id === ProductDetails?.subsubcategory;
+
+                        return (
+                          <Link
+                            key={item?._id}
+                            href={{
+                              pathname: `/product/details/${ProductDetails?.slug}`,
+                              query: {
+                                subcategory: ProductDetails?.subcategory?._id,
+                                subsubcategory: item?._id,
+                                type: "subsubcategory",
+                              },
+                            }}
+                            className={`
+    rounded-2xl overflow-hidden border-2
+    cursor-pointer transition-all duration-300 bg-white
+    ${isActive
+                                ? "border-black shadow-lg"
+                                : "border-gray-200 hover:border-gray-400"
+                              }
+  `}
+                          >
+                            <div className="relative aspect-square bg-[#F7F7F7]">
+                              <Image
+                                src={item?.Image}
+                                alt={item?.name}
+                                fill
+                                className="object-contain p-3"
+                              />
+                            </div>
+
+                            <p className="text-center py-3 text-sm font-semibold">
+                              {item?.name}
+                            </p>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
                 {shouldShowPriceSections && (
                   <div className="mt-8">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -791,11 +931,10 @@ export default function Index() {
                   {/* WISHLIST BUTTON */}
                   <button
                     onClick={() => toggleWishlist(ProductDetails?._id)}
-                    className={`w-full h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${
-                      isWishlisted
-                        ? "bg-red-50 border-red-200 text-red-500"
-                        : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
-                    }`}
+                    className={`w-full h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${isWishlisted
+                      ? "bg-red-50 border-red-200 text-red-500"
+                      : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
+                      }`}
                   >
                     <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
                     {isWishlisted ? 'REMOVE FROM WISHLIST' : 'ADD TO WISHLIST'}
@@ -859,9 +998,34 @@ export default function Index() {
             />
           )}
 
-          {/* RELATED PRODUCTS */}
+          {/* RELATED PRODUCTS WITH SORT */}
           <div className="mt-12 md:mt-16">
-            <Related selectedId={ProductDetails?.subcategory?._id} />
+            {/* Sort Dropdown for Related Products */}
+            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
+              <h2 className="text-2xl font-bold uppercase tracking-wider">
+                Related Products
+              </h2>
+              <div className="flex items-center gap-3">
+                <label className="text-sm font-medium text-gray-700">
+                  Sort By:
+                </label>
+                <select
+                  value={relatedSortBy}
+                  onChange={handleRelatedSortChange}
+                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
+                >
+                  <option value="">Default</option>
+                  <option value="price_asc">Price: Low to High</option>
+                  <option value="price_desc">Price: High to Low</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Pass sort parameter to Related component */}
+            <Related
+              selectedId={ProductDetails?.subcategory?._id}
+              sortBy={relatedSortBy}
+            />
           </div>
         </div>
       </div>
