@@ -24,6 +24,7 @@ import { useRole } from "@/context/RoleContext";
 import { formatPrice } from "@/components/formatPrice";
 import useWishlist from "@/hooks/useWishlist";
 import { useSelector } from "react-redux";
+import ReviewsSection from "@/components/reviews/ReviewsSection";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
@@ -793,6 +794,14 @@ export default function Index() {
               </div>
             </div>
           </div>
+
+          {/* REVIEWS SECTION */}
+          {ProductDetails?._id && (
+            <ReviewsSection
+              productId={ProductDetails._id}
+              productName={ProductDetails?.title}
+            />
+          )}
 
           {/* RELATED PRODUCTS */}
           <div className="mt-12 md:mt-16">

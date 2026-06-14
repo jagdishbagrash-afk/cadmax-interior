@@ -2,7 +2,7 @@ import Loader from "@/components/Loader";
 import Listing from "@/pages/api/Listing";
 import NoData from "@/pages/common/NoData";
 import ProductCard from "@/pages/common/ProductCard";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 const ProductGrid = ({ selectedId }) => {
     const [loading, setLoading] = useState(false);
@@ -26,6 +26,7 @@ const ProductGrid = ({ selectedId }) => {
     });
 
     const priceDebounceRef = useRef(null);
+    const prevFilterRef = useRef("");
 
     // ================= FETCH FILTER DATA =================
     const fetchData = async () => {
@@ -59,7 +60,7 @@ const ProductGrid = ({ selectedId }) => {
     }, []);
 
     // ================= FETCH PRODUCTS =================
-    const fetchProjectData = async (
+    const fetchProjectData = useCallback(async (
         pageNo = 1,
         reset = false,
         customFilters = null
@@ -109,9 +110,8 @@ const ProductGrid = ({ selectedId }) => {
         } finally {
             setLoading(false);
         }
-    };
+    }, [selectedId, selectedColors, priceRange, limit]);
 
-    // ================= INIT LOAD =================
     // ================= INIT LOAD =================
     useEffect(() => {
         if (!selectedId) return;
@@ -121,81 +121,60 @@ const ProductGrid = ({ selectedId }) => {
         setHasMore(true);
 
         fetchProjectData(1, true);
-    }, [selectedId]);
+    }, [selectedId, fetchProjectData]);
 
-    // ================= FILTER CHANGE =================
+    // ================= FILTER CHANGE (single trigger) =================
     useEffect(() => {
         if (!selectedId) return;
+
+        // Generate a string key from current filters
+        const filterKey = JSON.stringify({ colors: selectedColors, price: priceRange });
+        
+        // Skip if filter hasn't actually changed (prevents double calls)
+        if (prevFilterRef.current === filterKey) return;
+        prevFilterRef.current = filterKey;
 
         setProducts([]);
         setPage(1);
         setHasMore(true);
 
         fetchProjectData(1, true);
-    }, [selectedColors, priceRange]);
-
+    }, [selectedColors, priceRange, selectedId, fetchProjectData]);
 
     // ================= COLOR FILTER =================
     const handleColorChange = (selectedColor) => {
-        let updatedColors = [];
-
-        if (
-            selectedColors.includes(selectedColor)
-        ) {
-            updatedColors = selectedColors.filter(
-                (c) => c !== selectedColor
-            );
-        } else {
-            updatedColors = [
-                ...selectedColors,
-                selectedColor,
-            ];
-        }
-
-        setSelectedColors(updatedColors);
-
-        setProducts([]);
-        setPage(1);
-        setHasMore(true);
-
-        fetchProjectData(
-            1,
-            true,
-            {
-                ...(updatedColors.length > 0 && {
-                    color: updatedColors.join(","),
-                }),
-                lowPrice: priceRange.low,
-                highPrice: priceRange.high,
+        setSelectedColors((prev) => {
+            if (prev.includes(selectedColor)) {
+                return prev.filter((c) => c !== selectedColor);
             }
-        );
+            return [...prev, selectedColor];
+        });
     };
 
-    // ================= PRICE FILTER (DEBOUNCE FIX) =================
+    // ================= PRICE FILTER (DEBOUNCE - NO DUPLICATE) =================
     const handlePriceChange = (type, value) => {
         value = Number(value);
 
+        // Update state immediately for UI responsiveness
         setPriceRange((prev) => {
-            let low = prev.low;
-            let high = prev.high;
-
-            if (type === "low") low = value;
-            if (type === "high") high = value;
-
-            return { low, high };
+            const updated = { ...prev };
+            if (type === "low") updated.low = value;
+            if (type === "high") updated.high = value;
+            return updated;
         });
 
-        setPage(1);
-        setProducts([]);
-        setHasMore(true);
-
-        // debounce API call
+        // Debounce API call - the useEffect will handle the actual fetch
         if (priceDebounceRef.current) {
             clearTimeout(priceDebounceRef.current);
         }
-
+        
         priceDebounceRef.current = setTimeout(() => {
-            fetchProjectData(1, true);
+            prevFilterRef.current = ""; // Reset so useEffect triggers
+            setPriceRange((currentRange) => {
+                // Use functional update to get latest value
+                const newRange = { ...currentRange };
+                return newRange;
+            });
         }, 500);
     };
 
@@ -208,6 +187,7 @@ const ProductGrid = ({ selectedId }) => {
 
         setSelectedColors([]);
         setPriceRange(resetRange);
+        prevFilterRef.current = ""; // Reset filter key
 
         setProducts([]);
         setPage(1);
@@ -313,15 +293,6 @@ const ProductGrid = ({ selectedId }) => {
                                     className="absolute w-full"
                                 />
 
-                                {/* <div className="absolute top-1/2 w-full h-1 bg-gray-200 -translate-y-1/2 rounded-full" /> */}
-
-                                <div
-                                    className="absolute top-1/2 h-1  -translate-y-1/2 rounded-full"
-                                    style={{
-                                        left: `${leftPercent}%`,
-                                        width: `${widthPercent}%`,
-                                    }}
-                                />
                             </div>
 
                             <div className="flex justify-between text-xs">
@@ -351,14 +322,6 @@ const ProductGrid = ({ selectedId }) => {
                                             key={item._id || item.id}
                                             className="relative"
                                         >
-
-                                            {/* ✅ Discount Badge */}
-                                            {/* {item?.discount_amount > 0 && (
-                        <div className="absolute top-3 left-3 z-20 bg-red-500 text-white text-[11px] md:text-xs font-bold px-2 py-1 rounded-md shadow-md">
-                          {item.discount_amount}% OFF
-                        </div>
-                      )} */}
-
                                             <ProductCard item={item} />
                                         </div>
                                     ))}
