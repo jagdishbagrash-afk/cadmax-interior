@@ -11,6 +11,7 @@ const ProductGrid = ({ selectedId }) => {
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [hasMore, setHasMore] = useState(true);
+    const [sortBy, setSortBy] = useState("");
 
     const [selectedColors, setSelectedColors] = useState([]);
     const [color, setColor] = useState([]);
@@ -33,7 +34,6 @@ const ProductGrid = ({ selectedId }) => {
         try {
             const main = new Listing();
             const response = await main.GetAllProdcuctColor();
-            console.log("response", response)
             if (response?.data?.data) {
                 const min = response.data.data.lowestPrice ?? 0;
                 const max = response.data.data.highestPrice ?? 0;
@@ -75,6 +75,7 @@ const ProductGrid = ({ selectedId }) => {
                     }),
                     lowPrice: priceRange.low,
                     highPrice: priceRange.high,
+                    sortBy,
                 };
 
             const main = new Listing();
@@ -110,7 +111,7 @@ const ProductGrid = ({ selectedId }) => {
         } finally {
             setLoading(false);
         }
-    }, [selectedId, selectedColors, priceRange, limit]);
+    }, [selectedId, selectedColors, priceRange, sortBy, limit]);
 
     // ================= INIT LOAD =================
     useEffect(() => {
@@ -128,8 +129,11 @@ const ProductGrid = ({ selectedId }) => {
         if (!selectedId) return;
 
         // Generate a string key from current filters
-        const filterKey = JSON.stringify({ colors: selectedColors, price: priceRange });
-        
+        const filterKey = JSON.stringify({
+            colors: selectedColors,
+            price: priceRange,
+            sortBy,
+        });
         // Skip if filter hasn't actually changed (prevents double calls)
         if (prevFilterRef.current === filterKey) return;
         prevFilterRef.current = filterKey;
@@ -139,7 +143,22 @@ const ProductGrid = ({ selectedId }) => {
         setHasMore(true);
 
         fetchProjectData(1, true);
-    }, [selectedColors, priceRange, selectedId, fetchProjectData]);
+    }, [selectedColors, priceRange, selectedId, sortBy, fetchProjectData]);
+
+    const sortedProducts = [...products].sort((a, b) => {
+        const priceA = a?.salePrice || a?.price || 0;
+        const priceB = b?.salePrice || b?.price || 0;
+
+        if (sortBy === "lowToHigh") {
+            return priceA - priceB;
+        }
+
+        if (sortBy === "highToLow") {
+            return priceB - priceA;
+        }
+
+        return 0;
+    });
 
     // ================= COLOR FILTER =================
     const handleColorChange = (selectedColor) => {
@@ -247,7 +266,7 @@ const ProductGrid = ({ selectedId }) => {
                             <h4 className="text-sm font-semibold text-gray-700">Color</h4>
 
                             <div className="grid grid-cols-2 gap-2 text-sm">
-                                {color.map((c, i) => (
+                                {color?.map((c, i) => (
                                     <label key={i} className="flex items-center gap-2 cursor-pointer">
                                         <input
                                             type="checkbox"
@@ -305,6 +324,33 @@ const ProductGrid = ({ selectedId }) => {
                     {/* ================= PRODUCTS / NODATA ================= */}
                     <div className="order-1  md:order-2">
 
+                        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                            <div>
+                                <h2 className="text-2xl font-semibold text-gray-900">
+                                    Products
+                                </h2>
+                                <p className="text-sm text-gray-500 mt-1">
+                                    {products?.length} Products Found
+                                </p>
+                            </div>
+
+                            <div className="flex items-center gap-3">
+                                <span className="text-sm font-medium text-gray-700">
+                                    Sort By:
+                                </span>
+
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black bg-white"
+                                >
+                                    <option value="">Newest First</option>
+                                    <option value="lowToHigh">Price: Low to High</option>
+                                    <option value="highToLow">Price: High to Low</option>
+                                </select>
+                            </div>
+                        </div>
+
                         {isInitialLoading ? (
                             <div className="flex justify-center items-center py-20">
                                 <Loader />
@@ -317,7 +363,7 @@ const ProductGrid = ({ selectedId }) => {
                         ) : (
                             <>
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 ">
-                                    {products.map((item) => (
+                                    {sortedProducts?.map((item) => (
                                         <div
                                             key={item._id || item.id}
                                             className="relative"

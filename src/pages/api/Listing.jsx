@@ -371,8 +371,29 @@ class Listing extends Component {
     return Api.get(`/services/type-concept/${id}`,);
   }
 
-  async GetAllProductsId(id) {
-    return Api.get(`/product/details/${id}`,);
+  async GetAllProductsId(
+    slug,
+    subcategory,
+    subsubcategory,
+    type
+  ) {
+    const params = {};
+
+    if (subcategory) {
+      params.subcategory = subcategory;
+    }
+
+    if (subsubcategory) {
+      params.subsubcategory = subsubcategory;
+    }
+
+    if (type) {
+      params.type = type;
+    }
+
+    return Api.get(`/product/details/${slug}`, {
+      params,
+    });
   }
   async AddBooking(data) {
     return Api.post(`/add-booking`, data);

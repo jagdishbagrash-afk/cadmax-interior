@@ -42,9 +42,14 @@ export default function OrderDetail({ data }) {
           <div className="p-4 lg:p-6">
             <div className="space-y-4">
               {data.map((item, index) => {
-                const selectedVariant = item?.id?.variants?.find(
-                  (v) => v.color === item.variant
-                );
+  const selectedVariant = item?.id?.variants?.find(
+    (v) =>
+      v.title?.toLowerCase().trim() ===
+        item.variant?.toLowerCase().trim() ||
+      v.color?.toLowerCase().trim() ===
+        item.variant?.toLowerCase().trim()
+  );
+
 
                 const image = selectedVariant?.images?.[0];
 

@@ -34,22 +34,26 @@ export default function Add() {
     material: "",
     type: "",
     terms: "",
-    subsubcategory :"",
-    discount_amount :""
+    subsubcategory: "",
+    discount_amount: ""
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-    const [subSubCategories, setSubSubCategories] = useState([]);
+  const [subSubCategories, setSubSubCategories] = useState([]);
   
   const [image, setImage] = useState(null);
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // State for price sections
+  const [priceSections, setPriceSections] = useState([]);
 
   const [variants, setVariants] = useState(
     AVAILABLE_COLORS.map((c) => ({
       color: c.name,
       hex: c.hex,
       selected: false,
+      title: `${c.name.charAt(0).toUpperCase() + c.name.slice(1)} Variant`,
       stock: "",
       images: [], // ✅ existing URLs
       newImages: [], // ✅ new File objects
@@ -67,16 +71,22 @@ export default function Add() {
       amount: data.amount,
       category: data.category?._id || "",
       subcategory: data.subcategory?._id || "",
-      subsubcategory : data.subsubcategory?._id || "",
+      subsubcategory: data.subsubcategory?._id || "",
       dimensions: data.dimensions,
       material: data.material,
       type: data.type,
       terms: data.terms,
-      discount_amount :  data.discount_amount , 
-
+      discount_amount: data.discount_amount || "",
     });
 
     setImagePreview(data.image || "");
+
+    // Load price sections
+    if (data.product_price_section && data.product_price_section.length > 0) {
+      setPriceSections(data.product_price_section);
+    } else {
+      setPriceSections([]);
+    }
 
     setVariants((prev) =>
       prev.map((v) => {
@@ -85,6 +95,7 @@ export default function Add() {
           ? {
             ...v,
             selected: true,
+            title: found.title || `${v.color.charAt(0).toUpperCase() + v.color.slice(1)} Variant`,
             stock: found.stock,
             images: found.images || [],
             newImages: [],
@@ -142,8 +153,6 @@ export default function Add() {
     }
   }, [id]);
 
-  // console.log("id", id);
-
   const handleChange = (e) => {
     setForm({
       ...form,
@@ -154,6 +163,12 @@ export default function Add() {
   const toggleVariant = (index) => {
     setVariants((prev) =>
       prev.map((v, i) => (i === index ? { ...v, selected: !v.selected } : v))
+    );
+  };
+
+  const updateVariantTitle = (index, value) => {
+    setVariants((prev) =>
+      prev.map((v, i) => (i === index ? { ...v, title: value } : v))
     );
   };
 
@@ -188,12 +203,42 @@ export default function Add() {
       )
     );
 
+  // Price Section Handlers
+  const addPriceSection = () => {
+    setPriceSections([
+      ...priceSections,
+      {
+        title: "",
+        amount: "",
+        discount_amount: "10",
+        final_amount: 0
+      }
+    ]);
+  };
 
-     const fetchSubSubCategories = async () => {
+  const removePriceSection = (index) => {
+    setPriceSections(priceSections.filter((_, i) => i !== index));
+  };
+
+  const updatePriceSection = (index, field, value) => {
+    const updated = [...priceSections];
+    updated[index][field] = value;
+    
+    // Auto-calculate final amount
+    if (field === 'amount' || field === 'discount_amount') {
+      const amount = parseFloat(updated[index].amount) || 0;
+      const discount = parseFloat(updated[index].discount_amount) || 10;
+      updated[index].final_amount = amount - (amount * discount) / 100;
+    }
+    
+    setPriceSections(updated);
+  };
+
+  const fetchSubSubCategories = async () => {
     try {
       const main = new Listing();
       const response = await main.getproductsubcategory(form?.subcategory);
-console.log("response",response)
+      console.log("response", response)
       if (response.data?.data) {
         setSubSubCategories(response.data.data);
       } else {
@@ -213,6 +258,19 @@ console.log("response",response)
 
   const handleEdit = async (e) => {
     e.preventDefault();
+    
+    const selectedVariants = variants.filter(v => v.selected);
+    
+    if (!selectedVariants.length) {
+      toast.error("Select at least one color variant");
+      return;
+    }
+
+    if (!selectedVariants.every(v => (v.images.length > 0 || v.newImages.length > 0))) {
+      toast.error("Each selected variant must have at least one image");
+      return;
+    }
+
     setLoading(true);
     try {
       const fd = new FormData();
@@ -220,7 +278,7 @@ console.log("response",response)
       fd.append("description", form.description);
       fd.append("stock", form.stock);
       fd.append("amount", form.amount);
-      fd.append("category", form.category); // must be _id
+      fd.append("category", form.category);
       fd.append("subcategory", form.subcategory);
       fd.append("subsubcategory", form.subsubcategory);
       fd.append("dimensions", form.dimensions);
@@ -228,43 +286,40 @@ console.log("response",response)
       fd.append("type", form.type);
       fd.append("discount_amount", form.discount_amount);
       fd.append("terms", form.terms);
-      Object.entries(form).forEach(([k, v]) => fd.append(k, v));
-      const selectedVariants = variants.filter(v => v.selected);
+      
+      // Append variants with title
       fd.append(
         "variants",
         JSON.stringify(
           selectedVariants.map(v => ({
             color: v.color,
+            title: v.title,
             stock: v.stock,
-            images: v.images
+            images: v.images // Send existing image URLs
           }))
         )
       );
+      
+      // Append price sections
+      const validPriceSections = priceSections.filter(section => section.title && section.amount);
+      if (validPriceSections.length > 0) {
+        fd.append("product_price_section", JSON.stringify(validPriceSections));
+      }
+      
+      // Append new images
       selectedVariants.forEach(v =>
         v.newImages.forEach(img =>
           fd.append(`variantImages_${v.color}`, img)
         )
       );
+      
       const main = new Listing();
       const res = await main.editProduct(id, fd);
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        setForm({
-          title: "",
-          description: "",
-          stock: "",
-          amount: "",
-          category: "",
-          subcategory: "",
-          dimensions: "",
-          material: "",
-          type: "",
-          terms: "",
-        });
-        setImage(null);
         router.push("/admin/product");
       } else {
-        toast.error(data.message || "Failed to edit product");
+        toast.error(res?.data?.message || "Failed to edit product");
       }
     } catch (error) {
       toast.error("Internal Server Error");
@@ -273,8 +328,6 @@ console.log("response",response)
       setLoading(false);
     }
   };
-
-  // console.log("form", form);
 
   return (
     <AdminLayout page={"Product List"}>
@@ -308,15 +361,6 @@ console.log("response",response)
 
           {/* Stock & Price */}
           <div className="grid grid-cols-2 gap-4">
-            {/* <input
-              type="number"
-              name="discount_amount"
-              placeholder="discount_amount"
-              value={form.discount_amount}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            /> */}
             <input
               type="number"
               name="amount"
@@ -349,7 +393,6 @@ console.log("response",response)
               <option value="" disabled>
                 Select Category
               </option>
-
               {categories &&
                 categories?.map((cat) => (
                   <option key={cat?._id} value={cat?._id}>
@@ -362,7 +405,7 @@ console.log("response",response)
               name="subcategory"
               value={form.subcategory}
               onChange={handleChange}
-              disabled={!form.category} // 🔹 Disable if category is empty
+              disabled={!form.category}
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
                 ${!form.category
                   ? "bg-gray-200 cursor-not-allowed"
@@ -376,7 +419,6 @@ console.log("response",response)
                   ? "Select SubCategory"
                   : "Select a Category first"}
               </option>
-
               {subCategories &&
                 subCategories?.map((cat) => (
                   <option key={cat?._id} value={cat?._id}>
@@ -389,16 +431,14 @@ console.log("response",response)
               name="subsubcategory"
               value={form.subsubcategory}
               onChange={handleChange}
-              disabled={!form.subcategory} // 🔹 Disable if category is empty
+              disabled={!form.subcategory}
               className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
                 ${!form.subcategory ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}
               `}
-              required
             >
               <option value="" disabled>
-                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory Category first"}
+                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory first"}
               </option>
-
               {subSubCategories &&
                 subSubCategories?.map((cat) => (
                   <option key={cat?._id} value={cat?._id} className="text-black">
@@ -408,10 +448,59 @@ console.log("response",response)
             </select>
           </div>
 
-          {/* New String Fields */}
+              {/* Price Sections Component */}
+          <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-semibold text-gray-800">💰 Price Sections</h2>
+              <button
+                type="button"
+                onClick={addPriceSection}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+              >
+                + Add Section
+              </button>
+            </div>
 
+            {priceSections.length === 0 && (
+              <div className="text-center text-gray-500 py-4">
+                No price sections added. Click "Add Section" to create one.
+              </div>
+            )}
+
+            {priceSections?.map((section, idx) => (
+              <div key={idx} className="border rounded-lg p-4 bg-gray-50">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <input
+                    type="text"
+                    placeholder="Section Title (e.g., Standard Pack)"
+                    value={section.title}
+                    onChange={(e) => updatePriceSection(idx, 'title', e.target.value)}
+                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount (₹)"
+                    value={section.amount}
+                    onChange={(e) => updatePriceSection(idx, 'amount', e.target.value)}
+                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
+                 
+                    {priceSections.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => removePriceSection(idx)}
+                        className="w-full max-w-[50px] bg-red-600 text-white px-3 rounded-lg hover:bg-red-700"
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Material, Type, Terms */}
           <textarea
-            type="text"
             name="material"
             placeholder="Material"
             value={form.material}
@@ -422,7 +511,6 @@ console.log("response",response)
           />
 
           <textarea
-            type="text"
             name="type"
             placeholder="Product Care"
             value={form.type}
@@ -442,8 +530,10 @@ console.log("response",response)
             required
           />
 
-          <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+      
 
+          {/* Color Variants Component */}
+          <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">🎨 Color Variants</h2>
 
             {variants.map((v, i) => (
@@ -452,10 +542,8 @@ console.log("response",response)
                 className={`rounded-lg border p-4 transition 
       ${v.selected ? "bg-blue-50 border-blue-400" : "bg-gray-50"}`}
               >
-
                 {/* Header */}
                 <label className="flex items-center justify-between cursor-pointer">
-
                   <div className="flex items-center gap-3">
                     <input
                       type="checkbox"
@@ -463,22 +551,33 @@ console.log("response",response)
                       onChange={() => toggleVariant(i)}
                       className="w-4 h-4 accent-blue-600"
                     />
-
                     <span
                       className="w-6 h-6 rounded-full border shadow-sm"
                       style={{ background: v.hex }}
                     />
-
                     <span className="capitalize font-medium text-gray-700">
                       {v.color}
                     </span>
                   </div>
-
                 </label>
 
                 {/* Expanded Section */}
                 {v.selected && (
                   <div className="mt-4 ml-7 space-y-4">
+                    {/* Variant Title */}
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-600">
+                        Variant Title
+                      </label>
+                      <input
+                        type="text"
+                        value={v.title}
+                        onChange={e => updateVariantTitle(i, e.target.value)}
+                        className="w-full mt-1 rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-200"
+                        placeholder="Enter variant title"
+                        required
+                      />
+                    </div>
 
                     {/* Stock */}
                     <div>
@@ -502,6 +601,7 @@ console.log("response",response)
                       <input
                         type="file"
                         multiple
+                        accept="image/*"
                         onChange={e => addNewImages(i, [...e.target.files])}
                         className="mt-1 block w-full text-sm 
                 file:bg-blue-600 file:text-white 
@@ -514,12 +614,12 @@ console.log("response",response)
                     {/* Images */}
                     {(v.images.length > 0 || v.newImages.length > 0) && (
                       <div className="flex flex-wrap gap-3">
-
                         {v.images.map((img, idx) => (
                           <div key={idx} className="relative group">
                             <img
                               src={img}
                               className="w-20 h-20 rounded-lg border object-cover shadow"
+                              alt={`Existing ${idx}`}
                             />
                             <button
                               type="button"
@@ -536,6 +636,7 @@ console.log("response",response)
                             <img
                               src={URL.createObjectURL(img)}
                               className="w-20 h-20 rounded-lg border object-cover shadow"
+                              alt={`New ${idx}`}
                             />
                             <button
                               type="button"
@@ -554,13 +655,13 @@ console.log("response",response)
             ))}
           </div>
 
-
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium mt-4 hover:bg-blue-700 transition cursor-pointer"
+            disabled={loading}
+            className="w-full bg-blue-600 text-white py-3 rounded-lg text-lg font-medium mt-4 hover:bg-blue-700 transition cursor-pointer disabled:bg-gray-400"
           >
-            {loading ? "Submitting..." : `Submit`}
+            {loading ? "Submitting..." : `Update Product`}
           </button>
         </form>
       </div>
