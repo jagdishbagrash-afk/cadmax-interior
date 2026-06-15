@@ -35,7 +35,6 @@ export default function ReviewCard({
     rating,
     title,
     message,
-    verifiedPurchase,
     helpfulCount = 0,
     notHelpfulCount = 0,
     createdAt,
@@ -47,6 +46,7 @@ export default function ReviewCard({
 
   const isOwnReview = userId && user?._id === userId;
   const hasImages = images && images.length > 0;
+  const showStatusBadge = false;
 
   const openLightbox = (index) => {
     setLightboxIndex(index);
@@ -65,7 +65,7 @@ export default function ReviewCard({
 
   return (
     <>
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 hover:shadow-sm transition-shadow">
+      <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 hover:shadow-sm transition-shadow relative">
         {/* Header - User Info & Rating */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -89,12 +89,6 @@ export default function ReviewCard({
                 <p className="font-semibold text-sm text-black">
                   {user?.name || "Anonymous"}
                 </p>
-                {verifiedPurchase && (
-                  <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full font-medium">
-                    <MdVerified size={12} />
-                    Verified Purchase
-                  </span>
-                )}
               </div>
               <div className="flex items-center gap-2 mt-0.5">
                 <StarRatingDisplay rating={rating} size={14} />
@@ -192,12 +186,6 @@ export default function ReviewCard({
                 <div>
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm text-black">{user?.name || "Anonymous"}</p>
-                    {verifiedPurchase && (
-                      <span className="inline-flex items-center gap-1 text-xs text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full font-medium">
-                        <MdVerified size={10} />
-                        Verified
-                      </span>
-                    )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <StarRatingDisplay rating={rating} size={12} />

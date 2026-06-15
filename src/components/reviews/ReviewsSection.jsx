@@ -9,6 +9,7 @@ import CustomerReviewPhotos from "./CustomerReviewPhotos";
 import WriteReviewModal from "./WriteReviewModal";
 import { FaStar, FaSpinner } from "react-icons/fa";
 import Loader from "@/components/Loader";
+import ConfirmModal from "@/components/ConfirmModal";
 
 export default function ReviewsSection({ productId, productName = "" }) {
   const { user } = useRole();
@@ -34,6 +35,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
   const [showWriteModal, setShowWriteModal] = useState(false);
   const [editReviewData, setEditReviewData] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   // For infinite scroll
   const scrollContainerRef = useRef(null);
@@ -41,12 +43,16 @@ export default function ReviewsSection({ productId, productName = "" }) {
   const hasMoreRef = useRef(true);
   const isLoadingMoreRef = useRef(false);
 
-  // Load reviews for a page
+  // Load reviews for a page - pass userId for visibility logic
   const loadReviews = useCallback(
     (page = 1, append = false) => {
       currentPageRef.current = page;
       const params = { sort: activeSort, page, limit: 10 };
       if (activeRatingFilter) params.rating = activeRatingFilter;
+      // Pass userId so backend can include user's own reviews (even pending/rejected)
+      if (user?._id) {
+        params.userId = user._id;
+      }
 
       if (append) {
         setLoadingMore(true);
@@ -58,7 +64,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
         isLoadingMoreRef.current = false;
       });
     },
-    [productId, activeSort, activeRatingFilter, fetchReviews]
+    [productId, activeSort, activeRatingFilter, fetchReviews, user]
   );
 
   // Initial load
@@ -130,11 +136,12 @@ export default function ReviewsSection({ productId, productName = "" }) {
       router.push("/login");
       return;
     }
-    // Check if user is a verified buyer
-    if (eligibility && !eligibility?.canReview) {
-      toast.error("Only verified purchasers can write a review. You are not eligible to review this product.");
+    // Check if user has already reviewed this product
+    if (eligibility?.hasReviewed) {
+      toast.error("You have already reviewed this product. You can edit or delete your existing review.");
       return;
     }
+    // Any logged-in user can write a review (purchase not required)
     setEditReviewData(null);
     setShowWriteModal(true);
   };
@@ -194,8 +201,8 @@ export default function ReviewsSection({ productId, productName = "" }) {
   };
 
   const handleDeleteReview = async (reviewId) => {
-    if (!window.confirm("Are you sure you want to delete this review?")) return;
     await deleteReview(reviewId);
+    setDeleteConfirm(null);
     hasMoreRef.current = true;
     loadReviews(1, false);
     fetchRatingSummary(productId);
@@ -241,27 +248,14 @@ export default function ReviewsSection({ productId, productName = "" }) {
             activeRatingFilter={activeRatingFilter}
           />
 
-          {/* Write Review Button - Show to all logged-in users */}
+          {/* Write Review Button - Show to all logged-in customers */}
           {user && user?.role === "customer" && (
             <button
               onClick={handleWriteReview}
-              className={`w-full mt-4 py-3 rounded-2xl text-sm font-semibold transition-all ${
-                eligibility?.canReview
-                  ? "bg-black text-white hover:opacity-90"
-                  : "bg-gray-100 text-[#4D5466] border border-gray-300 hover:bg-gray-200"
-              }`}
+              className="w-full mt-4 py-3 rounded-2xl text-sm font-semibold transition-all bg-black text-white hover:opacity-90"
             >
-              {eligibility?.canReview ? "Write a Review" : "Write a Review"}
+              Write a Review
             </button>
-          )}
-
-          {/* Not verified buyer - show info message */}
-          {user && user?.role === "customer" && eligibility && !eligibility?.canReview && (
-            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-2xl">
-              <p className="text-xs text-yellow-700 font-medium text-center">
-                ⚠️ Only verified purchasers can write a review. You are not eligible to review this product.
-              </p>
-            </div>
           )}
 
           {!user && (
@@ -328,7 +322,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
                       onHelpful={handleHelpful}
                       onNotHelpful={handleNotHelpful}
                       onEdit={handleEditReview}
-                      onDelete={handleDeleteReview}
+                      onDelete={(id) => setDeleteConfirm({ reviewId: id })}
                     />
                   ))}
                 </div>
@@ -381,6 +375,18 @@ export default function ReviewsSection({ productId, productName = "" }) {
       {reviews.length > 0 && (
         <CustomerReviewPhotos reviews={reviews} />
       )}
+
+      {/* Delete Confirmation Modal */}
+      <ConfirmModal
+        isOpen={!!deleteConfirm}
+        onClose={() => setDeleteConfirm(null)}
+        onConfirm={() => handleDeleteReview(deleteConfirm?.reviewId)}
+        title="Delete Review"
+        message="Are you sure you want to delete your review? This action cannot be undone."
+        confirmText="Yes, Delete"
+        cancelText="No"
+        confirmClassName="bg-red-600 hover:bg-red-700"
+      />
 
       {/* Write/Edit Review Modal */}
       <WriteReviewModal
