@@ -296,9 +296,9 @@ class Listing extends Component {
     return Api.post(`/lead-status-update/${id}`, status);
   }
 
-  async getProductbySubcategory(id) {
-    return Api.get(`/product/subcategory/${id}`);
-  }
+  // async getProductbySubcategory(id) {
+  //   return Api.get(`/product/subcategory/${id}`);
+  // }
 
   async getAllProject(data) {
     return Api.get(`/project/list`, data);
