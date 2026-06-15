@@ -1008,7 +1008,6 @@ useEffect(() => {
             />
           </div>
         </div>
-      </div>
     </Layout>
   );
 }
