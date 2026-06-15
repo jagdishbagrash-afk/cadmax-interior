@@ -998,28 +998,8 @@ useEffect(() => {
             />
           )}
 
-          {/* RELATED PRODUCTS WITH SORT */}
-          <div className="mt-12 md:mt-16">
-            {/* Sort Dropdown for Related Products */}
-            <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-              <h2 className="text-2xl font-bold uppercase tracking-wider">
-                Related Products
-              </h2>
-              <div className="flex items-center gap-3">
-                <label className="text-sm font-medium text-gray-700">
-                  Sort By:
-                </label>
-                <select
-                  value={relatedSortBy}
-                  onChange={handleRelatedSortChange}
-                  className="border border-gray-300 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-black"
-                >
-                  <option value="">Default</option>
-                  <option value="price_asc">Price: Low to High</option>
-                  <option value="price_desc">Price: High to Low</option>
-                </select>
-              </div>
-            </div>
+          {/* RELATED PRODUCTS WITH SORT *
+        
 
             {/* Pass sort parameter to Related component */}
             <Related
