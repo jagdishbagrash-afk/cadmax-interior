@@ -107,6 +107,7 @@ export default function Index() {
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [selectedPriceSection, setSelectedPriceSection] = useState(null);
+  const [selectedSize, setSelectedSize] = useState(null);
   const [open, setOpen] = useState(null);
   const [ProductDetails, setProductDetails] = useState(null);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -123,8 +124,17 @@ export default function Index() {
   console.log("ProductDetails", ProductDetails)
   const dispatch = useDispatch();
 
-  // Get the current price based on main amount or selected price section
+  // Get the current price based on main amount or selected price section and size
   const getCurrentPrice = () => {
+    // If a size is selected within a price section
+    if (selectedPriceSection && selectedSize) {
+      return {
+        amount: selectedSize.amount,
+        final_amount: selectedSize.final_amount,
+        discount_amount: selectedSize.discount_amount
+      };
+    }
+    // If only price section is selected (no size)
     if (selectedPriceSection) {
       return {
         amount: selectedPriceSection.amount,
@@ -132,6 +142,7 @@ export default function Index() {
         discount_amount: selectedPriceSection.discount_amount
       };
     }
+    // Default product price
     return {
       amount: ProductDetails?.amount || 0,
       final_amount: ProductDetails?.final_amount || 0,
@@ -144,9 +155,6 @@ export default function Index() {
     const currentPrice = getCurrentPrice();
     if (currentPrice.final_amount > 0) {
       return currentPrice.final_amount;
-    }
-    if (ProductDetails?.product_price_section?.length > 0 && (!ProductDetails?.amount || ProductDetails?.amount === 0)) {
-      return ProductDetails.product_price_section[0]?.final_amount || 0;
     }
     return currentPrice.amount;
   };
@@ -211,8 +219,8 @@ export default function Index() {
         variant: selectedVariant?.color,
         price: currentPrice?.final_amount || currentPrice?.amount || 0,
         quantity: quantity,
-        priceSectionTitle: selectedPriceSection?.title || null
-
+        priceSectionTitle: selectedPriceSection?.title || null,
+        sizeTitle: selectedSize?.title || null
       });
       if (response?.data?.status) {
         toast.success(response.data.message);
@@ -221,8 +229,6 @@ export default function Index() {
       toast.error(err?.response?.data?.message || "Failed to update quantity");
     }
   };
-
-
 
   const fetchData = async (
     slug,
@@ -260,7 +266,6 @@ export default function Index() {
     }
   };
 
-
   useEffect(() => {
     if (!router.isReady || !id) return;
 
@@ -290,7 +295,6 @@ export default function Index() {
     subsubcategory,
     type,
   ]);
-
 
   const [subSubCategories, setSubSubCategories] = useState([]);
 
@@ -326,7 +330,7 @@ export default function Index() {
 
     const currentPrice = getCurrentPrice();
     const finalPrice = getDisplayPrice();
-    const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}`;
+    const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}_${selectedSize?.title || 'default'}`;
     const newItem = {
       id,
       name: ProductDetails?.title,
@@ -338,12 +342,14 @@ export default function Index() {
       product: ProductDetails,
       selectedVariant: selectedVariant?.color,
       selectedPriceSection: selectedPriceSection,
+      selectedSize: selectedSize,
     };
     HadleAddtocart({
       productId: ProductDetails?._id,
       quantity: qty,
       variant: selectedVariant?.color,
       priceSection: selectedPriceSection,
+      size: selectedSize,
       price: currentPrice?.final_amount || currentPrice?.amount || 0,
     });
     dispatch(addItem(newItem));
@@ -365,7 +371,7 @@ export default function Index() {
     const currentPrice = getCurrentPrice();
     const finalPrice = getDisplayPrice();
 
-    const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}`;
+    const id = `${selectedVariant?.color}_${ProductDetails?._id}_${selectedPriceSection?.title || 'default'}_${selectedSize?.title || 'default'}`;
 
     const newItem = {
       id,
@@ -378,6 +384,7 @@ export default function Index() {
       product: ProductDetails,
       selectedVariant: selectedVariant?.color,
       selectedPriceSection: selectedPriceSection,
+      selectedSize: selectedSize,
     };
 
     // BUY NOW
@@ -395,6 +402,7 @@ export default function Index() {
         variant: selectedVariant?.color,
         images: selectedVariant?.images,
         selectedPriceSection: selectedPriceSection,
+        selectedSize: selectedSize,
       };
 
       localStorage.setItem(
@@ -428,7 +436,12 @@ export default function Index() {
     // Auto-select first price section if main amount is 0 and price sections exist
     if (ProductDetails?.product_price_section?.length > 0 &&
       (!ProductDetails?.amount || ProductDetails?.amount === 0)) {
-      setSelectedPriceSection(ProductDetails.product_price_section[0]);
+      const firstSection = ProductDetails.product_price_section[0];
+      setSelectedPriceSection(firstSection);
+      // Auto-select first size if available
+      if (firstSection?.sizes?.length > 0) {
+        setSelectedSize(firstSection.sizes[0]);
+      }
     }
   }, [ProductDetails]);
 
@@ -534,11 +547,6 @@ export default function Index() {
         </div>
       </div>
     );
-  };
-
-  // ================= NEW: SORT HANDLER FOR RELATED PRODUCTS =================
-  const handleRelatedSortChange = (e) => {
-    setRelatedSortBy(e.target.value);
   };
 
   const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
@@ -701,7 +709,7 @@ export default function Index() {
                     </span>
                   )}
 
-
+                  
 
                   <span className="text-sm text-[#6B7280]">
                     Inclusive of all taxes
@@ -714,103 +722,79 @@ export default function Index() {
                   Deliver in approximately 8–12 days
                 </div>
 
-                {subSubCategories?.length > 0 && (
-                  <div className="mt-8">
-                    <p className="text-sm font-semibold text-black mb-4">
-                      Size :
-                      <span className="capitalize ml-2">
-                        {
-                          subSubCategories?.find(
-                            (item) => item?._id === ProductDetails?.subsubcategory
-                          )?.name
-                        }
-                      </span>
-                    </p>
-
-                    <div className="flex flex-wrap gap-2">
-                      {subSubCategories?.map((item) => {
-                        const isActive =
-                          item?._id === ProductDetails?.subsubcategory;
-
-                        return (
-                          <Link
-                            key={item?._id}
-                            href={{
-                              pathname: `/product/details/${ProductDetails?.slug}`,
-                              query: {
-                                subcategory: ProductDetails?.subcategory?._id,
-                                subsubcategory: item?._id,
-                                type: "subsubcategory",
-                              },
-                            }}
-                            className={`
-          flex flex-col items-center
-          p-2
-          w-20
-          rounded-lg
-          border
-          transition-all
-          ${isActive
-                                ? "border-black bg-gray-50"
-                                : "border-gray-200"}
-        `}
-                          >
-                            <div className="relative w-10 h-10">
-                              <Image
-                                src={item?.Image}
-                                alt={item?.name}
-                                fill
-                                className="object-contain"
-                              />
-                            </div>
-
-                            <span className="text-[10px] text-center mt-1 line-clamp-2">
-                              {item?.name}
-                            </span>
-                          </Link>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
+                {/* =====================================
+              PRICE SECTIONS WITH SIZES
+          ===================================== */}
                 {shouldShowPriceSections && (
                   <div className="mt-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {ProductDetails?.product_price_section?.map((section, idx) => {
-                        const isActive = selectedPriceSection?.title === section?.title;
-                        return (
-                          <div
-                            key={idx}
-                            onClick={() => {
-                              setSelectedPriceSection(section);
-                            }}
-                            className={`
-                              rounded-2xl p-4 border-2 cursor-pointer transition-all duration-300
-                              ${isActive
-                                ? "border-black bg-gray-50 shadow-lg"
-                                : "border-gray-200 hover:border-gray-300"
-                              }
-                            `}
-                          >
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <h3 className="font-bold text-lg capitalize">
-                                  {section?.title}
-                                </h3>
+                    <h3 className="text-sm font-semibold text-black mb-4">
+                      Select Price Section:
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+  {ProductDetails?.product_price_section?.map((section, idx) => {
+    const isActive = selectedPriceSection?.title === section?.title;
+
+    return (
+      <div
+        key={idx}
+        onClick={() => {
+          setSelectedPriceSection(section);
+
+          if (section?.sizes?.length > 0) {
+            setSelectedSize(section.sizes[0]);
+          } else {
+            setSelectedSize(null);
+          }
+        }}
+        className={`
+          rounded-lg px-3 py-2 border cursor-pointer transition-all duration-200
+          ${isActive
+            ? "border-black bg-gray-50 shadow-sm"
+            : "border-gray-200 hover:border-gray-300"
+          }
+        `}
+      >
+        <h3 className="font-medium text-sm capitalize text-center">
+          {section?.title}
+        </h3>
+      </div>
+    );
+  })}
+</div>
+
+                    {/* Sizes within selected section */}
+                    {selectedPriceSection?.sizes?.length > 0 && (
+                      <div className="mt-4">
+                        <h4 className="text-sm font-semibold text-black mb-3">
+                          Select Size:
+                        </h4>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                          {selectedPriceSection.sizes.map((size, idx) => {
+                            const isSizeActive = selectedSize?.title === size?.title;
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => setSelectedSize(size)}
+                                className={`
+                                  rounded-xl p-3 border-2 cursor-pointer transition-all duration-300
+                                  ${isSizeActive
+                                    ? "border-black bg-gray-50 shadow-lg"
+                                    : "border-gray-200 hover:border-gray-300"
+                                  }
+                                `}
+                              >
+                                <div className="text-center">
+                                  <p className="font-semibold text-sm capitalize">
+                                    {size?.title}
+                                  </p>
+
+                                </div>
                               </div>
-                              <div className="text-right">
-                                <p className="text-[18px] font-bold text-black">
-                                  ₹{formatPrice(section?.final_amount)}
-                                </p>
-                                <p className="text-sm text-gray-400 line-through">
-                                  ₹{formatPrice(section?.amount)}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -996,10 +980,7 @@ export default function Index() {
             />
           )}
 
-          {/* RELATED PRODUCTS WITH SORT *
-        
-
-            {/* Pass sort parameter to Related component */}
+          {/* RELATED PRODUCTS WITH SORT */}
           <Related
             selectedId={ProductDetails?.subcategory?._id}
             sortBy={relatedSortBy}
