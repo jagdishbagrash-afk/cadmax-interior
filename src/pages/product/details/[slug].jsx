@@ -261,35 +261,35 @@ export default function Index() {
   };
 
 
-useEffect(() => {
-  if (!router.isReady || !id) return;
+  useEffect(() => {
+    if (!router.isReady || !id) return;
 
-  // subsubcategory page
-  if (
-    type === "subsubcategory" &&
-    subcategory &&
-    subsubcategory
-  ) {
-    fetchData(
-      id,
-      subcategory,
-      subsubcategory,
-      type
-    );
-    return;
-  }
+    // subsubcategory page
+    if (
+      type === "subsubcategory" &&
+      subcategory &&
+      subsubcategory
+    ) {
+      fetchData(
+        id,
+        subcategory,
+        subsubcategory,
+        type
+      );
+      return;
+    }
 
-  // normal product page
-  if (!type) {
-    fetchData(id);
-  }
-}, [
-  router.isReady,
-  id,
-  subcategory,
-  subsubcategory,
-  type,
-]);
+    // normal product page
+    if (!type) {
+      fetchData(id);
+    }
+  }, [
+    router.isReady,
+    id,
+    subcategory,
+    subsubcategory,
+    type,
+  ]);
 
 
   const [subSubCategories, setSubSubCategories] = useState([]);
@@ -701,11 +701,7 @@ useEffect(() => {
                     </span>
                   )}
 
-                  {discountPercent > 0 && originalAmount > displayPrice && (
-                    <span className="bg-green-600 text-white text-xs font-bold px-2 py-1 rounded-md">
-                      {discountPercent}% OFF
-                    </span>
-                  )}
+
 
                   <span className="text-sm text-[#6B7280]">
                     Inclusive of all taxes
@@ -731,7 +727,7 @@ useEffect(() => {
                       </span>
                     </p>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="flex flex-wrap gap-2">
                       {subSubCategories?.map((item) => {
                         const isActive =
                           item?._id === ProductDetails?.subsubcategory;
@@ -748,26 +744,29 @@ useEffect(() => {
                               },
                             }}
                             className={`
-    rounded-2xl overflow-hidden border-2
-    cursor-pointer transition-all duration-300 bg-white
-    ${isActive
-                                ? "border-black shadow-lg"
-                                : "border-gray-200 hover:border-gray-400"
-                              }
-  `}
+          flex flex-col items-center
+          p-2
+          w-20
+          rounded-lg
+          border
+          transition-all
+          ${isActive
+                                ? "border-black bg-gray-50"
+                                : "border-gray-200"}
+        `}
                           >
-                            <div className="relative aspect-square bg-[#F7F7F7]">
+                            <div className="relative w-10 h-10">
                               <Image
                                 src={item?.Image}
                                 alt={item?.name}
                                 fill
-                                className="object-contain p-3"
+                                className="object-contain"
                               />
                             </div>
 
-                            <p className="text-center py-3 text-sm font-semibold">
+                            <span className="text-[10px] text-center mt-1 line-clamp-2">
                               {item?.name}
-                            </p>
+                            </span>
                           </Link>
                         );
                       })}
@@ -1002,12 +1001,12 @@ useEffect(() => {
         
 
             {/* Pass sort parameter to Related component */}
-            <Related
-              selectedId={ProductDetails?.subcategory?._id}
-              sortBy={relatedSortBy}
-            />
-          </div>
+          <Related
+            selectedId={ProductDetails?.subcategory?._id}
+            sortBy={relatedSortBy}
+          />
         </div>
+      </div>
     </Layout>
   );
 }
