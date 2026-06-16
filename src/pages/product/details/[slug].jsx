@@ -988,7 +988,6 @@ export default function Index() {
               </div>
             </div>
           </div>
-
           {/* REVIEWS SECTION */}
           {ProductDetails?._id && (
             <ReviewsSection
