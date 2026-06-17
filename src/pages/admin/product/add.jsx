@@ -693,7 +693,8 @@ export default function Add() {
           </div>
 
           {/* Price Sections */}
-          <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
+          {form.amount && (
+  <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
               <button
@@ -791,6 +792,8 @@ export default function Add() {
               </div>
             ))}
           </div>
+          )}
+        
 
           {/* Material, Type, Terms */}
           <textarea
