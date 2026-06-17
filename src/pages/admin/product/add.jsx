@@ -28,6 +28,8 @@ export default function Add() {
     description: "",
     stock: "",
     amount: "",
+    label_category: "",
+    label_size: "",
     discount_amount: "10",
     category: "",
     subcategory: "",
@@ -37,7 +39,7 @@ export default function Add() {
     terms: "",
     subsubcategory: ""
   });
-  
+
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
   const [subSubCategories, setSubSubCategories] = useState([]);
@@ -128,7 +130,10 @@ export default function Add() {
           material: data.material || "",
           type: data.type || "",
           terms: data.terms || "",
-          subsubcategory: data.subsubcategory?._id || ""
+          subsubcategory: data.subsubcategory?._id || "",
+          label_category: data.label_category || "", // add
+          label_size: data.label_size || "" // add
+
         });
         setImagePreview(data.image || "");
         setImage(null);
@@ -176,19 +181,19 @@ export default function Add() {
             amount: section.amount !== undefined && section.amount !== null ? String(section.amount) : "0",
             discount_amount: section.discount_amount || "10",
             final_amount: section.final_amount || 0,
-            sizes: section.sizes && section.sizes.length > 0 
+            sizes: section.sizes && section.sizes.length > 0
               ? section.sizes.map(size => ({
-                  title: size.title || "",
-                  amount: size.amount !== undefined && size.amount !== null ? String(size.amount) : "0",
-                  discount_amount: size.discount_amount || "10",
-                  final_amount: size.final_amount || 0
-                }))
+                title: size.title || "",
+                amount: size.amount !== undefined && size.amount !== null ? String(size.amount) : "0",
+                discount_amount: size.discount_amount || "10",
+                final_amount: size.final_amount || 0
+              }))
               : [{
-                  title: "",
-                  amount: "0",
-                  discount_amount: "10",
-                  final_amount: 0
-                }]
+                title: "",
+                amount: "0",
+                discount_amount: "10",
+                final_amount: 0
+              }]
           }));
           setPriceSections(loadedSections);
         } else {
@@ -255,28 +260,9 @@ export default function Add() {
     }
   }, [form?.category]);
 
-  const fetchSubSubCategories = async () => {
-    try {
-      const main = new Listing();
-      const response = await main.getproductsubcategory(form?.subcategory);
-      console.log("response", response);
-      if (response.data?.data) {
-        setSubSubCategories(response.data.data);
-      } else {
-        setSubSubCategories([]);
-      }
-    } catch (error) {
-      console.log("Error:", error);
-      setSubSubCategories([]);
-    }
-  };
+  
 
-  useEffect(() => {
-    if (form?.subcategory) {
-      fetchSubSubCategories();
-    }
-  }, [form?.subcategory]);
-
+ 
   useEffect(() => {
     if (id) {
       fetchProductData();
@@ -450,7 +436,7 @@ export default function Add() {
         const hasValidTitle = section.title && section.title.trim() !== '';
         const amountNum = parseFloat(section.amount);
         const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-        
+
         if (hasValidTitle && hasValidAmount) {
           const validSizes = section.sizes
             .filter(size => {
@@ -465,7 +451,7 @@ export default function Add() {
               discount_amount: parseFloat(size.discount_amount) || 10,
               final_amount: 0
             }));
-          
+
           validPriceSections.push({
             title: section.title.trim(),
             amount: parseFloat(section.amount),
@@ -501,6 +487,8 @@ export default function Add() {
         // Single price mode – append amount and discount
         fd.append("amount", form.amount);
         fd.append("discount_amount", form.discount_amount);
+         fd.append("label_size", form.label_size);
+        fd.append("label_category", form.label_category);
         // Do not append product_price_section
       }
 
@@ -531,6 +519,8 @@ export default function Add() {
           subcategory: "",
           dimensions: "",
           material: "",
+          label_category: "",
+          label_size: "",
           type: "",
           terms: "",
         });
@@ -550,7 +540,7 @@ export default function Add() {
   // ========== FIXED handleEdit ==========
   const handleEdit = async (e) => {
     e.preventDefault();
-    
+
     const selectedVariants = variants
       .filter(v => v.selected)
       .map(({ color, title, stock, images, existingImages }) => ({
@@ -566,7 +556,7 @@ export default function Add() {
         const hasValidTitle = section.title && section.title.trim() !== '';
         const amountNum = parseFloat(section.amount);
         const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-        
+
         if (hasValidTitle && hasValidAmount) {
           const validSizes = section.sizes
             .filter(size => {
@@ -581,7 +571,7 @@ export default function Add() {
               discount_amount: parseFloat(size.discount_amount) || 10,
               final_amount: 0
             }));
-          
+
           validPriceSections.push({
             title: section.title.trim(),
             amount: parseFloat(section.amount),
@@ -767,110 +757,141 @@ export default function Add() {
                 min="0"
                 step="0.01"
               />
-              
+
             </div>
           )}
 
+
+
           {/* ---------- MULTIPLE PRICE SECTIONS ---------- */}
           {priceMode === 'multiple' && (
-            <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
-              <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
-                <button
-                  type="button"
-                  onClick={addPriceSection}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-                >
-                  + Add Section
-                </button>
-              </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
 
-              {priceSections.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
-                  <div className="flex justify-between items-center mb-3">
-                    <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
-                    {priceSections.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removePriceSection(sectionIdx)}
-                        className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
-                      >
-                        Remove Section
-                      </button>
-                    )}
-                  </div>
-                  
-                  {/* Main Section Fields */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                    <input
-                      type="text"
-                      placeholder="Section Title (e.g., King)"
-                      value={section.title}
-                      onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
-                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                    />
-                    <input
-                      type="number"
-                      placeholder="Section Amount (₹) – can be 0"
-                      value={section.amount}
-                      onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
-                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                      min="0"
-                      step="0.01"
-                    />
-                  </div>
+                <div className="w-full mt-2 mb-2  flex ">
 
-                  {/* Sizes Sub-section */}
-                  <div className="border-t border-gray-200 pt-3 mt-2">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
-                      <button
-                        type="button"
-                        onClick={() => addSize(sectionIdx)}
-                        className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
-                      >
-                        + Add Size
-                      </button>
-                    </div>
-                    
-                    {section.sizes.map((size, sizeIdx) => (
-                      <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
-                          {section.sizes.length > 1 && (
-                            <button
-                              type="button"
-                              onClick={() => removeSize(sectionIdx, sizeIdx)}
-                              className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
-                            >
-                              Remove
-                            </button>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <input
-                            type="text"
-                            placeholder="Size Title (e.g., Small)"
-                            value={size.title}
-                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
-                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                          />
-                          <input
-                            type="number"
-                            placeholder="Size Amount (₹) – can be 0"
-                            value={size.amount}
-                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
-                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                            min="0"
-                            step="0.01"
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <input
+                    type="text"
+                    name="label_category"
+                    placeholder="Main Title (e.g., seating ca)"
+                    value={form.label_category}
+                    onChange={handleChange}
+                    className="border w-full rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
                 </div>
-              ))}
-            </div>
+
+                <div className="w-full mt-2 mb-2  flex ">
+
+                  <input
+                  name="label_size"
+                    type="text"
+                    placeholder="Main Title (e.g., type ca)"
+                    value={form.label_size}
+                    onChange={handleChange}
+                    className="border w-full rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                  />
+                </div>
+              </div>
+              <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
+                <div className="flex justify-between items-center">
+                  <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
+                  <button
+                    type="button"
+                    onClick={addPriceSection}
+                    className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                  >
+                    + Add Section
+                  </button>
+                </div>
+
+                {priceSections.map((section, sectionIdx) => (
+                  <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
+                      {priceSections.length > 1 && (
+                        <button
+                          type="button"
+                          onClick={() => removePriceSection(sectionIdx)}
+                          className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+                        >
+                          Remove Section
+                        </button>
+                      )}
+                    </div>
+
+
+                    {/* Main Section Fields */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                      <input
+                        type="text"
+                        placeholder="Section Title (e.g., King)"
+                        value={section.title}
+                        onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
+                        className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Section Amount (₹) – can be 0"
+                        value={section.amount}
+                        onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
+                        className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                        min="0"
+                        step="0.01"
+                      />
+                    </div>
+
+                    {/* Sizes Sub-section */}
+                    <div className="border-t border-gray-200 pt-3 mt-2">
+                      <div className="flex justify-between items-center mb-2">
+                        <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
+                        <button
+                          type="button"
+                          onClick={() => addSize(sectionIdx)}
+                          className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
+                        >
+                          + Add Size
+                        </button>
+                      </div>
+
+                      {section.sizes.map((size, sizeIdx) => (
+                        <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
+                          <div className="flex justify-between items-center mb-2">
+                            <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
+                            {section.sizes.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => removeSize(sectionIdx, sizeIdx)}
+                                className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
+                              >
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <input
+                              type="text"
+                              placeholder="Size Title (e.g., Small)"
+                              value={size.title}
+                              onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
+                              className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                            />
+                            <input
+                              type="number"
+                              placeholder="Size Amount (₹) – can be 0"
+                              value={size.amount}
+                              onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
+                              className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                              min="0"
+                              step="0.01"
+                            />
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </>
           )}
 
           {/* Material, Type, Terms */}
