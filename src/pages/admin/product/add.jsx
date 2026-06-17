@@ -58,13 +58,20 @@ export default function Add() {
     }))
   );
 
-  // New state for price sections
   const [priceSections, setPriceSections] = useState([
     {
       title: "",
-      amount: "",
+      amount: "0",
       discount_amount: "10",
-      final_amount: 0
+      final_amount: 0,
+      sizes: [
+        {
+          title: "",
+          amount: "0",
+          discount_amount: "10",
+          final_amount: 0
+        }
+      ]
     }
   ]);
 
@@ -92,7 +99,6 @@ export default function Add() {
         setImagePreview(data.image || "");
         setImage(null);
 
-        // Load variants if exists
         if (data.variants && data.variants.length > 0) {
           const updatedVariants = AVAILABLE_COLORS.map(color => {
             const existingVariant = data.variants.find(v => v.color === color.name);
@@ -121,9 +127,44 @@ export default function Add() {
           setVariants(updatedVariants);
         }
 
-        // Load price sections
         if (data.product_price_section && data.product_price_section.length > 0) {
-          setPriceSections(data.product_price_section);
+          const loadedSections = data.product_price_section.map(section => ({
+            title: section.title || "",
+            amount: section.amount !== undefined && section.amount !== null ? String(section.amount) : "0",
+            discount_amount: section.discount_amount || "10",
+            final_amount: section.final_amount || 0,
+            sizes: section.sizes && section.sizes.length > 0 
+              ? section.sizes.map(size => ({
+                  title: size.title || "",
+                  amount: size.amount !== undefined && size.amount !== null ? String(size.amount) : "0",
+                  discount_amount: size.discount_amount || "10",
+                  final_amount: size.final_amount || 0
+                }))
+              : [{
+                  title: "",
+                  amount: "0",
+                  discount_amount: "10",
+                  final_amount: 0
+                }]
+          }));
+          setPriceSections(loadedSections);
+        } else {
+          setPriceSections([
+            {
+              title: "",
+              amount: "0",
+              discount_amount: "10",
+              final_amount: 0,
+              sizes: [
+                {
+                  title: "",
+                  amount: "0",
+                  discount_amount: "10",
+                  final_amount: 0
+                }
+              ]
+            }
+          ]);
         }
       }
     } catch (error) {
@@ -135,7 +176,6 @@ export default function Add() {
     try {
       const main = new Listing();
       const response = await main.categoryList();
-
       if (response.data?.data) {
         setCategories(response.data.data);
       } else {
@@ -151,7 +191,6 @@ export default function Add() {
     try {
       const main = new Listing();
       const response = await main.getSubcategorybyCategory(form?.category);
-
       if (response.data?.data) {
         setSubCategories(response.data.data);
       } else {
@@ -177,7 +216,7 @@ export default function Add() {
     try {
       const main = new Listing();
       const response = await main.getproductsubcategory(form?.subcategory);
-      console.log("response", response)
+      console.log("response", response);
       if (response.data?.data) {
         setSubSubCategories(response.data.data);
       } else {
@@ -235,7 +274,6 @@ export default function Add() {
   const handleVariantImages = (index, files) => {
     const fileArr = Array.from(files);
     const previews = fileArr.map(file => URL.createObjectURL(file));
-
     setVariants(prev =>
       prev.map((v, i) =>
         i === index
@@ -253,15 +291,11 @@ export default function Add() {
     setVariants(prev =>
       prev.map((v, i) => {
         if (i !== variantIndex) return v;
-
         const newImages = [...v.images];
         const newPreviews = [...v.previews];
-
         URL.revokeObjectURL(newPreviews[imageIndex]);
-
         newImages.splice(imageIndex, 1);
         newPreviews.splice(imageIndex, 1);
-
         return {
           ...v,
           images: newImages,
@@ -271,37 +305,80 @@ export default function Add() {
     );
   };
 
-  // Price Section Handlers
   const addPriceSection = () => {
     setPriceSections([
       ...priceSections,
       {
         title: "",
-        amount: "",
+        amount: "0",
         discount_amount: "10",
-        final_amount: 0
+        final_amount: 0,
+        sizes: [
+          {
+            title: "",
+            amount: "0",
+            discount_amount: "10",
+            final_amount: 0
+          }
+        ]
       }
     ]);
   };
 
   const removePriceSection = (index) => {
-    setPriceSections(priceSections.filter((_, i) => i !== index));
+    if (priceSections.length > 1) {
+      setPriceSections(priceSections.filter((_, i) => i !== index));
+    } else {
+      toast.error("At least one price section is required");
+    }
   };
 
   const updatePriceSection = (index, field, value) => {
     const updated = [...priceSections];
     updated[index][field] = value;
-    
-    // Auto-calculate final amount
-    if (field === 'amount' || field === 'discount_amount') {
-      const amount = parseFloat(updated[index].amount) || 0;
-      const discount = parseFloat(updated[index].discount_amount) || 10;
-      updated[index].final_amount = amount - (amount * discount) / 100;
-    }
-    
     setPriceSections(updated);
   };
 
+  const addSize = (sectionIndex) => {
+    const updated = [...priceSections];
+    updated[sectionIndex].sizes.push({
+      title: "",
+      amount: "0",
+      discount_amount: "10",
+      final_amount: 0
+    });
+    setPriceSections(updated);
+  };
+
+  const removeSize = (sectionIndex, sizeIndex) => {
+    const updated = [...priceSections];
+    if (updated[sectionIndex].sizes.length > 1) {
+      updated[sectionIndex].sizes.splice(sizeIndex, 1);
+      setPriceSections(updated);
+    } else {
+      updated[sectionIndex].sizes[0] = {
+        title: "",
+        amount: "0",
+        discount_amount: "10",
+        final_amount: 0
+      };
+      setPriceSections(updated);
+      toast.info("Size fields cleared. Add new size or fill in the values.");
+    }
+  };
+
+  const updateSize = (sectionIndex, sizeIndex, field, value) => {
+    const updated = [...priceSections];
+    updated[sectionIndex].sizes[sizeIndex][field] = value;
+    if (field === 'amount' || field === 'discount_amount') {
+      const amount = parseFloat(updated[sectionIndex].sizes[sizeIndex].amount) || 0;
+      const discount = parseFloat(updated[sectionIndex].sizes[sizeIndex].discount_amount) || 10;
+      updated[sectionIndex].sizes[sizeIndex].final_amount = amount - (amount * discount) / 100;
+    }
+    setPriceSections(updated);
+  };
+
+  // ========== FIXED handleSubmit ==========
   const handleSubmit = async (e) => {
     e.preventDefault();
     const selectedVariants = variants
@@ -323,16 +400,41 @@ export default function Add() {
       return;
     }
 
-    // Validate price sections
-    const validPriceSections = priceSections.filter(section => section.title && section.amount);
-    if (validPriceSections.length > 0) {
-      for (const section of validPriceSections) {
-        if (!section.title || !section.amount) {
-          toast.error("Each price section must have a title and amount");
-          return;
-        }
+    // Build price sections – now includes section even without sizes
+    const validPriceSections = [];
+    
+    for (const section of priceSections) {
+      const hasValidTitle = section.title && section.title.trim() !== '';
+      const amountNum = parseFloat(section.amount);
+      const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
+      
+      if (hasValidTitle && hasValidAmount) {
+        const validSizes = section.sizes
+          .filter(size => {
+            const hasSizeTitle = size.title && size.title.trim() !== '';
+            const sizeAmountNum = parseFloat(size.amount);
+            const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+            return hasSizeTitle && hasSizeAmount;
+          })
+          .map(size => ({
+            title: size.title.trim(),
+            amount: parseFloat(size.amount),
+            discount_amount: parseFloat(size.discount_amount) || 10,
+            final_amount: 0
+          }));
+        
+        // Always add section, even if validSizes is empty
+        validPriceSections.push({
+          title: section.title.trim(),
+          amount: parseFloat(section.amount),
+          discount_amount: parseFloat(section.discount_amount) || 10,
+          final_amount: 0,
+          sizes: validSizes  // can be []
+        });
       }
     }
+    
+    console.log("validPriceSections", validPriceSections);
 
     setLoading(true);
     try {
@@ -406,6 +508,7 @@ export default function Add() {
     }
   };
 
+  // ========== FIXED handleEdit ==========
   const handleEdit = async (e) => {
     e.preventDefault();
     
@@ -418,7 +521,37 @@ export default function Add() {
         images: images.length > 0 ? images : (existingImages || [])
       }));
 
-    const validPriceSections = priceSections.filter(section => section.title && section.amount);
+    const validPriceSections = [];
+    
+    for (const section of priceSections) {
+      const hasValidTitle = section.title && section.title.trim() !== '';
+      const amountNum = parseFloat(section.amount);
+      const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
+      
+      if (hasValidTitle && hasValidAmount) {
+        const validSizes = section.sizes
+          .filter(size => {
+            const hasSizeTitle = size.title && size.title.trim() !== '';
+            const sizeAmountNum = parseFloat(size.amount);
+            const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+            return hasSizeTitle && hasSizeAmount;
+          })
+          .map(size => ({
+            title: size.title.trim(),
+            amount: parseFloat(size.amount),
+            discount_amount: parseFloat(size.discount_amount) || 10,
+            final_amount: 0
+          }));
+        
+        validPriceSections.push({
+          title: section.title.trim(),
+          amount: parseFloat(section.amount),
+          discount_amount: parseFloat(section.discount_amount) || 10,
+          final_amount: 0,
+          sizes: validSizes
+        });
+      }
+    }
 
     setLoading(true);
     try {
@@ -440,7 +573,7 @@ export default function Add() {
           color,
           title,
           stock,
-          images: images.filter(img => typeof img === 'string') // Keep existing image URLs
+          images: images.filter(img => typeof img === 'string')
         }))
       ));
       fd.append("product_price_section", JSON.stringify(validPriceSections));
@@ -503,7 +636,6 @@ export default function Add() {
 
           {/* Stock & Price */}
           <div className="grid grid-cols-2 gap-4">
-          
             <input
               type="number"
               name="amount"
@@ -524,7 +656,7 @@ export default function Add() {
           </div>
 
           {/* Category / Subcategory */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <select
               name="category"
               value={form.category}
@@ -558,26 +690,9 @@ export default function Add() {
                 </option>
               ))}
             </select>
-
-            <select
-              name="subsubcategory"
-              value={form.subsubcategory}
-              onChange={handleChange}
-              disabled={!form.subcategory}
-              className={`w-full border border-gray-300 rounded-lg p-3 focus:ring-2 outline-none capitalize 
-                ${!form.subcategory ? "bg-gray-200 cursor-not-allowed" : "focus:ring-blue-400"}`}
-            >
-              <option value="" disabled>
-                {form.subcategory ? "Select Sub Sub Category" : "Select a subcategory first"}
-              </option>
-              {subSubCategories && subSubCategories?.map((cat) => (
-                <option key={cat?._id} value={cat?._id} className="text-black">
-                  {cat?.name}
-                </option>
-              ))}
-            </select>
           </div>
-  {/* Price Sections Component */}
+
+          {/* Price Sections */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
@@ -590,38 +705,93 @@ export default function Add() {
               </button>
             </div>
 
-            {priceSections.map((section, idx) => (
-              <div key={idx} className="border rounded-lg p-4 bg-gray-50">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {priceSections.map((section, sectionIdx) => (
+              <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
+                  {priceSections.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => removePriceSection(sectionIdx)}
+                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+                    >
+                      Remove Section
+                    </button>
+                  )}
+                </div>
+                
+                {/* Main Section Fields */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <input
                     type="text"
-                    placeholder="Section Title (e.g., Standard Pack)"
+                    placeholder="Section Title (e.g., King)"
                     value={section.title}
-                    onChange={(e) => updatePriceSection(idx, 'title', e.target.value)}
+                    onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
                     className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
                   />
                   <input
                     type="number"
-                    placeholder="Amount (₹)"
+                    placeholder="Section Amount (₹) – can be 0"
                     value={section.amount}
-                    onChange={(e) => updatePriceSection(idx, 'amount', e.target.value)}
+                    onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
                     className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                    min="0"
+                    step="0.01"
                   />
+                </div>
 
-                  
-                    {priceSections.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removePriceSection(idx)}
-                        className="w-full max-w-[50px] bg-red-600 text-white px-3 rounded-lg hover:bg-red-700"
-                      >
-                        ✕
-                      </button>
-                    )}
+                {/* Sizes Sub-section */}
+                <div className="border-t border-gray-200 pt-3 mt-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
+                    <button
+                      type="button"
+                      onClick={() => addSize(sectionIdx)}
+                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
+                    >
+                      + Add Size
+                    </button>
                   </div>
+                  
+                  {section.sizes.map((size, sizeIdx) => (
+                    <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
+                        {section.sizes.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeSize(sectionIdx, sizeIdx)}
+                            className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input
+                          type="text"
+                          placeholder="Size Title (e.g., Small)"
+                          value={size.title}
+                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
+                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                        />
+                        <input
+                          type="number"
+                          placeholder="Size Amount (₹) – can be 0"
+                          value={size.amount}
+                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
+                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                          min="0"
+                          step="0.01"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             ))}
           </div>
+
           {/* Material, Type, Terms */}
           <textarea
             name="material"
@@ -653,9 +823,7 @@ export default function Add() {
             required
           />
 
-        
-
-          {/* Color Variants Component */}
+          {/* Color Variants */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
             <h2 className="text-xl font-semibold text-gray-800">🎨 Color Variants</h2>
 
@@ -681,7 +849,6 @@ export default function Add() {
 
                 {v.selected && (
                   <div className="mt-4 pl-6 space-y-4">
-                    {/* Stock Input */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         Stock Quantity
@@ -696,7 +863,6 @@ export default function Add() {
                       />
                     </div>
 
-                    {/* File Upload */}
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         Upload Images
@@ -710,7 +876,6 @@ export default function Add() {
                       />
                     </div>
 
-                    {/* Image Preview */}
                     {v.previews.length > 0 && (
                       <div className="flex gap-3 flex-wrap mt-2">
                         {v.previews.map((src, idx) => (
@@ -733,7 +898,6 @@ export default function Add() {
                       </div>
                     )}
 
-                    {/* Existing Images Preview for Edit */}
                     {v.existingImages && v.existingImages.length > 0 && v.previews.length === 0 && (
                       <div className="flex gap-3 flex-wrap mt-2">
                         {v.existingImages.map((src, idx) => (
