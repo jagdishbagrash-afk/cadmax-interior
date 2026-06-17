@@ -45,7 +45,10 @@ export default function Edit() {
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Default amount set to "0" instead of empty string
+  // ---------- PRICE MODE ----------
+  const [priceMode, setPriceMode] = useState("single"); // "single" | "multiple"
+
+  // Price sections – default with one empty section and one empty size
   const [priceSections, setPriceSections] = useState([
     {
       title: "",
@@ -75,6 +78,38 @@ export default function Edit() {
     }))
   );
 
+  // ---------- HANDLE PRICE MODE CHANGE ----------
+  const handlePriceModeChange = (mode) => {
+    setPriceMode(mode);
+    if (mode === "single") {
+      // Reset price sections to default empty state
+      setPriceSections([
+        {
+          title: "",
+          amount: "0",
+          discount_amount: "10",
+          final_amount: 0,
+          sizes: [
+            {
+              title: "",
+              amount: "0",
+              discount_amount: "10",
+              final_amount: 0
+            }
+          ]
+        }
+      ]);
+    } else {
+      // mode === "multiple" – clear single price fields
+      setForm(prev => ({
+        ...prev,
+        amount: "",
+        discount_amount: ""
+      }));
+    }
+  };
+
+  // ---------- FETCH PRODUCT DATA ----------
   const fetchProduct = async () => {
     const res = await new Listing().getProductbyId(id);
     const data = res?.data?.data;
@@ -83,7 +118,7 @@ export default function Edit() {
     setForm({
       title: data.title,
       description: data.description,
-      amount: data.amount,
+      amount: data.amount || "",
       category: data.category?._id || "",
       subcategory: data.subcategory?._id || "",
       subsubcategory: data.subsubcategory?._id || "",
@@ -92,14 +127,17 @@ export default function Edit() {
       type: data.type,
       terms: data.terms,
       discount_amount: data.discount_amount || "",
+      stock: data.stock || "",
     });
 
     setImagePreview(data.image || "");
 
+    // Determine price mode based on existing data
     if (data.product_price_section && data.product_price_section.length > 0) {
+      setPriceMode("multiple");
+      // Load price sections
       const loadedSections = data.product_price_section.map(section => ({
         title: section.title || "",
-        // Keep existing numeric amount; if missing, fallback to "0"
         amount: section.amount !== undefined && section.amount !== null ? String(section.amount) : "0",
         discount_amount: section.discount_amount || "10",
         final_amount: section.final_amount || 0,
@@ -121,6 +159,8 @@ export default function Edit() {
       }));
       setPriceSections(loadedSections);
     } else {
+      setPriceMode("single");
+      // Reset sections to default empty
       setPriceSections([
         {
           title: "",
@@ -156,6 +196,7 @@ export default function Edit() {
     );
   };
 
+  // ---------- FETCH CATEGORIES ----------
   const fetchCategories = async () => {
     try {
       const main = new Listing();
@@ -209,6 +250,7 @@ export default function Edit() {
     });
   };
 
+  // ---------- VARIANT HANDLERS ----------
   const toggleVariant = (index) => {
     setVariants((prev) =>
       prev.map((v, i) => (i === index ? { ...v, selected: !v.selected } : v))
@@ -252,13 +294,13 @@ export default function Edit() {
       )
     );
 
-  // Price Section Handlers
+  // ---------- PRICE SECTION HANDLERS ----------
   const addPriceSection = () => {
     setPriceSections([
       ...priceSections,
       {
         title: "",
-        amount: "0",   // default to "0" so it's valid
+        amount: "0",
         discount_amount: "10",
         final_amount: 0,
         sizes: [
@@ -318,7 +360,7 @@ export default function Edit() {
         final_amount: 0
       };
       setPriceSections(updated);
-      toast.success("Size fields cleared. Add new size or fill in the values.");
+      toast.info("Size fields cleared. Add new size or fill in the values.");
     }
   };
 
@@ -335,6 +377,7 @@ export default function Edit() {
     setPriceSections(updated);
   };
 
+  // ---------- FETCH SUB-SUB CATEGORIES ----------
   const fetchSubSubCategories = async () => {
     try {
       const main = new Listing();
@@ -357,6 +400,7 @@ export default function Edit() {
     }
   }, [form?.subcategory]);
 
+  // ---------- HANDLE EDIT SUBMIT ----------
   const handleEdit = async (e) => {
     e.preventDefault();
     
@@ -372,79 +416,65 @@ export default function Edit() {
       return;
     }
 
-    // Build price sections – now amount will always be a number (string like "0" or "12000")
-    const validPriceSections = [];
-    let skippedSections = 0;
-    let skippedReasons = [];
-    
-    console.log("Current priceSections:", JSON.stringify(priceSections, null, 2));
-    
-    for (const section of priceSections) {
-      const hasValidTitle = section.title && section.title.trim() !== '';
-      // Amount is already a string; we check that it's not empty and is a valid number >= 0
-      const amountNum = parseFloat(section.amount);
-      const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-      
-      console.log(`Section: ${section.title}, Has title: ${hasValidTitle}, Has valid amount: ${hasValidAmount} (value: ${section.amount})`);
-      
-      if (hasValidTitle && hasValidAmount) {
-        const validSizes = section.sizes
-          .filter(size => {
-            const hasSizeTitle = size.title && size.title.trim() !== '';
-            const sizeAmountNum = parseFloat(size.amount);
-            const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-            return hasSizeTitle && hasSizeAmount;
-          })
-          .map(size => ({
-            title: size.title.trim(),
-            amount: parseFloat(size.amount),
-            discount_amount: parseFloat(size.discount_amount) || 10,
-            final_amount: 0
-          }));
+    // Build price sections only if in multiple mode
+    let validPriceSections = [];
+    if (priceMode === "multiple") {
+      for (const section of priceSections) {
+        const hasValidTitle = section.title && section.title.trim() !== '';
+        const amountNum = parseFloat(section.amount);
+        const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
         
-        validPriceSections.push({
-          title: section.title.trim(),
-          amount: parseFloat(section.amount),
-          discount_amount: parseFloat(section.discount_amount) || 10,
-          final_amount: 0,
-          sizes: validSizes
-        });
-        
-        console.log(`✅ Added section: ${section.title} with ${validSizes.length} valid sizes`);
-      } else {
-        skippedSections++;
-        let reason = `Section "${section.title || 'Untitled'}" skipped: `;
-        if (!hasValidTitle) reason += 'missing title. ';
-        if (!hasValidAmount) reason += 'amount is empty or invalid (must be a number >= 0).';
-        skippedReasons.push(reason);
-        console.warn(`❌ ${reason}`);
+        if (hasValidTitle && hasValidAmount) {
+          const validSizes = section.sizes
+            .filter(size => {
+              const hasSizeTitle = size.title && size.title.trim() !== '';
+              const sizeAmountNum = parseFloat(size.amount);
+              const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+              return hasSizeTitle && hasSizeAmount;
+            })
+            .map(size => ({
+              title: size.title.trim(),
+              amount: parseFloat(size.amount),
+              discount_amount: parseFloat(size.discount_amount) || 10,
+              final_amount: 0
+            }));
+          
+          validPriceSections.push({
+            title: section.title.trim(),
+            amount: parseFloat(section.amount),
+            discount_amount: parseFloat(section.discount_amount) || 10,
+            final_amount: 0,
+            sizes: validSizes
+          });
+        }
       }
     }
-    
-    if (skippedSections > 0) {
-      toast.warning(
-        `${skippedSections} price section(s) skipped. Please ensure each section has a title and a valid amount (number >= 0).`
-      );
-      console.warn('Skipped reasons:', skippedReasons);
-    }
-    
-    console.log("📤 Sending price sections:", JSON.stringify(validPriceSections, null, 2));
 
     setLoading(true);
     try {
       const fd = new FormData();
+      
+      // Append common fields
       fd.append("title", form.title);
       fd.append("description", form.description);
       fd.append("stock", form.stock || "0");
-      fd.append("amount", form.amount);
       fd.append("category", form.category);
       fd.append("subcategory", form.subcategory);
       fd.append("subsubcategory", form.subsubcategory || "");
       fd.append("dimensions", form.dimensions);
       fd.append("material", form.material);
       fd.append("type", form.type);
-      fd.append("discount_amount", form.discount_amount);
       fd.append("terms", form.terms);
+      
+      // Price related – based on mode
+      if (priceMode === "single") {
+        fd.append("amount", form.amount);
+        fd.append("discount_amount", form.discount_amount);
+        // Do NOT append product_price_section
+      } else {
+        fd.append("product_price_section", JSON.stringify(validPriceSections));
+        // Do NOT append amount/discount_amount
+      }
       
       fd.append(
         "variants",
@@ -457,8 +487,6 @@ export default function Edit() {
           }))
         )
       );
-      
-      fd.append("product_price_section", JSON.stringify(validPriceSections));
       
       selectedVariants.forEach(v =>
         v.newImages.forEach(img =>
@@ -486,6 +514,7 @@ export default function Edit() {
     }
   };
 
+  // ---------- RENDER ----------
   return (
     <AdminLayout page={"Product List"}>
       <div className="bg-white p-8 border border-blue-100">
@@ -512,15 +541,8 @@ export default function Edit() {
             required
           />
 
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              name="amount"
-              placeholder="Price (₹)"
-              value={form.amount}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            />
+          <div className="grid grid-cols-1 gap-4">
+            {/* Dimensions only – amount will be conditionally rendered below */}
             <input
               type="text"
               name="dimensions"
@@ -530,6 +552,7 @@ export default function Edit() {
               className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
               required
             />
+         
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -565,107 +588,155 @@ export default function Edit() {
             </select>
           </div>
 
-          {/* Price Sections */}
-          <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-lg font-semibold text-gray-800">💰 Price Sections</h2>
-              <button
-                type="button"
-                onClick={addPriceSection}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
-              >
-                + Add Section
-              </button>
+          {/* ---------- PRICE MODE RADIO BUTTONS ---------- */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="priceMode"
+                  value="single"
+                  checked={priceMode === 'single'}
+                  onChange={() => handlePriceModeChange('single')}
+                  className="w-4 h-4"
+                />
+                <span className="font-medium">Single Price</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="priceMode"
+                  value="multiple"
+                  checked={priceMode === 'multiple'}
+                  onChange={() => handlePriceModeChange('multiple')}
+                  className="w-4 h-4"
+                />
+                <span className="font-medium">Multiple Price (Sections)</span>
+              </label>
             </div>
+          </div>
 
-            {priceSections.length === 0 && (
-              <div className="text-center text-gray-500 py-4">
-                No price sections added. Click "Add Section" to create one.
+          {/* ---------- SINGLE PRICE INPUT ---------- */}
+          {priceMode === 'single' && (
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <input
+                type="number"
+                name="amount"
+                placeholder="Price (₹)"
+                value={form.amount}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+                min="0"
+                step="0.01"
+              />
+             
+            </div>
+          )}
+
+          {/* ---------- MULTIPLE PRICE SECTIONS ---------- */}
+          {priceMode === 'multiple' && (
+            <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold text-gray-800">💰 Price Sections</h2>
+                <button
+                  type="button"
+                  onClick={addPriceSection}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition text-sm"
+                >
+                  + Add Section
+                </button>
               </div>
-            )}
 
-            {priceSections.map((section, sectionIdx) => (
-              <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
-                  {priceSections.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removePriceSection(sectionIdx)}
-                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
-                    >
-                      Remove Section
-                    </button>
-                  )}
+              {priceSections.length === 0 && (
+                <div className="text-center text-gray-500 py-4">
+                  No price sections added. Click "Add Section" to create one.
                 </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Section Title (e.g., King)"
-                    value={section.title}
-                    onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
-                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Section Amount (₹) – can be 0"
-                    value={section.amount}
-                    onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
-                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
+              )}
 
-                <div className="border-t border-gray-200 pt-3 mt-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
-                    <button
-                      type="button"
-                      onClick={() => addSize(sectionIdx)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
-                    >
-                      + Add Size
-                    </button>
+              {priceSections.map((section, sectionIdx) => (
+                <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
+                    {priceSections.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePriceSection(sectionIdx)}
+                        className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+                      >
+                        Remove Section
+                      </button>
+                    )}
                   </div>
                   
-                  {section.sizes.map((size, sizeIdx) => (
-                    <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
-                        <button
-                          type="button"
-                          onClick={() => removeSize(sectionIdx, sizeIdx)}
-                          className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Size Title (e.g., Small)"
-                          value={size.title}
-                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
-                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Size Amount (₹) – can be 0"
-                          value={size.amount}
-                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
-                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Section Title (e.g., King)"
+                      value={section.title}
+                      onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
+                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Section Amount (₹) – can be 0"
+                      value={section.amount}
+                      onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
+                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  <div className="border-t border-gray-200 pt-3 mt-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
+                      <button
+                        type="button"
+                        onClick={() => addSize(sectionIdx)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
+                      >
+                        + Add Size
+                      </button>
                     </div>
-                  ))}
+                    
+                    {section.sizes.map((size, sizeIdx) => (
+                      <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
+                          <button
+                            type="button"
+                            onClick={() => removeSize(sectionIdx, sizeIdx)}
+                            className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="Size Title (e.g., Small)"
+                            value={size.title}
+                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
+                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                          />
+                          <input
+                            type="number"
+                            placeholder="Size Amount (₹) – can be 0"
+                            value={size.amount}
+                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
+                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
 
           <textarea
             name="material"

@@ -4,25 +4,16 @@ import React from "react";
 import { FiHeart } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import useWishlist from "@/hooks/useWishlist";
+import { getProductPrices } from "@/components/productPrices";
 
 export default function ProductCard({ item }) {
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const { toggleWishlist } = useWishlist();
   const isWishlisted = wishlistIds.includes(item?._id);
 
-  const displayPrice =
-    item?.final_amount > 0
-      ? item.final_amount
-      : item?.product_price_section?.[0]?.final_amount > 0
-        ? item.product_price_section[0].final_amount
-        : item?.product_price_section?.[0]?.amount > 0
-          ? item.product_price_section[0].amount
-          : item?.amount;
+  // Get prices using the helper
+  const { displayPrice, originalPrice } = getProductPrices(item);
 
-  const originalPrice =
-    item?.amount > 0
-      ? item.amount
-      : item?.product_price_section?.[0]?.amount || 0;
   const image =
     item?.variants?.find((v) => v.images?.length)?.images;
 
@@ -39,10 +30,8 @@ export default function ProductCard({ item }) {
     >
       {/* CARD */}
       <div className="bg-white overflow-hidden transition-all duration-300">
-
         {/* IMAGE */}
         <div className="relative w-full h-[280px] sm:h-[320px] md:h-[360px] lg:h-[450px] overflow-hidden bg-[#F8F8F8]">
-
           {/* WISHLIST BUTTON */}
           <button
             onClick={handleWishlistClick}
@@ -50,10 +39,11 @@ export default function ProductCard({ item }) {
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
             <FiHeart
-              className={`text-lg transition-all duration-200 ${isWishlisted
+              className={`text-lg transition-all duration-200 ${
+                isWishlisted
                   ? "fill-red-500 text-red-500"
                   : "text-gray-600 hover:text-red-400"
-                }`}
+              }`}
             />
           </button>
 
@@ -77,11 +67,7 @@ export default function ProductCard({ item }) {
 
           {/* Hover Image */}
           <img
-            src={
-              image?.[1] ||
-              image?.[0] ||
-              "/no-image.png"
-            }
+            src={image?.[1] || image?.[0] || "/no-image.png"}
             alt={item?.title}
             className="
               absolute inset-0
@@ -91,55 +77,28 @@ export default function ProductCard({ item }) {
               group-hover:opacity-100
             "
           />
-
         </div>
 
         {/* TEXT AREA */}
         <div className="bg-white pt-4 pb-2 relative z-10">
-
           {/* TITLE */}
-          <h3
-            className="
-              text-[13px] sm:text-sm
-              font-medium
-              text-[#262A33]
-              uppercase
-              tracking-wide
-              line-clamp-2
-            "
-          >
+          <h3 className="text-[13px] sm:text-sm font-medium text-[#262A33] uppercase tracking-wide line-clamp-2">
             {item?.title}
           </h3>
 
           {/* PRICE */}
           <div className="mt-2 flex items-center gap-2 flex-wrap">
-
-            {/* ✅ Final Price */}
-            <div className="mt-2 flex items-center gap-2 flex-wrap">
-              <p
-                className="
-      text-[18px] sm:text-[20px]
-      font-black
-      text-black
-      uppercase
-    "
-              >
-                ₹{formatPrice(displayPrice)}
-              </p>
-
-              {originalPrice > displayPrice && (
-                <span className="text-sm text-gray-400 line-through">
-                  ₹{formatPrice(originalPrice)}
-                </span>
-              )}
-            </div>
-
+            <p className="text-[18px] sm:text-[20px] font-black text-black uppercase">
+              ₹{formatPrice(displayPrice)}
+            </p>
+            {originalPrice > displayPrice && (
+              <span className="text-sm text-gray-400 line-through">
+                ₹{formatPrice(originalPrice)}
+              </span>
+            )}
           </div>
-
         </div>
-
       </div>
-
     </Link>
   );
 }

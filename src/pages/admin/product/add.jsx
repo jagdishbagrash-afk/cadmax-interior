@@ -6,7 +6,6 @@ import toast from "react-hot-toast";
 import { useRouter } from "next/router";
 
 export default function Add() {
-
   const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
     { name: "blue", hex: "#3b82f6" },
@@ -46,6 +45,9 @@ export default function Add() {
   const [imagePreview, setImagePreview] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // ---------- PRICE MODE ----------
+  const [priceMode, setPriceMode] = useState("single"); // "single" | "multiple"
+
   const [variants, setVariants] = useState(
     AVAILABLE_COLORS.map(c => ({
       color: c.name,
@@ -75,6 +77,38 @@ export default function Add() {
     }
   ]);
 
+  // ---------- HANDLE PRICE MODE CHANGE ----------
+  const handlePriceModeChange = (mode) => {
+    setPriceMode(mode);
+    if (mode === "single") {
+      // Reset price sections to default empty state
+      setPriceSections([
+        {
+          title: "",
+          amount: "0",
+          discount_amount: "10",
+          final_amount: 0,
+          sizes: [
+            {
+              title: "",
+              amount: "0",
+              discount_amount: "10",
+              final_amount: 0
+            }
+          ]
+        }
+      ]);
+    } else {
+      // mode === "multiple" – clear single price fields
+      setForm(prev => ({
+        ...prev,
+        amount: "",
+        discount_amount: "10"
+      }));
+    }
+  };
+
+  // ---------- FETCH DATA FOR EDIT ----------
   const fetchProductData = async () => {
     try {
       const main = new Listing();
@@ -98,6 +132,15 @@ export default function Add() {
         });
         setImagePreview(data.image || "");
         setImage(null);
+
+        // Determine price mode based on existing data
+        if (data.product_price_section && data.product_price_section.length > 0) {
+          setPriceMode("multiple");
+        } else if (data.amount !== undefined && data.amount !== null && data.amount !== "") {
+          setPriceMode("single");
+        } else {
+          setPriceMode("single"); // default
+        }
 
         if (data.variants && data.variants.length > 0) {
           const updatedVariants = AVAILABLE_COLORS.map(color => {
@@ -400,46 +443,46 @@ export default function Add() {
       return;
     }
 
-    // Build price sections – now includes section even without sizes
-    const validPriceSections = [];
-    
-    for (const section of priceSections) {
-      const hasValidTitle = section.title && section.title.trim() !== '';
-      const amountNum = parseFloat(section.amount);
-      const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-      
-      if (hasValidTitle && hasValidAmount) {
-        const validSizes = section.sizes
-          .filter(size => {
-            const hasSizeTitle = size.title && size.title.trim() !== '';
-            const sizeAmountNum = parseFloat(size.amount);
-            const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-            return hasSizeTitle && hasSizeAmount;
-          })
-          .map(size => ({
-            title: size.title.trim(),
-            amount: parseFloat(size.amount),
-            discount_amount: parseFloat(size.discount_amount) || 10,
-            final_amount: 0
-          }));
+    // Build price sections only if in multiple mode
+    let validPriceSections = [];
+    if (priceMode === "multiple") {
+      for (const section of priceSections) {
+        const hasValidTitle = section.title && section.title.trim() !== '';
+        const amountNum = parseFloat(section.amount);
+        const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
         
-        // Always add section, even if validSizes is empty
-        validPriceSections.push({
-          title: section.title.trim(),
-          amount: parseFloat(section.amount),
-          discount_amount: parseFloat(section.discount_amount) || 10,
-          final_amount: 0,
-          sizes: validSizes  // can be []
-        });
+        if (hasValidTitle && hasValidAmount) {
+          const validSizes = section.sizes
+            .filter(size => {
+              const hasSizeTitle = size.title && size.title.trim() !== '';
+              const sizeAmountNum = parseFloat(size.amount);
+              const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+              return hasSizeTitle && hasSizeAmount;
+            })
+            .map(size => ({
+              title: size.title.trim(),
+              amount: parseFloat(size.amount),
+              discount_amount: parseFloat(size.discount_amount) || 10,
+              final_amount: 0
+            }));
+          
+          validPriceSections.push({
+            title: section.title.trim(),
+            amount: parseFloat(section.amount),
+            discount_amount: parseFloat(section.discount_amount) || 10,
+            final_amount: 0,
+            sizes: validSizes  // can be []
+          });
+        }
       }
     }
-    
-    console.log("validPriceSections", validPriceSections);
 
     setLoading(true);
     try {
       const fd = new FormData();
       Object.entries(form).forEach(([key, value]) => {
+        // Skip amount if in multiple mode – we'll handle it separately
+        if (key === 'amount' && priceMode === 'multiple') return;
         fd.append(key, value);
       });
 
@@ -451,7 +494,15 @@ export default function Add() {
         }))
       ));
 
-      fd.append("product_price_section", JSON.stringify(validPriceSections));
+      if (priceMode === "multiple") {
+        fd.append("product_price_section", JSON.stringify(validPriceSections));
+        // Do not append amount
+      } else {
+        // Single price mode – append amount and discount
+        fd.append("amount", form.amount);
+        fd.append("discount_amount", form.discount_amount);
+        // Do not append product_price_section
+      }
 
       selectedVariants.forEach(v => {
         v.images.forEach(img => {
@@ -461,23 +512,11 @@ export default function Add() {
         });
       });
 
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock);
-      fd.append("amount", form.amount);
-      fd.append("discount_amount", form.discount_amount);
-      fd.append("category", form.category);
-      fd.append("subcategory", form.subcategory);
-      fd.append("subsubcategory", form.subsubcategory);
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("type", form.type);
-      fd.append("terms", form.terms);
-      
+      // Append main product image (if any)
       if (image instanceof File) {
         fd.append("image", image);
       }
-      
+
       const main = new Listing();
       const res = await main.productAdd(fd);
       if (res?.data?.status) {
@@ -521,53 +560,50 @@ export default function Add() {
         images: images.length > 0 ? images : (existingImages || [])
       }));
 
-    const validPriceSections = [];
-    
-    for (const section of priceSections) {
-      const hasValidTitle = section.title && section.title.trim() !== '';
-      const amountNum = parseFloat(section.amount);
-      const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-      
-      if (hasValidTitle && hasValidAmount) {
-        const validSizes = section.sizes
-          .filter(size => {
-            const hasSizeTitle = size.title && size.title.trim() !== '';
-            const sizeAmountNum = parseFloat(size.amount);
-            const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-            return hasSizeTitle && hasSizeAmount;
-          })
-          .map(size => ({
-            title: size.title.trim(),
-            amount: parseFloat(size.amount),
-            discount_amount: parseFloat(size.discount_amount) || 10,
-            final_amount: 0
-          }));
+    let validPriceSections = [];
+    if (priceMode === "multiple") {
+      for (const section of priceSections) {
+        const hasValidTitle = section.title && section.title.trim() !== '';
+        const amountNum = parseFloat(section.amount);
+        const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
         
-        validPriceSections.push({
-          title: section.title.trim(),
-          amount: parseFloat(section.amount),
-          discount_amount: parseFloat(section.discount_amount) || 10,
-          final_amount: 0,
-          sizes: validSizes
-        });
+        if (hasValidTitle && hasValidAmount) {
+          const validSizes = section.sizes
+            .filter(size => {
+              const hasSizeTitle = size.title && size.title.trim() !== '';
+              const sizeAmountNum = parseFloat(size.amount);
+              const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+              return hasSizeTitle && hasSizeAmount;
+            })
+            .map(size => ({
+              title: size.title.trim(),
+              amount: parseFloat(size.amount),
+              discount_amount: parseFloat(size.discount_amount) || 10,
+              final_amount: 0
+            }));
+          
+          validPriceSections.push({
+            title: section.title.trim(),
+            amount: parseFloat(section.amount),
+            discount_amount: parseFloat(section.discount_amount) || 10,
+            final_amount: 0,
+            sizes: validSizes
+          });
+        }
       }
     }
 
     setLoading(true);
     try {
       const fd = new FormData();
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock);
-      fd.append("amount", form.amount);
-      fd.append("discount_amount", form.discount_amount);
-      fd.append("category", form.category);
-      fd.append("subcategory", form.subcategory);
-      fd.append("subsubcategory", form.subsubcategory);
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("type", form.type);
-      fd.append("terms", form.terms);
+
+      // Append all form fields except amount if multiple mode
+      Object.entries(form).forEach(([key, value]) => {
+        if (key === 'amount' && priceMode === 'multiple') return;
+        fd.append(key, value);
+      });
+
+      // Variants
       fd.append("variants", JSON.stringify(
         selectedVariants.map(({ color, title, stock, images }) => ({
           color,
@@ -576,8 +612,15 @@ export default function Add() {
           images: images.filter(img => typeof img === 'string')
         }))
       ));
-      fd.append("product_price_section", JSON.stringify(validPriceSections));
-      
+
+      if (priceMode === "multiple") {
+        fd.append("product_price_section", JSON.stringify(validPriceSections));
+      } else {
+        fd.append("amount", form.amount);
+        fd.append("discount_amount", form.discount_amount);
+      }
+
+      // Variant images (files)
       selectedVariants.forEach(v => {
         v.images.forEach(img => {
           if (img instanceof File) {
@@ -585,11 +628,11 @@ export default function Add() {
           }
         });
       });
-      
+
       if (image instanceof File) {
         fd.append("image", image);
       }
-      
+
       const main = new Listing();
       const res = await main.editProduct(id, fd);
       if (res?.data?.status) {
@@ -634,26 +677,16 @@ export default function Add() {
             required
           />
 
-          {/* Stock & Price */}
-          <div className="grid grid-cols-2 gap-4">
-            <input
-              type="number"
-              name="amount"
-              placeholder="Price (₹)"
-              value={form.amount}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-            />
-            <input
-              type="text"
-              name="dimensions"
-              placeholder="Dimensions"
-              value={form.dimensions}
-              onChange={handleChange}
-              className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              required
-            />
-          </div>
+          {/* Dimensions */}
+          <input
+            type="text"
+            name="dimensions"
+            placeholder="Dimensions"
+            value={form.dimensions}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+            required
+          />
 
           {/* Category / Subcategory */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -692,108 +725,153 @@ export default function Add() {
             </select>
           </div>
 
-          {/* Price Sections */}
-          {form.amount && (
-  <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
-              <button
-                type="button"
-                onClick={addPriceSection}
-                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
-              >
-                + Add Section
-              </button>
+          {/* ---------- PRICE MODE RADIO BUTTONS ---------- */}
+          <div className="border rounded-lg p-4 bg-gray-50">
+            <div className="flex items-center gap-6">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="priceMode"
+                  value="single"
+                  checked={priceMode === 'single'}
+                  onChange={() => handlePriceModeChange('single')}
+                  className="w-4 h-4"
+                />
+                <span className="font-medium">Single Price</span>
+              </label>
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="priceMode"
+                  value="multiple"
+                  checked={priceMode === 'multiple'}
+                  onChange={() => handlePriceModeChange('multiple')}
+                  className="w-4 h-4"
+                />
+                <span className="font-medium">Multiple Price (Sections)</span>
+              </label>
             </div>
+          </div>
 
-            {priceSections.map((section, sectionIdx) => (
-              <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
-                <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
-                  {priceSections.length > 1 && (
-                    <button
-                      type="button"
-                      onClick={() => removePriceSection(sectionIdx)}
-                      className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
-                    >
-                      Remove Section
-                    </button>
-                  )}
-                </div>
-                
-                {/* Main Section Fields */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <input
-                    type="text"
-                    placeholder="Section Title (e.g., King)"
-                    value={section.title}
-                    onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
-                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                  />
-                  <input
-                    type="number"
-                    placeholder="Section Amount (₹) – can be 0"
-                    value={section.amount}
-                    onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
-                    className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
-                    min="0"
-                    step="0.01"
-                  />
-                </div>
+          {/* ---------- SINGLE PRICE INPUT ---------- */}
+          {priceMode === 'single' && (
+            <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <input
+                type="number"
+                name="amount"
+                placeholder="Price (₹)"
+                value={form.amount}
+                onChange={handleChange}
+                className="border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                required
+                min="0"
+                step="0.01"
+              />
+              
+            </div>
+          )}
 
-                {/* Sizes Sub-section */}
-                <div className="border-t border-gray-200 pt-3 mt-2">
-                  <div className="flex justify-between items-center mb-2">
-                    <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
-                    <button
-                      type="button"
-                      onClick={() => addSize(sectionIdx)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
-                    >
-                      + Add Size
-                    </button>
+          {/* ---------- MULTIPLE PRICE SECTIONS ---------- */}
+          {priceMode === 'multiple' && (
+            <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-semibold text-gray-800">💰 Price Sections</h2>
+                <button
+                  type="button"
+                  onClick={addPriceSection}
+                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                >
+                  + Add Section
+                </button>
+              </div>
+
+              {priceSections.map((section, sectionIdx) => (
+                <div key={sectionIdx} className="border rounded-lg p-4 bg-gray-50">
+                  <div className="flex justify-between items-center mb-3">
+                    <h3 className="font-medium text-gray-700">Section #{sectionIdx + 1}</h3>
+                    {priceSections.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removePriceSection(sectionIdx)}
+                        className="bg-red-600 text-white px-3 py-1 rounded-lg hover:bg-red-700 text-sm"
+                      >
+                        Remove Section
+                      </button>
+                    )}
                   </div>
                   
-                  {section.sizes.map((size, sizeIdx) => (
-                    <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
-                        {section.sizes.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => removeSize(sectionIdx, sizeIdx)}
-                            className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
-                          >
-                            Remove
-                          </button>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                        <input
-                          type="text"
-                          placeholder="Size Title (e.g., Small)"
-                          value={size.title}
-                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
-                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                        />
-                        <input
-                          type="number"
-                          placeholder="Size Amount (₹) – can be 0"
-                          value={size.amount}
-                          onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
-                          className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
-                          min="0"
-                          step="0.01"
-                        />
-                      </div>
+                  {/* Main Section Fields */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <input
+                      type="text"
+                      placeholder="Section Title (e.g., King)"
+                      value={section.title}
+                      onChange={(e) => updatePriceSection(sectionIdx, 'title', e.target.value)}
+                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                    <input
+                      type="number"
+                      placeholder="Section Amount (₹) – can be 0"
+                      value={section.amount}
+                      onChange={(e) => updatePriceSection(sectionIdx, 'amount', e.target.value)}
+                      className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none"
+                      min="0"
+                      step="0.01"
+                    />
+                  </div>
+
+                  {/* Sizes Sub-section */}
+                  <div className="border-t border-gray-200 pt-3 mt-2">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-sm font-medium text-gray-600">Sizes</h4>
+                      <button
+                        type="button"
+                        onClick={() => addSize(sectionIdx)}
+                        className="bg-blue-600 text-white px-3 py-1 rounded-lg hover:bg-blue-700 text-sm"
+                      >
+                        + Add Size
+                      </button>
                     </div>
-                  ))}
+                    
+                    {section.sizes.map((size, sizeIdx) => (
+                      <div key={sizeIdx} className="border border-gray-300 rounded-lg p-3 mb-2 bg-white">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-xs font-medium text-gray-500">Size #{sizeIdx + 1}</span>
+                          {section.sizes.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeSize(sectionIdx, sizeIdx)}
+                              className="bg-red-500 text-white px-2 py-0.5 rounded hover:bg-red-600 text-xs"
+                            >
+                              Remove
+                            </button>
+                          )}
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <input
+                            type="text"
+                            placeholder="Size Title (e.g., Small)"
+                            value={size.title}
+                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'title', e.target.value)}
+                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                          />
+                          <input
+                            type="number"
+                            placeholder="Size Amount (₹) – can be 0"
+                            value={size.amount}
+                            onChange={(e) => updateSize(sectionIdx, sizeIdx, 'amount', e.target.value)}
+                            className="border rounded-lg p-2 focus:ring-2 focus:ring-blue-400 outline-none text-sm"
+                            min="0"
+                            step="0.01"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
           )}
-        
 
           {/* Material, Type, Terms */}
           <textarea
