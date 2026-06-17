@@ -728,7 +728,7 @@ export default function Index() {
                 {shouldShowPriceSections && (
                   <div className="mt-8">
                     <h3 className="text-sm font-semibold text-black mb-4">
-                      Select Price Section:
+                      Select Size Section:
                     </h3>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
   {ProductDetails?.product_price_section?.map((section, idx) => {
@@ -766,7 +766,7 @@ export default function Index() {
                     {selectedPriceSection?.sizes?.length > 0 && (
                       <div className="mt-4">
                         <h4 className="text-sm font-semibold text-black mb-3">
-                          Select Size:
+                          Select Type:
                         </h4>
                         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                           {selectedPriceSection.sizes.map((size, idx) => {
