@@ -709,7 +709,7 @@ export default function Index() {
                     </span>
                   )}
 
-                  
+
 
                   <span className="text-sm text-[#6B7280]">
                     Inclusive of all taxes
@@ -725,78 +725,76 @@ export default function Index() {
                 {/* =====================================
               PRICE SECTIONS WITH SIZES
           ===================================== */}
-                {shouldShowPriceSections && (
-                  <div className="mt-8">
-                    <h3 className="text-sm font-semibold text-black mb-4">
-                      Select Size Section:
-                    </h3>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-  {ProductDetails?.product_price_section?.map((section, idx) => {
-    const isActive = selectedPriceSection?.title === section?.title;
+                <div className="mt-8">
+                  <h3 className="text-sm font-semibold text-black mb-4">
+                    {ProductDetails?.label_category}
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                    {ProductDetails?.product_price_section?.map((section, idx) => {
+                      const isActive = selectedPriceSection?.title === section?.title;
 
-    return (
-      <div
-        key={idx}
-        onClick={() => {
-          setSelectedPriceSection(section);
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => {
+                            setSelectedPriceSection(section);
 
-          if (section?.sizes?.length > 0) {
-            setSelectedSize(section.sizes[0]);
-          } else {
-            setSelectedSize(null);
-          }
-        }}
-        className={`
+                            if (section?.sizes?.length > 0) {
+                              setSelectedSize(section.sizes[0]);
+                            } else {
+                              setSelectedSize(null);
+                            }
+                          }}
+                          className={`
           rounded-lg px-3 py-2 border cursor-pointer transition-all duration-200
           ${isActive
-            ? "border-black bg-gray-50 shadow-sm"
-            : "border-gray-200 hover:border-gray-300"
-          }
+                              ? "border-black bg-gray-50 shadow-sm"
+                              : "border-gray-200 hover:border-gray-300"
+                            }
         `}
-      >
-        <h3 className="font-medium text-sm capitalize text-center">
-          {section?.title}
-        </h3>
-      </div>
-    );
-  })}
-</div>
+                        >
+                          <h3 className="font-medium text-sm capitalize text-center">
+                            {section?.title}
+                          </h3>
+                        </div>
+                      );
+                    })}
+                  </div>
 
-                    {/* Sizes within selected section */}
-                    {selectedPriceSection?.sizes?.length > 0 && (
-                      <div className="mt-4">
-                        <h4 className="text-sm font-semibold text-black mb-3">
-                          Select Type:
-                        </h4>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                          {selectedPriceSection.sizes.map((size, idx) => {
-                            const isSizeActive = selectedSize?.title === size?.title;
-                            return (
-                              <div
-                                key={idx}
-                                onClick={() => setSelectedSize(size)}
-                                className={`
+                  {/* Sizes within selected section */}
+                  {selectedPriceSection?.sizes?.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="text-sm font-semibold text-black mb-3">
+                        {ProductDetails?.label_size}
+                      </h4>
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {selectedPriceSection.sizes.map((size, idx) => {
+                          const isSizeActive = selectedSize?.title === size?.title;
+                          return (
+                            <div
+                              key={idx}
+                              onClick={() => setSelectedSize(size)}
+                              className={`
                                   rounded-xl p-3 border-2 cursor-pointer transition-all duration-300
                                   ${isSizeActive
-                                    ? "border-black bg-gray-50 shadow-lg"
-                                    : "border-gray-200 hover:border-gray-300"
-                                  }
+                                  ? "border-black bg-gray-50 shadow-lg"
+                                  : "border-gray-200 hover:border-gray-300"
+                                }
                                 `}
-                              >
-                                <div className="text-center">
-                                  <p className="font-semibold text-sm capitalize">
-                                    {size?.title}
-                                  </p>
+                            >
+                              <div className="text-center">
+                                <p className="font-semibold text-sm capitalize">
+                                  {size?.title}
+                                </p>
 
-                                </div>
                               </div>
-                            );
-                          })}
-                        </div>
+                            </div>
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-                )}
+                    </div>
+                  )}
+                </div>
 
                 {/* =====================================
               VARIANTS
