@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { FiUser, FiShoppingBag, FiSearch, FiHeart, FiMapPin, FiSettings, FiLogOut } from "react-icons/fi";
+import { useDispatch, useSelector } from "react-redux";
+import { clearWishlist } from "@/redux/wishlistSlice";
 import MegaMenu from "./MegaMenu";
 import { useRole } from "@/context/RoleContext";
 import { useRouter } from "next/router";
-import { useSelector } from "react-redux";
 import Image from "next/image";
 import VendorMenu from "./VendorMenu";
 import { HiOutlineMenu, HiOutlineX } from "react-icons/hi";
@@ -93,6 +94,7 @@ export default function Header() {
   /* CART */
   const wishlistCount = useSelector((state) => state.wishlist.count);
 
+  const dispatch = useDispatch();
   const [record, setRecord] = useState([]);
 
   useEffect(() => {
@@ -107,6 +109,8 @@ export default function Header() {
   /* LOGOUT */
   const handleLogout = () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("wishlistIds");
+    dispatch(clearWishlist());
     toast.success("Logout Successfully");
     setUser(null);
     setDropdownOpen(false);

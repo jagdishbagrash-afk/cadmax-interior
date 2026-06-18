@@ -560,7 +560,7 @@ export default function Index() {
   return (
     <Layout>
       <div className="w-full bg-white">
-        <div className="container max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8 py-4 md:py-8 lg:py-12">
+        <div className="container max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8 py-1 md:py-2 lg:py-4">
 
           {/* BREADCRUMB */}
           <p className="text-[11px] sm:text-xs md:text-sm text-[#6B7280] uppercase tracking-[2px] mb-5 md:mb-8">
@@ -574,9 +574,9 @@ export default function Index() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 xl:gap-14">
 
             {/* =====================================
-          LEFT SIDE - PRODUCT GALLERY
+          LEFT SIDE - PRODUCT GALLERY (STICKY)
       ===================================== */}
-            <div className="w-full">
+            <div className="w-full lg:sticky lg:top-24 lg:self-start">
 
               {/* MOBILE + TABLET */}
               <div className="block lg:hidden">
@@ -586,7 +586,7 @@ export default function Index() {
                   <img
                     src={selectedVariant?.images?.[currentIndex]}
                     alt="Product"
-                    className="w-full h-full object-contain p-4 sm:p-6"
+                    className="w-full h-full object-cover p-0"
                   />
                 </div>
 
@@ -614,7 +614,7 @@ export default function Index() {
                           src={img}
                           alt="thumb"
                           fill
-                          className="object-contain p-2"
+                          className="object-cover p-0"
                         />
                       </div>
                     </SwiperSlide>
@@ -653,7 +653,7 @@ export default function Index() {
                             src={img}
                             alt="thumb"
                             fill
-                            className="object-cover"
+                            className="object-cover p-0"
                           />
                         </div>
                       </SwiperSlide>
@@ -669,7 +669,7 @@ export default function Index() {
                         Out Of Stock
                       </div>
                     )}
-                    <div className="absolute inset-0 p-2">
+                    <div className="absolute inset-0">
                       <CustomZoomOnHover
                         imageSrc={selectedVariant?.images?.[currentIndex]}
                         alt="Product"
@@ -682,10 +682,10 @@ export default function Index() {
             </div>
 
             {/* =====================================
-          RIGHT SIDE - PRODUCT INFO
+          RIGHT SIDE - PRODUCT INFO (SCROLLABLE)
       ===================================== */}
             <div className="w-full">
-              <div className="lg:sticky lg:top-24">
+              <div>
 
                 {/* TITLE */}
                 <h1 className="text-[26px] sm:text-[32px] xl:text-[42px] leading-tight font-black uppercase text-black">
