@@ -476,9 +476,12 @@ export default function Edit() {
       if (priceMode === "single") {
         fd.append("amount", form.amount);
         fd.append("discount_amount", form.discount_amount);
+        
         // Do NOT append product_price_section
       } else {
         fd.append("product_price_section", JSON.stringify(validPriceSections));
+         fd.append("amount",0);
+        fd.append("discount_amount", 0);
         // Do NOT append amount/discount_amount
       }
 
