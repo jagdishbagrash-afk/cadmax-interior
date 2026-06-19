@@ -61,11 +61,15 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5, onShowZoom, onHideZ
   };
 
   return (
-    <>
-      {/* Main Image */}
+    <div className="relative w-full" ref={containerRef}>
       <div
-        ref={containerRef}
-        className="relative w-full h-full overflow-hidden cursor-crosshair"
+        className="
+    relative w-full
+    aspect-[4/5]
+    cursor-crosshair
+    flex items-center justify-center
+    overflow-hidden
+  "
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
