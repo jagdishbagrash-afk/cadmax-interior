@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../common/Layout";
 import ProductImage from "../../../Assets/Images/ProductDetail.png";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { FiTruck, FiHeart, FiShare2 } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
@@ -36,6 +37,7 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5, onShowZoom, onHideZ
     if (!containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
@@ -59,15 +61,11 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5, onShowZoom, onHideZ
   };
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <>
+      {/* Main Image */}
       <div
-        className="
-    relative w-full
-    aspect-[4/5]
-    cursor-crosshair
-    flex items-center justify-center
-    overflow-hidden
-  "
+        ref={containerRef}
+        className="relative w-full h-full overflow-hidden cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -521,70 +519,7 @@ export default function Index() {
     }
   };
 
-  const GalleryModal = () => {
-    return (
-      <div className="fixed inset-0 z-[9999999] bg-black flex items-center justify-center">
-        <div
-          onClick={handleClose}
-          className="fixed top-2.5 right-2.5 sm:top-7 sm:right-7 cursor-pointer text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="w-10 h-10"
-            fill="currentColor"
-          >
-            <path d="m6.4 18.308l-.708-.708l5.6-5.6l-5.6-5.6l.708-.708l5.6 5.6l5.6-5.6l.708.708l-5.6 5.6l5.6 5.6l-.708.708l-5.6-5.6z" />
-          </svg>
-        </div>
-        <div className="flex items-center justify-center w-full h-full px-4">
-          <button
-            onClick={goToPrevious}
-            className="text-white p-2 hover:bg-white/10 rounded-full transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
-          </button>
-          <img
-            src={currentImage || ""}
-            alt="image"
-            className="max-h-full max-w-full object-contain mx-4"
-          />
-          <button
-            onClick={goToNext}
-            className="text-white p-2 hover:bg-white/10 rounded-full transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    );
-  };
+ 
 
   const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   const currentPriceData = getCurrentPrice();
