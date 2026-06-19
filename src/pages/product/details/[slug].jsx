@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../common/Layout";
 import ProductImage from "../../../Assets/Images/ProductDetail.png";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { FiTruck, FiHeart } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
@@ -27,38 +28,42 @@ import Link from "next/link";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
-  const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0, show: false });
-  const imageRef = React.useRef(null);
+  const [zoomPosition, setZoomPosition] = useState({
+    x: 50,
+    y: 50,
+    show: false,
+  });
+
   const containerRef = React.useRef(null);
 
   const handleMouseMove = (e) => {
     if (!containerRef.current) return;
 
     const rect = containerRef.current.getBoundingClientRect();
+
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
     setZoomPosition({
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
-      show: true
+      show: true,
     });
   };
 
   const handleMouseLeave = () => {
-    setZoomPosition({ ...zoomPosition, show: false });
+    setZoomPosition((prev) => ({
+      ...prev,
+      show: false,
+    }));
   };
 
   return (
-    <div className="relative w-full" ref={containerRef}>
+    <>
+      {/* Main Image */}
       <div
-        className="
-    relative w-full
-    aspect-[4/5]
-    cursor-crosshair
-    flex items-center justify-center
-    overflow-hidden
-  "
+        ref={containerRef}
+        className="relative w-full h-full overflow-hidden cursor-crosshair"
         onMouseMove={handleMouseMove}
         onMouseLeave={handleMouseLeave}
       >
@@ -69,24 +74,44 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
         />
       </div>
 
-      {/* Zoom Preview Window */}
-      {zoomPosition.show && (
-        <div
-          className="fixed top-24 right-80 w-[450px] h-[550px] bg-white border rounded-lg shadow-2xl z-[99999] hidden lg:block overflow-hidden"
-        >
+      {/* Zoom Preview */}
+      {typeof window !== "undefined" &&
+        zoomPosition.show &&
+        createPortal(
           <div
-            className="w-full h-full bg-no-repeat"
+            className="
+              fixed
+              top-20
+              right-[150]
+              w-[500px]
+              h-[600px]
+              bg-white
+              border
+              border-gray-200
+              rounded-xl
+              shadow-2xl
+              overflow-hidden
+              hidden
+              xl:block
+            "
             style={{
-              backgroundImage: `url(${imageSrc})`,
-              backgroundSize: `${zoomScale * 100}%`,
-              backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: '#f5f5f5'
+              zIndex: 999999999,
             }}
-          />
-        </div>
-      )}
-    </div>
+          >
+            <div
+              className="w-full h-full bg-no-repeat"
+              style={{
+                backgroundImage: `url(${imageSrc})`,
+                backgroundSize: `${zoomScale * 100}%`,
+                backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                backgroundRepeat: "no-repeat",
+                backgroundColor: "#f5f5f5",
+              }}
+            />
+          </div>,
+          document.body
+        )}
+    </>
   );
 };
 
@@ -484,70 +509,7 @@ export default function Index() {
     }
   };
 
-  const GalleryModal = () => {
-    return (
-      <div className="fixed inset-0 z-[9999999] bg-black flex items-center justify-center">
-        <div
-          onClick={handleClose}
-          className="fixed top-2.5 right-2.5 sm:top-7 sm:right-7 cursor-pointer text-white"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            className="w-10 h-10"
-            fill="currentColor"
-          >
-            <path d="m6.4 18.308l-.708-.708l5.6-5.6l-5.6-5.6l.708-.708l5.6 5.6l5.6-5.6l.708.708l-5.6 5.6l5.6 5.6l-.708.708l-5.6-5.6z" />
-          </svg>
-        </div>
-        <div className="flex items-center justify-center w-full h-full px-4">
-          <button
-            onClick={goToPrevious}
-            className="text-white p-2 hover:bg-white/10 rounded-full transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5 8.25 12l7.5-7.5"
-              />
-            </svg>
-          </button>
-          <img
-            src={currentImage || ""}
-            alt="image"
-            className="max-h-full max-w-full object-contain mx-4"
-          />
-          <button
-            onClick={goToNext}
-            className="text-white p-2 hover:bg-white/10 rounded-full transition"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="w-6 h-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="m8.25 4.5 7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </div>
-      </div>
-    );
-  };
+ 
 
   const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   const currentPriceData = getCurrentPrice();
@@ -663,20 +625,19 @@ export default function Index() {
 
                 {/* MAIN IMAGE */}
                 <div className="flex-1">
-                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
-                    {isOutOfStock && (
-                      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
-                        Out Of Stock
-                      </div>
-                    )}
-                    <div className="absolute inset-0">
-                      <CustomZoomOnHover
-                        imageSrc={selectedVariant?.images?.[currentIndex]}
-                        alt="Product"
-                        zoomScale={2.5}
-                      />
-                    </div>
-                  </div>
+               <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
+  {isOutOfStock && (
+    <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
+      Out Of Stock
+    </div>
+  )}
+
+  <CustomZoomOnHover
+    imageSrc={selectedVariant?.images?.[currentIndex]}
+    alt="Product"
+    zoomScale={2.5}
+  />
+</div>
                 </div>
               </div>
             </div>
