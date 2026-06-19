@@ -345,14 +345,43 @@ export default function AdminReviews() {
 
         {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-6">
-            <button onClick={() => setCurrentPage((p) => Math.max(1, p - 1))} disabled={!pagination.hasPrevPage} className="px-3 py-1.5 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
-              Previous
-            </button>
-            <span className="text-sm text-gray-600">Page {pagination.page} of {pagination.totalPages}</span>
-            <button onClick={() => setCurrentPage((p) => p + 1)} disabled={!pagination.hasNextPage} className="px-3 py-1.5 rounded-lg text-sm bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed">
-              Next
-            </button>
+          <div className="flex items-center justify-between px-5 py-4 border-t mt-6">
+            <p className="text-sm text-gray-500">
+              Showing {(pagination.page - 1) * pagination.limit + 1} to{" "}
+              {Math.min(pagination.page * pagination.limit, pagination.totalDocs)} of{" "}
+              {pagination.totalDocs} reviews
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={!pagination.hasPrevPage}
+                className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+              >
+                <FaChevronLeft size={14} />
+              </button>
+              {Array.from({ length: pagination.totalPages }, (_, i) => i + 1)
+                .slice(Math.max(pagination.page - 3, 0), Math.min(pagination.page + 2, pagination.totalPages))
+                .map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                      pagination.page === page
+                        ? "bg-blue-600 text-white"
+                        : "border hover:bg-gray-100"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+              <button
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={!pagination.hasNextPage}
+                className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+              >
+                <FaChevronRight size={14} />
+              </button>
+            </div>
           </div>
         )}
       </div>

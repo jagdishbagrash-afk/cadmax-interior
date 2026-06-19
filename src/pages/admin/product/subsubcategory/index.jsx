@@ -8,11 +8,16 @@ import dataimage from "../../../../Assets/Images/c1.jpg"
 import toast from "react-hot-toast";
 import BlockUnblock from "../../common/BlockUnblock";
 import AddSubSubCategory from "./AddSubSubCategory";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
   const [deletingId, setDeletingId] = useState(null);
   const [search, setSearch] = useState("");
+
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const fetchData = async () => {
     try {
@@ -35,6 +40,14 @@ export default function Index() {
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase())
   );
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   // Frontend API call
   const handleDeleteproductsubsubcategory = async (id) => {
@@ -121,8 +134,8 @@ export default function Index() {
 
               {/* Body */}
               <tbody className="bg-white divide-y divide-gray-100">
-                {filteredData.length > 0 ? (
-                  filteredData?.map((item) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData?.map((item) => (
                     <tr
                       key={item._id}
                       className={`transition
@@ -207,6 +220,48 @@ export default function Index() {
               </tbody>
             </table>
           </div>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4 border-t flex-wrap gap-3">
+              <p className="text-sm text-gray-500">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
+                {filteredData.length} entries
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronLeft size={20} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages))
+                  .map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-blue-600 text-white"
+                          : "border hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

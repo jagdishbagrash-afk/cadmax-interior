@@ -10,15 +10,15 @@ export const getProductPrices = (product) => {
 
   // Otherwise, scan all product_price_section entries
   const sections = product.product_price_section || [];
-  let bestFinal = Infinity;
+  let bestFinal = 0;
   let bestOriginal = 0;
 
   for (const section of sections) {
-    // If the section has sizes, use the lowest price among them
+    // If the section has sizes, use the highest price among them
     if (section.sizes && section.sizes.length > 0) {
       for (const size of section.sizes) {
         const final = size.final_amount || size.amount || 0;
-        if (final > 0 && final < bestFinal) {
+        if (final > 0 && final > bestFinal) {
           bestFinal = final;
           bestOriginal = size.amount || section.amount || 0;
         }
@@ -26,7 +26,7 @@ export const getProductPrices = (product) => {
     } else {
       // No sizes – use the section's own price
       const final = section.final_amount || section.amount || 0;
-      if (final > 0 && final < bestFinal) {
+      if (final > 0 && final > bestFinal) {
         bestFinal = final;
         bestOriginal = section.amount || 0;
       }
@@ -34,7 +34,7 @@ export const getProductPrices = (product) => {
   }
 
   // Fallback to top-level amount if nothing found
-  if (bestFinal === Infinity) {
+  if (bestFinal === 0) {
     bestFinal = product.amount || 0;
     bestOriginal = product.amount || 0;
   }

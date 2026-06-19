@@ -6,11 +6,15 @@ import dataimage from "../../../../Assets/Images/c1.jpg";
 import AdminLayout from "../../common/AdminLayout";
 import BlockUnblock from "../../common/BlockUnblock";
 import Link from "next/link";
-import { MdEdit } from "react-icons/md";
+import { MdEdit, MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
   const [search, setSearch] = useState("");
+
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const fetchData = async () => {
     try {
@@ -40,6 +44,14 @@ export default function Index() {
       item?.ServicesType?.title?.toLowerCase().includes(query)
     );
   });
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search]);
 
   return (
     <AdminLayout page={"Concept"}>
@@ -115,8 +127,8 @@ export default function Index() {
               </thead>
 
               <tbody>
-                {filteredData.length > 0 ? (
-                  filteredData.map((item) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item) => (
                     <tr
                       key={item?._id}
                       className={`border-t hover:bg-gray-50 transition ${
@@ -185,6 +197,48 @@ export default function Index() {
               </tbody>
             </table>
           </div>
+
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4 border-t flex-wrap gap-3">
+              <p className="text-sm text-gray-500">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(startIndex + itemsPerPage, filteredData.length)} of{" "}
+                {filteredData.length} entries
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronLeft size={20} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages))
+                  .map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-black text-white"
+                          : "border hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

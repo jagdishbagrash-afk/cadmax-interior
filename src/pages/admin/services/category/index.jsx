@@ -6,9 +6,14 @@ import CategoryAdd from "./CategoryAdd";
 import Listing from "@/pages/api/Listing";
 import BlockUnblock from "../../common/BlockUnblock";
 import dataimage from "../../../../Assets/Images/c1.jpg"
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 
 export default function Index() {
   const [data, setData] = useState([]);
+
+  // PAGINATION
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const fetchData = async () => {
     try {
@@ -25,6 +30,10 @@ export default function Index() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedData = data.slice(startIndex, startIndex + itemsPerPage);
 
   return (
     <AdminLayout page={"Concept Vendor Sub Category List"}>
@@ -66,8 +75,8 @@ export default function Index() {
               </thead>
 
               <tbody className="bg-white divide-y divide-gray-100">
-                {data.length > 0 ? (
-                  data.map((item) => (
+                {paginatedData.length > 0 ? (
+                  paginatedData.map((item) => (
                     <tr
                       key={item?._id}
                       className={`transition hover:bg-gray-50 ${item?.deleted_at ? "opacity-50" : ""
@@ -124,6 +133,47 @@ export default function Index() {
             </table>
           </div>
 
+          {/* PAGINATION */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between px-5 py-4 border-t flex-wrap gap-3">
+              <p className="text-sm text-gray-500">
+                Showing {startIndex + 1} to{" "}
+                {Math.min(startIndex + itemsPerPage, data.length)} of{" "}
+                {data.length} entries
+              </p>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronLeft size={20} />
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages))
+                  .map((page) => (
+                    <button
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                        currentPage === page
+                          ? "bg-black text-white"
+                          : "border hover:bg-gray-100"
+                      }`}
+                    >
+                      {page}
+                    </button>
+                  ))}
+                <button
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                  className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                >
+                  <MdChevronRight size={20} />
+                </button>
+              </div>
+            </div>
+          )}
 
         </div>
       </div>

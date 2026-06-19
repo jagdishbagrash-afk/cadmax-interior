@@ -1,9 +1,10 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 import { FaHome } from "react-icons/fa";
+import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import BlockUnblock from "../common/BlockUnblock";
 
 export default function Index() {
@@ -11,6 +12,10 @@ export default function Index() {
     const [filteredData, setFilteredData] = useState([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
+
+    // PAGINATION
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 15;
 
     const fetchData = async () => {
         try {
@@ -38,7 +43,13 @@ export default function Index() {
             item.email?.toLowerCase().includes(search.toLowerCase())
         );
         setFilteredData(result);
+        setCurrentPage(1);
     }, [search, data]);
+
+    // PAGINATION LOGIC
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedData = filteredData.slice(startIndex, startIndex + itemsPerPage);
 
     return (
         <AdminLayout page={"User Listing"}>
@@ -90,10 +101,10 @@ export default function Index() {
                                 )}
 
                                 {/* DATA */}
-                                {!loading && filteredData.length > 0 && filteredData.map((item, index) => (
+                                {!loading && paginatedData.length > 0 && paginatedData.map((item, index) => (
                                     <tr key={item._id} className="hover:bg-gray-50 transition">
 
-                                        <td className="px-4 py-3 font-semibold">{index + 1}</td>
+                                        <td className="px-4 py-3 font-semibold">{startIndex + index + 1}</td>
 
                                         <td className="px-4 py-3">
                                             <img
@@ -159,6 +170,46 @@ export default function Index() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* PAGINATION */}
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 mt-0">
+                            <p className="text-sm text-gray-500">
+                                Showing {startIndex + 1} to {Math.min(startIndex + itemsPerPage, filteredData.length)} of {filteredData.length} users
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                    className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                                >
+                                    <MdChevronLeft size={20} />
+                                </button>
+                                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                    .slice(Math.max(currentPage - 3, 0), Math.min(currentPage + 2, totalPages))
+                                    .map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={`w-10 h-10 rounded-lg text-sm font-medium transition ${
+                                                currentPage === page
+                                                    ? "bg-blue-600 text-white"
+                                                    : "border hover:bg-gray-100"
+                                            }`}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                <button
+                                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
+                                >
+                                    <MdChevronRight size={20} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
 
                 </div>
             </div>

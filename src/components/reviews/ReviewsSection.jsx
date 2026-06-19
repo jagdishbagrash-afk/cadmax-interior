@@ -36,6 +36,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
   const [editReviewData, setEditReviewData] = useState(null);
   const [loadingMore, setLoadingMore] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [showAlreadyReviewedModal, setShowAlreadyReviewedModal] = useState(false);
 
   // For infinite scroll
   const scrollContainerRef = useRef(null);
@@ -138,7 +139,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
     }
     // Check if user has already reviewed this product
     if (eligibility?.hasReviewed) {
-      toast.error("You have already reviewed this product. You can edit or delete your existing review.");
+      setShowAlreadyReviewedModal(true);
       return;
     }
     // Any logged-in user can write a review (purchase not required)
@@ -230,6 +231,18 @@ export default function ReviewsSection({ productId, productName = "" }) {
 
   const totalReviews = ratingSummary?.totalReviews || 0;
 
+  // Sort reviews: current user's review first
+  const sortedReviews = React.useMemo(() => {
+    if (!user?._id) return reviews;
+    return [...reviews].sort((a, b) => {
+      const aIsUser = a.user?._id === user._id || a.user === user._id;
+      const bIsUser = b.user?._id === user._id || b.user === user._id;
+      if (aIsUser && !bIsUser) return -1;
+      if (!aIsUser && bIsUser) return 1;
+      return 0;
+    });
+  }, [reviews, user]);
+
   return (
     <div className="mt-12 md:mt-16 border-t border-gray-200 pt-10 md:pt-14">
       {/* Section Title */}
@@ -314,7 +327,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
             ) : reviews.length > 0 ? (
               <>
                 <div className="space-y-4">
-                  {reviews.map((review) => (
+                  {sortedReviews.map((review) => (
                     <ReviewCard
                       key={review._id}
                       review={review}
@@ -387,6 +400,49 @@ export default function ReviewsSection({ productId, productName = "" }) {
         cancelText="No"
         confirmClassName="bg-red-600 hover:bg-red-700"
       />
+
+      {/* Already Reviewed Modal */}
+      {showAlreadyReviewedModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 relative animate-in fade-in zoom-in duration-200">
+            <button
+              onClick={() => setShowAlreadyReviewedModal(false)}
+              className="absolute top-4 right-4 w-8 h-8 flex items-center justify-center rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-all"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+
+            <div className="flex flex-col items-center text-center">
+              {/* Info Icon */}
+              <div className="w-16 h-16 rounded-full bg-yellow-100 flex items-center justify-center mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-8 h-8 text-yellow-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+              </div>
+
+              <h3 className="text-lg font-bold text-gray-900 mb-2">
+                Already Reviewed
+              </h3>
+
+              <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                You have already reviewed this product. You can edit or delete your existing review from the review list below.
+              </p>
+
+              <button
+                onClick={() => setShowAlreadyReviewedModal(false)}
+                className="w-full py-2.5 px-4 rounded-xl bg-black text-white text-sm font-semibold hover:opacity-90 transition-all"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Write/Edit Review Modal */}
       <WriteReviewModal

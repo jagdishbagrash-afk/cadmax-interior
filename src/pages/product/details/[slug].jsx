@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../common/Layout";
 import ProductImage from "../../../Assets/Images/ProductDetail.png";
 import Image from "next/image";
-import { FiTruck, FiHeart } from "react-icons/fi";
+import { FiTruck, FiHeart, FiShare2 } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
@@ -24,9 +24,10 @@ import useWishlist from "@/hooks/useWishlist";
 import { useSelector } from "react-redux";
 import ReviewsSection from "@/components/reviews/ReviewsSection";
 import Link from "next/link";
+import { createPortal } from "react-dom";
 
 // Custom Zoom Component - Fixed version
-const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
+const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5, onShowZoom, onHideZoom, zoomData }) => {
   const [zoomPosition, setZoomPosition] = useState({ x: 0, y: 0, show: false });
   const imageRef = React.useRef(null);
   const containerRef = React.useRef(null);
@@ -38,15 +39,23 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
 
-    setZoomPosition({
+    const newPos = {
       x: Math.min(Math.max(x, 0), 100),
       y: Math.min(Math.max(y, 0), 100),
       show: true
-    });
+    };
+
+    setZoomPosition(newPos);
+    if (onShowZoom) {
+      onShowZoom({ imageSrc, position: newPos, zoomScale });
+    }
   };
 
   const handleMouseLeave = () => {
     setZoomPosition({ ...zoomPosition, show: false });
+    if (onHideZoom) {
+      onHideZoom();
+    }
   };
 
   return (
@@ -68,25 +77,28 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
           className="w-full h-full object-contain"
         />
       </div>
-
-      {/* Zoom Preview Window */}
-      {zoomPosition.show && (
-        <div
-          className="fixed top-24 right-80 w-[450px] h-[550px] bg-white border rounded-lg shadow-2xl z-[99999] hidden lg:block overflow-hidden"
-        >
-          <div
-            className="w-full h-full bg-no-repeat"
-            style={{
-              backgroundImage: `url(${imageSrc})`,
-              backgroundSize: `${zoomScale * 100}%`,
-              backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
-              backgroundRepeat: 'no-repeat',
-              backgroundColor: '#f5f5f5'
-            }}
-          />
-        </div>
-      )}
     </div>
+  );
+};
+
+// Zoom Preview rendered as portal at document body level
+const ZoomPreviewPortal = ({ imageSrc, position, zoomScale }) => {
+  if (!position?.show || !imageSrc) return null;
+
+  return createPortal(
+    <div className="fixed top-24 right-50 w-[450px] h-[550px] bg-white border rounded-lg shadow-2xl z-[99999] hidden lg:block overflow-hidden pointer-events-none">
+      <div
+        className="w-full h-full bg-no-repeat"
+        style={{
+          backgroundImage: `url(${imageSrc})`,
+          backgroundSize: `${(zoomScale || 2.5) * 100}%`,
+          backgroundPosition: `${position.x}% ${position.y}%`,
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#f5f5f5'
+        }}
+      />
+    </div>,
+    document.body
   );
 };
 
@@ -113,6 +125,7 @@ export default function Index() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const [zoomData, setZoomData] = useState({ imageSrc: null, position: null, zoomScale: 2.5 });
 
   // ================= NEW: SORT STATE FOR RELATED PRODUCTS =================
   const [relatedSortBy, setRelatedSortBy] = useState("");
@@ -417,6 +430,30 @@ export default function Index() {
     toast.success("Item added to cart");
   };
 
+  const handleShare = async () => {
+    try {
+      const shareUrl = window.location.href;
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success("Product link copied to clipboard!", {
+        style: {
+          background: '#1a1a1a',
+          color: '#fff',
+          padding: '16px 24px',
+          borderRadius: '12px',
+          fontSize: '14px',
+          fontWeight: 500,
+          boxShadow: '0 10px 40px rgba(0,0,0,0.15)',
+        },
+        iconTheme: {
+          primary: '#4ade80',
+          secondary: '#1a1a1a',
+        },
+      });
+    } catch (err) {
+      toast.error("Failed to copy link. Please try again.");
+    }
+  };
+
   const HadleAddtocart = async (cartData) => {
     try {
       const main = new Listing();
@@ -586,7 +623,7 @@ export default function Index() {
                   <img
                     src={selectedVariant?.images?.[currentIndex]}
                     alt="Product"
-                    className="w-full h-full object-cover p-0"
+                    className="w-full h-full object-contain p-0"
                   />
                 </div>
 
@@ -663,19 +700,19 @@ export default function Index() {
 
                 {/* MAIN IMAGE */}
                 <div className="flex-1">
-                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
+                  <div className="w-full bg-[#F7F7F7] rounded-[32px]">
                     {isOutOfStock && (
-                      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
+                      <div className="absolute top-6 right-85 z-[100000] bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
                         Out Of Stock
                       </div>
                     )}
-                    <div className="absolute inset-0">
-                      <CustomZoomOnHover
-                        imageSrc={selectedVariant?.images?.[currentIndex]}
-                        alt="Product"
-                        zoomScale={2.5}
-                      />
-                    </div>
+                    <CustomZoomOnHover
+                      imageSrc={selectedVariant?.images?.[currentIndex]}
+                      alt="Product"
+                      zoomScale={2.5}
+                      onShowZoom={(data) => setZoomData(data)}
+                      onHideZoom={() => setZoomData({ imageSrc: null, position: null, zoomScale: 2.5 })}
+                    />
                   </div>
                 </div>
               </div>
@@ -725,8 +762,8 @@ export default function Index() {
                 {/* =====================================
               PRICE SECTIONS WITH SIZES
           ===================================== */}
-                <div className="mt-8">
-                  <h3 className="text-sm font-semibold text-black mb-4">
+                <div className="mt-6">
+                  <h3 className="text-sm font-semibold text-black mb-3">
                     {ProductDetails?.label_category}
                   </h3>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
@@ -763,11 +800,11 @@ export default function Index() {
 
                   {/* Sizes within selected section */}
                   {selectedPriceSection?.sizes?.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="text-sm font-semibold text-black mb-3">
+                    <div className="mt-3">
+                      <h4 className="text-sm font-semibold text-black mb-2">
                         {ProductDetails?.label_size}
                       </h4>
-                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
                         {selectedPriceSection.sizes.map((size, idx) => {
                           const isSizeActive = selectedSize?.title === size?.title;
                           return (
@@ -775,15 +812,15 @@ export default function Index() {
                               key={idx}
                               onClick={() => setSelectedSize(size)}
                               className={`
-                                  rounded-xl p-3 border-2 cursor-pointer transition-all duration-300
+                                  rounded-lg px-3 py-2 border cursor-pointer transition-all duration-200
                                   ${isSizeActive
-                                  ? "border-black bg-gray-50 shadow-lg"
+                                  ? "border-black bg-gray-50 shadow-sm"
                                   : "border-gray-200 hover:border-gray-300"
                                 }
                                 `}
                             >
                               <div className="text-center">
-                                <p className="font-semibold text-sm capitalize">
+                                <p className="font-medium text-sm capitalize">
                                   {size?.title}
                                 </p>
 
@@ -800,15 +837,15 @@ export default function Index() {
               VARIANTS
           ===================================== */}
                 {ProductDetails?.variants?.length > 0 && (
-                  <div className="mt-8">
-                    <p className="text-sm font-semibold text-black mb-4">
+                  <div className="mt-6">
+                    <p className="text-sm font-semibold text-black mb-3">
                       Colour :
                       <span className="capitalize ml-2">
                         {selectedVariant?.color}
                       </span>
                     </p>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                       {ProductDetails?.variants?.map((variant, idx) => {
                         const isActive = selectedVariant?.color === variant?.color;
                         return (
@@ -819,24 +856,24 @@ export default function Index() {
                               setCurrentIndex(0);
                             }}
                             className={`
-                              rounded-2xl overflow-hidden border-2
+                              rounded-xl overflow-hidden border-2
                               cursor-pointer transition-all duration-300
                               bg-white
                               ${isActive
-                                ? "border-black shadow-lg"
-                                : "border-gray-200"
+                                ? "border-black shadow-md"
+                                : "border-gray-200 hover:border-gray-400"
                               }
                             `}
                           >
-                            <div className="relative aspect-square bg-[#F7F7F7]">
+                          <div className={`relative aspect-square bg-[#F7F7F7] ${zoomData.position?.show ? 'pointer-events-none' : ''}`}>
                               <Image
                                 src={variant.images?.[0]}
                                 alt={variant?.color}
                                 fill
-                                className="object-contain p-3"
+                                className={`object-contain p-2 ${zoomData.position?.show ? 'pointer-events-none' : ''}`}
                               />
                             </div>
-                            <p className="text-center py-3 text-sm font-semibold capitalize">
+                            <p className="text-center py-2 text-xs font-semibold capitalize">
                               {variant?.color}
                             </p>
                           </div>
@@ -909,17 +946,28 @@ export default function Index() {
                     {isOutOfStock ? "OUT OF STOCK" : "BUY IT NOW"}
                   </button>
 
-                  {/* WISHLIST BUTTON */}
-                  <button
-                    onClick={() => toggleWishlist(ProductDetails?._id)}
-                    className={`w-full h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${isWishlisted
-                      ? "bg-red-50 border-red-200 text-red-500"
-                      : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
-                      }`}
-                  >
-                    <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
-                    {isWishlisted ? 'REMOVE FROM WISHLIST' : 'ADD TO WISHLIST'}
-                  </button>
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* WISHLIST BUTTON */}
+                    <button
+                      onClick={() => toggleWishlist(ProductDetails?._id)}
+                      className={`h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${isWishlisted
+                        ? "bg-red-50 border-red-200 text-red-500"
+                        : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
+                        }`}
+                    >
+                      <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
+                      <span className="hidden sm:inline">{isWishlisted ? 'WISHLIST' : 'WISHLIST'}</span>
+                    </button>
+
+                    {/* SHARE BUTTON */}
+                    <button
+                      onClick={handleShare}
+                      className="h-[35px] md:h-[58px] rounded-2xl border-2 border-gray-300 bg-white font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 text-gray-600 hover:border-black hover:text-black"
+                    >
+                      <FiShare2 className="text-lg" />
+                      <span className="hidden sm:inline">SHARE</span>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-10 border-t border-gray-200">
@@ -985,6 +1033,12 @@ export default function Index() {
           />
         </div>
       </div>
+      {/* Zoom Preview rendered at document body level */}
+      <ZoomPreviewPortal
+        imageSrc={zoomData.imageSrc}
+        position={zoomData.position}
+        zoomScale={zoomData.zoomScale}
+      />
     </Layout>
   );
 }
