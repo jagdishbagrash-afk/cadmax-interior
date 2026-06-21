@@ -166,7 +166,9 @@ export default function Index() {
         total: item.finalPrice * item.quantity,
         variant: item.variant,
         variantTitle: item.variantTitle,
-        priceSection: item.priceSection
+        priceSection: item.priceSection,
+          priceSectionTitle: item.priceSection?.title   // ✅ already included
+
       }));
       
       const totalAmount = record?.summary?.totalAmount || 0;
