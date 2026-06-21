@@ -58,15 +58,15 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
     return main.Servicesdelete(Id);
   };
 
-    const handleServicesType = () => {
+  const handleServicesType = () => {
     const main = new Listing();
     return main.ServicesTypedelete(Id);
   };
 
-    const handleProductSubSubCategory = () => {
+  const handleProductSubSubCategory = () => {
     const main = new Listing();
     return main.productsubsubcategorystatus(Id);
-    }
+  }
   /* -------------------- MAIN HANDLER -------------------- */
 
   const handleClick = async (e) => {
@@ -118,7 +118,7 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
         className="cursor-pointer m-auto flex items-center justify-center
                     w-[42px] h-[42px] rounded-lg 
                     border border-gray-200 shadow-sm 
-                    bg-white  transition-all duration-200" 
+                    bg-white  transition-all duration-200"
       >
         {status === true ? (
           <FaUndo
@@ -135,16 +135,20 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
 
       {/* Popup Modal */}
       {isOpen && (
-        <Popup isOpen={isOpen} onClose={handleClose} size="max-w-lg">
+        <Popup
+          isOpen={isOpen}
+          onClose={handleClose}
+          size="max-w-lg"
+        >
           {/* Header */}
-          <div className="border-b border-black/10 !z-[99999999999] px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
+          <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
             <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
-              {status === true ? "Block" : "Unblock"}
+              {status === true ? "Restore" : "Delete"}
             </h2>
 
             <button
               onClick={handleClose}
-              className="text-gray-700 hover:text-gray-900 cursor-pointer"
+              className="text-gray-700 hover:text-gray-900"
             >
               <MdClose size={24} />
             </button>
@@ -152,20 +156,20 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
 
           {/* Body */}
           <div className="py-4 px-4">
-            <p className="text-[16px] font-medium text-[#3E3E3E] Creato">
-              Are you sure you want to {status === true ? "restore" : "delete"}{" "}
-              it?
+            <p className="text-[16px] font-medium text-[#3E3E3E]">
+              Are you sure you want to {status ? "restore" : "delete"} it?
             </p>
-            <p className="text-red-600 text-[16px] font-medium Creato">
+
+            <p className="text-red-600 text-[16px] font-medium">
               (This action can be changed later.)
             </p>
           </div>
 
-          {/* Buttons */}
+          {/* Footer */}
           <div className="flex justify-end gap-3 px-6 pb-6">
             <button
-              onClick={toggleModal}
-              className="text-black px-4 py-2 border border-gray-300 rounded-md cursor-pointer"
+              onClick={handleClose}
+              className="px-4 py-2 border rounded-md"
             >
               Cancel
             </button>
@@ -173,16 +177,11 @@ export default function BlockUnblock({ Id, status, fetchData, step }) {
             <button
               onClick={handleClick}
               disabled={loading}
-              className={`cursor-pointer font-[700] text-[14px] px-[20px] py-[10px] rounded-[5px]
-                            ${loading
-                  ? "bg-gray-400"
-                  : "bg-black hover:bg-white"
-                }
-                            text-white hover:text-black cursor-pointer`}
+              className="px-5 py-2 bg-black text-white rounded-md"
             >
               {loading
                 ? "Processing..."
-                : status === true
+                : status
                   ? "Restore"
                   : "Delete"}
             </button>

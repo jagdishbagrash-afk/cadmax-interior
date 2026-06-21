@@ -1,35 +1,38 @@
+"use client";
+
 import React, { useEffect } from "react";
+import { createPortal } from "react-dom";
 
-const Popup = ({ isOpen, onClose, children }) => {
-
+export default function Popup({
+  isOpen,
+  onClose,
+  children,
+  size = "max-w-lg",
+}) {
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
     }
+
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = "auto";
     };
   }, [isOpen]);
 
   if (!isOpen) return null;
 
-  return (
-    <div 
-      className="fixed inset-0 bg-black/50 flex justify-center items-center p-4 z-[99999]"
-      onClick={onClose}   // ✅ outside click closes modal
+  return createPortal(
+    <div
+      className="fixed inset-0 z-[999999] flex items-center justify-center bg-black/60 p-4"
+      onClick={onClose}
     >
-      <div 
-        className="bg-white w-full max-w-2xl rounded-xl shadow-lg"
-        onClick={(e) => e.stopPropagation()} // ✅ prevent close on inner click
+      <div
+        className={`relative w-full ${size} bg-white rounded-xl shadow-2xl`}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-4 text-gray-800 overflow-y-auto max-h-[80vh]">
-          {children}
-        </div>
+        {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
-};
-
-export default Popup;
+}
