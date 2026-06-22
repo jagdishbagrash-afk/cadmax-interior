@@ -399,8 +399,8 @@ export default function Index() {
       productId: ProductDetails?._id,
       quantity: qty,
       variant: selectedVariant?.color,
-      priceSection: selectedPriceSection,
-      size: selectedSize,
+      priceSection: selectedPriceSection?.title || "",
+      size: selectedSize?.title || "",
       price: currentPrice?.final_amount || currentPrice?.amount || 0,
     });
     dispatch(addItem(newItem));
