@@ -7,6 +7,7 @@ import ShipmentCard from "@/components/ShipmentCard";
 import {
   extractCarrier,
   extractOrderAndShipment,
+  extractStatus,
 } from "@/components/shipmentUtils";
 
 function getQueryValue(value) {
@@ -115,6 +116,14 @@ export default function Index() {
     };
   }, [orderId, router.isReady, trackingNumber]);
 
+  useEffect(() => {
+    if (!shipmentData.shipment && !shipmentData.trackingNumber) {
+      return;
+    }
+
+    console.log("Success page shipment data", shipmentData);
+  }, [shipmentData]);
+
   const trackingHref = shipmentData.trackingNumber
     ? (() => {
         const courier = extractCarrier(
@@ -151,6 +160,9 @@ export default function Index() {
           title="Shipment Created"
           order={shipmentData.order}
           shipment={shipmentData.shipment}
+          trackingNumber={shipmentData.trackingNumber}
+          carrier={extractCarrier(shipmentData.shipment, shipmentData.order) || "BLUE_DART"}
+          status={extractStatus(shipmentData.shipment, shipmentData.order)}
           loading={loading}
           trackingHref={trackingHref}
           emptyMessage="Shipment details will appear here once the carrier accepts the request."
