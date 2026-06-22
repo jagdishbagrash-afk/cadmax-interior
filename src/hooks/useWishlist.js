@@ -20,8 +20,9 @@ export default function useWishlist() {
     try {
       const main = new Listing();
       const response = await main.WishlistGet();
-      if (response?.data?.status && response?.data?.data?.productIds) {
-        dispatch(setWishlist(response.data.data.productIds));
+      if (response?.data?.status && response?.data?.data?.products) {
+        const productIds = response.data.data.products.map((p) => p._id || p);
+        dispatch(setWishlist(productIds));
       }
     } catch (error) {
       console.log("Error fetching wishlist:", error);

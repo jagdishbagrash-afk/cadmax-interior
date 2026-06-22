@@ -296,9 +296,9 @@ class Listing extends Component {
     return Api.post(`/lead-status-update/${id}`, status);
   }
 
-  async getProductbySubcategory(id) {
-    return Api.get(`/product/subcategory/${id}`);
-  }
+  // async getProductbySubcategory(id) {
+  //   return Api.get(`/product/subcategory/${id}`);
+  // }
 
   async getAllProject(data) {
     return Api.get(`/project/list`, data);
@@ -371,8 +371,29 @@ class Listing extends Component {
     return Api.get(`/services/type-concept/${id}`,);
   }
 
-  async GetAllProductsId(id) {
-    return Api.get(`/product/details/${id}`,);
+  async GetAllProductsId(
+    slug,
+    subcategory,
+    subsubcategory,
+    type
+  ) {
+    const params = {};
+
+    if (subcategory) {
+      params.subcategory = subcategory;
+    }
+
+    if (subsubcategory) {
+      params.subsubcategory = subsubcategory;
+    }
+
+    if (type) {
+      params.type = type;
+    }
+
+    return Api.get(`/product/details/${slug}`, {
+      params,
+    });
   }
   async AddBooking(data) {
     return Api.post(`/add-booking`, data);
@@ -490,6 +511,49 @@ class Listing extends Component {
 
   async AddPaymentCreate(data) {
     return Api.post("/create", data)
+  }
+
+  // ========== REVIEW APIs ==========
+  async AddReview(data) {
+    return Api.post("/review/add", data)
+  }
+
+  async UpdateReview(reviewId, data) {
+    return Api.post(`/review/update/${reviewId}`, data)
+  }
+
+  async DeleteReview(reviewId) {
+    return Api.post(`/review/delete/${reviewId}`)
+  }
+
+  async GetProductReviews(productId, params = {}) {
+    return Api.get(`/review/product/${productId}`, { params })
+  }
+
+  async GetProductRatingSummary(productId) {
+    return Api.get(`/review/rating-summary/${productId}`)
+  }
+
+  async MarkHelpful(reviewId) {
+    return Api.post(`/review/helpful/${reviewId}`)
+  }
+
+  async MarkNotHelpful(reviewId) {
+    return Api.post(`/review/not-helpful/${reviewId}`)
+  }
+
+  async CheckReviewEligibility(productId) {
+    return Api.get(`/review/eligibility/${productId}`)
+  }
+
+  async UploadReviewImages(reviewId, formData) {
+    return Api.post(`/review/images/upload/${reviewId}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    })
+  }
+
+  async DeleteReviewImage(reviewId, imageIndex) {
+    return Api.post(`/review/images/delete/${reviewId}/${imageIndex}`)
   }
 
   async PaymentSave(data) {

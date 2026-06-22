@@ -42,7 +42,7 @@ export default function WishlistCard({
           href={`/product/details/${product?.slug}`}
           className="relative block"
         >
-          <div className="relative w-full h-[280px] sm:h-[320px] md:h-[360px] lg:h-[450px] overflow-hidden bg-[#F8F8F8]">
+          <div className="relative w-full h-[260px] sm:h-[300px] md:h-[340px] lg:h-[430px] overflow-hidden bg-[#F8F8F8]">
             {/* REMOVE BUTTON */}
             <button
               onClick={(e) => {

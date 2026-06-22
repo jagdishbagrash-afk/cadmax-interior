@@ -27,6 +27,8 @@ function SideBar() {
 
     { name: "Products", path: "/admin/product", icon: <AiFillProduct /> },
 
+    { name: "Reviews", path: "/admin/reviews", icon: <MdLabel /> },
+
     { name: "Orders", path: "/admin/order", icon: <BsCartCheckFill /> },
     { name: "Payments", path: "/admin/payment", icon: <MdBorderAll /> },
 

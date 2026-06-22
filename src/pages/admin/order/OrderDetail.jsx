@@ -41,10 +41,15 @@ export default function OrderDetail({ data }) {
           {/* Content */}
           <div className="p-4 lg:p-6">
             <div className="space-y-4">
-              {data.map((item, index) => {
-                const selectedVariant = item?.id?.variants?.find(
-                  (v) => v.color === item.variant
-                );
+              {data?.map((item, index) => {
+  const selectedVariant = item?.id?.variants?.find(
+    (v) =>
+      v.title?.toLowerCase().trim() ===
+        item.variant?.toLowerCase().trim() ||
+      v.color?.toLowerCase().trim() ===
+        item.variant?.toLowerCase().trim()
+  );
+
 
                 const image = selectedVariant?.images?.[0];
 
@@ -67,6 +72,10 @@ export default function OrderDetail({ data }) {
                       <h3 className="text-[16px] font-semibold text-gray-800 capitalize">
                         {item?.id?.title}
                       </h3>
+
+                        <span className="text-[16px] font-semibold text-gray-800 capitalize">
+                    type:    {item?.priceSectionTitle}
+                      </span>
 
                       <div className="text-[14px] text-gray-600 mt-1">
                         Color:{" "}

@@ -7,6 +7,7 @@ import Listing from "@/pages/api/Listing";
 import moment from "moment";
 import BlockUnblock from "../common/BlockUnblock";
 import { formatMultiPrice } from "@/components/ValueDataHook";
+import { getProductPrices } from "@/components/productPrices";
 
 export default function Index() {
   const [search, setSearch] = useState("");
@@ -35,22 +36,16 @@ export default function Index() {
     item.title?.toLowerCase().includes(search.toLowerCase())
   );
 
-  console.log("filteredData",filteredData)
-
   // PAGINATION LOGIC
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
-
   const paginatedData = filteredData.slice(startIndex, endIndex);
 
-  // PAGE CHANGE
   const handlePageChange = (page) => {
     setCurrentPage(page);
   };
 
-  // RESET PAGE ON SEARCH
   useEffect(() => {
     setCurrentPage(1);
   }, [search]);
@@ -58,16 +53,10 @@ export default function Index() {
   return (
     <AdminLayout page={"Product List"}>
       <div className="p-5">
-
         {/* HEADER */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-
-          <h2 className="text-xl font-bold text-gray-800">
-            Product List
-          </h2>
-
+          <h2 className="text-xl font-bold text-gray-800">Product List</h2>
           <div className="flex flex-wrap gap-2 items-center">
-
             <input
               type="text"
               placeholder="Search product..."
@@ -75,22 +64,19 @@ export default function Index() {
               onChange={(e) => setSearch(e.target.value)}
               className="px-4 py-2 border rounded-lg text-sm focus:ring-2 focus:ring-blue-400"
             />
-
             <Link
               href="/admin/product/category"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
             >
               Category
             </Link>
-
             <Link
               href="/admin/product/subcategory"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
             >
               Subcategory
             </Link>
-
- <Link
+            <Link
               href="/admin/product/subsubcategory"
               className="bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-lg text-sm"
             >
@@ -102,29 +88,21 @@ export default function Index() {
             >
               <MdAdd /> Add
             </Link>
-
           </div>
         </div>
 
         {/* TABLE CARD */}
         <div className="bg-white rounded-2xl shadow-md border z-[0]">
-
           <div className="overflow-x-auto">
             <table className="min-w-full text-sm">
-
-              {/* HEAD */}
               <thead className="bg-gray-50 text-gray-500 uppercase text-xs">
                 <tr className="text-center">
-
-                  {/* INDEX */}
                   <th className="px-6 py-3">#</th>
-
                   <th className="px-6 py-3">Image</th>
                   <th className="px-6 py-3">Title</th>
                   <th className="px-6 py-3">Category</th>
                   <th className="px-6 py-3">SubCategory</th>
                   <th className="px-6 py-3">Sub Sub Category</th>
-
                   <th className="px-6 py-3">Price</th>
                   <th className="px-6 py-3">Final Price</th>
                   <th className="px-6 py-3">Stock</th>
@@ -134,151 +112,120 @@ export default function Index() {
                   <th className="px-6 py-3">Delete</th>
                 </tr>
               </thead>
-
-              {/* BODY */}
-              {/* BODY */}
               <tbody className="divide-y">
-
                 {paginatedData.length > 0 ? (
-                  paginatedData.map((item, index) => (
-                    <tr
-                      key={item._id}
-                      className={`hover:bg-gray-50 transition
-        ${item?.deletedAt ? "opacity-50" : ""}`}
-                    >
+                  paginatedData.map((item, index) => {
+                    // 👇 Extract prices using the helper
+                    const { displayPrice, originalPrice } = getProductPrices(item);
 
-                      {/* INDEX */}
-                      <td className="px-6 py-4 text-center font-semibold text-gray-600">
-                        {startIndex + index + 1}
-                      </td>
-
-                      {/* IMAGE */}
-                      <td className="px-6 py-4 text-center">
-                        <img
-                          src={
-                            item?.variants?.[0]?.images?.[0] ||
-                            "/no-image.png"
-                          }
-                          className="w-16 h-16 object-cover rounded-lg border mx-auto"
-                          alt="product"
-                        />
-                      </td>
-
-                      {/* TITLE */}
-                      <td className="px-6 py-4 text-center font-medium text-gray-800 capitalize">
-                        {item.title}
-                      </td>
-
-                      {/* CATEGORY */}
-                      <td className="px-6 py-4 text-center capitalize">
-                        {item?.category?.name || "-"}
-                      </td>
-
-                      {/* SUBCATEGORY */}
-                      <td className="px-6 py-4 text-center capitalize">
-                        {item?.subcategory?.name || "-"}
-                      </td>
-
-                       <td className="px-6 py-4 text-center capitalize">
-                        {item?.subsubcategory?.name || "-"}
-                      </td>
-
-                      {/* PRICE */}
-                      <td className="px-6 py-4 text-center font-semibold text-gray-700">
-                        {formatMultiPrice(item?.amount, "INR")}
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="font-bold text-green-600">
-                          {formatMultiPrice(
-                            item?.final_amount || item?.amount,
-                            "INR"
-                          )}
-                        </span>
-                      </td>
-
-                      <td className="px-6 py-4 text-left">
-                        {item?.variants?.map((v) => (
-                          <div
-                            key={v.color}
-                            className="flex justify-between text-xs"
-                          >
-                            <span className="capitalize">
-                              {v.color}
-                            </span>
-
-                            <span className="font-semibold">
-                              {v.stock}
-                            </span>
+                    return (
+                      <tr
+                        key={item._id}
+                        className={`hover:bg-gray-50 transition ${
+                          item?.deletedAt ? "opacity-50" : ""
+                        }`}
+                      >
+                        <td className="px-6 py-4 text-center font-semibold text-gray-600">
+                          {startIndex + index + 1}
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <img
+                            src={
+                              item?.variants?.[0]?.images?.[0] ||
+                              "/no-image.png"
+                            }
+                            className="w-16 h-16 object-cover rounded-lg border mx-auto"
+                            alt="product"
+                          />
+                        </td>
+                        <td className="px-6 py-4 text-center font-medium text-gray-800 capitalize">
+                          {item.title}
+                        </td>
+                        <td className="px-6 py-4 text-center capitalize">
+                          {item?.category?.name || "-"}
+                        </td>
+                        <td className="px-6 py-4 text-center capitalize">
+                          {item?.subcategory?.name || "-"}
+                        </td>
+                        <td className="px-6 py-4 text-center capitalize">
+                          {item?.subsubcategory?.name || "-"}
+                        </td>
+                        {/* PRICE (Original) */}
+                        <td className="px-6 py-4 text-center font-semibold text-gray-700">
+                          {formatMultiPrice(originalPrice, "INR")}
+                        </td>
+                        {/* FINAL PRICE (Discounted) */}
+                        <td className="px-6 py-4 text-center">
+                          <span className="font-bold text-green-600">
+                            {formatMultiPrice(displayPrice, "INR")}
+                          </span>
+                        </td>
+                        {/* STOCK (variant-wise) */}
+                        <td className="px-6 py-4 text-left">
+                          {item?.variants?.map((v) => (
+                            <div
+                              key={v.color}
+                              className="flex justify-between text-xs"
+                            >
+                              <span className="capitalize">{v.color}</span>
+                              <span className="font-semibold">{v.stock}</span>
+                            </div>
+                          ))}
+                          <div className="mt-1 border-t pt-1 text-xs font-bold text-gray-700">
+                            Total:{" "}
+                            {item?.variants?.reduce(
+                              (sum, v) => sum + (Number(v.stock) || 0),
+                              0
+                            )}
                           </div>
-                        ))}
-
-                        <div className="mt-1 border-t pt-1 text-xs font-bold text-gray-700">
-                          Total:{" "}
-                          {item?.variants?.reduce(
-                            (sum, v) => sum + (Number(v.stock) || 0),
-                            0
-                          )}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${item?.stock_status === "out_of_stock"
-                              ? "bg-red-100 text-red-700"
-                              : "bg-green-100 text-green-700"
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span
+                            className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                              item?.stock_status === "out_of_stock"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-green-100 text-green-700"
                             }`}
-                        >
-                          {item?.stock_status === "out_of_stock"
-                            ? "Out Of Stock"
-                            : "In Stock"}
-                        </span>
-                      </td>
-
-                      {/* DATE */}
-                      <td className="px-6 py-4 text-center text-gray-500">
-                        {moment(item.createdAt).format("DD MMM YYYY")}
-                      </td>
-
-                      {/* ACTION */}
-                      <td className="px-6 py-4">
-                        <div className="flex justify-center gap-3">
-
-                          <Link
-                            href={`/admin/product/edit?id=${item._id}`}
-                            className="cursor-pointer m-auto flex items-center justify-center
-              w-[42px] h-[42px] rounded-lg 
-              border border-gray-200 shadow-sm 
-              bg-white hover:bg-gray-50 transition-all duration-200"
                           >
-                            <MdEdit size={20} />
-                          </Link>
-
-                        </div>
-                      </td>
-
-                      {/* DELETE */}
-                      <td className="px-6 py-4 text-center text-gray-500">
-
-                        <BlockUnblock
-                          Id={item._id}
-                          fetchData={fetchData}
-                          step={4}
-                          status={item?.deletedAt ? true : false}
-                        />
-                      </td>
-
-                    </tr>
-                  ))
+                            {item?.stock_status === "out_of_stock"
+                              ? "Out Of Stock"
+                              : "In Stock"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-500">
+                          {moment(item.createdAt).format("DD MMM YYYY")}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-3">
+                            <Link
+                              href={`/admin/product/edit?id=${item._id}`}
+                              className="cursor-pointer m-auto flex items-center justify-center
+                                w-[42px] h-[42px] rounded-lg 
+                                border border-gray-200 shadow-sm 
+                                bg-white hover:bg-gray-50 transition-all duration-200"
+                            >
+                              <MdEdit size={20} />
+                            </Link>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-center text-gray-500">
+                          <BlockUnblock
+                            Id={item._id}
+                            fetchData={fetchData}
+                            step={4}
+                            status={item?.deletedAt ? true : false}
+                          />
+                        </td>
+                      </tr>
+                    );
+                  })
                 ) : (
                   <tr>
-                    <td
-                      colSpan={10}
-                      className="text-center py-10 text-gray-400"
-                    >
+                    <td colSpan={13} className="text-center py-10 text-gray-400">
                       No Products Found
                     </td>
                   </tr>
                 )}
-
               </tbody>
             </table>
           </div>
@@ -286,30 +233,21 @@ export default function Index() {
           {/* PAGINATION */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between px-5 py-4 border-t flex-wrap gap-3">
-
-              {/* LEFT */}
               <p className="text-sm text-gray-500">
                 Showing {startIndex + 1} to{" "}
                 {Math.min(endIndex, filteredData.length)} of{" "}
                 {filteredData.length} products
               </p>
-
-              {/* RIGHT */}
               <div className="flex items-center gap-2">
-
-                {/* PREV */}
                 <button
                   onClick={() =>
-                    currentPage > 1 &&
-                    handlePageChange(currentPage - 1)
+                    currentPage > 1 && handlePageChange(currentPage - 1)
                   }
                   disabled={currentPage === 1}
                   className="w-10 h-10 rounded-lg border flex items-center justify-center disabled:opacity-50 hover:bg-gray-100"
                 >
                   <MdChevronLeft size={20} />
                 </button>
-
-                {/* PAGE NUMBERS */}
                 {Array.from({ length: totalPages }, (_, i) => i + 1)
                   .slice(
                     Math.max(currentPage - 3, 0),
@@ -320,16 +258,15 @@ export default function Index() {
                       key={page}
                       onClick={() => handlePageChange(page)}
                       className={`w-10 h-10 rounded-lg text-sm font-medium transition
-                        ${currentPage === page
-                          ? "bg-blue-600 text-white"
-                          : "border hover:bg-gray-100"
+                        ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "border hover:bg-gray-100"
                         }`}
                     >
                       {page}
                     </button>
                   ))}
-
-                {/* NEXT */}
                 <button
                   onClick={() =>
                     currentPage < totalPages &&
@@ -340,11 +277,9 @@ export default function Index() {
                 >
                   <MdChevronRight size={20} />
                 </button>
-
               </div>
             </div>
           )}
-
         </div>
       </div>
     </AdminLayout>

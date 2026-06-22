@@ -116,6 +116,8 @@ export default function OrderHistory() {
     return matchesStatus && matchesSearch;
   });
 
+  console.log("Filtered Orders:", filteredOrders);
+
 
   return (
     <Layout>
@@ -147,8 +149,8 @@ export default function OrderHistory() {
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={`pb-2 mt-2 text-[14px] whitespace-nowrap border-b-2 transition-all ${activeTab === tab
-                  ? "border-[#e77600] text-[#c45500] font-bold"
-                  : "border-transparent text-[#565959] hover:text-[#007185]"
+                ? "border-[#e77600] text-[#c45500] font-bold"
+                : "border-transparent text-[#565959] hover:text-[#007185]"
                 }`}
             >
               {tab}
@@ -236,7 +238,17 @@ export default function OrderHistory() {
                       >
                         <div className="p-5 border-t border-gray-100">
                           {order?.product?.map((item, idx) => {
-                            const variantImg = item?.id?.variants?.find((v) => v.color === item.variant)?.images?.[0];
+                            const selectedVariant = item?.id?.variants?.find(
+                              (v) =>
+                                v.title?.toLowerCase().trim() ===
+                                item.variant?.toLowerCase().trim() ||
+                                v.color?.toLowerCase().trim() ===
+                                item.variant?.toLowerCase().trim()
+                            );
+
+
+                            const variantImg = selectedVariant?.images?.[0];
+
                             return (
                               <div key={idx} className="flex flex-col md:flex-row gap-6 mb-6 last:mb-0 pb-6 last:pb-0 border-b last:border-0">
                                 <div className="flex flex-1 gap-4">
@@ -306,7 +318,7 @@ export default function OrderHistory() {
                   {!isOpen && (
                     <div className="px-4 py-2 bg-white flex justify-between items-center text-[12px] text-gray-400">
                       <p>{order?.product?.length} items in this order</p>
-                      <button  className="text-[#007185] hover:underline">Show items</button>
+                      <button className="text-[#007185] hover:underline">Show items</button>
                     </div>
                   )}
                 </div>
