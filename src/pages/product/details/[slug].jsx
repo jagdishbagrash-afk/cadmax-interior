@@ -82,7 +82,7 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
             className="
               fixed
               top-20
-              right-[150]
+              right-20
               w-[500px]
               h-[600px]
               bg-white
@@ -92,7 +92,7 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
               shadow-2xl
               overflow-hidden
               hidden
-              xl:block
+              lg:block
             "
             style={{
               zIndex: 999999999,
@@ -221,7 +221,28 @@ export default function Index() {
   const increaseQty = () => {
     setQty((prev) => {
       const maxStock = selectedVariant?.stock ?? 0;
-      const newQty = prev < maxStock ? prev + 1 : prev;
+      if (prev >= maxStock) {
+        toast.error(`Only ${maxStock} items available in stock`, {
+          duration: 3000,
+          position: "top-right",
+          style: {
+            background: "#fee2e2",
+            color: "#991b1b",
+            border: "1px solid #fecaca",
+            borderRadius: "12px",
+            padding: "16px 24px",
+            fontSize: "14px",
+            fontWeight: "600",
+            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+          },
+          iconTheme: {
+            primary: "#dc2626",
+            secondary: "#fee2e2",
+          },
+        });
+        return prev;
+      }
+      const newQty = prev + 1;
       handleQtyChange(newQty);
       return newQty;
     });
@@ -239,7 +260,7 @@ export default function Index() {
     try {
       const currentPrice = getCurrentPrice();
       const main = new Listing();
-      const response = await main.UpdateTocart({
+      await main.UpdateTocart({
         productId: ProductDetails?._id,
         variant: selectedVariant?.color,
         price: currentPrice?.final_amount || currentPrice?.amount || 0,
@@ -247,11 +268,8 @@ export default function Index() {
         priceSectionTitle: selectedPriceSection?.title || null,
         sizeTitle: selectedSize?.title || null
       });
-      if (response?.data?.status) {
-        toast.success(response.data.message);
-      }
     } catch (err) {
-      toast.error(err?.response?.data?.message || "Failed to update quantity");
+      // Silently fail - no toast on quantity change
     }
   };
 
@@ -293,6 +311,14 @@ export default function Index() {
 
   useEffect(() => {
     if (!router.isReady || !id) return;
+
+    // Reset product state when route changes
+    setProductDetails(null);
+    setSelectedVariant(null);
+    setSelectedPriceSection(null);
+    setSelectedSize(null);
+    setQty(1);
+    setCurrentIndex(0);
 
     // subsubcategory page
     if (
@@ -378,7 +404,6 @@ export default function Index() {
       price: currentPrice?.final_amount || currentPrice?.amount || 0,
     });
     dispatch(addItem(newItem));
-    toast.success("Item added to cart");
     FetchCart();
   };
 
@@ -445,10 +470,7 @@ export default function Index() {
   const HadleAddtocart = async (cartData) => {
     try {
       const main = new Listing();
-      const response = await main.AddTocart(cartData);
-      if (response?.data) {
-        toast.success(response.data.message);
-      }
+      await main.AddTocart(cartData);
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to add to cart");
     }
@@ -560,24 +582,26 @@ export default function Index() {
                 >
                   {selectedVariant?.images?.map((img, index) => (
                     <SwiperSlide key={index}>
-                      <div
-                        onClick={() => setCurrentIndex(index)}
-                        className={`
-                    relative aspect-square rounded-2xl overflow-hidden
-                    border-2 cursor-pointer bg-[#F7F7F7]
-                    transition-all duration-300
-                    ${currentIndex === index
-                            ? "border-black"
-                            : "border-gray-200"
-                          }
-                  `}
-                      >
-                        <Image
-                          src={img}
-                          alt="thumb"
-                          fill
-                          className="object-cover p-0"
-                        />
+                      <div className="w-full sm:w-[150px]">
+                        <div
+                          className={`h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5 ${isOutOfStock ? "opacity-50 pointer-events-none" : ""}`}
+                        >
+                          <button
+                            onClick={decreaseQty}
+                            disabled={isOutOfStock}
+                            className="text-xl font-bold"
+                          >
+                            −
+                          </button>
+                          <span className="font-semibold text-lg">{qty}</span>
+                          <button
+                            onClick={increaseQty}
+                            disabled={isOutOfStock}
+                            className="text-xl font-bold"
+                          >
+                            +
+                          </button>
+                        </div>
                       </div>
                     </SwiperSlide>
                   ))}
