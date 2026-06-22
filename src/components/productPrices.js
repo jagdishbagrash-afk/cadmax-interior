@@ -1,5 +1,3 @@
-// utils/productPrices.js
-
 export const getProductPrices = (product = {}) => {
   if (!product || typeof product !== "object") {
     return {
@@ -21,53 +19,40 @@ export const getProductPrices = (product = {}) => {
     ? product.product_price_section
     : [];
 
-  let bestFinal = 0;
-  let bestOriginal = 0;
+  if (sections.length > 0) {
+    const firstSection = sections[0];
 
-  for (const section of sections) {
-    if (!section) continue;
+    // If sizes exist
+    if (firstSection?.sizes?.length > 0) {
+      const firstSize = firstSection.sizes[0];
 
-    const sizes = Array.isArray(section?.sizes)
-      ? section.sizes
-      : [];
-
-    if (sizes.length > 0) {
-      for (const size of sizes) {
-        if (!size) continue;
-
-        const final =
-          Number(size?.final_amount) ||
-          Number(size?.amount) ||
-          0;
-
-        if (final > 0 && final > bestFinal) {
-          bestFinal = final;
-          bestOriginal =
-            Number(size?.amount) ||
-            Number(section?.amount) ||
-            final;
-        }
-      }
-    } else {
-      const final =
-        Number(section?.final_amount) ||
-        Number(section?.amount) ||
-        0;
-
-      if (final > 0 && final > bestFinal) {
-        bestFinal = final;
-        bestOriginal = Number(section?.amount) || final;
-      }
+      return {
+        displayPrice:
+          Number(firstSize?.final_amount) ||
+          Number(firstSize?.amount) ||
+          0,
+        originalPrice:
+          Number(firstSize?.amount) ||
+          Number(firstSection?.amount) ||
+          0,
+      };
     }
-  }
 
-  if (bestFinal === 0) {
-    bestFinal = Number(product?.amount) || 0;
-    bestOriginal = Number(product?.amount) || 0;
+    // Section level price
+    return {
+      displayPrice:
+        Number(firstSection?.final_amount) ||
+        Number(firstSection?.amount) ||
+        0,
+      originalPrice:
+        Number(firstSection?.amount) ||
+        Number(firstSection?.final_amount) ||
+        0,
+    };
   }
 
   return {
-    displayPrice: bestFinal,
-    originalPrice: bestOriginal,
+    displayPrice: Number(product?.amount) || 0,
+    originalPrice: Number(product?.amount) || 0,
   };
 };

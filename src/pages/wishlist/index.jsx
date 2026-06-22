@@ -34,7 +34,7 @@ export default function WishlistPage() {
       const response = await main.WishlistGet();
       if (response?.data?.status && response?.data?.data) {
         const data = response.data.data;
-        console.log("data",data)
+        console.log("data", data)
         const items = data.products || [];
         dispatch(setWishlist(items));
         setProducts(items);
@@ -52,7 +52,7 @@ export default function WishlistPage() {
   };
 
   useEffect(() => {
-    
+
     setAuthChecked(true);
     if (user?.role === "customer") {
       fetchWishlistProducts();
@@ -79,6 +79,56 @@ export default function WishlistPage() {
       setRemoving(null);
     }
   };
+
+  // utils/productNormalizer.js
+  const normalizeWishlistProduct = (product) => {
+    let image = "/placeholder.jpg";
+
+    if (
+      product?.variants?.length > 0 &&
+      product?.variants?.[0]?.images?.length > 0
+    ) {
+      image = product.variants[0].images[0];
+    }
+
+    let finalAmount = product?.final_amount || 0;
+    let amount = product?.amount || 0;
+
+    if (product?.product_price_section?.length > 0) {
+      let minFinal = Infinity;
+      let minAmount = Infinity;
+
+      product.product_price_section.forEach((section) => {
+        section?.sizes?.forEach((size) => {
+          if (size?.final_amount < minFinal) {
+            minFinal = size.final_amount;
+          }
+
+          if (size?.amount < minAmount) {
+            minAmount = size.amount;
+          }
+        });
+      });
+
+      if (minFinal !== Infinity) finalAmount = minFinal;
+      if (minAmount !== Infinity) amount = minAmount;
+    }
+
+    const discountPercent =
+      amount && finalAmount
+        ? Math.round(((amount - finalAmount) / amount) * 100)
+        : 0;
+
+    return {
+      ...product,
+      image,
+      amount,
+      final_amount: finalAmount,
+      discountPercent,
+    };
+  };
+
+
 
   // Filter then sort products
   const filteredProducts = useMemo(() => {
@@ -117,6 +167,12 @@ export default function WishlistPage() {
     }
   }, [products, sort, searchQuery]);
 
+  console.log("products", products)
+
+  const normalizedProducts = useMemo(() => {
+    return filteredProducts.map(normalizeWishlistProduct);
+  }, [filteredProducts]);
+
   if (loading) {
     return (
       <Layout>
@@ -132,7 +188,7 @@ export default function WishlistPage() {
 
   return (
     <Layout>
-        <div className="container mx-auto px-4 max-w-[1430px]">
+      <div className="container mx-auto px-4 max-w-[1430px]">
         {/* Breadcrumb */}
         <div className="flex items-center gap-2 text-xs text-gray-500 mb-6">
           <Link href="/" className="hover:text-amber-700 transition-colors">
@@ -179,7 +235,7 @@ export default function WishlistPage() {
               </div>
             ) : (
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-                {filteredProducts.map((item, idx) => (
+                {normalizedProducts.map((item, idx) => (
                   <WishlistCard
                     key={item._id || idx}
                     product={item}
