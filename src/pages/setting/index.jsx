@@ -22,6 +22,10 @@ export default function ProfileIndex() {
     profileImage: null,
   });
 
+  const [errors, setErrors] = useState({
+    email: "",
+  });
+
   /* ================= FETCH PROFILE ================= */
   const fetchData = async () => {
     try {
@@ -57,9 +61,43 @@ export default function ProfileIndex() {
   }, []);
 
   /* ================= HANDLERS ================= */
+  const validateEmail = (email) => {
+    if (!email) {
+      return "Email is required";
+    }
+    
+    // Basic email format check
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+      return "Please enter a valid email address";
+    }
+    
+    // Check for allowed domains only: @gmail.com or @email.com
+    const allowedDomains = ["@gmail.com", "@email.com"];
+    const hasAllowedDomain = allowedDomains.some(domain => 
+      email.toLowerCase().endsWith(domain)
+    );
+    
+    if (!hasAllowedDomain) {
+      return "Email must be from @gmail.com or @email.com domain only";
+    }
+    
+    return "";
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setRecord((prev) => ({ ...prev, [name]: value }));
+    
+    // Clear error when user starts typing
+    if (name === "email") {
+      setErrors((prev) => ({ ...prev, email: "" }));
+    }
+  };
+
+  const handleEmailBlur = (e) => {
+    const emailError = validateEmail(e.target.value);
+    setErrors((prev) => ({ ...prev, email: emailError }));
   };
 
   const handleImageChange = (e) => {
@@ -71,6 +109,15 @@ export default function ProfileIndex() {
   };
 
   const handleSubmit = async () => {
+    // Validate email before submission
+    const emailError = validateEmail(record.email);
+    setErrors((prev) => ({ ...prev, email: emailError }));
+
+    if (emailError) {
+      toast.error("Please fix the errors before submitting");
+      return;
+    }
+
     try {
       setLoading(true);
 
@@ -172,13 +219,20 @@ export default function ProfileIndex() {
           </FormRow>
 
           <FormRow label="Email" desc="Edit your email address">
-            <Input
-              type="email"
-              name="email"
-              value={record.email}
-              onChange={handleChange}
-              placeholder="Enter email"
-            />
+            <div>
+              <Input
+                type="email"
+                name="email"
+                value={record.email}
+                onChange={handleChange}
+                onBlur={handleEmailBlur}
+                placeholder="Enter email"
+                className={errors.email ? "border-red-500" : ""}
+              />
+              {errors.email && (
+                <p className="text-red-500 text-sm mt-1">{errors.email}</p>
+              )}
+            </div>
           </FormRow>
 
           <FormRow label="Phone" desc="Edit your phone number">

@@ -67,7 +67,6 @@ export default function Index() {
       });
 
       if (response?.data?.status) {
-        toast.success(response.data.message);
         await FetchCart();
       }
     } catch (err) {
@@ -298,7 +297,6 @@ export default function Index() {
       });
       
       if (response?.data?.status) {
-        toast.success(response.data.message);
         await FetchCart();
       }
     } catch (err) {

@@ -21,7 +21,7 @@ export const getProductPrices = (product = {}) => {
     ? product.product_price_section
     : [];
 
-  let bestFinal = Infinity;
+  let bestFinal = 0;
   let bestOriginal = 0;
 
   for (const section of sections) {
@@ -40,7 +40,7 @@ export const getProductPrices = (product = {}) => {
           Number(size?.amount) ||
           0;
 
-        if (final > 0 && final < bestFinal) {
+        if (final > 0 && final > bestFinal) {
           bestFinal = final;
           bestOriginal =
             Number(size?.amount) ||
@@ -54,14 +54,14 @@ export const getProductPrices = (product = {}) => {
         Number(section?.amount) ||
         0;
 
-      if (final > 0 && final < bestFinal) {
+      if (final > 0 && final > bestFinal) {
         bestFinal = final;
         bestOriginal = Number(section?.amount) || final;
       }
     }
   }
 
-  if (bestFinal === Infinity) {
+  if (bestFinal === 0) {
     bestFinal = Number(product?.amount) || 0;
     bestOriginal = Number(product?.amount) || 0;
   }

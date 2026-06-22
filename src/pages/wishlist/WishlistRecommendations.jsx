@@ -30,7 +30,7 @@ export default function WishlistRecommendations({ products = [] }) {
               You May Also Like
             </h2>
             <p className="text-xs text-gray-500">
-              Based on your wishlist preferences
+              Explore more products from our collection
             </p>
           </div>
         </div>
