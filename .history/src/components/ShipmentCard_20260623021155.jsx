@@ -114,7 +114,16 @@ export default function ShipmentCard({
         </div>
       ) : null}
 
-      
+      {shipment ? (
+        <details className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+          <summary className="cursor-pointer text-sm font-semibold text-gray-700">
+            Raw Shipment Payload
+          </summary>
+          <pre className="mt-3 overflow-x-auto whitespace-pre-wrap break-words text-xs text-gray-700">
+            {JSON.stringify(shipment, null, 2)}
+          </pre>
+        </details>
+      ) : null}
     </div>
   );
 }

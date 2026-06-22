@@ -3,14 +3,29 @@ const TRACKING_NUMBER_KEYS = [
   "trackingNumber",
   "awb_number",
   "awbNumber",
+  "AWBNo",
   "waybill",
   "waybillNumber",
+];
+
+const REFERENCE_NUMBER_KEYS = [
+  "CCRCRDREF",
+  "creditReference",
+  "creditReferenceNo",
+  "CreditReferenceNo",
+  "orderNumber",
+];
+
+const TOKEN_NUMBER_KEYS = [
+  "TokenNumber",
+  "tokenNumber",
 ];
 
 const STATUS_KEYS = [
   "status",
   "shipment_status",
   "shipmentStatus",
+  "shippingStatus",
   "tracking_status",
   "trackingStatus",
   "current_status",
@@ -59,6 +74,10 @@ function readFirstValue(source, keys) {
     }
   }
 
+  if (source.GenerateWayBillResult && typeof source.GenerateWayBillResult === "object") {
+    return readFirstValue(source.GenerateWayBillResult, keys);
+  }
+
   return null;
 }
 
@@ -98,6 +117,50 @@ export function extractCarrier(...sources) {
   return null;
 }
 
+export function extractReferenceNumber(...sources) {
+  for (const source of sources) {
+    const value = readFirstValue(source, REFERENCE_NUMBER_KEYS);
+
+    if (value) {
+      return String(value);
+    }
+  }
+
+  return null;
+}
+
+export function extractTokenNumber(...sources) {
+  for (const source of sources) {
+    const value = readFirstValue(source, TOKEN_NUMBER_KEYS);
+
+    if (value) {
+      return String(value);
+    }
+  }
+
+  return null;
+}
+
+export function extractStatusInformation(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const statusList =
+      payload?.GenerateWayBillResult?.Status ??
+      payload?.generateWayBillResult?.Status ??
+      payload?.Status ??
+      null;
+
+    if (Array.isArray(statusList) && statusList.length > 0) {
+      return statusList
+        .map((item) => item?.StatusInformation || item?.StatusCode)
+        .filter(Boolean)
+        .join(" | ");
+    }
+  }
+
+  return null;
+}
+
 export function formatShipmentStatus(status) {
   if (!status) {
     return "Pending";
@@ -112,8 +175,15 @@ export function formatShipmentStatus(status) {
 
 export function extractOrderAndShipment(responseOrPayload) {
   const payload = unwrapApiData(responseOrPayload);
-  const order = payload?.order ?? null;
-  const shipment = payload?.shipment ?? payload?.shipment_details ?? null;
+  const order =
+    payload?.order ??
+    (payload?.orderId || payload?.orderNumber ? payload : null);
+  const shipment =
+    payload?.shipment ??
+    payload?.shipment_details ??
+    payload?.shipmentResponse ??
+    payload?.shipping_response ??
+    null;
   const trackingNumber = extractTrackingNumber(
     payload,
     order,
