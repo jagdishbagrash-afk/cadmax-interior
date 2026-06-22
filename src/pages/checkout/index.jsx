@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
-import { formatMultiPrice } from "@/components/ValueDataHook";
-import { incrementQty, decrementQty, clearCart, removeItem } from "@/redux/cartSlice";
+import { useDispatch } from "react-redux";
+import { clearCart } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
 import { FiPlus, FiMinus } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
@@ -12,12 +11,13 @@ import { useRouter } from "next/router";
 import { useRole } from "@/context/RoleContext";
 import Banner from "@/components/Banner";
 import BannerImages from "../../Assets/Images/Frame18.jpg"
-import { useRazorpay, RazorpayOrderOptions } from "react-razorpay";
+import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 
 export default function Index() {
-  const { error, isLoading, Razorpay } = useRazorpay();
+  const { Razorpay } = useRazorpay();
 
   const FetchGetCart = async () => {
     try {
@@ -49,10 +49,15 @@ export default function Index() {
 
   const dispatch = useDispatch();
   const { user } = useRole();
-  const finalAmount = record?.summary?.finalAmount
-  const totalPrice = formatPrice(finalAmount);
+  const finalAmount = Number(record?.summary?.finalAmount || 0);
 
   const itemNames = cartItems.map((item) => item.name);
+  const selectedAddress = data.find(
+    (item) => item._id === formData.addressId
+  );
+  const selectedAddressText = selectedAddress
+    ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
+    : "";
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",  // ✅ FIX
@@ -114,7 +119,7 @@ export default function Index() {
   return;
 }
 
-    if (totalPrice === 0) {
+    if (finalAmount === 0) {
       toast.error("Amount can't be 0!");
       return;
     }
@@ -123,14 +128,14 @@ export default function Index() {
     const main = new Listing();
     try {
       const res = await main.AddPaymentCreate({
-        "amount": (totalPrice),
+        "amount": finalAmount,
         "currency": "INR",
         "receipt": "receipt#1"
       });
       if (res && res.data && res.data.orderId) {
         const options = {
           key: RAZOPAY_KEY,
-          amount: totalPrice,
+          amount: finalAmount,
           currency: "INR",
           name: "Cadmaxatelier",
           description: "Payment for services",
@@ -141,9 +146,8 @@ export default function Index() {
             toast.success("Payment Successful");
           },
           prefill: {
-            name: "Customer Name",
-            email: "customer@example.com",
-            contact: "1234567890",
+            name: formData.name,
+            contact: formData.mobile,
           },
           notes: {
             address: "Razorpay Corporate Office",
@@ -195,19 +199,20 @@ export default function Index() {
       const res = await main.AddOrder({
         name: formData?.name,
         mobile: formData?.mobile,
-        address: formData?.address,
+        address: selectedAddressText,
+        addressId: formData?.addressId,
         product: products,
-        amount: totalPrice,
+        amount: finalAmount,
         PaymentId: response.razorpay_payment_id
       });
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        const orderId = res?.data?.data?._id;
+        const createdOrderId = res?.data?.data?._id;
         await savePaymentDetails(
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          orderId
+          createdOrderId
         );
         toast.success(res?.data?.message);
 
@@ -227,22 +232,53 @@ export default function Index() {
     setLoading(true);
     try {
       const main = new Listing();
+      const shippingProvider = process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
 
-      const response = await main.PaymentSave({
+      const response = await main.VerifyPayment({
         "order_id": orderId,
         "payment_id": paymentId,
         "currency": "INR",
         "product_name": itemNames,
-        "amount": totalPrice,
+        "amount": finalAmount,
         "type": "product",
         "payment_status": payment_status,
         "OrderID": Orderdatas,
+        "shipping_provider": shippingProvider || undefined,
       });
       if (response?.data?.status) {
         toast.success(response.data.message);
-        router.push(`/success`);
-        dispatch(clearCart());
-        FetchGetCart();
+        if (payment_status === "success") {
+          const { order, shipment, trackingNumber } =
+            extractOrderAndShipment(response);
+
+          if (typeof window !== "undefined") {
+            sessionStorage.setItem(
+              "latestShipmentState",
+              JSON.stringify({
+                orderId: Orderdatas || order?._id || null,
+                trackingNumber,
+                order,
+                shipment,
+              })
+            );
+          }
+
+          const query = new URLSearchParams();
+
+          if (Orderdatas || order?._id) {
+            query.set("orderId", Orderdatas || order?._id);
+          }
+
+          if (trackingNumber) {
+            query.set("trackingNumber", trackingNumber);
+          }
+
+          router.push(
+            query.toString() ? `/success?${query.toString()}` : "/success"
+          );
+          dispatch(clearCart());
+          FetchGetCart();
+        }
       } else {
         toast.error(response.data.message);
       }

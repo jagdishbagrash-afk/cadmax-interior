@@ -7,6 +7,11 @@ import { formatMultiPrice } from "@/components/ValueDataHook";
 import { FaChevronDown, FaSearch, FaCircle } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import ShipmentCard from "@/components/ShipmentCard";
+import {
+  extractCarrier,
+  extractOrderAndShipment,
+} from "@/components/shipmentUtils";
 
 const STATUS_CONFIG = {
   pending: { color: "text-yellow-600 bg-yellow-50 border-yellow-200", label: "Pending" },
@@ -24,6 +29,9 @@ export default function OrderHistory() {
   const [activeTab, setActiveTab] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeOrder, setActiveOrder] = useState(null);
+  const [shipmentMap, setShipmentMap] = useState({});
+  const [shipmentLoadingMap, setShipmentLoadingMap] = useState({});
+  const [shipmentErrorMap, setShipmentErrorMap] = useState({});
 
   const fetchData = async () => {
     try {
@@ -42,12 +50,68 @@ export default function OrderHistory() {
     fetchData();
   }, []);
 
+  const fetchShipment = async (orderId) => {
+    if (!orderId || shipmentLoadingMap[orderId]) {
+      return;
+    }
+
+    try {
+      setShipmentLoadingMap((prev) => ({
+        ...prev,
+        [orderId]: true,
+      }));
+
+      const main = new Listing();
+      const response = await main.GetOrderShipment(orderId);
+      const { order, shipment, trackingNumber } =
+        extractOrderAndShipment(response);
+
+      setShipmentMap((prev) => ({
+        ...prev,
+        [orderId]: {
+          order: order || null,
+          shipment: shipment || null,
+          trackingNumber: trackingNumber || "",
+        },
+      }));
+      setShipmentErrorMap((prev) => ({
+        ...prev,
+        [orderId]: "",
+      }));
+    } catch (error) {
+      setShipmentErrorMap((prev) => ({
+        ...prev,
+        [orderId]:
+          error?.response?.data?.message ||
+          "Shipment details are not available yet.",
+      }));
+    } finally {
+      setShipmentLoadingMap((prev) => ({
+        ...prev,
+        [orderId]: false,
+      }));
+    }
+  };
+
+  const handleToggleOrder = (orderId) => {
+    const nextOrderId = activeOrder === orderId ? null : orderId;
+    setActiveOrder(nextOrderId);
+
+    if (nextOrderId && !shipmentMap[orderId]) {
+      fetchShipment(orderId);
+    }
+  };
+
   const filteredOrders = orders.filter((order) => {
-    const matchesStatus = activeTab === "All" || order.status.toLowerCase() === activeTab.toLowerCase();
+    const matchesStatus =
+      activeTab === "All" ||
+      order?.status?.toLowerCase() === activeTab.toLowerCase();
 
     const matchesSearch =
-      order._id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.product.some(p => p.id?.title?.toLowerCase().includes(searchQuery.toLowerCase()));
+      order?._id?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order?.product?.some((p) =>
+        p?.id?.title?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
 
     return matchesStatus && matchesSearch;
   });
@@ -111,6 +175,22 @@ export default function OrderHistory() {
             {filteredOrders?.map((order) => {
               const isOpen = activeOrder === order?._id;
               const statusStyle = STATUS_CONFIG[order?.status] || { color: "bg-gray-100", label: order.status };
+              const shipmentState = shipmentMap[order?._id];
+              const orderTrackingHref = `/orders/${order?._id}/tracking`;
+              const trackingCourier = extractCarrier(
+                shipmentState?.shipment,
+                shipmentState?.order,
+                order
+              );
+              const publicTrackingHref = shipmentState?.trackingNumber
+                ? `/shipment/track/${encodeURIComponent(
+                    shipmentState.trackingNumber
+                  )}${
+                    trackingCourier
+                      ? `?courier=${encodeURIComponent(trackingCourier)}`
+                      : ""
+                  }`
+                : "";
 
               return (
                 <div key={order?._id} className="border border-[#D5D9D9] rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
@@ -121,7 +201,7 @@ export default function OrderHistory() {
                   </div>
 
                   <div
-                    onClick={() => setActiveOrder(isOpen ? null : order?._id)}
+                    onClick={() => handleToggleOrder(order?._id)}
                     className="bg-[#F0F2F2] px-4 py-3 flex flex-wrap items-center justify-between gap-y-3 text-[12px] text-[#565959] cursor-pointer"
                   >
                     <div className="flex gap-8 sm:gap-12">
@@ -190,6 +270,33 @@ export default function OrderHistory() {
                           <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
                             <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">Shipping Address</p>
                             <p className="text-[13px] text-gray-700 leading-relaxed">{order?.address}</p>
+                          </div>
+
+                          <ShipmentCard
+                            title="Shipment Details"
+                            order={shipmentState?.order || order}
+                            shipment={shipmentState?.shipment}
+                            loading={shipmentLoadingMap[order?._id]}
+                            error={shipmentErrorMap[order?._id]}
+                            trackingHref={publicTrackingHref || orderTrackingHref}
+                            emptyMessage="Shipment details will appear after payment verification and carrier creation."
+                          />
+
+                          <div className="mt-4 flex flex-wrap gap-3">
+                            <Link
+                              href={orderTrackingHref}
+                              className="inline-flex rounded-md border border-black px-4 py-2 text-sm font-semibold text-black transition hover:bg-black hover:text-white"
+                            >
+                              Track By Order
+                            </Link>
+                            {publicTrackingHref ? (
+                              <Link
+                                href={publicTrackingHref}
+                                className="inline-flex rounded-md border border-green-700 px-4 py-2 text-sm font-semibold text-green-700 transition hover:bg-green-700 hover:text-white"
+                              >
+                                Public Tracking
+                              </Link>
+                            ) : null}
                           </div>
                         </div>
                       </motion.div>
