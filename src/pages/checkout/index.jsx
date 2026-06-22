@@ -14,6 +14,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -26,7 +27,6 @@ export default function Index() {
   const cartItems = record?.items || [];
   const dispatch = useDispatch();
   const { user } = useRole();
-
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",
@@ -184,12 +184,12 @@ export default function Index() {
 
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        const orderId = res?.data?.data?._id;
+        const createdOrderId = res?.data?.data?._id;
         await savePaymentDetails(
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          orderId
+          createdOrderId
         );
       } else {
         toast.error(res?.data?.message || "Failed to place order");

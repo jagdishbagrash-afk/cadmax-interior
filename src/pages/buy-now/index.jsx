@@ -30,6 +30,12 @@ export default function Index() {
     mobile: "",
     addressId: "",
   });
+  const selectedAddress = data.find(
+    (item) => item._id === formData.addressId
+  );
+  const selectedAddressText = selectedAddress
+    ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
+    : "";
 
   // BUY NOW PRODUCT
   useEffect(() => {
@@ -194,6 +200,7 @@ export default function Index() {
         name: formData.name,
         mobile: formData.mobile,
         addressId: formData.addressId,
+        address: selectedAddressText,
         product: productData,
 
         subtotal,
@@ -230,8 +237,9 @@ export default function Index() {
   ) => {
     try {
       const main = new Listing();
+      const shippingProvider = process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
 
-      const response = await main.PaymentSave({
+      const response = await main.VerifyPayment({
         order_id: orderId,
         payment_id: paymentId,
         currency: "INR",
@@ -240,14 +248,42 @@ export default function Index() {
         type: "product",
         payment_status,
         OrderID: Orderdatas,
+        shipping_provider: shippingProvider || undefined,
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order,
+              shipment,
+            })
+          );
+        }
+
         localStorage.removeItem("buyNowItem");
 
         toast.success(response.data.message);
 
-        router.push("/success");
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }
