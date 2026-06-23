@@ -237,7 +237,7 @@ export default function Index() {
   };
 
   // ============================================================
-  //  FETCH CART – uses ONLY product data (no priceDetails)
+  //  FETCH CART – handles ALL price structures
   // ============================================================
   const FetchCart = async () => {
     try {
@@ -252,12 +252,11 @@ export default function Index() {
           const product = item.product;
 
           // ----- 1. Determine variant -----
-          let selectedVariant = item.selectedVariant; // may be undefined
+          let selectedVariant = item.selectedVariant;
           let variantObj = null;
 
-          // If a variant is explicitly selected, find it; otherwise take first
           if (selectedVariant && product.variants) {
-            variantObj = product.variants.find(v => v.color === selectedVariant);
+            variantObj = product.variants.find((v) => v.color === selectedVariant);
           }
           if (!variantObj && product.variants && product.variants.length > 0) {
             variantObj = product.variants[0];
@@ -265,45 +264,79 @@ export default function Index() {
           }
 
           // ----- 2. Determine price section and size -----
-          let selectedSize = item.selectedSize; // may be undefined
+          let selectedSize = item.selectedSize;
           let priceSection = null;
           let sizeObj = null;
 
-          // First try to find the size using selectedSize (or the first size)
-          if (product.product_price_section && product.product_price_section.length > 0) {
-            // Loop through sections
-            for (const section of product.product_price_section) {
-              if (section.sizes && section.sizes.length > 0) {
-                // If we have a selectedSize, try to match it
-                if (selectedSize) {
-                  sizeObj = section.sizes.find(s => s.title === selectedSize);
-                  if (sizeObj) {
-                    priceSection = { title: section.title };
-                    break;
-                  }
-                } else {
-                  // No selectedSize -> pick first size from first section
-                  sizeObj = section.sizes[0];
-                  priceSection = { title: section.title };
+          // Check if product has price sections
+          const hasPriceSections = product.product_price_section && product.product_price_section.length > 0;
+
+          if (hasPriceSections) {
+            // ---------------------------------------------------
+            // CASE A: Product has price sections
+            // ---------------------------------------------------
+            // Try to use the price section from cart item (if provided)
+            if (item.priceSection?.title) {
+              const foundSection = product.product_price_section.find(
+                (s) => s.title === item.priceSection.title
+              );
+              if (foundSection) {
+                // Extract price from section (with or without sizes)
+                if (foundSection.sizes && foundSection.sizes.length > 0) {
+                  // Has sizes: find matching size or take first
+                  const sizeMatch = foundSection.sizes.find(
+                    (s) => s.title === item.selectedSize
+                  );
+                  sizeObj = sizeMatch || foundSection.sizes[0];
                   selectedSize = sizeObj.title;
-                  break;
+                } else {
+                  // No sizes: use section's own prices
+                  sizeObj = {
+                    amount: foundSection.amount,
+                    discount_amount: foundSection.discount_amount,
+                    final_amount: foundSection.final_amount,
+                  };
+                  selectedSize = null; // no size to display
                 }
+                priceSection = { title: foundSection.title };
+              }
+            }
+
+            // If still not found, fallback to first section
+            if (!sizeObj) {
+              const firstSection = product.product_price_section[0];
+              if (firstSection) {
+                if (firstSection.sizes && firstSection.sizes.length > 0) {
+                  sizeObj = firstSection.sizes[0];
+                  selectedSize = sizeObj.title;
+                } else {
+                  sizeObj = {
+                    amount: firstSection.amount,
+                    discount_amount: firstSection.discount_amount,
+                    final_amount: firstSection.final_amount,
+                  };
+                  selectedSize = null;
+                }
+                priceSection = { title: firstSection.title };
               }
             }
           }
 
-          // If still no size, fallback (should not happen)
+          // ---------------------------------------------------
+          // CASE B: No price sections – use product-level prices
+          // ---------------------------------------------------
           if (!sizeObj) {
-            // Take first section and first size
-            const firstSection = product.product_price_section?.[0];
-            if (firstSection && firstSection.sizes && firstSection.sizes.length > 0) {
-              sizeObj = firstSection.sizes[0];
-              priceSection = { title: firstSection.title };
-              selectedSize = sizeObj.title;
-            }
+            // Use product top-level amount, discount_amount, final_amount
+            sizeObj = {
+              amount: product.amount || 0,
+              discount_amount: product.discount_amount || 0,
+              final_amount: product.final_amount || product.amount || 0,
+            };
+            priceSection = null;
+            selectedSize = null;
           }
 
-          // ----- 3. Extract prices from sizeObj -----
+          // ----- 3. Extract prices -----
           const originalPrice = sizeObj?.amount || 0;
           const discountAmount = sizeObj?.discount_amount || 0;
           const finalPrice = sizeObj?.final_amount || originalPrice;
@@ -313,25 +346,24 @@ export default function Index() {
 
           // ----- 5. Build flattened item -----
           return {
-            ...item, // keep original fields like quantity, _id etc.
+            ...item,
             productId: product._id,
             title: product.title,
             slug: product.slug,
-            label_category : product?.label_category,
-            label_size : product?.label_size,
+            label_category: product?.label_category,
+            label_size: product?.label_size,
             variant: selectedVariant,
             variantTitle: variantObj?.title,
             selectedSize: selectedSize,
             priceSection: priceSection,
             priceSectionTitle: priceSection?.title,
-            // Prices from product data (not from priceDetails)
             originalPrice: originalPrice,
             finalPrice: finalPrice,
             discountAmount: discountAmount,
             images: images,
             availableStock: item.availableStock,
             maxStock: item.availableStock,
-            itemSubtotal: item.itemSubtotal, // you may keep or recompute
+            itemSubtotal: item.itemSubtotal,
             itemOriginalSubtotal: item.itemOriginalSubtotal,
             itemDiscountAmount: item.itemDiscountAmount,
             isOutOfStock: item.isOutOfStock,
@@ -605,24 +637,17 @@ export default function Index() {
                                         </span>
                                       )}
 
-
-  {item?.selectedSize && (
+                                      {item?.selectedSize && (
                                         <span className="text-xs text-green-600 block font-medium">
                                           {item?.label_size}: {item?.selectedSize}
                                         </span>
                                       )}
+
                                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                                         <span className="text-sm font-bold text-black">
                                           {formatPrice(finalPrice)}
                                         </span>
-                                        {discount > 0 && originalPrice > finalPrice && (
-                                          <>
-                                            <span className="text-xs text-gray-400 line-through">
-                                              ₹{formatPrice(originalPrice)}
-                                            </span>
-                                           
-                                          </>
-                                        )}
+                                        
                                       </div>
                                     </div>
                                   </div>
