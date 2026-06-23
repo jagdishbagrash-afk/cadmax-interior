@@ -12,7 +12,7 @@ import {
 
 export default function useWishlist() {
   const dispatch = useDispatch();
-  const { user } = useRole();
+  const { user, clearUser } = useRole();
   const router = useRouter();
   const count = useSelector((state) => state.wishlist.count);
 
@@ -52,8 +52,19 @@ export default function useWishlist() {
           }
         }
       } catch (error) {
+        const status = error?.response?.status;
         const message =
           error?.response?.data?.message || "Something went wrong";
+
+        // Handle token expiration
+        if (status === 401 || message.toLowerCase().includes("token")) {
+          toast.error("Session expired. Please login again.");
+          // Clear user session
+          clearUser();
+          router.push("/login");
+          return;
+        }
+
         toast.error(message);
       }
     },

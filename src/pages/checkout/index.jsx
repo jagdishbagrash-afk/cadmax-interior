@@ -318,8 +318,8 @@ export default function Index() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12">
             {/* LEFT COLUMN: FORM */}
-            <div className="w-full lg:w-5/12">
-              <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm">
+            <div className="w-full lg:w-6/12">
+              <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm lg:sticky lg:top-24">
                 <div className="px-6 py-5 border-b border-gray-200">
                   <h2 className="text-2xl font-semibold tracking-tight">Shipping Details</h2>
                   <p className="text-sm text-gray-500 mt-1">Please enter your delivery information.</p>
@@ -409,7 +409,7 @@ export default function Index() {
             </div>
 
             {/* RIGHT COLUMN: CART SUMMARY */}
-            <div className="w-full lg:w-7/12">
+            <div className="w-full lg:w-6/12">
               <div className="sticky top-10">
                 <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
                   Order Summary ({cartItems?.length || 0})
@@ -486,6 +486,16 @@ export default function Index() {
                                         <span className="text-sm font-bold text-black">
                                           {formatPrice(finalPrice)}
                                         </span>
+                                        {discount > 0 && originalPrice > finalPrice && (
+                                          <>
+                                            <span className="text-xs text-gray-400 line-through">
+                                              ₹{formatPrice(originalPrice)}
+                                            </span>
+                                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
+                                              {Math.round((discount / originalPrice) * 100)}% OFF
+                                            </span>
+                                          </>
+                                        )}
                                       </div>
                                     </div>
                                   </div>
@@ -538,49 +548,59 @@ export default function Index() {
                       </table>
                     </div>
 
-                    {/* PRICE SUMMARY CARD */}
-                      {/* <div className="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                        <h3 className="text-lg font-semibold mb-4">Price Summary</h3>
-                        <div className="space-y-3">
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Subtotal</span>
-                            <span className="font-medium">{formatPrice(subtotal)}</span>
-                          </div>
-                          
-                          {totalDiscount > 0 && (
-                            <div className="flex justify-between text-sm text-green-600">
-                              <span>Product Discount</span>
-                              <span>- {formatPrice(totalDiscount)}</span>
-                            </div>
-                          )}
-                          
-                          {cartDiscountAmount > 0 && (
-                            <div className="flex justify-between text-sm text-green-600">
-                              <span>Cart Discount ({summary.cartDiscount}%)</span>
-                              <span>- {formatPrice(cartDiscountAmount)}</span>
-                            </div>
-                          )}
-                          
-                          {taxAmount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span>Tax ({summary.tax}%)</span>
-                              <span>+ {formatPrice(taxAmount)}</span>
-                            </div>
-                          )}
-                          
-                          <div className="border-t border-gray-200 pt-3 mt-3">
-                            <div className="flex justify-between text-lg font-bold">
-                              <span>Total Amount</span>
-                              <span className="text-black">{formatPrice(totalAmount)}</span>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2 text-right">
-                              Inclusive of all taxes
-                            </p>
-                          </div>
+                    {/* ========== OLD PRICE SUMMARY - COMMENTED FOR REFERENCE ========== */}
+                    {/*
+                    <div className="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                      <h3 className="text-lg font-semibold mb-4">Price Summary</h3>
+                      <div className="space-y-3">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-600">Subtotal</span>
+                          <span className="font-medium">{formatPrice(subtotal)}</span>
                         </div>
-                      </div> */}
+                        {totalDiscount > 0 && (
+                          <div className="flex justify-between text-sm text-green-600">
+                            <span>Product Discount</span>
+                            <span>- {formatPrice(totalDiscount)}</span>
+                          </div>
+                        )}
+                        {cartDiscountAmount > 0 && (
+                          <div className="flex justify-between text-sm text-green-600">
+                            <span>Cart Discount ({summary.cartDiscount}%)</span>
+                            <span>- {formatPrice(cartDiscountAmount)}</span>
+                          </div>
+                        )}
+                        {taxAmount > 0 && (
+                          <div className="flex justify-between text-sm">
+                            <span>Tax ({summary.tax}%)</span>
+                            <span>+ {formatPrice(taxAmount)}</span>
+                          </div>
+                        )}
+                        <div className="border-t border-gray-200 pt-3 mt-3">
+                          <div className="flex justify-between text-lg font-bold">
+                            <span>Total Amount</span>
+                            <span className="text-black">{formatPrice(totalAmount)}</span>
+                          </div>
+                          <p className="text-xs text-gray-500 mt-2 text-right">
+                            Inclusive of all taxes
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                    */}
+
+                    {/* GRAND TOTAL CARD */}
+                    <div className="mt-8 w-full rounded-lg bg-black px-5 py-4 flex items-center justify-between">
+                      <h3 className="text-base md:text-lg font-semibold text-white tracking-wide">
+                        GRAND TOTAL
+                      </h3>
+                      <span className="text-lg md:text-xl font-bold text-white">
+                        ₹ {formatPrice(totalAmount)}
+                      </span>
+                    </div>
                   </>
                 )}
+
+               
               </div>
             </div>
           </div>

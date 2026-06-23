@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import StarRatingDisplay from "./StarRatingDisplay";
 import { FaRegThumbsUp, FaRegThumbsDown, FaTrash, FaEdit, FaTimes, FaChevronLeft, FaChevronRight } from "react-icons/fa";
-import { MdVerified } from "react-icons/md";
 
 function timeAgo(date) {
   const now = new Date();
@@ -43,8 +42,14 @@ export default function ReviewCard({
 
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const [showFullMessage, setShowFullMessage] = useState(false);
 
   const isOwnReview = userId && user?._id === userId;
+  const MAX_MESSAGE_LENGTH = 100;
+  const isLongMessage = message && message.length > MAX_MESSAGE_LENGTH;
+  const displayMessage = isLongMessage && !showFullMessage
+    ? message.substring(0, MAX_MESSAGE_LENGTH) + "..."
+    : message;
   const hasImages = images && images.length > 0;
   const showStatusBadge = false;
 
@@ -63,9 +68,11 @@ export default function ReviewCard({
     setLightboxIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
+  const toggleMessage = () => setShowFullMessage(!showFullMessage);
+
   return (
     <>
-      <div className="bg-white border border-gray-100 rounded-2xl p-5 md:p-6 hover:shadow-sm transition-shadow relative">
+      <div className="bg-white border border-gray-100 rounded-xl p-4 md:p-5 hover:shadow-sm transition-shadow relative">
         {/* Header - User Info & Rating */}
         <div className="flex items-start justify-between mb-3">
           <div className="flex items-center gap-3">
@@ -112,8 +119,18 @@ export default function ReviewCard({
           )}
         </div>
 
-        {title && <h4 className="text-base font-bold text-black mb-1.5">{title}</h4>}
-        <p className="text-sm text-[#4D5466] leading-relaxed mb-4">{message}</p>
+        {title && <h4 className="text-sm font-semibold text-black mb-1">{title}</h4>}
+        <p className="text-sm text-[#4D5466] leading-relaxed mb-2">
+          {displayMessage}
+          {isLongMessage && (
+            <button
+              onClick={toggleMessage}
+              className="text-blue-600 hover:text-blue-800 font-medium ml-1 text-xs"
+            >
+              {showFullMessage ? "Show less" : "Read more"}
+            </button>
+          )}
+        </p>
 
         {/* Review Images */}
         {hasImages && (

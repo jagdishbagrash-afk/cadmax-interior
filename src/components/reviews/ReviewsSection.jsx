@@ -30,7 +30,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
     markNotHelpful,
   } = useReviews();
 
-  const [activeSort, setActiveSort] = useState("latest");
+  const [activeSort, setActiveSort] = useState("all");
   const [activeRatingFilter, setActiveRatingFilter] = useState(null);
   const [showWriteModal, setShowWriteModal] = useState(false);
   const [editReviewData, setEditReviewData] = useState(null);
@@ -124,28 +124,44 @@ export default function ReviewsSection({ productId, productName = "" }) {
   };
 
   const handleSort = (sort) => {
-    if (sort === "positive" || sort === "negative") {
+    if (sort === "all") {
       setActiveRatingFilter(null);
     }
     setActiveSort(sort);
   };
 
-  const handleWriteReview = () => {
+  const handleWriteReview = async () => {
     if (!user || user?.role !== "customer") {
       toast.error("Please login to write a review");
       router.push("/login");
       return;
     }
-    // Check if user has already reviewed this product
-    if (eligibility?.hasReviewed) {
-      toast.error("You have already reviewed this product. You can edit or delete your existing review.");
-      return;
+    // If user already reviewed, open edit modal directly
+    if (eligibility?.hasReviewed && eligibility?.existingReviewId) {
+      try {
+        // Fetch the user's existing review from API using the review ID
+        const Listing = (await import("@/pages/api/Listing")).default;
+        const main = new Listing();
+        const response = await main.GetProductReviews(productId, { userId: user._id, limit: 50 });
+        if (response?.data?.status) {
+          const userReview = response.data.data.reviews.find(
+            (r) => r._id === eligibility.existingReviewId
+          );
+          if (userReview) {
+            setEditReviewData(userReview);
+            setShowWriteModal(true);
+            return;
+          }
+        }
+      } catch (err) {
+        console.error("Failed to fetch existing review:", err);
+      }
     }
     // Any logged-in user can write a review (purchase not required)
     setEditReviewData(null);
     setShowWriteModal(true);
   };
-
+  
   const handleEditReview = (review) => {
     setEditReviewData(review);
     setShowWriteModal(true);
@@ -222,10 +238,9 @@ export default function ReviewsSection({ productId, productName = "" }) {
   };
 
   const sortOptions = [
+    { value: "all", label: "All" },
     { value: "most_helpful", label: "Most Helpful" },
     { value: "latest", label: "Latest" },
-    { value: "positive", label: "Positive" },
-    { value: "negative", label: "Negative" },
   ];
 
   const totalReviews = ratingSummary?.totalReviews || 0;

@@ -124,7 +124,7 @@ export default function Header() {
         className={`sticky top-0 z-[100] transition-all duration-300 ${scrolled ? "bg-white shadow-md" : "bg-white/30"
           }`}
       >
-        <nav className="max-w-[1430px] container bg-transparent mx-auto flex items-center justify-between px-6 xl:px-0 py-3 md:py-0">
+        <nav className="max-w-[1430px] container bg-transparent mx-auto flex items-center justify-between px-6 xl:px-6 py-3 md:py-0">
 
           {/* LOGO */}
           <Link href="/" className="mt-2 mb-2">
