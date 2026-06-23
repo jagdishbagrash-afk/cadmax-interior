@@ -634,32 +634,60 @@ export default function Index() {
                   spaceBetween={12}
                   className="mt-4"
                 >
-                  {selectedVariant?.images?.map((img, index) => (
-                    <SwiperSlide key={index}>
-                      <div className="w-full sm:w-[150px]">
+                  
+                   {selectedVariant?.images?.map((img, index) => (
+                 <SwiperSlide key={index}>
                         <div
-                          className={`h-[35px] md:h-[56px] border border-black rounded-2xl flex items-center justify-between px-5 ${isOutOfStock ? "opacity-50 pointer-events-none" : ""}`}
+                          onMouseEnter={() => setCurrentIndex(index)}
+                          className={`
+      relative w-full h-[120px]
+      rounded-xl overflow-hidden
+      border-2 cursor-pointer bg-[#F7F7F7]
+      transition-all duration-300
+      ${currentIndex === index
+                              ? "border-black"
+                              : "border-gray-200"
+                            }
+    `}
                         >
-                          <button
-                            onClick={decreaseQty}
-                            disabled={isOutOfStock}
-                            className="text-xl font-bold"
-                          >
-                            −
-                          </button>
-                          <span className="font-semibold text-lg">{qty}</span>
-                          <button
-                            onClick={increaseQty}
-                            disabled={isOutOfStock}
-                            className="text-xl font-bold"
-                          >
-                            +
-                          </button>
+                          <Image
+                            src={img}
+                            alt="thumb"
+                            fill
+                            className="object-cover p-0"
+                          />
                         </div>
-                      </div>
-                    </SwiperSlide>
+                      </SwiperSlide>
                   ))}
                 </Swiper>
+
+                <div className="w-full sm:w-[150px] my-3">
+  <div
+    className={`h-11 sm:h-14 w-full sm:w-[150px] border border-black rounded-xl sm:rounded-2xl flex items-center justify-between px-4 sm:px-5 ${
+      isOutOfStock ? "opacity-50 pointer-events-none" : ""
+    }`}
+  >
+    <button
+      onClick={decreaseQty}
+      disabled={isOutOfStock}
+      className="w-8 h-8 flex items-center justify-center text-xl sm:text-2xl font-bold"
+    >
+      −
+    </button>
+
+    <span className="font-semibold text-base sm:text-lg min-w-[30px] text-center">
+      {qty}
+    </span>
+
+    <button
+      onClick={increaseQty}
+      disabled={isOutOfStock}
+      className="w-8 h-8 flex items-center justify-center text-xl sm:text-2xl font-bold"
+    >
+      +
+    </button>
+  </div>
+</div>
               </div>
 
               {/* DESKTOP */}

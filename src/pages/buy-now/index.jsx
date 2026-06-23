@@ -33,6 +33,7 @@ export default function Index() {
   // BUY NOW PRODUCT
   useEffect(() => {
     const item = JSON.parse(localStorage.getItem("buyNowItem"));
+    console.log("item", item);
 
     if (!item) {
       router.push("/");
@@ -91,7 +92,7 @@ export default function Index() {
 
   // PRICE CALCULATIONS
   const subtotal =
-    (product?.price || 0) * (product?.quantity || 1);
+    (product?.originalPrice || 0) * (product?.quantity || 1);
 
   const discountTotal =
     (product?.discount_amount || 0) *
@@ -260,7 +261,7 @@ export default function Index() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-12">
 
-            {/* LEFT */}
+            {/* LEFT COLUMN – Shipping Form */}
             <div className="w-full lg:w-5/12">
               <div className="bg-[#F9F9F9] border border-gray-200 shadow-sm">
                 <div className="px-6 py-5 border-b border-gray-200">
@@ -350,10 +351,11 @@ export default function Index() {
                     type="submit"
                     disabled={loading}
                     className={`w-full py-4 mt-8 font-bold transition
-                    ${loading
+                    ${
+                      loading
                         ? "bg-gray-300 cursor-not-allowed"
                         : "bg-black text-white hover:bg-gray-800"
-                      }`}
+                    }`}
                   >
                     {loading ? "Processing..." : "Pay Now"}
                   </button>
@@ -361,7 +363,7 @@ export default function Index() {
               </div>
             </div>
 
-            {/* RIGHT */}
+            {/* RIGHT COLUMN – Product Summary */}
             <div className="w-full lg:w-7/12">
               <div className="border border-gray-200 p-6">
 
@@ -370,10 +372,10 @@ export default function Index() {
                 </h2>
 
                 {product && (
-                  <div className="flex gap-5 items-center">
+                  <div className="flex gap-5 items-start">
 
                     {/* IMAGE */}
-                    <div className="w-28 h-28 border bg-gray-100 overflow-hidden">
+                    <div className="w-28 h-28 border bg-gray-100 overflow-hidden flex-shrink-0">
                       <img
                         src={
                           product?.images?.[0] ||
@@ -394,11 +396,25 @@ export default function Index() {
                         Variant: {product?.variant}
                       </p>
 
+                      {/* ---- NEW: Price Section ---- */}
+                      {product?.selectedPriceSection?.title && (
+                        <p className="text-sm text-gray-500">
+                          Category: {product.selectedPriceSection.title}
+                        </p>
+                      )}
+
+                      {/* ---- NEW: Selected Size ---- */}
+                      {product?.selectedSize?.title && (
+                        <p className="text-sm text-gray-500">
+                          Size: {product.selectedSize.title}
+                        </p>
+                      )}
+
                       <p className="text-sm text-gray-500">
                         Quantity: {product?.quantity}
                       </p>
 
-                      {/* PRICE */}
+                      {/* PRICE DISPLAY */}
                       <div className="mt-3 space-y-1">
 
                         <div className="flex items-center gap-3">
@@ -406,22 +422,20 @@ export default function Index() {
                             {formatMultiPrice(subtotal, "INR")}
                           </span>
 
-                          {/* <span className="text-green-600 font-medium text-sm">
-                            Save {discountTotal} %
-                          </span> */}
+                         
                         </div>
 
                         <div className="text-2xl font-bold">
                           {formatPrice(finalTotal, "INR")}
                         </div>
+
                       </div>
                     </div>
                   </div>
                 )}
 
-                {/* TOTAL */}
+                {/* FINAL TOTAL */}
                 <div className="border-t mt-8 pt-6 space-y-3">
-
                   <div className="flex justify-between items-center pt-4">
                     <span className="text-lg font-semibold">
                       Final Amount
@@ -431,8 +445,8 @@ export default function Index() {
                       {formatPrice(finalTotal, "INR")}
                     </span>
                   </div>
-
                 </div>
+
               </div>
             </div>
 
