@@ -4,7 +4,7 @@ import Layout from "../../common/Layout";
 import ProductImage from "../../../Assets/Images/ProductDetail.png";
 import { createPortal } from "react-dom";
 import Image from "next/image";
-import { FiTruck, FiHeart } from "react-icons/fi";
+import { FiTruck, FiHeart, FiShare } from "react-icons/fi";
 import { FaPlus, FaMinus } from "react-icons/fa6";
 import { useDispatch } from "react-redux";
 import { addItem } from "@/redux/cartSlice";
@@ -138,6 +138,35 @@ export default function Index() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+
+  const handleShare = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      toast.success("Link copied to clipboard!", {
+        duration: 3000,
+        position: "top-right",
+        style: {
+          background: "#10b981",
+          color: "#ffffff",
+          border: "1px solid #059669",
+          borderRadius: "12px",
+          padding: "16px 24px",
+          fontSize: "14px",
+          fontWeight: "600",
+          boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+        },
+        iconTheme: {
+          primary: "#ffffff",
+          secondary: "#10b981",
+        },
+      });
+    } catch (error) {
+      toast.error("Failed to copy link", {
+        duration: 3000,
+        position: "top-right",
+      });
+    }
+  };
 
   // ================= NEW: SORT STATE FOR RELATED PRODUCTS =================
   const [relatedSortBy, setRelatedSortBy] = useState("");
@@ -471,6 +500,20 @@ export default function Index() {
     try {
       const main = new Listing();
       await main.AddTocart(cartData);
+      toast.success("Added to cart", {
+        duration: 2000,
+        position: "bottom-center",
+        style: {
+          background: "#ffffff",
+          color: "#1a1a1a",
+          border: "1px solid #e5e7eb",
+          borderRadius: "9999px",
+          padding: "10px 24px",
+          fontSize: "13px",
+          fontWeight: "500",
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+        },
+      });
     } catch (err) {
       toast.error(err?.response?.data?.message || "Failed to add to cart");
     }
@@ -572,6 +615,24 @@ export default function Index() {
                     alt="Product"
                     className="w-full h-full object-cover p-0"
                   />
+                  {/* Wishlist & Share Icons */}
+                  <div className="absolute top-4 right-4 flex flex-col gap-2">
+                    <button
+                      onClick={() => toggleWishlist(ProductDetails?._id)}
+                      className={`w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 ${isWishlisted
+                        ? "text-red-500"
+                        : "text-gray-600 hover:text-red-500"
+                        }`}
+                    >
+                      <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
+                    </button>
+                    <button
+                      onClick={handleShare}
+                      className="w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-black transition-all duration-300"
+                    >
+                      <FiShare className="text-lg" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* THUMBNAILS */}
@@ -661,6 +722,25 @@ export default function Index() {
     alt="Product"
     zoomScale={2.5}
   />
+
+  {/* Wishlist & Share Icons */}
+  <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
+    <button
+      onClick={() => toggleWishlist(ProductDetails?._id)}
+      className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
+        ? "text-red-500"
+        : "text-gray-600 hover:text-red-500"
+        }`}
+    >
+      <FiHeart className={`text-xl ${isWishlisted ? 'fill-red-500' : ''}`} />
+    </button>
+    <button
+      onClick={handleShare}
+      className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-black transition-all duration-300 hover:scale-110"
+    >
+      <FiShare className="text-xl" />
+    </button>
+  </div>
 </div>
                 </div>
               </div>
@@ -693,8 +773,6 @@ export default function Index() {
                       ₹{formatPrice(originalAmount)}
                     </span>
                   )}
-
-
 
                   <span className="text-sm text-[#6B7280]">
                     Inclusive of all taxes
@@ -894,17 +972,6 @@ export default function Index() {
                     {isOutOfStock ? "OUT OF STOCK" : "BUY IT NOW"}
                   </button>
 
-                  {/* WISHLIST BUTTON */}
-                  <button
-                    onClick={() => toggleWishlist(ProductDetails?._id)}
-                    className={`w-full h-[35px] md:h-[58px] rounded-2xl border-2 font-semibold tracking-wide transition-all duration-300 flex items-center justify-center gap-2 ${isWishlisted
-                      ? "bg-red-50 border-red-200 text-red-500"
-                      : "bg-white border-gray-300 text-gray-600 hover:border-red-200 hover:text-red-500"
-                      }`}
-                  >
-                    <FiHeart className={`text-lg ${isWishlisted ? 'fill-red-500' : ''}`} />
-                    {isWishlisted ? 'REMOVE FROM WISHLIST' : 'ADD TO WISHLIST'}
-                  </button>
                 </div>
 
                 <div className="mt-10 border-t border-gray-200">
