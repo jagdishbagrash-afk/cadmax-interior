@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Image from "next/image";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
 import { FiPlus, FiMinus } from "react-icons/fi";
@@ -26,11 +26,11 @@ export default function Index() {
   const cartItems = record?.items || [];
   const dispatch = useDispatch();
   const { user } = useRole();
-  
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",
-    addressId: ""
+    addressId: "",
   });
 
   useEffect(() => {
@@ -38,7 +38,7 @@ export default function Index() {
       setFormData((prev) => ({
         ...prev,
         name: user?.name || "",
-        mobile: user?.phone ? String(user.phone) : ""
+        mobile: user?.phone ? String(user.phone) : "",
       }));
     }
   }, [user]);
@@ -63,7 +63,7 @@ export default function Index() {
         productId: item.productId,
         variant: item.variant,
         quantity: 0,
-        priceSectionTitle: item.priceSection?.title
+        priceSectionTitle: item.priceSection?.title,
       });
 
       if (response?.data?.status) {
@@ -76,7 +76,7 @@ export default function Index() {
 
   const handlePaymentCreateSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (String(formData.mobile).length !== 10) {
       toast.error("Mobile number must be exactly 10 digits");
       return;
@@ -88,7 +88,7 @@ export default function Index() {
     }
 
     const totalAmount = record?.summary?.totalAmount || 0;
-    
+
     if (totalAmount === 0) {
       toast.error("Cart is empty");
       return;
@@ -100,9 +100,9 @@ export default function Index() {
       const res = await main.AddPaymentCreate({
         amount: totalAmount,
         currency: "INR",
-        receipt: "receipt#1"
+        receipt: "receipt#1",
       });
-      
+
       if (res && res.data && res.data.orderId) {
         const options = {
           key: RAZOPAY_KEY,
@@ -123,7 +123,7 @@ export default function Index() {
             color: "#F37254",
           },
         };
-        
+
         const rzp = new Razorpay(options);
         rzp.on("payment.failed", function (response) {
           const error = response.error;
@@ -151,10 +151,10 @@ export default function Index() {
       toast.error("Your cart is empty");
       return;
     }
-    
+
     if (loading) return;
     setLoading(true);
-    
+
     try {
       const products = cartItems.map((item) => ({
         id: item.productId,
@@ -166,12 +166,11 @@ export default function Index() {
         variant: item.variant,
         variantTitle: item.variantTitle,
         priceSection: item.priceSection,
-          priceSectionTitle: item.priceSection?.title   // ✅ already included
-
+        priceSectionTitle: item.priceSection?.title,
       }));
-      
+
       const totalAmount = record?.summary?.totalAmount || 0;
-      
+
       const main = new Listing();
       const res = await main.AddOrder({
         name: formData?.name,
@@ -180,9 +179,9 @@ export default function Index() {
         product: products,
         amount: totalAmount,
         PaymentId: response.razorpay_payment_id,
-        orderId: response.razorpay_order_id
+        orderId: response.razorpay_order_id,
       });
-      
+
       if (res?.data?.status) {
         toast.success(res?.data?.message);
         const orderId = res?.data?.data?._id;
@@ -205,9 +204,11 @@ export default function Index() {
   const savePaymentDetails = async (orderId, paymentId, payment_status, Orderdatas) => {
     setLoading(true);
     try {
-      const itemNames = cartItems.map((item) => `${item.title} (${item.variantTitle})`).join(", ");
+      const itemNames = cartItems
+        .map((item) => `${item.title} (${item.variantTitle})`)
+        .join(", ");
       const totalAmount = record?.summary?.totalAmount || 0;
-      
+
       const main = new Listing();
       const response = await main.PaymentSave({
         order_id: orderId,
@@ -219,7 +220,7 @@ export default function Index() {
         payment_status: payment_status,
         OrderID: Orderdatas,
       });
-      
+
       if (response?.data?.status) {
         toast.success(response.data.message);
         dispatch(clearCart());
@@ -235,18 +236,118 @@ export default function Index() {
     }
   };
 
+  // ============================================================
+  //  FETCH CART – uses ONLY product data (no priceDetails)
+  // ============================================================
   const FetchCart = async () => {
     try {
       const main = new Listing();
       const response = await main.CartGet();
-      console.log("response get", response);
+      console.log("Cart API response", response);
+
       if (response?.data?.data) {
-        setRecord(response.data.data);
+        const cart = response.data.data;
+
+        const transformedItems = cart.items.map((item) => {
+          const product = item.product;
+
+          // ----- 1. Determine variant -----
+          let selectedVariant = item.selectedVariant; // may be undefined
+          let variantObj = null;
+
+          // If a variant is explicitly selected, find it; otherwise take first
+          if (selectedVariant && product.variants) {
+            variantObj = product.variants.find(v => v.color === selectedVariant);
+          }
+          if (!variantObj && product.variants && product.variants.length > 0) {
+            variantObj = product.variants[0];
+            selectedVariant = variantObj.color;
+          }
+
+          // ----- 2. Determine price section and size -----
+          let selectedSize = item.selectedSize; // may be undefined
+          let priceSection = null;
+          let sizeObj = null;
+
+          // First try to find the size using selectedSize (or the first size)
+          if (product.product_price_section && product.product_price_section.length > 0) {
+            // Loop through sections
+            for (const section of product.product_price_section) {
+              if (section.sizes && section.sizes.length > 0) {
+                // If we have a selectedSize, try to match it
+                if (selectedSize) {
+                  sizeObj = section.sizes.find(s => s.title === selectedSize);
+                  if (sizeObj) {
+                    priceSection = { title: section.title };
+                    break;
+                  }
+                } else {
+                  // No selectedSize -> pick first size from first section
+                  sizeObj = section.sizes[0];
+                  priceSection = { title: section.title };
+                  selectedSize = sizeObj.title;
+                  break;
+                }
+              }
+            }
+          }
+
+          // If still no size, fallback (should not happen)
+          if (!sizeObj) {
+            // Take first section and first size
+            const firstSection = product.product_price_section?.[0];
+            if (firstSection && firstSection.sizes && firstSection.sizes.length > 0) {
+              sizeObj = firstSection.sizes[0];
+              priceSection = { title: firstSection.title };
+              selectedSize = sizeObj.title;
+            }
+          }
+
+          // ----- 3. Extract prices from sizeObj -----
+          const originalPrice = sizeObj?.amount || 0;
+          const discountAmount = sizeObj?.discount_amount || 0;
+          const finalPrice = sizeObj?.final_amount || originalPrice;
+
+          // ----- 4. Images from variant -----
+          const images = variantObj?.images || [];
+
+          // ----- 5. Build flattened item -----
+          return {
+            ...item, // keep original fields like quantity, _id etc.
+            productId: product._id,
+            title: product.title,
+            slug: product.slug,
+            label_category : product?.label_category,
+            label_size : product?.label_size,
+            variant: selectedVariant,
+            variantTitle: variantObj?.title,
+            selectedSize: selectedSize,
+            priceSection: priceSection,
+            priceSectionTitle: priceSection?.title,
+            // Prices from product data (not from priceDetails)
+            originalPrice: originalPrice,
+            finalPrice: finalPrice,
+            discountAmount: discountAmount,
+            images: images,
+            availableStock: item.availableStock,
+            maxStock: item.availableStock,
+            itemSubtotal: item.itemSubtotal, // you may keep or recompute
+            itemOriginalSubtotal: item.itemOriginalSubtotal,
+            itemDiscountAmount: item.itemDiscountAmount,
+            isOutOfStock: item.isOutOfStock,
+            stock_status: item.stock_status,
+          };
+        });
+
+        setRecord({
+          ...cart,
+          items: transformedItems,
+        });
       } else {
         setRecord(null);
       }
     } catch (error) {
-      console.log(error);
+      console.error("FetchCart error:", error);
       setRecord(null);
     }
   };
@@ -283,7 +384,7 @@ export default function Index() {
     try {
       const main = new Listing();
       const newQty = type === "increase" ? item.quantity + 1 : item.quantity - 1;
-      
+
       if (newQty < 1) {
         await handleRemove(item);
         return;
@@ -293,9 +394,9 @@ export default function Index() {
         productId: item.productId,
         variant: item.variant,
         quantity: newQty,
-        priceSectionTitle: item.priceSection?.title
+        priceSectionTitle: item.priceSection?.title,
       });
-      
+
       if (response?.data?.status) {
         await FetchCart();
       }
@@ -306,10 +407,6 @@ export default function Index() {
 
   const summary = record?.summary || {};
   const totalAmount = summary.totalAmount || 0;
-  const subtotal = summary.subtotal || 0;
-  const totalDiscount = summary.totalDiscount || 0;
-  const cartDiscountAmount = summary.cartDiscountAmount || 0;
-  const taxAmount = summary.taxAmount || 0;
 
   return (
     <Layout>
@@ -321,15 +418,22 @@ export default function Index() {
             <div className="w-full lg:w-6/12">
               <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm lg:sticky lg:top-24">
                 <div className="px-6 py-5 border-b border-gray-200">
-                  <h2 className="text-2xl font-semibold tracking-tight">Shipping Details</h2>
-                  <p className="text-sm text-gray-500 mt-1">Please enter your delivery information.</p>
+                  <h2 className="text-2xl font-semibold tracking-tight">
+                    Shipping Details
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    Please enter your delivery information.
+                  </p>
                 </div>
 
                 <form className="p-6" onSubmit={handlePaymentCreateSubmit}>
                   <div className="space-y-6">
                     {/* NAME */}
                     <div>
-                      <label htmlFor="name" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                      <label
+                        htmlFor="name"
+                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                      >
                         Full Name *
                       </label>
                       <input
@@ -347,7 +451,10 @@ export default function Index() {
 
                     {/* MOBILE */}
                     <div>
-                      <label htmlFor="mobile" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                      <label
+                        htmlFor="mobile"
+                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                      >
                         Mobile Number *
                       </label>
                       <input
@@ -368,10 +475,16 @@ export default function Index() {
                     {/* ADDRESS SELECTION */}
                     <div>
                       <div className="flex justify-between items-center text-center mt-2">
-                        <label htmlFor="addressId" className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                        <label
+                          htmlFor="addressId"
+                          className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                        >
                           Select Address *
                         </label>
-                        <Link href={"/address"} className="mt-2 text-sm text-blue-600 underline mb-2">
+                        <Link
+                          href={"/address"}
+                          className="mt-2 text-sm text-blue-600 underline mb-2"
+                        >
                           + Add New Address
                         </Link>
                       </div>
@@ -398,9 +511,11 @@ export default function Index() {
                     type="submit"
                     disabled={loading || cartItems.length === 0}
                     className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
-                      ${loading || cartItems.length === 0
-                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                        : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"}`}
+                      ${
+                        loading || cartItems.length === 0
+                          ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                          : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
+                      }`}
                   >
                     {loading ? "Processing..." : "Proceed to Payment"}
                   </button>
@@ -414,11 +529,14 @@ export default function Index() {
                 <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
                   Order Summary ({cartItems?.length || 0})
                 </h2>
-                
+
                 {cartItems?.length === 0 ? (
                   <div className="text-center py-12">
                     <p className="text-gray-500">Your cart is empty</p>
-                    <Link href="/" className="mt-4 inline-block bg-black text-white px-6 py-3">
+                    <Link
+                      href="/"
+                      className="mt-4 inline-block bg-black text-white px-6 py-3"
+                    >
                       Continue Shopping
                     </Link>
                   </div>
@@ -428,17 +546,23 @@ export default function Index() {
                       <table className="w-full">
                         <thead>
                           <tr className="border-b border-gray-100">
-                            <th className="pb-3 text-left text-xs font-bold uppercase text-gray-400">Item</th>
-                            <th className="pb-3 text-center text-xs font-bold uppercase text-gray-400">Qty</th>
-                            <th className="pb-3 text-right text-xs font-bold uppercase text-gray-400">Total</th>
+                            <th className="pb-3 text-left text-xs font-bold uppercase text-gray-400">
+                              Item
+                            </th>
+                            <th className="pb-3 text-center text-xs font-bold uppercase text-gray-400">
+                              Qty
+                            </th>
+                            <th className="pb-3 text-right text-xs font-bold uppercase text-gray-400">
+                              Total
+                            </th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
                           {cartItems.map((item, idx) => {
-                            const originalPrice = item?.originalPrice || item?.amount || 0;
-                            const finalPrice = item?.finalPrice || item?.final_amount || 0;
-                            const discount = item?.discountAmount || item?.discount_amount || 0;
-                            const productImage = item?.images?.[0] || "/no-image.png";
+                            const originalPrice = item.originalPrice || 0;
+                            const finalPrice = item.finalPrice || 0;
+                            const discount = item.discountAmount || 0;
+                            const productImage = item.images?.[0] || "/no-image.png";
 
                             return (
                               <tr key={item.productId || idx} className="group">
@@ -458,7 +582,7 @@ export default function Index() {
                                       <Image
                                         src={productImage}
                                         fill
-                                        alt={item?.title || item?.name}
+                                        alt={item.title}
                                         className="object-contain p-1"
                                       />
                                     </div>
@@ -466,22 +590,27 @@ export default function Index() {
                                     {/* TITLE + VARIANT INFO */}
                                     <div>
                                       <span className="font-medium text-sm text-gray-900 line-clamp-2 block">
-                                        {item?.title || item?.name}
+                                        {item.title}
                                       </span>
-                                      
-                                      {item?.variant && (
+
+                                      {item.variant && (
                                         <span className="text-xs text-gray-500 block mt-1">
-                                          Color: {item?.variant}
+                                          Color: {item.variant}
                                         </span>
                                       )}
-                                      
 
-                                      {item?.priceSection?.title && (
+                                      {item.priceSection?.title && (
                                         <span className="text-xs text-green-600 block font-medium">
-                                          Package: {item?.priceSection?.title}
+                                          {item?.label_category}: {item.priceSection.title}
                                         </span>
                                       )}
 
+
+  {item?.selectedSize && (
+                                        <span className="text-xs text-green-600 block font-medium">
+                                          {item?.label_size}: {item?.selectedSize}
+                                        </span>
+                                      )}
                                       <div className="flex items-center gap-2 mt-1 flex-wrap">
                                         <span className="text-sm font-bold text-black">
                                           {formatPrice(finalPrice)}
@@ -491,9 +620,7 @@ export default function Index() {
                                             <span className="text-xs text-gray-400 line-through">
                                               ₹{formatPrice(originalPrice)}
                                             </span>
-                                            <span className="text-[11px] font-semibold text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded">
-                                              {Math.round((discount / originalPrice) * 100)}% OFF
-                                            </span>
+                                           
                                           </>
                                         )}
                                       </div>
@@ -513,7 +640,7 @@ export default function Index() {
                                       <FiMinus size={12} />
                                     </button>
                                     <span className="text-sm font-semibold w-8 text-center">
-                                      {item?.quantity}
+                                      {item.quantity}
                                     </span>
                                     <button
                                       type="button"
@@ -523,7 +650,7 @@ export default function Index() {
                                       <FiPlus size={12} />
                                     </button>
                                   </div>
-                                  {item?.maxStock && (
+                                  {item.maxStock && (
                                     <div className="text-xs text-gray-400 mt-1">
                                       Max: {item.maxStock}
                                     </div>
@@ -548,46 +675,6 @@ export default function Index() {
                       </table>
                     </div>
 
-                    {/* ========== OLD PRICE SUMMARY - COMMENTED FOR REFERENCE ========== */}
-                    {/*
-                    <div className="mt-6 bg-gray-50 p-6 rounded-lg border border-gray-200">
-                      <h3 className="text-lg font-semibold mb-4">Price Summary</h3>
-                      <div className="space-y-3">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-gray-600">Subtotal</span>
-                          <span className="font-medium">{formatPrice(subtotal)}</span>
-                        </div>
-                        {totalDiscount > 0 && (
-                          <div className="flex justify-between text-sm text-green-600">
-                            <span>Product Discount</span>
-                            <span>- {formatPrice(totalDiscount)}</span>
-                          </div>
-                        )}
-                        {cartDiscountAmount > 0 && (
-                          <div className="flex justify-between text-sm text-green-600">
-                            <span>Cart Discount ({summary.cartDiscount}%)</span>
-                            <span>- {formatPrice(cartDiscountAmount)}</span>
-                          </div>
-                        )}
-                        {taxAmount > 0 && (
-                          <div className="flex justify-between text-sm">
-                            <span>Tax ({summary.tax}%)</span>
-                            <span>+ {formatPrice(taxAmount)}</span>
-                          </div>
-                        )}
-                        <div className="border-t border-gray-200 pt-3 mt-3">
-                          <div className="flex justify-between text-lg font-bold">
-                            <span>Total Amount</span>
-                            <span className="text-black">{formatPrice(totalAmount)}</span>
-                          </div>
-                          <p className="text-xs text-gray-500 mt-2 text-right">
-                            Inclusive of all taxes
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    */}
-
                     {/* GRAND TOTAL CARD */}
                     <div className="mt-8 w-full rounded-lg bg-black px-5 py-4 flex items-center justify-between">
                       <h3 className="text-base md:text-lg font-semibold text-white tracking-wide">
@@ -599,8 +686,6 @@ export default function Index() {
                     </div>
                   </>
                 )}
-
-               
               </div>
             </div>
           </div>

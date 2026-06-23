@@ -20,7 +20,6 @@ export default function AddSubSubCategory({ fetchDatas, isEdit, item }) {
     Category: ""
   });
 
-  console.log("item" ,item)
 
 
   useEffect(() => {

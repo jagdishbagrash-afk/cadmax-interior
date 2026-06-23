@@ -52,7 +52,6 @@ export default function OrderHistory() {
     return matchesStatus && matchesSearch;
   });
 
-  console.log("Filtered Orders:", filteredOrders);
 
 
   return (

@@ -11,7 +11,6 @@ export default function ServicesAdd() {
 
      const [data, setData] = useState([]);
 
-     console.log("data" ,data)
     
       const fetchSubcategroyData = async () => {
         try {
@@ -186,7 +185,6 @@ const[project ,setProject] = useState([]);
         setProcessing(false);
     };
 
-    console.log("datacategiroes", datacategiroes)
     return (
         <>
             <AdminLayout page={"Add / Edit Concept "}>

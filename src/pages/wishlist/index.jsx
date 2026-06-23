@@ -34,7 +34,6 @@ export default function WishlistPage() {
       const response = await main.WishlistGet();
       if (response?.data?.status && response?.data?.data) {
         const data = response.data.data;
-        console.log("data", data)
         const items = data.products || [];
         dispatch(setWishlist(items));
         setProducts(items);
@@ -167,7 +166,6 @@ export default function WishlistPage() {
     }
   }, [products, sort, searchQuery]);
 
-  console.log("products", products)
 
   const normalizedProducts = useMemo(() => {
     return filteredProducts.map(normalizeWishlistProduct);

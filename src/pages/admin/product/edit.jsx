@@ -386,7 +386,6 @@ export default function Edit() {
     try {
       const main = new Listing();
       const response = await main.getproductsubcategory(form?.subcategory);
-      console.log("response", response);
       if (response.data?.data) {
         setSubSubCategories(response.data.data);
       } else {

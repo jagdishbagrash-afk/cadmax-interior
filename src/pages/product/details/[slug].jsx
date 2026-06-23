@@ -175,7 +175,6 @@ export default function Index() {
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const isWishlisted = ProductDetails && wishlistIds.includes(ProductDetails._id);
 
-  console.log("ProductDetails", ProductDetails)
   const dispatch = useDispatch();
 
   // Get the current price based on main amount or selected price section and size
@@ -311,12 +310,7 @@ export default function Index() {
     try {
       const main = new Listing();
 
-      console.log("API PARAMS", {
-        slug,
-        subcategory,
-        subsubcategory,
-        type,
-      });
+     
 
       const response = await main.GetAllProductsId(
         slug,
@@ -325,7 +319,6 @@ export default function Index() {
         type
       );
 
-      console.log("API RESPONSE", response?.data);
 
       if (response?.data?.status) {
         setProductDetails(response.data.data);

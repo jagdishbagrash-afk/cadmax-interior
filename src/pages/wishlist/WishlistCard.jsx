@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { FiTrash2 } from "react-icons/fi";
 import { formatPrice } from "@/components/formatPrice";
+import { getProductPrices } from "@/components/productPrices";
 
 export default function WishlistCard({
   product = {},
@@ -9,6 +10,7 @@ export default function WishlistCard({
   removing = null,
 }) {
   const [selectedColor, setSelectedColor] = useState(null);
+  const { displayPrice, originalPrice } = getProductPrices(product);
 
   const productId = product?._id;
   const isRemoving = removing === productId;
@@ -17,16 +19,15 @@ export default function WishlistCard({
   const discount =
     product?.final_amount && product?.amount
       ? Math.round(
-          ((product.amount - product.final_amount) / product.amount) * 100
-        )
+        ((product.amount - product.final_amount) / product.amount) * 100
+      )
       : 0;
 
-  const displayPrice = product?.final_amount || product?.amount;
 
   const currentVariant = selectedColor
     ? product?.variants?.find((v) => v.color === selectedColor)
     : product?.variants?.find((v) => v.images?.length) ||
-      product?.variants?.[0];
+    product?.variants?.[0];
 
   const images = currentVariant?.images || [];
 
@@ -125,21 +126,14 @@ export default function WishlistCard({
           </div>
 
           {/* PRICE */}
-          <div className="mt-3 flex items-center gap-2 flex-wrap">
-            <p className="text-[18px] sm:text-[20px] font-black text-black">
+          <div className="mt-2 flex items-center gap-2 flex-wrap">
+            <p className="text-[18px] sm:text-[20px] font-black text-black uppercase">
               ₹{formatPrice(displayPrice)}
             </p>
-
-            {discount > 0 && (
-              <>
-                <span className="text-sm text-gray-400 line-through">
-                  ₹{formatPrice(product?.amount)}
-                </span>
-
-                <span className="text-xs font-semibold text-green-600">
-                  {discount}% OFF
-                </span>
-              </>
+            {originalPrice > displayPrice && (
+              <span className="text-sm text-gray-400 line-through">
+                ₹{formatPrice(originalPrice)}
+              </span>
             )}
           </div>
 
@@ -166,11 +160,10 @@ export default function WishlistCard({
                 <button
                   key={index}
                   onClick={() => handleColorClick(variant?.color)}
-                  className={`px-2 py-1 text-[10px] rounded-full border capitalize transition-all ${
-                    selectedColor === variant?.color
+                  className={`px-2 py-1 text-[10px] rounded-full border capitalize transition-all ${selectedColor === variant?.color
                       ? "border-black bg-black text-white"
                       : "border-gray-300 text-gray-600 hover:border-black"
-                  }`}
+                    }`}
                 >
                   {variant?.color}
                 </button>
@@ -205,7 +198,7 @@ export default function WishlistCard({
               View Details
             </Link>
 
-            
+
           </div>
         </div>
       </div>

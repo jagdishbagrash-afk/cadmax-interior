@@ -8,7 +8,6 @@ const ProductGrid = ({ selectedId }) => {
     const [loading, setLoading] = useState(false);
 
     const [products, setProducts] = useState([]);
-    console.log("products",products)
     const [page, setPage] = useState(1);
     const [limit] = useState(10);
     const [hasMore, setHasMore] = useState(true);
