@@ -438,7 +438,7 @@ export default function Index() {
   };
 
   const summary = record?.summary || {};
-  const totalAmount = summary.totalAmount || 0;
+  const totalAmount = summary.subtotal || 0;
 
   return (
     <Layout>
