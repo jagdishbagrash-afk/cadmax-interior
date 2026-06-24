@@ -72,6 +72,24 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
           alt={alt}
           className="w-full h-full object-contain"
         />
+        {/* Cursor Box Indicator - Premium Design */}
+        {zoomPosition.show && (
+          <div
+            className="absolute pointer-events-none rounded-lg"
+            style={{
+              width: '100px',
+              height: '100px',
+              left: `${zoomPosition.x}%`,
+              top: `${zoomPosition.y}%`,
+              transform: 'translate(-50%, -50%)',
+              zIndex: 10,
+              boxShadow: '0 0 0 1px rgba(255,255,255,0.9), 0 0 0 3px rgba(0,0,0,0.15), 0 4px 20px rgba(0,0,0,0.15)',
+              background: 'rgba(255,255,255,0.08)',
+              backdropFilter: 'blur(1px)',
+              WebkitBackdropFilter: 'blur(1px)',
+            }}
+          />
+        )}
       </div>
 
       {/* Zoom Preview */}
@@ -82,7 +100,7 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
             className="
               fixed
               top-20
-              right-20
+              right-30
               w-[500px]
               h-[600px]
               bg-white
@@ -99,7 +117,7 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
             }}
           >
             <div
-              className="w-full h-full bg-no-repeat"
+              className="w-full h-full bg-no-repeat relative"
               style={{
                 backgroundImage: `url(${imageSrc})`,
                 backgroundSize: `${zoomScale * 100}%`,
@@ -107,7 +125,8 @@ const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
                 backgroundRepeat: "no-repeat",
                 backgroundColor: "#f5f5f5",
               }}
-            />
+            >
+            </div>
           </div>,
           document.body
         )}
@@ -138,6 +157,7 @@ export default function Index() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [show, setShow] = useState(false);
   const [currentImage, setCurrentImage] = useState(null);
+  const maxStockReachedRef = React.useRef(false);
 
   const handleShare = async () => {
     try {
@@ -250,24 +270,29 @@ export default function Index() {
     setQty((prev) => {
       const maxStock = selectedVariant?.stock ?? 0;
       if (prev >= maxStock) {
-        toast.error(`Only ${maxStock} items available in stock`, {
-          duration: 3000,
-          position: "top-right",
-          style: {
-            background: "#fee2e2",
-            color: "#991b1b",
-            border: "1px solid #fecaca",
-            borderRadius: "12px",
-            padding: "16px 24px",
-            fontSize: "14px",
-            fontWeight: "600",
-            boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
-          },
-          iconTheme: {
-            primary: "#dc2626",
-            secondary: "#fee2e2",
-          },
-        });
+        // Only show notification if we haven't shown it for this variant/size combination
+        const variantKey = `${selectedVariant?.color}_${selectedPriceSection?.title}_${selectedSize?.title}`;
+        if (!maxStockReachedRef.current || maxStockReachedRef.current !== variantKey) {
+          maxStockReachedRef.current = variantKey;
+          toast.error(`Only ${maxStock} items available in stock`, {
+            duration: 3000,
+            position: "top-right",
+            style: {
+              background: "#fee2e2",
+              color: "#991b1b",
+              border: "1px solid #fecaca",
+              borderRadius: "12px",
+              padding: "16px 24px",
+              fontSize: "14px",
+              fontWeight: "600",
+              boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+            },
+            iconTheme: {
+              primary: "#dc2626",
+              secondary: "#fee2e2",
+            },
+          });
+        }
         return prev;
       }
       const newQty = prev + 1;
@@ -611,7 +636,14 @@ export default function Index() {
                   {/* Wishlist & Share Icons */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     <button
-                      onClick={() => toggleWishlist(ProductDetails?._id)}
+                      onClick={() => toggleWishlist(ProductDetails?._id, {
+                        selectedVariant: selectedVariant ? {
+                          color: selectedVariant.color,
+                          images: selectedVariant.images
+                        } : null,
+                        selectedPriceSection: selectedPriceSection || null,
+                        selectedSize: selectedSize || null
+                      })}
                       className={`w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 ${isWishlisted
                         ? "text-red-500"
                         : "text-gray-600 hover:text-red-500"
@@ -660,34 +692,6 @@ export default function Index() {
                       </SwiperSlide>
                   ))}
                 </Swiper>
-
-                <div className="w-full sm:w-[150px] my-3">
-  <div
-    className={`h-11 sm:h-14 w-full sm:w-[150px] border border-black rounded-xl sm:rounded-2xl flex items-center justify-between px-4 sm:px-5 ${
-      isOutOfStock ? "opacity-50 pointer-events-none" : ""
-    }`}
-  >
-    <button
-      onClick={decreaseQty}
-      disabled={isOutOfStock}
-      className="w-8 h-8 flex items-center justify-center text-xl sm:text-2xl font-bold"
-    >
-      −
-    </button>
-
-    <span className="font-semibold text-base sm:text-lg min-w-[30px] text-center">
-      {qty}
-    </span>
-
-    <button
-      onClick={increaseQty}
-      disabled={isOutOfStock}
-      className="w-8 h-8 flex items-center justify-center text-xl sm:text-2xl font-bold"
-    >
-      +
-    </button>
-  </div>
-</div>
               </div>
 
               {/* DESKTOP */}
@@ -747,7 +751,14 @@ export default function Index() {
   {/* Wishlist & Share Icons */}
   <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
     <button
-      onClick={() => toggleWishlist(ProductDetails?._id)}
+      onClick={() => toggleWishlist(ProductDetails?._id, {
+        selectedVariant: selectedVariant ? {
+          color: selectedVariant.color,
+          images: selectedVariant.images
+        } : null,
+        selectedPriceSection: selectedPriceSection || null,
+        selectedSize: selectedSize || null
+      })}
       className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
         ? "text-red-500"
         : "text-gray-600 hover:text-red-500"
@@ -902,15 +913,11 @@ export default function Index() {
                               setSelectedVariant(variant);
                               setCurrentIndex(0);
                             }}
-                            className={`
-                              rounded-2xl overflow-hidden border-2
-                              cursor-pointer transition-all duration-300
-                              bg-white
-                              ${isActive
+                            className={`rounded-2xl overflow-hidden border-2 cursor-pointer transition-all duration-300 bg-white ${
+                              isActive
                                 ? "border-black shadow-lg"
                                 : "border-gray-200"
-                              }
-                            `}
+                            }`}
                           >
                             <div className="relative aspect-square bg-[#F7F7F7]">
                               <Image

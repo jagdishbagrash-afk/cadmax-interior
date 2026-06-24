@@ -293,11 +293,15 @@ export default function Add() {
   };
 
   const updateVariantStock = (index, value) => {
-    setVariants(prev =>
-      prev.map((v, i) =>
-        i === index ? { ...v, stock: value } : v
-      )
-    );
+    // Allow only numeric input, keep as string for editing
+    // User can clear field or type any number freely
+    if (value === '' || /^\d+$/.test(value)) {
+      setVariants(prev =>
+        prev.map((v, i) =>
+          i === index ? { ...v, stock: value } : v
+        )
+      );
+    }
   };
 
   const handleVariantImages = (index, files) => {
@@ -962,6 +966,8 @@ export default function Add() {
                         onChange={(e) => updateVariantStock(i, e.target.value)}
                         className="w-full mt-1 rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
                         required
+                        min="0"
+                        step="1"
                       />
                     </div>
 

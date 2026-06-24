@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
-import { FiPlus, FiMinus } from "react-icons/fi";
+import { FiPlus, FiMinus, FiTag, FiLock, FiRotateCcw, FiTruck, FiHeadphones, FiChevronRight, FiTrash2 } from "react-icons/fi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
@@ -236,9 +236,6 @@ export default function Index() {
     }
   };
 
-  // ============================================================
-  //  FETCH CART – handles ALL price structures
-  // ============================================================
   const FetchCart = async () => {
     try {
       const main = new Listing();
@@ -440,6 +437,22 @@ export default function Index() {
   const summary = record?.summary || {};
   const totalAmount = summary.subtotal || 0;
 
+  // Compute derived values from cart items
+  const subtotal = cartItems.reduce((sum, item) => sum + ((item.originalPrice || 0) * (item.quantity || 0)), 0);
+  // discountAmount is a percentage (e.g. 10 means 10%), so calculate actual rupee discount
+  const totalDiscount = cartItems.reduce((sum, item) => {
+    const perUnitDiscount = ((item.originalPrice || 0) * (item.discountAmount || 0)) / 100;
+    return sum + (perUnitDiscount * (item.quantity || 0));
+  }, 0);
+  const grandTotal = subtotal - totalDiscount;
+
+  const trustFeatures = [
+    { icon: FiLock, label: "Secure Checkout", desc: "256-bit encrypted" },
+    { icon: FiRotateCcw, label: "Easy Returns", desc: "30-day return policy" },
+    { icon: FiTruck, label: "Fast Delivery", desc: "Pan India shipping" },
+    { icon: FiHeadphones, label: "24/7 Support", desc: "Dedicated assistance" },
+  ];
+
   return (
     <Layout>
       <Banner Slider1={BannerImages} />
@@ -555,159 +568,266 @@ export default function Index() {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: CART SUMMARY */}
+            {/* RIGHT COLUMN: ORDER SUMMARY */}
             <div className="w-full lg:w-6/12">
-              <div className="sticky top-10">
-                <h2 className="text-2xl font-semibold border-b border-gray-200 pb-5 mb-4">
-                  Order Summary ({cartItems?.length || 0})
-                </h2>
+              <div className="sticky top-10 space-y-6">
+                {/* ---------- ORDER SUMMARY HEADING ---------- */}
+                <div className="flex items-center justify-between pb-4 border-b border-gray-200">
+                  <div>
+                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+                      Order Summary
+                    </h2>
+                    <p className="text-sm text-gray-500 mt-0.5">
+                      {cartItems?.length || 0}{" "}
+                      {cartItems?.length === 1 ? "Item" : "Items"} in your cart
+                    </p>
+                  </div>
+                  <div className="hidden sm:flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-sm font-bold text-gray-700">
+                    {cartItems?.length || 0}
+                  </div>
+                </div>
 
                 {cartItems?.length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-gray-500">Your cart is empty</p>
+                  <div className="text-center py-16">
+                    <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
+                      <FiTruck size={32} className="text-gray-400" />
+                    </div>
+                    <p className="text-gray-500 text-lg">Your cart is empty</p>
                     <Link
                       href="/"
-                      className="mt-4 inline-block bg-black text-white px-6 py-3"
+                      className="mt-6 inline-flex items-center gap-2 bg-black text-white px-8 py-3 hover:bg-gray-800 transition"
                     >
                       Continue Shopping
+                      <FiChevronRight size={16} />
                     </Link>
                   </div>
                 ) : (
                   <>
-                    <div className="overflow-x-auto">
-                      <table className="w-full">
-                        <thead>
-                          <tr className="border-b border-gray-100">
-                            <th className="pb-3 text-left text-xs font-bold uppercase text-gray-400">
-                              Item
-                            </th>
-                            <th className="pb-3 text-center text-xs font-bold uppercase text-gray-400">
-                              Qty
-                            </th>
-                            <th className="pb-3 text-right text-xs font-bold uppercase text-gray-400">
-                              Total
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                          {cartItems.map((item, idx) => {
-                            const originalPrice = item.originalPrice || 0;
-                            const finalPrice = item.finalPrice || 0;
-                            const discount = item.discountAmount || 0;
-                            const productImage = item.images?.[0] || "/no-image.png";
+                    {/* ---------- PRODUCT CARDS ---------- */}
+                    <div className="space-y-4">
+                      {cartItems.map((item, idx) => {
+                        const originalPrice = item.originalPrice || 0;
+                        const finalPrice = item.finalPrice || 0;
+                        const discount = item.discountAmount || 0;
+                        const productImage = item.images?.[0] || "/no-image.png";
 
-                            return (
-                              <tr key={item.productId || idx} className="group">
-                                <td className="py-4">
-                                  <div className="flex items-center gap-4">
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemove(item)}
-                                      className="text-gray-400 hover:text-red-500 transition-colors"
-                                      title="Remove Item"
-                                    >
-                                      <FaRegTrashCan size={16} />
-                                    </button>
+                        return (
+                          <div
+                            key={item.productId || idx}
+                            className="group relative bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 p-4 sm:p-5"
+                          >
+                            {/* Remove Button */}
+                            <button
+                              type="button"
+                              onClick={() => handleRemove(item)}
+                              className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-200 transition-all opacity-0 group-hover:opacity-100"
+                              title="Remove Item"
+                            >
+                              <FiTrash2 size={12} />
+                            </button>
 
-                                    {/* IMAGE */}
-                                    <div className="relative h-16 w-16 flex-shrink-0 bg-gray-50 border border-gray-100 rounded overflow-hidden">
-                                      <Image
-                                        src={productImage}
-                                        fill
-                                        alt={item.title}
-                                        className="object-contain p-1"
-                                      />
-                                    </div>
+                            <div className="flex gap-4 sm:gap-5">
+                              {/* Product Image */}
+                              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+                                <Image
+                                  src={productImage}
+                                  fill
+                                  alt={item.title}
+                                  className="object-contain p-1.5 group-hover:scale-105 transition-transform duration-500"
+                                />
+                              </div>
 
-                                    {/* TITLE + VARIANT INFO */}
-                                    <div>
-                                      <span className="font-medium text-sm text-gray-900 line-clamp-2 block">
-                                        {item.title}
-                                      </span>
+                              {/* Product Info */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <h3 className="font-medium text-sm sm:text-base text-gray-900 leading-snug line-clamp-2">
+                                      {item.title}
+                                    </h3>
 
-                                      {item.variant && (
-                                        <span className="text-xs text-gray-500 block mt-1">
-                                          Color: {item.variant}
+                                    {item.variant && (
+                                      <p className="text-xs text-gray-500 mt-1.5 font-medium">
+                                        Color:{" "}
+                                        <span className="text-gray-700">{item.variant}</span>
+                                      </p>
+                                    )}
+
+                                    {item.priceSection?.title && (
+                                      <p className="text-xs text-gray-500 font-medium">
+                                        {item?.label_category}:{" "}
+                                        <span className="text-gray-700">
+                                          {item.priceSection.title}
                                         </span>
-                                      )}
+                                      </p>
+                                    )}
 
-                                      {item.priceSection?.title && (
-                                        <span className="text-xs text-green-600 block font-medium">
-                                          {item?.label_category}: {item.priceSection.title}
+                                    {item?.selectedSize && (
+                                      <p className="text-xs text-gray-500 font-medium">
+                                        {item?.label_size}:{" "}
+                                        <span className="text-gray-700">
+                                          {item?.selectedSize}
                                         </span>
-                                      )}
-
-                                      {item?.selectedSize && (
-                                        <span className="text-xs text-green-600 block font-medium">
-                                          {item?.label_size}: {item?.selectedSize}
-                                        </span>
-                                      )}
-
-                                      <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                        <span className="text-sm font-bold text-black">
-                                          {formatPrice(finalPrice)}
-                                        </span>
-                                        
-                                      </div>
-                                    </div>
+                                      </p>
+                                    )}
                                   </div>
-                                </td>
 
-                                {/* QTY */}
-                                <td className="py-4 text-center">
-                                  <div className="flex items-center justify-center gap-2">
+                                  {/* Price */}
+                                  <div className="text-right flex-shrink-0">
+                                    <p className="text-sm sm:text-base font-bold text-gray-900">
+                                      {formatPrice(finalPrice)}
+                                    </p>
+                                    {discount > 0 && (
+                                      <p className="text-xs text-gray-400 line-through mt-0.5">
+                                        {formatPrice(originalPrice)}
+                                      </p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                {/* Quantity Controls + Line Total */}
+                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
+                                  <div className="flex items-center gap-1.5">
                                     <button
                                       type="button"
                                       onClick={() => handleQtyChange(item, "decrease")}
-                                      className="p-1 hover:bg-gray-100 rounded transition disabled:opacity-30"
+                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-100 transition disabled:opacity-30"
                                       disabled={item.quantity === 1}
                                     >
-                                      <FiMinus size={12} />
+                                      <FiMinus size={11} />
                                     </button>
-                                    <span className="text-sm font-semibold w-8 text-center">
+                                    <span className="text-sm font-semibold text-gray-900 w-8 text-center select-none">
                                       {item.quantity}
                                     </span>
                                     <button
                                       type="button"
                                       onClick={() => handleQtyChange(item, "increase")}
-                                      className="p-1 hover:bg-gray-100 rounded transition"
+                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-100 transition"
                                     >
-                                      <FiPlus size={12} />
+                                      <FiPlus size={11} />
                                     </button>
+                                    {item.maxStock && (
+                                      <span className="text-[10px] text-gray-400 ml-1">
+                                        Max: {item.maxStock}
+                                      </span>
+                                    )}
                                   </div>
-                                  {item.maxStock && (
-                                    <div className="text-xs text-gray-400 mt-1">
-                                      Max: {item.maxStock}
-                                    </div>
-                                  )}
-                                </td>
 
-                                {/* TOTAL */}
-                                <td className="py-4 text-right">
-                                  <div className="font-semibold text-gray-900">
-                                    {formatPrice(finalPrice * item.quantity)}
+                                  <div className="text-right">
+                                    <span className="text-sm font-bold text-gray-900">
+                                      {formatPrice(finalPrice * item.quantity)}
+                                    </span>
+                                    {discount > 0 && (
+                                      <span className="text-[10px] text-gray-400 line-through block">
+                                        {formatPrice(originalPrice * item.quantity)}
+                                      </span>
+                                    )}
                                   </div>
-                                  {discount > 0 && (
-                                    <div className="text-xs text-gray-400 line-through">
-                                      {formatPrice(originalPrice * item.quantity)}
-                                    </div>
-                                  )}
-                                </td>
-                              </tr>
-                            );
-                          })}
-                        </tbody>
-                      </table>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
 
-                    {/* GRAND TOTAL CARD */}
-                    <div className="mt-8 w-full rounded-lg bg-black px-5 py-4 flex items-center justify-between">
-                      <h3 className="text-base md:text-lg font-semibold text-white tracking-wide">
-                        GRAND TOTAL
-                      </h3>
-                      <span className="text-lg md:text-xl font-bold text-white">
-                        ₹ {formatPrice(totalAmount)}
-                      </span>
+                    {/* ---------- COUPON SECTION ---------- */}
+                    <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-5 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                          <FiTag size={18} className="text-gray-600" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold text-gray-900">
+                            Have a coupon code?
+                          </p>
+                          <p className="text-xs text-gray-500 mt-0.5">
+                            Add your coupon for extra savings
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          className="flex items-center gap-1.5 text-sm font-semibold text-black hover:text-gray-600 transition-colors px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
+                        >
+                          Apply Coupon
+                          <FiChevronRight size={14} />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* ---------- PRICE SUMMARY CARD ---------- */}
+                    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
+                      <div className="px-5 py-4 border-b border-gray-100">
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900">
+                          Price Summary
+                        </h3>
+                      </div>
+                      <div className="px-5 py-4 space-y-3">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Subtotal</span>
+                          <span className="font-medium text-gray-900">
+                            {formatPrice(subtotal)}
+                          </span>
+                        </div>
+                        {totalDiscount > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Discount</span>
+                            <span className="font-medium text-green-600">
+                              - {formatPrice(totalDiscount)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* ---------- GRAND TOTAL ---------- */}
+                      <div className="mx-5 mb-5 rounded-xl bg-gray-900 px-5 py-4 flex items-center justify-between shadow-lg">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
+                            Grand Total
+                          </p>
+                          <p className="text-lg md:text-xl font-bold text-white mt-0.5 tracking-tight">
+                            {formatPrice(grandTotal)}
+                          </p>
+                        </div>
+                        <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                          <svg
+                            width="20"
+                            height="20"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="text-white"
+                          >
+                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+                            <line x1="1" y1="10" x2="23" y2="10" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* ---------- TRUST BADGES ---------- */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                      {trustFeatures.map((feature, i) => {
+                        const Icon = feature.icon;
+                        return (
+                          <div
+                            key={i}
+                            className="flex flex-col items-center text-center p-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm transition-all duration-200"
+                          >
+                            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                              <Icon size={16} className="text-gray-700" />
+                            </div>
+                            <p className="text-[11px] font-bold uppercase tracking-wider text-gray-800">
+                              {feature.label}
+                            </p>
+                            <p className="text-[10px] text-gray-400 mt-0.5">
+                              {feature.desc}
+                            </p>
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}

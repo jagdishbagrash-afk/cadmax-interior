@@ -127,8 +127,8 @@ class Listing extends Component {
     return Api.post("/wishlist/remove", { productId })
   }
 
-  async WishlistToggle(productId) {
-    return Api.post("/wishlist/toggle", { productId })
+  async WishlistToggle(productId, variantData = {}) {
+    return Api.post("/wishlist/toggle", { productId, ...variantData })
   }
 
   async WishlistDelete(productId) {

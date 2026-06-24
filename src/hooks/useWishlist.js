@@ -30,7 +30,7 @@ export default function useWishlist() {
   }, [dispatch]);
 
   const toggleWishlist = useCallback(
-    async (productId) => {
+    async (productId, variantData = {}) => {
       if (!user || user?.role !== "customer") {
         toast.error("Please login first");
         router.push("/login");
@@ -39,7 +39,7 @@ export default function useWishlist() {
 
       try {
         const main = new Listing();
-        const response = await main.WishlistToggle(productId);
+        const response = await main.WishlistToggle(productId, variantData);
 
         if (response?.data?.status) {
           const { isWishlisted } = response.data.data;
