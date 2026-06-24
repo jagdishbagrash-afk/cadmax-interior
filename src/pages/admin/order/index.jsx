@@ -22,7 +22,7 @@ export default function Index() {
     try {
       const main = new Listing();
       const response = await main.adminGetOrders();
-
+console.log("response",response)
       if (response?.data?.data) {
         setData(response.data.data);
         setFilteredData(response.data.data);
@@ -105,7 +105,6 @@ export default function Index() {
       startIndex + itemsPerPage
     );
   }, [filteredData, currentPage]);
-
   return (
     <AdminLayout page="Order management">
       <div className="px-4 py-3">
@@ -245,7 +244,10 @@ export default function Index() {
                         {/* ADDRESS */}
                         <td className="px-5 py-4 max-w-[220px]">
                           <p className="line-clamp-2 text-sm text-gray-700">
-                            {order?.address || "N/A"}
+                             {order?.addressId?.street_address}, {order?.addressId?.city},{" "}
+    {order?.addressId?.state}, {order?.addressId?.country} -{" "}
+    {order?.addressId?.pincode} 
+                            {order?.address }
                           </p>
                         </td>
 

@@ -30,6 +30,7 @@ export default function OrderHistory() {
       setLoading(true);
       const main = new Listing();
       const response = await main.userGetOrders();
+      console.log(response)
       setOrders(response?.data?.data || []);
     } catch (err) {
       setOrders([]);
@@ -41,6 +42,8 @@ export default function OrderHistory() {
   useEffect(() => {
     fetchData();
   }, []);
+
+
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus = activeTab === "All" || order.status.toLowerCase() === activeTab.toLowerCase();
@@ -178,6 +181,8 @@ export default function OrderHistory() {
                                     <p className="text-[#0000000] text-[15px] font-medium hover:underline cursor-pointer leading-snug">
                                       {item?.id?.title}
                                     </p>
+                                    <p className="text-[12px] text-gray-500 mt-1 uppercase font-bold tracking-tight">section: {item.priceSectionTitle}</p>
+
                                     <p className="text-[12px] text-gray-500 mt-1 uppercase font-bold tracking-tight">Variant: {item.variant}</p>
                                     <p className="text-[14px] font-bold mt-2">{formatMultiPrice(item?.total, "INR")}</p>
                                     <p className="text-[12px] text-gray-400">Qty: {item.quantity}</p>
@@ -199,8 +204,22 @@ export default function OrderHistory() {
                             );
                           })}
                           <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-                            <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">Shipping Address</p>
-                            <p className="text-[13px] text-gray-700 leading-relaxed">{order?.address}</p>
+                            <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
+  <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">
+    Shipping Address
+  </p>
+
+  <p className="text-[13px] text-gray-700 leading-relaxed">
+    {order?.addressId?.street_address}, {order?.addressId?.city},{" "}
+    {order?.addressId?.state}, {order?.addressId?.country} -{" "}
+    {order?.addressId?.pincode}
+  </p>
+
+  <p className="text-[13px] text-gray-700 mt-2">
+    <span className="font-medium">{order?.name}</span> |{" "}
+    {order?.mobile}
+  </p>
+</div>
                           </div>
                         </div>
                       </motion.div>

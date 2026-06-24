@@ -87,7 +87,7 @@ export default function Index() {
       return;
     }
 
-    const totalAmount = record?.summary?.totalAmount || 0;
+    const totalAmount = record?.summary?.subtotal || 0;
 
     if (totalAmount === 0) {
       toast.error("Cart is empty");
@@ -169,7 +169,7 @@ export default function Index() {
         priceSectionTitle: item.priceSection?.title,
       }));
 
-      const totalAmount = record?.summary?.totalAmount || 0;
+    const totalAmount = record?.summary?.subtotal || 0;
 
       const main = new Listing();
       const res = await main.AddOrder({
@@ -207,7 +207,7 @@ export default function Index() {
       const itemNames = cartItems
         .map((item) => `${item.title} (${item.variantTitle})`)
         .join(", ");
-      const totalAmount = record?.summary?.totalAmount || 0;
+    const totalAmount = record?.summary?.subtotal || 0;
 
       const main = new Listing();
       const response = await main.PaymentSave({
