@@ -1,8 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { FiTrash2 } from "react-icons/fi";
 import { formatPrice } from "@/components/formatPrice";
-import { getProductPrices } from "@/components/productPrices";
 
 export default function WishlistCard({
   product = {},
@@ -10,34 +9,78 @@ export default function WishlistCard({
   removing = null,
 }) {
   const [selectedColor, setSelectedColor] = useState(null);
-  const { displayPrice, originalPrice } = getProductPrices(product);
 
   const productId = product?._id;
   const isRemoving = removing === productId;
   const isOutOfStock = product?.stock_status === "out_of_stock";
 
-  const discount =
-    product?.final_amount && product?.amount
-      ? Math.round(
-        ((product.amount - product.final_amount) / product.amount) * 100
-      )
-      : 0;
+  // Get saved variant data from backend
+  const savedWishlistItem = product?._wishlistItem || null;
+  const savedVariant = savedWishlistItem?.selectedVariant || null;
+  const savedPriceSection = savedWishlistItem?.selectedPriceSection || null;
+  const savedSize = savedWishlistItem?.selectedSize || null;
 
+  // Initialize selected color from saved data
+  const effectiveSelectedColor = selectedColor || savedVariant?.color || null;
 
-  const currentVariant = selectedColor
-    ? product?.variants?.find((v) => v.color === selectedColor)
-    : product?.variants?.find((v) => v.images?.length) ||
-    product?.variants?.[0];
+  // Find current variant based on selection
+  const currentVariant = useMemo(() => {
+    if (effectiveSelectedColor) {
+      return product?.variants?.find((v) => v.color === effectiveSelectedColor);
+    }
+    return product?.variants?.[0] || null;
+  }, [effectiveSelectedColor, product?.variants]);
+
+  // Calculate price based on variant, price section, and size
+  const { displayPrice, originalPrice, discount } = useMemo(() => {
+    let finalAmount = product?.final_amount || 0;
+    let amount = product?.amount || 0;
+
+    // If we have saved price section and size, use those prices
+    if (savedPriceSection && savedSize) {
+      finalAmount = savedSize.final_amount || savedPriceSection.final_amount || finalAmount;
+      amount = savedSize.amount || savedPriceSection.amount || amount;
+    } else if (savedPriceSection) {
+      finalAmount = savedPriceSection.final_amount || finalAmount;
+      amount = savedPriceSection.amount || amount;
+    }
+
+    // If variant has specific pricing (you can add variant-specific pricing here if needed)
+    if (currentVariant) {
+      // Use variant pricing if available, otherwise keep calculated price
+      if (currentVariant.final_amount) {
+        finalAmount = currentVariant.final_amount;
+      }
+      if (currentVariant.amount) {
+        amount = currentVariant.amount;
+      }
+    }
+
+    const display = finalAmount > 0 ? finalAmount : amount;
+    const discountPercent =
+      amount && finalAmount && finalAmount < amount
+        ? Math.round(((amount - finalAmount) / amount) * 100)
+        : 0;
+
+    return {
+      displayPrice: display,
+      originalPrice: amount,
+      discount: discountPercent,
+    };
+  }, [product, currentVariant, savedPriceSection, savedSize]);
 
   const images = currentVariant?.images || [];
 
   const handleColorClick = (color) => {
-    setSelectedColor(color === selectedColor ? null : color);
+    setSelectedColor(color === effectiveSelectedColor ? null : color);
   };
 
+  const hasVariants = product?.variants?.length > 0;
+  const hasPriceSections = product?.product_price_section?.length > 0;
+
   return (
-    <div className="group block relative">
-      <div className="bg-white overflow-hidden transition-all duration-300 border border-gray-200 rounded-lg">
+    <div className="group block relative h-full">
+      <div className="bg-white overflow-hidden transition-all duration-300 border border-gray-200 rounded-lg h-full flex flex-col">
         {/* IMAGE SECTION */}
         <Link
           href={`/product/details/${product?.slug}`}
@@ -98,7 +141,7 @@ export default function WishlistCard({
         </Link>
 
         {/* CONTENT */}
-        <div className="bg-white px-2 pt-2 pb-2">
+        <div className="bg-white px-2 pt-2 pb-2 flex-1 flex flex-col">
           {/* TITLE */}
           <Link href={`/product/details/${product?.slug}`}>
             <h3
@@ -135,6 +178,11 @@ export default function WishlistCard({
                 ₹{formatPrice(originalPrice)}
               </span>
             )}
+            {/* {discount > 0 && (
+              <span className="text-xs font-semibold text-green-600 bg-green-50 px-2 py-0.5 rounded">
+                {discount}% OFF
+              </span>
+            )} */}
           </div>
 
           {/* STOCK */}
@@ -153,16 +201,16 @@ export default function WishlistCard({
             )}
           </div>
 
-          {/* COLORS */}
-          {product?.variants?.length > 1 && (
+          {/* COLORS - Always show if variants exist */}
+          {hasVariants && (
             <div className="mt-3 flex flex-wrap gap-1.5">
               {product.variants.slice(0, 4).map((variant, index) => (
                 <button
                   key={index}
                   onClick={() => handleColorClick(variant?.color)}
-                  className={`px-2 py-1 text-[10px] rounded-full border capitalize transition-all ${selectedColor === variant?.color
-                      ? "border-black bg-black text-white"
-                      : "border-gray-300 text-gray-600 hover:border-black"
+                  className={`px-2 py-1 text-[10px] rounded-full border capitalize transition-all ${effectiveSelectedColor === variant?.color
+                    ? "border-black bg-black text-white"
+                    : "border-gray-300 text-gray-600 hover:border-black"
                     }`}
                 >
                   {variant?.color}
@@ -177,8 +225,27 @@ export default function WishlistCard({
             </div>
           )}
 
+          {/* Show selected variant details - compact chip style */}
+          {(savedPriceSection || savedSize) && (
+            <div className="mt-2 flex flex-wrap items-center gap-4 text-xs text-gray-600">
+              {savedPriceSection && (
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-gray-800">Size:</span>
+                  <span>{savedPriceSection.title}</span>
+                </div>
+              )}
+
+              {savedSize && (
+                <div className="flex items-center gap-1">
+                  <span className="font-semibold text-gray-800">Category:</span>
+                  <span>{savedSize.title}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           {/* ACTIONS */}
-          <div className="mt-4 flex gap-2">
+          <div className="mt-auto pt-3">
             <Link
               href={`/product/details/${product?.slug}`}
               className="
@@ -193,12 +260,11 @@ export default function WishlistCard({
                 tracking-wider
                 hover:bg-gray-800
                 transition-colors
+                block
               "
             >
               View Details
             </Link>
-
-
           </div>
         </div>
       </div>
