@@ -48,7 +48,7 @@ export default function Slider() {
   }
 
   return (
-    <div className="relative w-full overflow-hidden md:mt-[-120px]">
+     <div className="relative w-full overflow-hidden md:mt-[-120px]">
       <Swiper
         key={banner.length}
         slidesPerView={1}
@@ -67,75 +67,38 @@ export default function Slider() {
               className="
                 relative
                 w-full
-                h-[220px]
-                sm:h-[350px]
-                md:h-[500px]
-                lg:h-screen
+                h-full
                 overflow-hidden
               "
             >
-              {/* Image */}
               <img
                 src={slide?.Image}
                 alt={`Slide ${index}`}
                 className="
                   w-full
                   h-full
-                  object-cover
+                  object-contain
                   object-center
                 "
               />
-
-              {/* Overlay */}
               <div className="absolute inset-0 bg-black/20 md:bg-black/40"></div>
-
-              {/* Content */}
               <div className="absolute inset-0 flex items-center justify-center z-10 px-4">
                 <div className="text-center text-white max-w-4xl">
-                  
                   {slide?.title && (
-                    <h2
-                      className="
-                        text-xl
-                        sm:text-3xl
-                        md:text-5xl
-                        lg:text-6xl
-                        font-bold
-                        mb-3
-                        md:mb-5
-                        leading-tight
-                      "
-                    >
+                    <h2 className="text-xl sm:text-3xl md:text-5xl lg:text-6xl font-bold mb-3 md:mb-5 leading-tight">
                       {slide.title}
                     </h2>
                   )}
-
                   {slide?.description && (
-                    <p
-                      className="
-                        text-xs
-                        sm:text-sm
-                        md:text-lg
-                        lg:text-xl
-                        max-w-2xl
-                        mx-auto
-                        mb-4
-                        md:mb-6
-                        leading-relaxed
-                      "
-                    >
+                    <p className="text-xs sm:text-sm md:text-lg lg:text-xl max-w-2xl mx-auto mb-4 md:mb-6 leading-relaxed">
                       {slide.description}
                     </p>
                   )}
-
                   {slide?.buttonText && (
                     <div className="flex justify-center">
-                      <Button>
-                        {slide.buttonText}
-                      </Button>
+                      <Button>{slide.buttonText}</Button>
                     </div>
                   )}
-
                 </div>
               </div>
             </div>
