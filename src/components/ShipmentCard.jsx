@@ -60,6 +60,9 @@ export default function ShipmentCard({
   const referenceNumber = extractReferenceNumber(shipment, order);
   const tokenNumber = extractTokenNumber(shipment, order);
   const statusInformation = extractStatusInformation(shipment, order);
+  const isFailureState = /failed|unauthorized|error|denied/i.test(
+    `${status || ""} ${statusInformation || ""}`
+  );
 
   if (!shipment && !trackingNumber) {
     return (
@@ -104,11 +107,21 @@ export default function ShipmentCard({
       </div>
 
       {statusInformation ? (
-        <div className="mt-4 rounded-lg border border-gray-100 bg-gray-50 p-3">
+        <div
+          className={`mt-4 rounded-lg p-3 ${
+            isFailureState
+              ? "border border-red-200 bg-red-50"
+              : "border border-gray-100 bg-gray-50"
+          }`}
+        >
           <p className="text-[11px] font-bold uppercase tracking-wide text-gray-500">
             Carrier Response
           </p>
-          <p className="mt-1 text-sm text-gray-800 break-words">
+          <p
+            className={`mt-1 break-words text-sm ${
+              isFailureState ? "text-red-700" : "text-gray-800"
+            }`}
+          >
             {statusInformation}
           </p>
         </div>
@@ -118,5 +131,4 @@ export default function ShipmentCard({
     </div>
   );
 }
-
 

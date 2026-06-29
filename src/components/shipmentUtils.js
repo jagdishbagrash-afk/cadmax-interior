@@ -22,9 +22,10 @@ const TOKEN_NUMBER_KEYS = [
 ];
 
 const STATUS_KEYS = [
-  "status",
+  "shipping_status",
   "shipment_status",
   "shipmentStatus",
+  "status",
   "shippingStatus",
   "tracking_status",
   "trackingStatus",
@@ -81,6 +82,45 @@ function readFirstValue(source, keys) {
   return null;
 }
 
+function buildErrorSummary(payload) {
+  if (!payload || typeof payload !== "object") {
+    return null;
+  }
+
+  const rawErrorItems = [
+    payload?.["error-response"],
+    payload?.errorResponse,
+    payload?.error?.["error-response"],
+    payload?.error?.errorResponse,
+  ].find(Array.isArray);
+
+  const errorMessages = rawErrorItems
+    ?.map((item) => item?.msg || item?.message || item?.title)
+    .filter(Boolean);
+
+  const title =
+    payload?.error?.title ??
+    payload?.title ??
+    null;
+  const status =
+    payload?.error?.status ??
+    payload?.status ??
+    null;
+  const message =
+    payload?.error?.message ??
+    payload?.message ??
+    null;
+
+  const summaryParts = [
+    title ? String(title) : null,
+    status ? `Code ${status}` : null,
+    message ? String(message) : null,
+    ...(errorMessages || []),
+  ].filter(Boolean);
+
+  return summaryParts.length ? summaryParts.join(" | ") : null;
+}
+
 export function extractTrackingNumber(...sources) {
   for (const source of sources) {
     const value = readFirstValue(source, TRACKING_NUMBER_KEYS);
@@ -99,6 +139,18 @@ export function extractStatus(...sources) {
 
     if (value) {
       return String(value);
+    }
+  }
+
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+
+    if (payload?.success === false) {
+      return "shipment_failed";
+    }
+
+    if (payload?.error || payload?.status >= 400) {
+      return payload?.title ? String(payload.title) : "shipment_failed";
     }
   }
 
@@ -155,6 +207,12 @@ export function extractStatusInformation(...sources) {
         .map((item) => item?.StatusInformation || item?.StatusCode)
         .filter(Boolean)
         .join(" | ");
+    }
+
+    const errorSummary = buildErrorSummary(payload);
+
+    if (errorSummary) {
+      return errorSummary;
     }
   }
 

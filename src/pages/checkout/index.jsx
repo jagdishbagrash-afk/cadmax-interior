@@ -222,10 +222,38 @@ export default function Index() {
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order,
+              shipment,
+            })
+          );
+        }
+
         toast.success(response.data.message);
         dispatch(clearCart());
         await FetchCart();
-        router.push(`/success`);
+
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }

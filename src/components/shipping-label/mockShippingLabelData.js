@@ -1,0 +1,52 @@
+export const mockShippingLabelData = {
+  trackingNumber: "BDX9028712456",
+  orderReferenceNumber: "ORD-CMX-2026-00127",
+  bookingDate: "2026-06-27T10:30:00.000Z",
+  courierName: "Cadmax Express",
+  serviceType: "Surface Priority",
+  shipTo: {
+    name: "Rohit Sharma",
+    phone: "+91 98765 43210",
+    addressLine1: "Flat 402, Block B, Shree Residency",
+    addressLine2: "Near Central Park",
+    city: "Jaipur",
+    state: "Rajasthan",
+    country: "India",
+    pincode: "302017",
+  },
+  shipFrom: {
+    name: "Dispatch Desk",
+    companyName: "Cadmax Interior",
+    phone: "+91 141 400 1100",
+    addressLine1: "Warehouse 12, Sitapura Industrial Area",
+    addressLine2: "Phase 2",
+    city: "Jaipur",
+    state: "Rajasthan",
+    country: "India",
+    pincode: "302022",
+  },
+  payment: {
+    isCod: true,
+    orderValue: 8499,
+    codAmount: 8499,
+    currency: "INR",
+  },
+  packageDetails: {
+    weightKg: 3.45,
+    lengthCm: 42,
+    widthCm: 28,
+    heightCm: 16,
+  },
+  items: [
+    {
+      sku: "CMX-CH-001",
+      name: "Decorative Chair Cover Set",
+      quantity: 1,
+    },
+    {
+      sku: "CMX-LP-009",
+      name: "Premium Pendant Light",
+      quantity: 2,
+    },
+  ],
+};
