@@ -5,7 +5,17 @@ import Layout from "./common/Layout";
 
 export default function Home() {
   return (
-    <Layout>
+    <Layout
+          seo={{
+        title:
+          "Luxury Architects & Interior Designers in Jaipur | CADMAX Atelier",
+        description:
+          "Leading architecture and interior design studio in Jaipur offering residential architecture, luxury villa design, commercial interiors, and 3D visualization services.",
+        canonical: "https://cadmaxatelier.com/",
+        url: "https://cadmaxatelier.com/",
+      }}
+
+    >
       <Index />
     </Layout>
   );

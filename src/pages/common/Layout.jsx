@@ -6,8 +6,9 @@ import Listing from "../api/Listing";
 import useWishlist from "@/hooks/useWishlist";
 import { useDispatch } from "react-redux";
 import { clearWishlist } from "@/redux/wishlistSlice";
+import SEOHead from "./SEOHead";
 
-export default function Layout({ children }) {
+export default function Layout({ children , seo}) {
   const { user, setUser } = useRole();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
@@ -83,6 +84,8 @@ export default function Layout({ children }) {
 
   return (
     <>
+          <SEOHead {...seo} />
+
       <Header />
      <main>{children}</main>
 

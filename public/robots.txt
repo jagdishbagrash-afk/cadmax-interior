@@ -1,0 +1,25 @@
+User-agent: *
+Allow: /
+
+# Allow major search engines
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Block internal folders
+Disallow: /admin/
+Disallow: /api/
+Disallow: /checkout/
+Disallow: /buy-now/
+Disallow: /wishlist/
+Disallow: /orders/
+Disallow: /setting/
+
+Host: https://cadmaxatelier.com
+
+Sitemap: https://cadmaxatelier.com/sitemap.xml
