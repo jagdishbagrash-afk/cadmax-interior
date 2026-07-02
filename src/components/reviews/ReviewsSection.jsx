@@ -169,44 +169,8 @@ export default function ReviewsSection({ productId, productName = "" }) {
 
   const handleSubmitReview = async (data) => {
     if (editReviewData) {
+      // updateReview already handles image deletion (via removedImageIndices) and new image upload internally
       await updateReview(editReviewData._id, data);
-
-      const originalImages = editReviewData.images || [];
-      const currentImages = data.images || [];
-
-      const removedImages = originalImages.filter(
-        (origUrl) => !currentImages.some((img) => img.preview === origUrl)
-      );
-
-      const newImages = currentImages.filter((img) => img.file !== null);
-
-      for (let i = 0; i < removedImages.length; i++) {
-        const imgIndex = originalImages.indexOf(removedImages[i]);
-        if (imgIndex !== -1) {
-          try {
-            const Listing = (await import("@/pages/api/Listing")).default;
-            const main = new Listing();
-            await main.DeleteReviewImage(editReviewData._id, imgIndex);
-          } catch (err) {
-            console.error("Failed to delete image:", err);
-          }
-        }
-      }
-
-      if (newImages.length > 0) {
-        try {
-          const formData = new FormData();
-          newImages.forEach((img) => {
-            formData.append("reviewImages", img.file);
-          });
-          const Listing = (await import("@/pages/api/Listing")).default;
-          const main = new Listing();
-          await main.UploadReviewImages(editReviewData._id, formData);
-        } catch (err) {
-          console.error("Failed to upload new images:", err);
-          toast.error("Some images failed to upload");
-        }
-      }
     } else {
       await submitReview({ productId, ...data });
     }

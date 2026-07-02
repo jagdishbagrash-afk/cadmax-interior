@@ -5,11 +5,13 @@ import { FiHeart } from "react-icons/fi";
 import { useSelector } from "react-redux";
 import useWishlist from "@/hooks/useWishlist";
 import { getProductPrices } from "@/components/productPrices";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 export default function ProductCard({ item }) {
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const { toggleWishlist } = useWishlist();
   const isWishlisted = wishlistIds.includes(item?._id);
+  const { openAuthModal } = useAuthModal();
 
   // Get prices using the helper
   const { displayPrice, originalPrice } = getProductPrices(item);
@@ -20,7 +22,8 @@ export default function ProductCard({ item }) {
   const handleWishlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    toggleWishlist(item?._id);
+    // Open auth modal for wishlist - user must login first
+    openAuthModal("login");
   };
 
   return (

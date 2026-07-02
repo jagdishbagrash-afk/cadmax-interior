@@ -1,0 +1,285 @@
+{
+  "info": {
+    "name": "Cadmax Interior - Complete Review APIs",
+    "description": "Postman collection for testing all Review and Rating APIs including image upload/delete",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:5000/api",
+      "type": "string"
+    },
+    {
+      "key": "productId",
+      "value": "6a34e93dc9065cf1d2455c37",
+      "type": "string"
+    },
+    {
+      "key": "reviewId",
+      "value": "REPLACE_WITH_ACTUAL_REVIEW_ID",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "YOUR_JWT_TOKEN_HERE",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Get Product Reviews",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/review/product/{{productId}}?sort=latest&page=1&limit=10",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "product", "{{productId}}"],
+          "query": [
+            {
+              "key": "sort",
+              "value": "latest",
+              "description": "Sort by: latest, highest, lowest, most_helpful, positive, negative, relevant"
+            },
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            },
+            {
+              "key": "userId",
+              "value": "",
+              "description": "Optional: Pass user ID to see their pending reviews"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "2. Get Rating Summary",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/review/rating-summary/{{productId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "rating-summary", "{{productId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "3. Check Review Eligibility",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/review/eligibility/{{productId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "eligibility", "{{productId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "4. Add Review (with images)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"productId\": \"{{productId}}\",\n  \"rating\": 5,\n  \"title\": \"Amazing product!\",\n  \"message\": \"This is exactly what I was looking for. Great quality and fast delivery.\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/review/add",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "add"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "5. Update Review (text only)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"rating\": 4,\n  \"title\": \"Updated review title\",\n  \"message\": \"Updated review message\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/review/update/{{reviewId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "update", "{{reviewId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "6. Delete Review",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/review/delete/{{reviewId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "delete", "{{reviewId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "7. Upload Review Images",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "reviewImages",
+              "type": "file",
+              "src": [],
+              "description": "Upload 1-5 images (max 5MB each)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/review/images/upload/{{reviewId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "images", "upload", "{{reviewId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "8. Delete Review Image",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/review/images/delete/{{reviewId}}/0",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "images", "delete", "{{reviewId}}", "0"],
+          "query": [
+            {
+              "key": "imageIndex",
+              "value": "0",
+              "description": "Index of image to delete (0-based)"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "9. Mark Review as Helpful",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/review/helpful/{{reviewId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "helpful", "{{reviewId}}"]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10. Mark Review as Not Helpful",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/review/not-helpful/{{reviewId}}",
+          "protocol": "http",
+          "host": ["{{baseUrl}}"],
+          "path": ["review", "not-helpful", "{{reviewId}}"]
+        }
+      },
+      "response": []
+    }
+  ]
+}

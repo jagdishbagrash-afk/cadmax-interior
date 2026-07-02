@@ -5,6 +5,7 @@ import { Toaster } from "react-hot-toast";
 import { Provider } from "react-redux";
 import { store } from "@/redux/store";
 import { RoleProvider } from "@/context/RoleContext";
+import { AuthModalProvider } from "@/context/AuthModalContext";
 
 export default function App({ Component, pageProps }) {
   return (
@@ -20,7 +21,9 @@ export default function App({ Component, pageProps }) {
       />
       <Provider store={store}>
         <RoleProvider>
-        <Component {...pageProps} />
+          <AuthModalProvider>
+            <Component {...pageProps} />
+          </AuthModalProvider>
         </RoleProvider>
       </Provider>
     </>
