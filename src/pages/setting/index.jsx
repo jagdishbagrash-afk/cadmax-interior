@@ -181,13 +181,16 @@ export default function ProfileIndex() {
           </div>
 
           <div className="flex items-center gap-5">
-            <Image
-              src={previewImgSrc}
-              alt="Profile"
-              width={64}
-              height={64}
-              className="rounded-full object-cover"
-            />
+            <div className="w-16 h-16 rounded-full overflow-hidden flex-shrink-0">
+              <Image
+                src={previewImgSrc}
+                alt="Profile"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+                style={{ objectFit: "cover" }}
+              />
+            </div>
 
             <div>
               <input
