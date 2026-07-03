@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-const API_URL =  process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:5000/api";
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ||
+  process.env.NEXT_PUBLIC_BASE_URL ||
+  "http://localhost:5001/api";
 
 function getToken() {
   if (typeof window !== "undefined") {
@@ -19,7 +22,6 @@ let Api = axios.create({
   baseURL: API_URL,
   headers: {
     'Accept': 'application/json',
-    'Access-Control-Allow-Origin': '*',
     // "Content-Type": "multipart/form-data",
   }
 });
@@ -41,7 +43,6 @@ let ApiallowFile = axios.create({
   baseURL: API_URL,
   headers: {
     'Accept': 'application/json',
-    'Access-Control-Allow-Origin': '*',
     "Content-Type": "multipart/form-data",
   }
 });

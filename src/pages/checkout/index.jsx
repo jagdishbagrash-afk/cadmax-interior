@@ -14,6 +14,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -184,12 +185,12 @@ export default function Index() {
 
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        const orderId = res?.data?.data?._id;
+        const createdOrderId = res?.data?.data?._id;
         await savePaymentDetails(
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          orderId
+          createdOrderId
         );
       } else {
         toast.error(res?.data?.message || "Failed to place order");
@@ -222,10 +223,38 @@ export default function Index() {
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order,
+              shipment,
+            })
+          );
+        }
+
         toast.success(response.data.message);
         dispatch(clearCart());
         await FetchCart();
-        router.push(`/success`);
+
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }

@@ -10,7 +10,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
-import { FiShield, FiTruck, FiAward, FiHeadphones, FiArrowRight } from "react-icons/fi";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -30,11 +30,16 @@ export default function Index() {
     mobile: "",
     addressId: "",
   });
+  const selectedAddress = data.find(
+    (item) => item._id === formData.addressId
+  );
+  const selectedAddressText = selectedAddress
+    ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
+    : "";
 
   // BUY NOW PRODUCT
   useEffect(() => {
     const item = JSON.parse(localStorage.getItem("buyNowItem"));
-    console.log("item", item);
 
     if (!item) {
       router.push("/");
@@ -93,7 +98,7 @@ export default function Index() {
 
   // PRICE CALCULATIONS
   const subtotal =
-    (product?.originalPrice || 0) * (product?.quantity || 1);
+    (product?.price || 0) * (product?.quantity || 1);
 
   const discountTotal =
     (product?.discount_amount || 0) *
@@ -102,9 +107,6 @@ export default function Index() {
   const finalTotal =
     (product?.final_amount || 0) *
     (product?.quantity || 1);
-
-  // Calculate 10% discount on subtotal
-  const additionalDiscount = subtotal * 0.1;
 
   // PAYMENT
   const handlePaymentCreateSubmit = async (e) => {
@@ -151,7 +153,7 @@ export default function Index() {
           },
 
           theme: {
-            color: "#D4AF37",
+            color: "#F37254",
           },
         };
 
@@ -194,6 +196,7 @@ export default function Index() {
         name: formData.name,
         mobile: formData.mobile,
         addressId: formData.addressId,
+        address: selectedAddressText,
         product: productData,
 
         subtotal,
@@ -230,8 +233,9 @@ export default function Index() {
   ) => {
     try {
       const main = new Listing();
+      const shippingProvider = process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
 
-      const response = await main.PaymentSave({
+      const response = await main.VerifyPayment({
         order_id: orderId,
         payment_id: paymentId,
         currency: "INR",
@@ -240,14 +244,42 @@ export default function Index() {
         type: "product",
         payment_status,
         OrderID: Orderdatas,
+        shipping_provider: shippingProvider || undefined,
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order,
+              shipment,
+            })
+          );
+        }
+
         localStorage.removeItem("buyNowItem");
 
         toast.success(response.data.message);
 
-        router.push("/success");
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }
@@ -261,366 +293,186 @@ export default function Index() {
     <Layout>
       <Banner Slider1={BannerImages} />
 
-      <section className="w-full bg-gradient-to-b from-gray-50 to-white py-12 md:py-16 lg:py-20 text-black antialiased">
+      <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          {/* Page Header */}
-          <div className="text-center mb-12 md:mb-16">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-black mb-4">
-              Buy Now
-            </h1>
-            <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto mb-4"></div>
-            <p className="text-gray-600 text-lg">Complete your purchase instantly</p>
-          </div>
+          <div className="flex flex-col lg:flex-row gap-12">
 
-          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
-            {/* LEFT COLUMN – Shipping Form */}
+            {/* LEFT */}
             <div className="w-full lg:w-5/12">
-              <div className="bg-white rounded-3xl shadow-xl border border-gray-100 lg:sticky lg:top-24 overflow-hidden">
-                {/* Form Header */}
-                <div className="bg-gradient-to-r from-black to-gray-900 px-8 py-6">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+              <div className="bg-[#F9F9F9] border border-gray-200 shadow-sm">
+                <div className="px-6 py-5 border-b border-gray-200">
+                  <h2 className="text-2xl font-semibold">
                     Shipping Details
                   </h2>
-                  <p className="text-gray-300 mt-2 text-sm">
-                    Enter your details to complete your order
-                  </p>
                 </div>
 
-                <form className="p-8" onSubmit={handlePaymentCreateSubmit}>
+                <form
+                  className="p-6"
+                  onSubmit={handlePaymentCreateSubmit}
+                >
                   <div className="space-y-6">
+
                     {/* NAME */}
                     <div>
-                      <label
-                        htmlFor="name"
-                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-3"
-                      >
-                        Full Name *
+                      <label className="block text-sm font-medium mb-2">
+                        Full Name
                       </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                          </svg>
-                        </div>
-                        <input
-                          id="name"
-                          type="text"
-                          name="name"
-                          placeholder="John Doe"
-                          autoComplete="name"
-                          value={formData.name}
-                          onChange={handleChange}
-                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none"
-                          required
-                        />
-                      </div>
+
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 outline-none"
+                        required
+                      />
                     </div>
 
                     {/* MOBILE */}
                     <div>
-                      <label
-                        htmlFor="mobile"
-                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-3"
-                      >
-                        Mobile Number *
+                      <label className="block text-sm font-medium mb-2">
+                        Mobile Number
                       </label>
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                          </svg>
-                        </div>
-                        <input
-                          id="mobile"
-                          type="tel"
-                          name="mobile"
-                          placeholder="9876543210"
-                          autoComplete="tel"
-                          value={formData.mobile}
-                          onChange={handleChange}
-                          maxLength={10}
-                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none"
-                          required
-                        />
-                      </div>
+
+                      <input
+                        type="tel"
+                        name="mobile"
+                        value={formData.mobile}
+                        onChange={handleChange}
+                        maxLength={10}
+                        className="w-full border border-gray-300 px-4 py-3 outline-none"
+                        required
+                      />
                     </div>
 
                     {/* ADDRESS */}
                     <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <label
-                          htmlFor="addressId"
-                          className="block text-xs font-bold uppercase tracking-wider text-gray-700"
-                        >
-                          Select Address *
+                      <div className="flex justify-between items-center mb-2">
+                        <label className="block text-sm font-medium">
+                          Address
                         </label>
+
                         <Link
                           href="/address"
-                          className="text-sm text-[#D4AF37] hover:text-black transition-colors duration-200 font-semibold flex items-center gap-1"
+                          className="text-sm text-blue-600 underline"
                         >
                           + Add New Address
                         </Link>
                       </div>
 
-                      <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                          </svg>
-                        </div>
-                        <select
-                          id="addressId"
-                          name="addressId"
-                          value={formData.addressId || ""}
-                          onChange={handleChange}
-                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none appearance-none cursor-pointer"
-                          required
-                        >
-                          <option value="">Select Address</option>
-                          {data?.map((item) => (
-                            <option key={item._id} value={item._id}>
-                              {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode}`}
-                            </option>
-                          ))}
-                        </select>
-                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
-                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                          </svg>
-                        </div>
-                      </div>
+                      <select
+                        name="addressId"
+                        value={formData.addressId}
+                        onChange={handleChange}
+                        className="w-full border border-gray-300 px-4 py-3 outline-none"
+                        required
+                      >
+                        <option value="">
+                          Select Address
+                        </option>
+
+                        {data?.map((item) => (
+                          <option
+                            key={item._id}
+                            value={item._id}
+                          >
+                            {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode}`}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
-                  {/* Secure Checkout Badge */}
-                  <div className="mt-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
-                        <FiShield className="w-6 h-6 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-black text-lg mb-1">100% Secure payment</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Your information is protected with encrypted payment security. Shop with confidence.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Pay Button */}
                   <button
                     type="submit"
-                    disabled={loading || !product}
-                    className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${
-                      loading || !product
-                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                        : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-                    }`}
+                    disabled={loading}
+                    className={`w-full py-4 mt-8 font-bold transition
+                    ${loading
+                        ? "bg-gray-300 cursor-not-allowed"
+                        : "bg-black text-white hover:bg-gray-800"
+                      }`}
                   >
-                    {loading ? (
-                      <>
-                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        Pay Securely Now
-                        <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
-                      </>
-                    )}
+                    {loading ? "Processing..." : "Pay Now"}
                   </button>
                 </form>
               </div>
             </div>
 
-            {/* RIGHT COLUMN – Product Summary */}
+            {/* RIGHT */}
             <div className="w-full lg:w-7/12">
-              <div className="lg:sticky lg:top-24">
-                <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-                  {/* Order Summary Header */}
-                  <div className="bg-gradient-to-r from-black to-gray-900 px-8 py-6">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                      Order Summary
-                    </h2>
-                    <p className="text-gray-300 mt-1 text-sm">
-                      {product ? '1 item in your order' : 'Loading...'}
-                    </p>
-                  </div>
+              <div className="border border-gray-200 p-6">
 
-                  {product && (
-                    <>
-                      {/* Product Card */}
-                      <div className="p-8">
-                        <div className="flex gap-6">
-                          {/* Product Image */}
-                          <div className="relative w-32 h-32 sm:w-36 sm:h-36 flex-shrink-0 bg-gray-50 rounded-2xl overflow-hidden border-2 border-gray-100">
-                            <img
-                              src={
-                                product?.images?.[0] ||
-                                "/placeholder.png"
-                              }
-                              alt={product?.name}
-                              className="w-full h-full object-cover"
-                            />
-                          </div>
+                <h2 className="text-2xl font-semibold border-b pb-4 mb-6">
+                  Product Summary
+                </h2>
 
-                          {/* Product Details */}
-                          <div className="flex-1">
-                            <h3 className="font-bold text-black text-xl leading-tight mb-3">
-                              {product?.name}
-                            </h3>
-
-                            {/* Variant Badge */}
-                            {product?.variant && (
-                              <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-xs font-semibold rounded-full mb-3">
-                                {product?.variant}
-                              </span>
-                            )}
-
-                            {/* Size & Category */}
-                            <div className="space-y-1 text-sm text-gray-600 mb-3">
-                              {product?.selectedSize?.title && (
-                                <p className="font-medium">
-                                  Category: <span className="text-black">{product.selectedSize.title}</span>
-                                </p>
-                              )}
-                              {product?.selectedPriceSection?.title && (
-                                <p className="font-medium">
-                                  Size: <span className="text-black">{product.selectedPriceSection.title}</span>
-                                </p>
-                              )}
-                              <p className="font-medium">
-                                Quantity: <span className="text-black">{product?.quantity}</span>
-                              </p>
-                            </div>
-
-                            {/* Price */}
-                            <div className="space-y-1">
-                              {discountTotal > 0 && (
-                                <p className="text-sm text-gray-400 line-through">
-                                  {formatPrice(subtotal, "INR")}
-                                </p>
-                              )}
-                              <p className="text-2xl font-bold text-black">
-                                {formatPrice(finalTotal, "INR")}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Price Breakdown */}
-                      <div className="px-8 py-6 bg-gray-50 border-t-2 border-gray-100">
-                        <div className="space-y-3">
-                          {subtotal > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Price</span>
-                              <span className="font-semibold text-black">{formatPrice(subtotal, "INR")}</span>
-                            </div>
-                          )}
-                          {additionalDiscount > 0 && (
-                            <div className="flex justify-between text-sm">
-                              <span className="text-gray-600">Discount (10%)</span>
-                              <span className="font-semibold text-green-600">-{formatPrice(additionalDiscount, "INR")}</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between text-sm">
-                            <span className="text-gray-600">Delivery Charges</span>
-                            <span className="font-semibold text-green-600">FREE</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Total */}
-                      <div className="px-8 py-6 bg-gradient-to-r from-black to-gray-900">
-                        <div className="flex justify-between items-center">
-                          <span className="text-white font-bold text-lg uppercase tracking-wide">Total Amount</span>
-                          <span className="text-white font-black text-2xl md:text-3xl">
-                            {formatPrice(finalTotal , "INR")}
-                          </span>
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {!product && (
-                    <div className="text-center py-16 px-8">
-                      <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                        <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                      </div>
-                      <p className="text-gray-500 text-lg mb-6">No product found</p>
-                      <Link
-                        href="/"
-                        className="inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-900 transition-all duration-200"
-                      >
-                        Continue Shopping
-                        <FiArrowRight className="w-4 h-4" />
-                      </Link>
-                    </div>
-                  )}
-                </div>
-
-                {/* Value Proposition */}
                 {product && (
-                  <div className="mt-8 grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 text-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <FiAward className="w-6 h-6 text-black" />
-                      </div>
-                      <p className="text-xs font-bold text-black uppercase tracking-wide">Premium Quality</p>
+                  <div className="flex gap-5 items-center">
+
+                    {/* IMAGE */}
+                    <div className="w-28 h-28 border bg-gray-100 overflow-hidden">
+                      <img
+                        src={
+                          product?.images?.[0] ||
+                          "/placeholder.png"
+                        }
+                        alt={product?.name}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 text-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <FiTruck className="w-6 h-6 text-black" />
+
+                    {/* DETAILS */}
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold">
+                        {product?.name}
+                      </h3>
+
+                      <p className="text-sm text-gray-500 mt-1">
+                        Variant: {product?.variant}
+                      </p>
+
+                      <p className="text-sm text-gray-500">
+                        Quantity: {product?.quantity}
+                      </p>
+
+                      {/* PRICE */}
+                      <div className="mt-3 space-y-1">
+
+                        <div className="flex items-center gap-3">
+                          <span className="text-gray-400 line-through text-sm">
+                            {formatMultiPrice(subtotal, "INR")}
+                          </span>
+
+                          {/* <span className="text-green-600 font-medium text-sm">
+                            Save {discountTotal} %
+                          </span> */}
+                        </div>
+
+                        <div className="text-2xl font-bold">
+                          {formatPrice(finalTotal, "INR")}
+                        </div>
                       </div>
-                      <p className="text-xs font-bold text-black uppercase tracking-wide">Free Delivery</p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 text-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <FiShield className="w-6 h-6 text-black" />
-                      </div>
-                      <p className="text-xs font-bold text-black uppercase tracking-wide">Warranty</p>
-                    </div>
-                    <div className="bg-white rounded-2xl p-5 shadow-lg border border-gray-100 text-center">
-                      <div className="w-12 h-12 bg-gradient-to-br from-gray-100 to-gray-50 rounded-xl flex items-center justify-center mx-auto mb-3">
-                        <FiHeadphones className="w-6 h-6 text-black" />
-                      </div>
-                      <p className="text-xs font-bold text-black uppercase tracking-wide">24/7 Support</p>
                     </div>
                   </div>
                 )}
-              </div>
-            </div>
-          </div>
 
-          {/* Trust Section */}
-          <div className="mt-16 md:mt-20 pt-12 border-t border-gray-200">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <FiShield className="w-8 h-8 text-black" />
+                {/* TOTAL */}
+                <div className="border-t mt-8 pt-6 space-y-3">
+
+                  <div className="flex justify-between items-center pt-4">
+                    <span className="text-lg font-semibold">
+                      Final Amount
+                    </span>
+
+                    <span className="text-2xl font-bold">
+                      {formatPrice(finalTotal, "INR")}
+                    </span>
+                  </div>
+
                 </div>
-                <h3 className="font-bold text-black text-lg mb-2">Secure Payment</h3>
-                <p className="text-sm text-gray-600">Protected by industry-standard encryption</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <FiTruck className="w-8 h-8 text-black" />
-                </div>
-                <h3 className="font-bold text-black text-lg mb-2">Easy Returns</h3>
-                <p className="text-sm text-gray-600">Hassle-free return policy within 7 days</p>
-              </div>
-              <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-100 to-white rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <FiAward className="w-8 h-8 text-black" />
-                </div>
-                <h3 className="font-bold text-black text-lg mb-2">Best Price Guarantee</h3>
-                <p className="text-sm text-gray-600">We match prices for quality products</p>
               </div>
             </div>
+
           </div>
         </div>
       </section>

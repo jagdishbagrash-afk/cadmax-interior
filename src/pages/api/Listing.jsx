@@ -559,6 +559,25 @@ class Listing extends Component {
   async PaymentSave(data) {
     return Api.post("/verify-payment", data)
   }
+
+  async VerifyPayment(data) {
+    return Api.post("/verify-payment", data)
+  }
+
+  async GetOrderShipment(id) {
+    return Api.get(`/order/${id}/shipment`)
+  }
+
+  async GetOrderTracking(id) {
+    return Api.get(`/order/${id}/tracking`)
+  }
+
+  async GetPublicShipmentTracking(trackingNumber, courier) {
+    return Api.get(`/shipment/track/${trackingNumber}`, {
+      params: courier ? { courier } : undefined
+    })
+  }
+
   async DeleteImageUrl(data) {
     return Api.post("/common/delete-image", data)
 
