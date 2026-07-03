@@ -25,6 +25,7 @@ import useWishlist from "@/hooks/useWishlist";
 import { useSelector } from "react-redux";
 import ReviewsSection from "@/components/reviews/ReviewsSection";
 import Link from "next/link";
+import { useAuthModal } from "@/context/AuthModalContext";
 
 // Custom Zoom Component - Fixed version
 const CustomZoomOnHover = ({ imageSrc, alt, zoomScale = 2.5 }) => {
@@ -194,6 +195,7 @@ export default function Index() {
   const { toggleWishlist } = useWishlist();
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const isWishlisted = ProductDetails && wishlistIds.includes(ProductDetails._id);
+  const { openAuthModal } = useAuthModal();
 
   const dispatch = useDispatch();
 
@@ -418,7 +420,7 @@ export default function Index() {
 
   const handleAdd = () => {
     if (!user || user?.role !== "customer") {
-      router.push("/login");
+      openAuthModal("login");
       return;
     }
     if (!selectedVariant) {
@@ -456,7 +458,7 @@ export default function Index() {
 
   const handlecheckoutAdd = (redirect = false) => {
     if (!user || user?.role !== "customer") {
-      router.push("/login");
+      openAuthModal("login");
       return;
     }
 
@@ -636,14 +638,7 @@ export default function Index() {
                   {/* Wishlist & Share Icons */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     <button
-                      onClick={() => toggleWishlist(ProductDetails?._id, {
-                        selectedVariant: selectedVariant ? {
-                          color: selectedVariant.color,
-                          images: selectedVariant.images
-                        } : null,
-                        selectedPriceSection: selectedPriceSection || null,
-                        selectedSize: selectedSize || null
-                      })}
+                      onClick={() => openAuthModal("login")}
                       className={`w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 ${isWishlisted
                         ? "text-red-500"
                         : "text-gray-600 hover:text-red-500"
@@ -751,14 +746,7 @@ export default function Index() {
   {/* Wishlist & Share Icons */}
   <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
     <button
-      onClick={() => toggleWishlist(ProductDetails?._id, {
-        selectedVariant: selectedVariant ? {
-          color: selectedVariant.color,
-          images: selectedVariant.images
-        } : null,
-        selectedPriceSection: selectedPriceSection || null,
-        selectedSize: selectedSize || null
-      })}
+      onClick={() => openAuthModal("login")}
       className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
         ? "text-red-500"
         : "text-gray-600 hover:text-red-500"

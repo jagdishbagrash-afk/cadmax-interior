@@ -13,6 +13,7 @@ import DesignMenu from "./DesignMenu";
 import toast from "react-hot-toast";
 import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
+import AuthModal from "@/components/AuthModal";
 
 
 import { DiJava } from "react-icons/di";
@@ -25,6 +26,8 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authTab, setAuthTab] = useState("login");
 
   // SEARCH STATES
 
@@ -251,8 +254,9 @@ export default function Header() {
               </div>
             ) : (
               <div className={`flex gap-3 ${textColor}`}>
-                <Link href="/login">Login</Link>
-                <Link href="/register">Signup</Link>
+                <button onClick={() => { setAuthTab("login"); setAuthModalOpen(true); }} className="hover:underline">Login</button>
+                <span>/</span>
+                <button onClick={() => { setAuthTab("signup"); setAuthModalOpen(true); }} className="hover:underline">Signup</button>
               </div>
             )}
 
@@ -360,6 +364,15 @@ export default function Header() {
 
       {/* SEARCH POPUP */}
 
+      {/* AUTH MODAL - Opens on current page */}
+      <AuthModal
+        key={authTab}
+        isOpen={authModalOpen}
+        onClose={() => {
+          setAuthModalOpen(false);
+        }}
+        defaultTab={authTab}
+      />
     </>
   );
 }

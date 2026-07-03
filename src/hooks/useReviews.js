@@ -87,7 +87,19 @@ export default function useReviews() {
           if (newImages.length > 0) {
             const reviewId = response.data.data._id;
             const formData = new FormData();
-            newImages.forEach((img) => {
+            
+            // Deduplicate files by name and size to prevent double uploads
+            const seenFiles = new Set();
+            const uniqueFiles = newImages.filter((img) => {
+              const fileKey = `${img.file.name}-${img.file.size}-${img.file.lastModified}`;
+              if (seenFiles.has(fileKey)) {
+                return false;
+              }
+              seenFiles.add(fileKey);
+              return true;
+            });
+            
+            uniqueFiles.forEach((img) => {
               formData.append("reviewImages", img.file);
             });
             try {
@@ -113,13 +125,58 @@ export default function useReviews() {
   const updateReview = useCallback(async (reviewId, data) => {
     try {
       const main = new Listing();
-      // Only send rating, title, message to backend (images handled separately)
+      // Update review text and rating
       const response = await main.UpdateReview(reviewId, {
         rating: data.rating,
         title: data.title,
         message: data.message,
       });
       if (response?.data?.status) {
+        // Delete removed images first
+        if (data.removedImageIndices && data.removedImageIndices.length > 0) {
+          for (const imageIndex of data.removedImageIndices) {
+            try {
+              await Api.post(`/review/images/delete/${reviewId}/${imageIndex}`);
+            } catch (deleteErr) {
+              console.error("Image delete error:", deleteErr);
+              // Continue with other deletions even if one fails
+            }
+          }
+        }
+        
+        // Handle image updates if images are provided
+        if (data.images && data.images.length > 0) {
+          const newImages = data.images.filter((img) => img.file !== null);
+          
+          // Upload new images
+          if (newImages.length > 0) {
+            const formData = new FormData();
+            
+            // Deduplicate files by name and size to prevent double uploads
+            const seenFiles = new Set();
+            const uniqueFiles = newImages.filter((img) => {
+              const fileKey = `${img.file.name}-${img.file.size}-${img.file.lastModified}`;
+              if (seenFiles.has(fileKey)) {
+                return false;
+              }
+              seenFiles.add(fileKey);
+              return true;
+            });
+            
+            uniqueFiles.forEach((img) => {
+              formData.append("reviewImages", img.file);
+            });
+            try {
+              await Api.post(`/review/images/upload/${reviewId}`, formData, {
+                headers: { "Content-Type": "multipart/form-data" },
+              });
+            } catch (imgErr) {
+              console.error("Image upload error:", imgErr);
+              toast.error("Review updated but some images failed to upload");
+            }
+          }
+        }
+        
         toast.success("Review updated successfully!");
         return response.data;
       }

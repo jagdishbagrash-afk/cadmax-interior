@@ -14,6 +14,7 @@ export default function WriteReviewModal({
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [reviewImages, setReviewImages] = useState([]);
+  const [removedImageIndices, setRemovedImageIndices] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef(null);
 
@@ -31,17 +32,20 @@ export default function WriteReviewModal({
               file: null,
               preview: url,
               existing: true,
+              originalIndex: initialData.images.indexOf(url),
             }))
           );
         } else {
           setReviewImages([]);
         }
+        setRemovedImageIndices([]);
       } else {
         // Fresh write mode - reset everything
         setRating(0);
         setTitle("");
         setMessage("");
         setReviewImages([]);
+        setRemovedImageIndices([]);
       }
       setHoverRating(0);
       setSubmitting(false);
@@ -52,7 +56,7 @@ export default function WriteReviewModal({
 
   const handleImageSelect = (e) => {
     const files = Array.from(e.target.files);
-    const totalExisting = reviewImages.length;
+    const totalExisting = reviewImages.filter(img => !img.existing).length;
     const remaining = 5 - totalExisting;
 
     if (files.length > remaining) {
@@ -72,7 +76,22 @@ export default function WriteReviewModal({
       return true;
     });
 
-    const newImages = validFiles.map((file) => ({
+    // Check for duplicates - compare by file name and size
+    const existingNewFiles = reviewImages
+      .filter(img => !img.existing)
+      .map(img => `${img.file.name}-${img.file.size}`);
+    
+    const uniqueFiles = validFiles.filter((file) => {
+      const fileKey = `${file.name}-${file.size}`;
+      return !existingNewFiles.includes(fileKey);
+    });
+
+    if (uniqueFiles.length === 0) {
+      toast.error("These images are already added");
+      return;
+    }
+
+    const newImages = uniqueFiles.map((file) => ({
       file,
       preview: URL.createObjectURL(file),
       existing: false, // Mark as new
@@ -83,6 +102,13 @@ export default function WriteReviewModal({
   };
 
   const removeImage = (index) => {
+    const imageToRemove = reviewImages[index];
+    
+    // Track removed existing images
+    if (imageToRemove && imageToRemove.existing) {
+      setRemovedImageIndices((prev) => [...prev, imageToRemove.originalIndex]);
+    }
+    
     setReviewImages((prev) => {
       const updated = [...prev];
       const removed = updated[index];
@@ -114,6 +140,7 @@ export default function WriteReviewModal({
         title: title.trim(),
         message: message.trim(),
         images: reviewImages,
+        removedImageIndices: removedImageIndices,
       });
       onClose();
       // Reset state after successful submit
@@ -121,6 +148,7 @@ export default function WriteReviewModal({
       setTitle("");
       setMessage("");
       setReviewImages([]);
+      setRemovedImageIndices([]);
     } catch (error) {
       // Error already handled in hook
     } finally {
