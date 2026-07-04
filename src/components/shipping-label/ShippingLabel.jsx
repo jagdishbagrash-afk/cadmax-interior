@@ -72,22 +72,27 @@ function TrackingBarcode({ value }) {
   );
 }
 
-function AddressSection({ title, name, address, phone, extraLines = [] }) {
+function AddressSection({
+  title,
+  name,
+  address,
+  phone,
+  extraLines = [],
+  renderAddressBeforeExtra = false,
+}) {
   const addressLines = address ? [address] : [];
   const normalizedExtraLines = Array.isArray(extraLines)
     ? extraLines.filter(Boolean)
     : [];
+  const orderedLines = renderAddressBeforeExtra
+    ? [...addressLines, ...normalizedExtraLines]
+    : [...normalizedExtraLines, ...addressLines];
 
   return (
     <div className={styles.addressSection}>
       <p className={styles.sectionTitle}>{title}</p>
       {name ? <p className={styles.addressName}>{name}</p> : null}
-      {normalizedExtraLines.map((line, index) => (
-        <p key={`${title}-meta-${index}`} className={styles.addressLine}>
-          {line}
-        </p>
-      ))}
-      {addressLines.map((line, index) => (
+      {orderedLines.map((line, index) => (
         <p key={`${title}-${index}`} className={styles.addressLine}>
           {line}
         </p>
@@ -159,6 +164,31 @@ function shouldRenderMetaValue(value, alwaysShow = false) {
   return false;
 }
 
+function getPublicTrackingUrl(trackingNumber, courierName) {
+  const normalizedTracking = safeText(trackingNumber);
+  const publicSiteUrl =
+    safeText(process.env.NEXT_PUBLIC_FRONTEND_URL) ||
+    safeText(process.env.NEXT_PUBLIC_APP_URL);
+  const baseUrl =
+    publicSiteUrl || (typeof window !== "undefined" ? window.location.origin : "");
+
+  if (!normalizedTracking || !baseUrl) {
+    return "";
+  }
+
+  const trackingUrl = new URL(
+    `/shipment/track/${encodeURIComponent(normalizedTracking)}`,
+    baseUrl
+  );
+  const normalizedCourier = safeText(courierName);
+
+  if (normalizedCourier) {
+    trackingUrl.searchParams.set("courier", normalizedCourier);
+  }
+
+  return trackingUrl.toString();
+}
+
 const ShippingLabel = forwardRef(function ShippingLabel(
   { data, showPrice = true, className = "" },
   ref
@@ -173,6 +203,10 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const carrierProvider = safeText(carrier.provider);
   const blueDart = carrier.blueDart || {};
   const trackingNumber = safeText(shipmentData.trackingNumber);
+  const trackingQrValue = getPublicTrackingUrl(
+    trackingNumber,
+    shipmentData.courierName
+  );
   const bookingDate = formatDisplayDate(labelData.bookingDate);
   const courierName = safeText(shipmentData.courierName);
   const serviceType = safeText(labelData.serviceType);
@@ -225,7 +259,6 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const destinationArea = safeText(blueDart.destinationArea);
   const destinationLocation = safeText(blueDart.destinationLocation);
   const clusterCode = safeText(blueDart.clusterCode);
-  const areaLocation = safeText(blueDart.areaLocation);
   const routeOrigin = isBlueDart ? originArea || origin : origin;
   const routingCode = isBlueDart
     ? [destinationArea, destinationLocation, clusterCode].filter(Boolean).join("/")
@@ -266,17 +299,11 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       ].filter(Boolean)
     : [];
   const returnToSource =
-    labelData.rto ||
-    labelData.returnTo ||
-    labelData.returnAddress ||
-    blueDart.returnTo ||
-    blueDart.returnAddress ||
-    null;
-  const returnToName = safeText(returnToSource?.name);
-  const returnToAddress = formatFullAddress(returnToSource);
-  const returnToPhone = maskSensitivePhone(returnToSource?.phone);
-  const shouldShowReturnTo =
-    Boolean(returnToAddress) && returnToAddress !== shipFromAddress;
+    labelData.rto || labelData.returnTo || labelData.returnAddress || {};
+  const returnToName = safeText(returnToSource?.name) || shipFromName;
+  const returnToAddress = formatFullAddress(returnToSource) || shipFromAddress;
+  const returnToPhone =
+    maskSensitivePhone(returnToSource?.phone) || shipFromPhone;
   const labelClassName = `${styles.label}${className ? ` ${className}` : ""}`;
 
   return (
@@ -301,9 +328,9 @@ const ShippingLabel = forwardRef(function ShippingLabel(
           <div className={styles.qrFrame}>
             {trackingNumber ? (
               <QRCodeSVG
-                value={trackingNumber}
+                value={trackingQrValue || trackingNumber}
                 size={82}
-                level="M"
+                level="H"
                 bgColor="#FFFFFF"
                 fgColor="#111111"
               />
@@ -333,6 +360,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
             address={shipFromAddress}
             phone={shipFromPhone}
             extraLines={shipFromExtraLines}
+            renderAddressBeforeExtra
           />
         </div>
       </div>
@@ -373,17 +401,11 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       </div>
 
       <div className={styles.footerSection}>
-        {shouldShowReturnTo ? (
-          <>
-            <p className={styles.rtoLabel}>If Undelivered Return To:</p>
-            {returnToName ? (
-              <p className={styles.footerCompany}>{returnToName}</p>
-            ) : null}
-            <p className={styles.footerAddress}>{returnToAddress}</p>
-            {returnToPhone ? (
-              <p className={styles.footerAddress}>Phone: {returnToPhone}</p>
-            ) : null}
-          </>
+        <p className={styles.rtoLabel}>If Undelivered Return To:</p>
+        {returnToName ? <p className={styles.footerCompany}>{returnToName}</p> : null}
+        <p className={styles.footerAddress}>{returnToAddress}</p>
+        {returnToPhone ? (
+          <p className={styles.footerAddress}>Phone: {returnToPhone}</p>
         ) : null}
       </div>
     </section>

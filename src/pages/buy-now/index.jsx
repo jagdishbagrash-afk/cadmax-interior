@@ -10,6 +10,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 import { FiShield, FiTruck, FiAward, FiHeadphones, FiArrowRight } from "react-icons/fi";
 
 export default function Index() {
@@ -36,6 +37,34 @@ export default function Index() {
   const selectedAddressText = selectedAddress
     ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
     : "";
+
+  const buildOrderProducts = () => {
+    if (!product) {
+      return [];
+    }
+
+    return [
+      {
+        id: product.productId || product.id,
+        sku: product.productId || product.id,
+        title: product.name,
+        name: product.name,
+        price: product.final_amount ?? product.price ?? 0,
+        originalPrice: product.originalPrice ?? 0,
+        discount: product.discount_amount ?? 0,
+        quantity: product.quantity ?? 1,
+        total:
+          (product.final_amount ?? product.price ?? 0) * (product.quantity ?? 1),
+        variant: product.variant,
+        variantTitle: product.variant,
+        priceSection: product.selectedPriceSection || null,
+        priceSectionTitle: product.selectedPriceSection?.title || "",
+        size: product.selectedSize?.title || "",
+        dimensions: product.dimensions || product.product?.dimensions,
+        product: product.product || null,
+      },
+    ];
+  };
 
   // BUY NOW PRODUCT
   useEffect(() => {
