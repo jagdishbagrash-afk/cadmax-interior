@@ -2,73 +2,44 @@ import React, { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import styles from "./ShippingLabel.module.css";
 import {
-  COMPANY_FOOTER_ADDRESS,
   formatCurrency,
   formatDimensions,
   formatDisplayDate,
+  formatFullAddress,
   formatWeight,
-  getCodHeading,
-  getDisplayValue,
   getItems,
+  hasVisibleValue,
+  safeNumber,
+  safeBool,
+  safeText,
 } from "./shippingLabelUtils";
 
-function getAddressLines(address) {
-  if (!address) {
-    return ["N/A"];
-  }
-
-  const cityState = [address.city, address.state].filter(Boolean).join(" ");
-  const countryPincode = [address.country, address.pincode].filter(Boolean).join(" - ");
-
-  const lines = [
-    address.addressLine1,
-    address.addressLine2,
-    cityState,
-    countryPincode,
-  ]
-    .map((line) => (typeof line === "string" ? line.trim() : ""))
-    .filter(Boolean);
-
-  return lines.length ? lines : ["N/A"];
-}
-
-function getRouteCode(address) {
-  const sourceText =
-    address?.city || address?.state || address?.pincode || "N/A";
-
-  const normalized = String(sourceText).replace(/[^a-zA-Z0-9]/g, "").toUpperCase();
-
-  return normalized ? normalized.slice(0, 3) : "N/A";
-}
-
-function AddressSection({ title, address, companyName }) {
-  const displayName =
-    companyName || address?.companyName || address?.name || "N/A";
-  const lines = getAddressLines(address);
-  const phone = getDisplayValue(address?.phone);
+function AddressSection({ title, name, address, phone }) {
+  const addressLines = address ? [address] : [];
 
   return (
     <div className={styles.addressSection}>
       <p className={styles.sectionTitle}>{title}</p>
-      <p className={styles.addressName}>{getDisplayValue(displayName)}</p>
-      {address?.name && companyName ? (
-        <p className={styles.addressLine}>{getDisplayValue(address.name)}</p>
-      ) : null}
-      {lines.map((line, index) => (
+      {name ? <p className={styles.addressName}>{name}</p> : null}
+      {addressLines.map((line, index) => (
         <p key={`${title}-${index}`} className={styles.addressLine}>
           {line}
         </p>
       ))}
-      <p className={styles.addressLine}>Phone: {phone}</p>
+      {phone ? <p className={styles.addressLine}>Phone: {phone}</p> : null}
     </div>
   );
 }
 
 function DetailMetric({ label, value }) {
+  if (!value) {
+    return null;
+  }
+
   return (
     <div className={styles.metricCell}>
       <p className={styles.metricLabel}>{label}</p>
-      <p className={styles.metricValue}>{getDisplayValue(value)}</p>
+      <p className={styles.metricValue}>{value}</p>
     </div>
   );
 }
@@ -87,22 +58,60 @@ function ItemsTable({ items }) {
         </tr>
       </thead>
       <tbody>
-        {normalizedItems.length ? (
-          normalizedItems.map((item, index) => (
-            <tr key={item.id}>
-              <td>{index + 1}</td>
-              <td>{item.sku}</td>
-              <td>{item.name}</td>
-              <td>{item.quantity}</td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <td colSpan={4}>N/A</td>
+        {normalizedItems.map((item, index) => (
+          <tr key={item.id}>
+            <td>{index + 1}</td>
+            <td>{item.sku}</td>
+            <td>{item.name}</td>
+            <td>{item.quantity}</td>
           </tr>
-        )}
+        ))}
       </tbody>
     </table>
+  );
+}
+
+function shouldRenderMetaValue(value, alwaysShow = false) {
+  if (alwaysShow) {
+    return true;
+  }
+
+  if (value === undefined || value === null) {
+    return false;
+  }
+
+  if (typeof value === "number") {
+    return Number.isFinite(value) && value !== 0;
+  }
+
+  if (typeof value === "string") {
+    const normalized = value.trim();
+
+    return Boolean(normalized) && normalized !== "0";
+  }
+
+  return false;
+}
+
+function BlueDartMetaTable({ rows }) {
+  if (!Array.isArray(rows) || rows.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className={styles.carrierMetaSection}>
+      <p className={styles.carrierMetaTitle}>BLUE DART META</p>
+      <table className={styles.carrierMetaTable}>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row.label}>
+              <td className={styles.carrierMetaLabel}>{row.label}</td>
+              <td className={styles.carrierMetaValue}>{row.value}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -110,19 +119,93 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   { data, showPrice = true, className = "" },
   ref
 ) {
-  const trackingNumber = getDisplayValue(data?.trackingNumber);
-  const bookingDate = formatDisplayDate(data?.bookingDate);
-  const courierName = getDisplayValue(data?.courierName, "Custom Courier");
-  const serviceType = getDisplayValue(data?.serviceType);
-  const orderReferenceNumber = getDisplayValue(data?.orderReferenceNumber);
-  const weight = formatWeight(data?.packageDetails?.weightKg);
-  const dimensions = formatDimensions(data?.packageDetails);
-  const currency = data?.payment?.currency || "INR";
-  const orderValue = formatCurrency(data?.payment?.orderValue, currency);
-  const codAmount = formatCurrency(data?.payment?.codAmount, currency);
-  const codHeading = showPrice ? getCodHeading(data?.payment) : null;
-  const originCode = getRouteCode(data?.shipFrom);
-  const destinationCode = getRouteCode(data?.shipTo);
+  const shipmentData = data || {};
+  const labelData = shipmentData.labelData || {};
+  const shipTo = labelData.shipTo || {};
+  const shipFrom = labelData.shipFrom || {};
+  const payment = labelData.payment || {};
+  const packageData = labelData.package || {};
+  const carrier = labelData.carrier || {};
+  const carrierProvider = safeText(carrier.provider);
+  const blueDart = carrier.blueDart || {};
+  const trackingNumber = safeText(shipmentData.trackingNumber);
+  const bookingDate = formatDisplayDate(labelData.bookingDate);
+  const courierName = safeText(shipmentData.courierName);
+  const serviceType = safeText(labelData.serviceType);
+  const orderReferenceNumber = safeText(shipmentData.orderNumber);
+  const origin = safeText(labelData.origin);
+  const destination = safeText(labelData.destination);
+  const shipToName = safeText(shipTo.name);
+  const shipToAddress = formatFullAddress(shipTo);
+  const shipToPhone = safeText(shipTo.phone);
+  const shipFromName = safeText(shipFrom.name);
+  const shipFromAddress = formatFullAddress(shipFrom);
+  const shipFromPhone = safeText(shipFrom.phone);
+  const currency = safeText(payment.currency) || "INR";
+  const orderValue = formatCurrency(payment.orderValue, currency);
+  const codAmount = formatCurrency(payment.codAmount, currency);
+  const weight = formatWeight(packageData.weightKg);
+  const dimensions = formatDimensions(packageData.dimensionsCm);
+  const pieceCount = hasVisibleValue(packageData.pieceCount)
+    ? String(safeNumber(packageData.pieceCount))
+    : "";
+  const paymentBanner = orderValue ? `ORDER VALUE ${orderValue}` : "";
+  const metricItems = [
+    {
+      label: `Order Value (${currency})`,
+      value: orderValue,
+    },
+    {
+      label: `COD Amount (${currency})`,
+      value: codAmount,
+    },
+    {
+      label: "Dimensions (cm)",
+      value: dimensions,
+    },
+    {
+      label: "Weight (kg)",
+      value: weight,
+    },
+    {
+      label: "Pieces",
+      value: pieceCount,
+    },
+  ].filter((item) => item.value);
+
+  const isBlueDart = carrierProvider.toUpperCase() === "BLUE_DART";
+  const blueDartMetaRows = isBlueDart
+    ? [
+        { label: "Area Location", value: safeText(blueDart.areaLocation) },
+        { label: "Cluster Code", value: safeText(blueDart.clusterCode) },
+        { label: "Origin Area", value: safeText(blueDart.originArea) },
+        {
+          label: "Destination Area",
+          value: safeText(blueDart.destinationArea),
+        },
+        { label: "Product Code", value: safeText(blueDart.productCode) },
+        {
+          label: "Sub Product Code",
+          value: safeText(blueDart.subProductCode),
+        },
+        { label: "Product Type", value: safeText(blueDart.productType) },
+        { label: "Pack Type", value: safeText(blueDart.packType) },
+        { label: "Pickup Time", value: safeText(blueDart.pickupTime) },
+        { label: "API Type", value: safeText(blueDart.apiType) },
+        { label: "Sender", value: safeText(blueDart.sender) },
+        { label: "Vendor Code", value: safeText(blueDart.vendorCode) },
+        { label: "Customer Code", value: safeText(blueDart.customerCode) },
+        {
+          label: "Register Pickup",
+          value: safeBool(blueDart.registerPickup),
+          alwaysShow: true,
+        },
+      ]
+        .filter((row) =>
+          shouldRenderMetaValue(row.value, row.alwaysShow === true)
+        )
+        .map(({ label, value }) => ({ label, value }))
+    : [];
   const labelClassName = `${styles.label}${className ? ` ${className}` : ""}`;
 
   return (
@@ -145,31 +228,41 @@ const ShippingLabel = forwardRef(function ShippingLabel(
         </div>
         <div className={styles.qrSide}>
           <div className={styles.qrFrame}>
-            <QRCodeSVG
-              value={trackingNumber === "N/A" ? "N/A" : trackingNumber}
-              size={82}
-              level="M"
-              bgColor="#FFFFFF"
-              fgColor="#111111"
-            />
+            {trackingNumber ? (
+              <QRCodeSVG
+                value={trackingNumber}
+                size={82}
+                level="M"
+                bgColor="#FFFFFF"
+                fgColor="#111111"
+              />
+            ) : null}
           </div>
         </div>
       </div>
 
       <div className={styles.routeRow}>
-        <span>ORG: {originCode}</span>
-        <span>DST: {destinationCode}</span>
+        <span>ORG: {origin}</span>
+        <span>DST: {destination}</span>
       </div>
+
+      {isBlueDart ? <BlueDartMetaTable rows={blueDartMetaRows} /> : null}
 
       <div className={styles.addressGrid}>
         <div className={styles.addressCell}>
-          <AddressSection title="SHIP TO:" address={data?.shipTo} />
+          <AddressSection
+            title="SHIP TO:"
+            name={shipToName}
+            address={shipToAddress}
+            phone={shipToPhone}
+          />
         </div>
         <div className={styles.addressCell}>
           <AddressSection
             title="SHIP FROM:"
-            address={data?.shipFrom}
-            companyName={data?.shipFrom?.companyName}
+            name={shipFromName}
+            address={shipFromAddress}
+            phone={shipFromPhone}
           />
         </div>
       </div>
@@ -177,15 +270,20 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       <div className={styles.paymentSection}>
         {showPrice ? (
           <>
-            <p className={styles.codBannerInline}>
-              {codHeading || `ORDER VALUE ${orderValue}`}
-            </p>
-            <div className={styles.metricsGrid}>
-              <DetailMetric label="Order Value (INR)" value={orderValue} />
-              <DetailMetric label="COD Amount (INR)" value={codAmount} />
-              <DetailMetric label="Dimensions (cm)" value={dimensions} />
-              <DetailMetric label="Weight (kg)" value={weight} />
-            </div>
+            {paymentBanner ? (
+              <p className={styles.codBannerInline}>{paymentBanner}</p>
+            ) : null}
+            {metricItems.length ? (
+              <div className={styles.metricsGrid}>
+                {metricItems.map((item) => (
+                  <DetailMetric
+                    key={item.label}
+                    label={item.label}
+                    value={item.value}
+                  />
+                ))}
+              </div>
+            ) : null}
           </>
         ) : (
           <div className={styles.priceHidden}>Price hidden for label preview</div>
@@ -201,14 +299,14 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       </div>
 
       <div className={styles.itemsSection}>
-        <ItemsTable items={data?.items} />
+        <ItemsTable items={labelData.items} />
       </div>
 
       <div className={styles.footerSection}>
-        <p className={styles.footerCompany}>
-          {getDisplayValue(data?.shipFrom?.companyName, "Cadmax Interior")}
-        </p>
-        <p className={styles.footerAddress}>{COMPANY_FOOTER_ADDRESS}</p>
+        {shipFromName ? <p className={styles.footerCompany}>{shipFromName}</p> : null}
+        {shipFromAddress ? (
+          <p className={styles.footerAddress}>{shipFromAddress}</p>
+        ) : null}
       </div>
     </section>
   );

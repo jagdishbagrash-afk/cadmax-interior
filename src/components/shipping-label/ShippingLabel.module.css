@@ -200,6 +200,8 @@
   align-items: center;
   justify-content: center;
   border: 1px solid #111111;
+  min-height: 96px;
+  min-width: 96px;
   padding: 6px;
   background: #ffffff;
 }
@@ -213,6 +215,47 @@
   font-size: 14px;
   font-weight: 800;
   letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.carrierMetaSection {
+  border-bottom: 1px solid #111111;
+  padding: 8px 14px 10px;
+}
+
+.carrierMetaTitle {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.carrierMetaTable {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.carrierMetaTable td {
+  border: 1px solid #111111;
+  padding: 6px 7px;
+  font-size: 11px;
+  line-height: 1.35;
+  word-break: break-word;
+  vertical-align: top;
+}
+
+.carrierMetaLabel {
+  width: 38%;
+  font-weight: 800;
+  background: #f5f5f5;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.carrierMetaValue {
+  font-weight: 800;
   text-transform: uppercase;
 }
 
@@ -278,7 +321,7 @@
 
 .metricsGrid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
 }
 
 .metricCell {

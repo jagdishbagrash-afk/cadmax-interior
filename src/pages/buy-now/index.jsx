@@ -183,18 +183,7 @@ export default function Index() {
       setLoading(true);
 
       const main = new Listing();
-
-      const productData = [
-        {
-          id: product?.productId,
-          price: product?.price,
-          discount_amount: product?.discount_amount,
-          final_amount: product?.final_amount,
-          quantity: product?.quantity,
-          total: finalTotal,
-          variant: product?.variant,
-        },
-      ];
+      const productData = buildOrderProducts();
 
       const res = await main.AddOrder({
         name: formData.name,
@@ -256,13 +245,24 @@ export default function Index() {
           extractOrderAndShipment(response);
 
         if (typeof window !== "undefined") {
+          const fallbackOrder = {
+            ...(order || {}),
+            name: formData.name || order?.name,
+            mobile: formData.mobile || order?.mobile,
+            addressId: formData.addressId || order?.addressId,
+            address: selectedAddressText || order?.address,
+            amount: finalTotal || order?.amount,
+            product: buildOrderProducts(),
+          };
+
           sessionStorage.setItem(
             "latestShipmentState",
             JSON.stringify({
               orderId: Orderdatas || order?._id || null,
               trackingNumber,
-              order,
+              order: fallbackOrder,
               shipment,
+              shipToAddress: selectedAddress || null,
             })
           );
         }

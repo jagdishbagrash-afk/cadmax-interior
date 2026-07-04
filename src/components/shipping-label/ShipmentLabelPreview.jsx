@@ -2,11 +2,11 @@ import React, { useMemo, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import ShippingLabel from "./ShippingLabel";
 import { exportShippingLabelPdf } from "./exportShippingLabelPdf";
-import { getDisplayValue } from "./shippingLabelUtils";
+import { hasRenderableShipmentLabelData, safeText } from "./shippingLabelUtils";
 import styles from "./ShippingLabel.module.css";
 
 function buildExportFileName(trackingNumber) {
-  const safeTrackingNumber = getDisplayValue(trackingNumber, "shipment-label")
+  const safeTrackingNumber = safeText(trackingNumber)
     .toLowerCase()
     .replace(/[^a-z0-9-_]+/g, "-")
     .replace(/-+/g, "-")
@@ -28,9 +28,9 @@ export default function ShipmentLabelPreview({
   const [showPrice, setShowPrice] = useState(showPriceDefault);
   const [isExportingPdf, setIsExportingPdf] = useState(false);
 
-  const isReady = Boolean(data?.trackingNumber);
+  const isReady = hasRenderableShipmentLabelData(data);
   const printTitle = useMemo(
-    () => `shipping-label-${data?.trackingNumber || "preview"}`,
+    () => `shipping-label-${safeText(data?.trackingNumber) || "preview"}`,
     [data?.trackingNumber]
   );
   const exportFileName = useMemo(
@@ -45,8 +45,8 @@ export default function ShipmentLabelPreview({
       "@page { size: A4 portrait; margin: 10mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
   });
 
-  const onClickPrint = async () => {
-    await handlePrint();
+  const onClickPrint = () => {
+    handlePrint();
 
     if (typeof onPrint === "function") {
       onPrint();
@@ -85,19 +85,18 @@ export default function ShipmentLabelPreview({
           <div className={styles.stateCard}>
             <h3 className={styles.stateTitle}>Loading Shipment Label</h3>
             <p className={styles.stateText}>
-              Shipment data is loading. The label will render once the tracking
-              number and shipment details are available.
+              Shipment data is loading. The label will render once the shipment
+              details API returns normalized label data for this order.
             </p>
           </div>
         ) : null}
 
         {!loading && !isReady ? (
           <div className={styles.stateCard}>
-            <h3 className={styles.stateTitle}>No Tracking Data Available</h3>
+            <h3 className={styles.stateTitle}>No Shipment Label Data Available</h3>
             <p className={styles.stateText}>
-              Shipment label preview stays hidden until a tracking number is
-              available from the API. Pass a populated `ShippingLabelData`
-              object to render the final label.
+              Shipment label preview stays hidden until the shipment details API
+              returns normalized label data for this order.
             </p>
           </div>
         ) : null}
@@ -140,9 +139,8 @@ export default function ShipmentLabelPreview({
             </div>
 
             <p className={styles.previewHint}>
-              API note: `trackingNumber`, address blocks, payment details,
-              package details, and items should come from your shipment/order API
-              once booking succeeds.
+              API note: this preview renders normalized values from the shipment
+              details endpoint and suppresses empty fields automatically.
             </p>
           </div>
         ) : null}

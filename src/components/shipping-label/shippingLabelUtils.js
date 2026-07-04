@@ -1,25 +1,109 @@
 export const COMPANY_FOOTER_ADDRESS =
   "Ashish Vihar, RBI Colony, Vidhyadhar Nagar, Railway Colony, Jagatpura, Jaipur, Rajasthan 302017";
 
-export function getDisplayValue(value, fallback = "N/A") {
+export function safeText(value) {
   if (value === undefined || value === null) {
-    return fallback;
+    return "";
   }
 
   const normalizedValue = String(value).trim();
 
-  return normalizedValue ? normalizedValue : fallback;
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const lowerValue = normalizedValue.toLowerCase();
+
+  if (lowerValue === "null" || lowerValue === "undefined" || lowerValue === "n/a") {
+    return "";
+  }
+
+  return normalizedValue;
+}
+
+export function safeNumber(value) {
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return value;
+  }
+
+  if (typeof value === "string") {
+    const normalizedValue = value.replace(/,/g, "").trim();
+
+    if (!normalizedValue) {
+      return 0;
+    }
+
+    const parsedValue = Number.parseFloat(normalizedValue);
+
+    return Number.isFinite(parsedValue) ? parsedValue : 0;
+  }
+
+  return 0;
+}
+
+export function safeBool(value) {
+  if (value === undefined || value === null) {
+    return "";
+  }
+
+  if (typeof value === "boolean") {
+    return value ? "Yes" : "No";
+  }
+
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) {
+      return "";
+    }
+
+    return value === 0 ? "No" : "Yes";
+  }
+
+  if (typeof value === "string") {
+    const normalizedValue = value.trim().toLowerCase();
+
+    if (!normalizedValue) {
+      return "";
+    }
+
+    if (["true", "yes", "y", "1"].includes(normalizedValue)) {
+      return "Yes";
+    }
+
+    if (["false", "no", "n", "0"].includes(normalizedValue)) {
+      return "No";
+    }
+
+    return "";
+  }
+
+  return "";
+}
+
+export function hasVisibleValue(value) {
+  if (typeof value === "number") {
+    return Number.isFinite(value);
+  }
+
+  return safeText(value) !== "";
+}
+
+export function getDisplayValue(value, fallback = "") {
+  const normalizedValue = safeText(value);
+
+  return normalizedValue || fallback;
 }
 
 export function formatDisplayDate(value) {
-  if (!value) {
-    return "N/A";
+  const normalizedValue = safeText(value);
+
+  if (!normalizedValue) {
+    return "";
   }
 
-  const parsedDate = new Date(value);
+  const parsedDate = new Date(normalizedValue);
 
   if (Number.isNaN(parsedDate.getTime())) {
-    return getDisplayValue(value);
+    return normalizedValue;
   }
 
   return new Intl.DateTimeFormat("en-IN", {
@@ -30,85 +114,101 @@ export function formatDisplayDate(value) {
 }
 
 export function formatCurrency(value, currency = "INR") {
-  if (typeof value !== "number" || Number.isNaN(value)) {
-    return "N/A";
+  if (!hasVisibleValue(value)) {
+    return "";
   }
+
+  const normalizedCurrency = safeText(currency) || "INR";
+  const amount = safeNumber(value);
 
   try {
     return new Intl.NumberFormat("en-IN", {
       style: "currency",
-      currency,
+      currency: normalizedCurrency,
       maximumFractionDigits: 2,
-    }).format(value);
+    }).format(amount);
   } catch (error) {
-    return `${value.toFixed(2)} ${getDisplayValue(currency, "INR")}`;
+    return `${amount.toFixed(2)} ${normalizedCurrency}`;
   }
 }
 
-export function formatDimensions(packageDetails) {
-  if (!packageDetails) {
-    return "N/A";
+export function joinAddressLines(...lines) {
+  return lines
+    .map((line) => safeText(line))
+    .filter(Boolean)
+    .join(", ");
+}
+
+export function formatDimensions(dimensionsCm) {
+  if (!dimensionsCm || typeof dimensionsCm !== "object") {
+    return "";
   }
 
-  const { lengthCm, widthCm, heightCm } = packageDetails;
-  const values = [lengthCm, widthCm, heightCm];
+  const length =
+    dimensionsCm.length ?? dimensionsCm.lengthCm ?? dimensionsCm.l;
+  const breadth =
+    dimensionsCm.breadth ??
+    dimensionsCm.width ??
+    dimensionsCm.widthCm ??
+    dimensionsCm.b;
+  const height =
+    dimensionsCm.height ?? dimensionsCm.heightCm ?? dimensionsCm.h;
+  const values = [length, breadth, height];
 
-  if (values.some((value) => typeof value !== "number" || Number.isNaN(value))) {
-    return "N/A";
+  if (!values.some(hasVisibleValue)) {
+    return "";
   }
 
-  return `${lengthCm} x ${widthCm} x ${heightCm} cm`;
+  return values
+    .map((value) => (hasVisibleValue(value) ? safeNumber(value) : ""))
+    .join(" x ")
+    .trim()
+    ? `${values
+        .map((value) => (hasVisibleValue(value) ? safeNumber(value) : ""))
+        .join(" x ")} cm`
+    : "";
 }
 
 export function formatWeight(weightKg) {
-  if (typeof weightKg !== "number" || Number.isNaN(weightKg)) {
-    return "N/A";
+  if (!hasVisibleValue(weightKg)) {
+    return "";
   }
 
-  return `${weightKg} kg`;
+  return `${safeNumber(weightKg)} kg`;
 }
 
 export function formatFullAddress(address) {
   if (!address) {
-    return "N/A";
+    return "";
   }
 
-  const parts = [
-    address.addressLine1,
-    address.addressLine2,
-    [address.city, address.state].filter(Boolean).join(", "),
-    [address.pincode, address.country].filter(Boolean).join(", "),
-  ]
-    .map((part) => (typeof part === "string" ? part.trim() : ""))
-    .filter(Boolean);
-
-  return parts.length ? parts.join(", ") : "N/A";
+  return (
+    safeText(address.fullAddress) ||
+    joinAddressLines(
+      address.addressLine1,
+      address.addressLine2,
+      joinAddressLines(address.city, address.state),
+      joinAddressLines(address.pincode, address.country)
+    )
+  );
 }
 
 export function formatContactLine(address) {
   if (!address) {
-    return "N/A";
+    return "";
   }
 
-  const parts = [address.name, address.phone]
-    .map((part) => (typeof part === "string" ? part.trim() : ""))
-    .filter(Boolean);
-
-  return parts.length ? parts.join(" | ") : "N/A";
+  return joinAddressLines(address.name, address.phone);
 }
 
 export function getCodHeading(payment) {
-  if (!payment?.isCod) {
-    return null;
+  if (!hasVisibleValue(payment?.codAmount)) {
+    return "";
   }
 
   const amount = formatCurrency(payment?.codAmount, payment?.currency || "INR");
 
-  if (amount === "N/A") {
-    return "COLLECT CASH OF N/A INR";
-  }
-
-  return `COLLECT CASH OF ${amount.replace(/\s?INR$/, "").trim()} INR`;
+  return amount ? `COLLECT CASH OF ${amount}` : "";
 }
 
 export function getItems(items) {
@@ -117,12 +217,36 @@ export function getItems(items) {
   }
 
   return items.map((item, index) => ({
-    id: `${item?.sku || item?.name || "item"}-${index}`,
-    sku: getDisplayValue(item?.sku),
-    name: getDisplayValue(item?.name),
-    quantity:
-      typeof item?.quantity === "number" && !Number.isNaN(item.quantity)
-        ? item.quantity
-        : "N/A",
+    id: `${safeText(item?.sku) || safeText(item?.description) || "item"}-${index}`,
+    sku: safeText(item?.sku),
+    name: safeText(item?.description ?? item?.name),
+    quantity: hasVisibleValue(item?.quantity) ? safeNumber(item.quantity) : "",
   }));
+}
+
+export function hasRenderableShipmentLabelData(data) {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+
+  const labelData = data.labelData || {};
+  const itemCount = Array.isArray(labelData.items) ? labelData.items.length : 0;
+
+  return [
+    data.courierName,
+    data.trackingNumber,
+    data.orderNumber,
+    labelData.bookingDate,
+    labelData.origin,
+    labelData.destination,
+    labelData.serviceType,
+    labelData.shipTo?.name,
+    labelData.shipTo?.fullAddress,
+    labelData.shipFrom?.name,
+    labelData.shipFrom?.fullAddress,
+    labelData.payment?.orderValue,
+    labelData.payment?.codAmount,
+    labelData.package?.weightKg,
+    itemCount > 0 ? itemCount : null,
+  ].some(hasVisibleValue);
 }
