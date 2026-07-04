@@ -63,10 +63,15 @@ function normalizeShipmentDetailsResponse(payload) {
           ...carrier,
           blueDart: {
             ...blueDart,
+            originArea: preferNonEmpty(blueDart.originArea, generateResult?.OriginArea),
             clusterCode: preferNonEmpty(blueDart.clusterCode, generateResult?.ClusterCode),
             destinationArea: preferNonEmpty(
               blueDart.destinationArea,
               generateResult?.DestinationArea
+            ),
+            destinationLocation: preferNonEmpty(
+              blueDart.destinationLocation,
+              generateResult?.DestinationLocation
             ),
           },
         }

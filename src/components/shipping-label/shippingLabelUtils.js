@@ -79,6 +79,26 @@ export function safeBool(value) {
   return "";
 }
 
+export function maskSensitivePhone(value) {
+  const normalizedValue = safeText(value);
+
+  if (!normalizedValue) {
+    return "";
+  }
+
+  const digitsOnly = normalizedValue.replace(/\D/g, "");
+
+  if (!digitsOnly) {
+    return "";
+  }
+
+  if (digitsOnly.length <= 2) {
+    return digitsOnly;
+  }
+
+  return `${"*".repeat(digitsOnly.length - 2)}${digitsOnly.slice(-2)}`;
+}
+
 export function hasVisibleValue(value) {
   if (typeof value === "number") {
     return Number.isFinite(value);

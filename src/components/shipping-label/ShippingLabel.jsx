@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import styles from "./ShippingLabel.module.css";
 import {
+  COMPANY_FOOTER_ADDRESS,
   formatCurrency,
   formatDimensions,
   formatDisplayDate,
@@ -9,18 +10,83 @@ import {
   formatWeight,
   getItems,
   hasVisibleValue,
+  maskSensitivePhone,
   safeNumber,
-  safeBool,
   safeText,
 } from "./shippingLabelUtils";
 
-function AddressSection({ title, name, address, phone }) {
+function TrackingBarcode({ value }) {
+  const content = safeText(value);
+
+  if (!content) {
+    return null;
+  }
+
+  const bars = Array.from(content).flatMap((char, index) => {
+    const code = char.charCodeAt(0);
+    const widths = [
+      2 + (code % 3),
+      1 + (code % 2),
+      3 + (code % 4),
+      1 + ((code + index) % 2),
+    ];
+
+    return widths.map((width, widthIndex) => ({
+      key: `${char}-${index}-${widthIndex}`,
+      width,
+      isBar: widthIndex % 2 === 0,
+    }));
+  });
+  const totalWidth = bars.reduce((sum, item) => sum + item.width, 0);
+  let xPosition = 0;
+
+  return (
+    <svg
+      viewBox={`0 0 ${totalWidth} 66`}
+      preserveAspectRatio="none"
+      className={styles.barcodeSvg}
+      role="img"
+      aria-label={`Barcode for tracking ${content}`}
+    >
+      <rect x="0" y="0" width={totalWidth} height="66" fill="#ffffff" />
+      {bars.map((item) => {
+        const currentX = xPosition;
+        xPosition += item.width;
+
+        if (!item.isBar) {
+          return null;
+        }
+
+        return (
+          <rect
+            key={item.key}
+            x={currentX}
+            y="0"
+            width={item.width}
+            height="66"
+            fill="#111111"
+          />
+        );
+      })}
+    </svg>
+  );
+}
+
+function AddressSection({ title, name, address, phone, extraLines = [] }) {
   const addressLines = address ? [address] : [];
+  const normalizedExtraLines = Array.isArray(extraLines)
+    ? extraLines.filter(Boolean)
+    : [];
 
   return (
     <div className={styles.addressSection}>
       <p className={styles.sectionTitle}>{title}</p>
       {name ? <p className={styles.addressName}>{name}</p> : null}
+      {normalizedExtraLines.map((line, index) => (
+        <p key={`${title}-meta-${index}`} className={styles.addressLine}>
+          {line}
+        </p>
+      ))}
       {addressLines.map((line, index) => (
         <p key={`${title}-${index}`} className={styles.addressLine}>
           {line}
@@ -93,28 +159,6 @@ function shouldRenderMetaValue(value, alwaysShow = false) {
   return false;
 }
 
-function BlueDartMetaTable({ rows }) {
-  if (!Array.isArray(rows) || rows.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className={styles.carrierMetaSection}>
-      <p className={styles.carrierMetaTitle}>BLUE DART META</p>
-      <table className={styles.carrierMetaTable}>
-        <tbody>
-          {rows.map((row) => (
-            <tr key={row.label}>
-              <td className={styles.carrierMetaLabel}>{row.label}</td>
-              <td className={styles.carrierMetaValue}>{row.value}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 const ShippingLabel = forwardRef(function ShippingLabel(
   { data, showPrice = true, className = "" },
   ref
@@ -137,10 +181,10 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const destination = safeText(labelData.destination);
   const shipToName = safeText(shipTo.name);
   const shipToAddress = formatFullAddress(shipTo);
-  const shipToPhone = safeText(shipTo.phone);
+  const shipToPhone = maskSensitivePhone(shipTo.phone);
   const shipFromName = safeText(shipFrom.name);
-  const shipFromAddress = formatFullAddress(shipFrom);
-  const shipFromPhone = safeText(shipFrom.phone);
+  const shipFromAddress = COMPANY_FOOTER_ADDRESS;
+  const shipFromPhone = maskSensitivePhone(shipFrom.phone);
   const currency = safeText(payment.currency) || "INR";
   const orderValue = formatCurrency(payment.orderValue, currency);
   const codAmount = formatCurrency(payment.codAmount, currency);
@@ -149,7 +193,10 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const pieceCount = hasVisibleValue(packageData.pieceCount)
     ? String(safeNumber(packageData.pieceCount))
     : "";
-  const paymentBanner = orderValue ? `ORDER VALUE ${orderValue}` : "";
+  const codValue = hasVisibleValue(payment.codAmount) ? safeNumber(payment.codAmount) : 0;
+  const codHeading = codValue > 0 ? `COLLECT CASH OF ${formatCurrency(codValue, currency)}` : "";
+  const paymentBanner =
+    codHeading || (orderValue ? `ORDER VALUE ${orderValue}` : "");
   const metricItems = [
     {
       label: `Order Value (${currency})`,
@@ -174,38 +221,62 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   ].filter((item) => item.value);
 
   const isBlueDart = carrierProvider.toUpperCase() === "BLUE_DART";
-  const blueDartMetaRows = isBlueDart
+  const originArea = safeText(blueDart.originArea);
+  const destinationArea = safeText(blueDart.destinationArea);
+  const destinationLocation = safeText(blueDart.destinationLocation);
+  const clusterCode = safeText(blueDart.clusterCode);
+  const areaLocation = safeText(blueDart.areaLocation);
+  const routeOrigin = isBlueDart ? originArea || origin : origin;
+  const routingCode = isBlueDart
+    ? [destinationArea, destinationLocation, clusterCode].filter(Boolean).join("/")
+    : "";
+  const routeDestination = isBlueDart
+    ? routingCode || destinationArea || destination
+    : destination;
+
+  const blueDartProductCode = safeText(blueDart.productCode);
+  const blueDartSubProductCode = safeText(blueDart.subProductCode);
+  const blueDartProductType = safeText(blueDart.productType);
+  const blueDartPackType = safeText(blueDart.packType);
+  const blueDartApiType = safeText(blueDart.apiType);
+  const blueDartSender = safeText(blueDart.sender);
+  const blueDartCustomerCode = safeText(blueDart.customerCode);
+
+  const shipFromExtraLines = isBlueDart
     ? [
-        { label: "Area Location", value: safeText(blueDart.areaLocation) },
-        { label: "Cluster Code", value: safeText(blueDart.clusterCode) },
-        { label: "Origin Area", value: safeText(blueDart.originArea) },
-        {
-          label: "Destination Area",
-          value: safeText(blueDart.destinationArea),
-        },
-        { label: "Product Code", value: safeText(blueDart.productCode) },
-        {
-          label: "Sub Product Code",
-          value: safeText(blueDart.subProductCode),
-        },
-        { label: "Product Type", value: safeText(blueDart.productType) },
-        { label: "Pack Type", value: safeText(blueDart.packType) },
-        { label: "Pickup Time", value: safeText(blueDart.pickupTime) },
-        { label: "API Type", value: safeText(blueDart.apiType) },
-        { label: "Sender", value: safeText(blueDart.sender) },
-        { label: "Vendor Code", value: safeText(blueDart.vendorCode) },
-        { label: "Customer Code", value: safeText(blueDart.customerCode) },
-        {
-          label: "Register Pickup",
-          value: safeBool(blueDart.registerPickup),
-          alwaysShow: true,
-        },
-      ]
-        .filter((row) =>
-          shouldRenderMetaValue(row.value, row.alwaysShow === true)
-        )
-        .map(({ label, value }) => ({ label, value }))
+        shouldRenderMetaValue(blueDartCustomerCode)
+          ? `C/CODE: ${blueDartCustomerCode}`
+          : "",
+        shouldRenderMetaValue(blueDartSender) ? `SENDER: ${blueDartSender}` : "",
+        shouldRenderMetaValue(blueDartProductCode)
+          ? `PRODUCT CODE: ${blueDartProductCode}`
+          : "",
+        shouldRenderMetaValue(blueDartSubProductCode)
+          ? `SUB PRODUCT CODE: ${blueDartSubProductCode}`
+          : "",
+        shouldRenderMetaValue(blueDartProductType)
+          ? `PRODUCT TYPE: ${blueDartProductType}`
+          : "",
+        shouldRenderMetaValue(blueDartPackType)
+          ? `PACK TYPE: ${blueDartPackType}`
+          : "",
+        shouldRenderMetaValue(blueDartApiType)
+          ? `API TYPE: ${blueDartApiType}`
+          : "",
+      ].filter(Boolean)
     : [];
+  const returnToSource =
+    labelData.rto ||
+    labelData.returnTo ||
+    labelData.returnAddress ||
+    blueDart.returnTo ||
+    blueDart.returnAddress ||
+    null;
+  const returnToName = safeText(returnToSource?.name);
+  const returnToAddress = formatFullAddress(returnToSource);
+  const returnToPhone = maskSensitivePhone(returnToSource?.phone);
+  const shouldShowReturnTo =
+    Boolean(returnToAddress) && returnToAddress !== shipFromAddress;
   const labelClassName = `${styles.label}${className ? ` ${className}` : ""}`;
 
   return (
@@ -223,7 +294,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
 
       <div className={styles.barcodeSection}>
         <div className={styles.barcodeMain}>
-          <div className={styles.fakeBarcode} aria-hidden="true" />
+          <TrackingBarcode value={trackingNumber} />
           <p className={styles.barcodeTracking}>{trackingNumber}</p>
         </div>
         <div className={styles.qrSide}>
@@ -242,11 +313,9 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       </div>
 
       <div className={styles.routeRow}>
-        <span>ORG: {origin}</span>
-        <span>DST: {destination}</span>
+        <span>ORG: {routeOrigin}</span>
+        <span>DST: {routeDestination}</span>
       </div>
-
-      {isBlueDart ? <BlueDartMetaTable rows={blueDartMetaRows} /> : null}
 
       <div className={styles.addressGrid}>
         <div className={styles.addressCell}>
@@ -263,6 +332,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
             name={shipFromName}
             address={shipFromAddress}
             phone={shipFromPhone}
+            extraLines={shipFromExtraLines}
           />
         </div>
       </div>
@@ -303,9 +373,17 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       </div>
 
       <div className={styles.footerSection}>
-        {shipFromName ? <p className={styles.footerCompany}>{shipFromName}</p> : null}
-        {shipFromAddress ? (
-          <p className={styles.footerAddress}>{shipFromAddress}</p>
+        {shouldShowReturnTo ? (
+          <>
+            <p className={styles.rtoLabel}>If Undelivered Return To:</p>
+            {returnToName ? (
+              <p className={styles.footerCompany}>{returnToName}</p>
+            ) : null}
+            <p className={styles.footerAddress}>{returnToAddress}</p>
+            {returnToPhone ? (
+              <p className={styles.footerAddress}>Phone: {returnToPhone}</p>
+            ) : null}
+          </>
         ) : null}
       </div>
     </section>
