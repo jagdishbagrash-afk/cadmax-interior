@@ -12,6 +12,9 @@ const features = [
         title: "Trusted Vendors",
         desc: "Verified & experienced professionals",
     },
+
+
+    
     {
         icon: <FaPalette />,
         title: "Unique Designs",
