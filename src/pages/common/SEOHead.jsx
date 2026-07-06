@@ -63,7 +63,7 @@ export default function SEOHead({
   return (
     <Head>
       {/* Basic */}
-      <title>{title}</title>
+      <title>{title || "Luxury Architects & Interior Designers in Jaipur | CADMAX Atelier"}</title>
 
       <meta name="description" content={description} />
       <link rel="canonical" href={canonical} />

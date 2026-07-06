@@ -1,62 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
-<urlset
-xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <!-- Main Pages -->
+    <url>
+        <loc>https://cadmaxatelier.com/</loc>
+        <changefreq>daily</changefreq>
+        <priority>1.0</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>1.0</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/about</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/about</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/contact</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/contact</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/design</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/project</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/project</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/design</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.9</priority>
-  </url>
+    <!-- Product Pages -->
+    <url>
+        <loc>https://cadmaxatelier.com/vendor</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/privacy-policy</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/product</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/refund-policy</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/categories</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
 
-  <url>
-    <loc>https://cadmaxatelier.com/term-conditions</loc>
-    <lastmod>2026-06-29</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.4</priority>
-  </url>
+    <url>
+        <loc>https://cadmaxatelier.com/new-arrivals</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/best-seller</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/top-selling-products</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/vendor</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.9</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/top-selling-products</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/new-arrival</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/best-seller</loc>
+        <changefreq>daily</changefreq>
+        <priority>0.8</priority>
+    </url>
+
+    <!-- Information -->
+    <url>
+        <loc>https://cadmaxatelier.com/privacy-policy</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/refund-policy</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
+
+    <url>
+        <loc>https://cadmaxatelier.com/term-conditions</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.3</priority>
+    </url>
 
 </urlset>
