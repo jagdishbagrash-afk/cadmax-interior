@@ -264,6 +264,10 @@
   word-break: break-word;
 }
 
+.addressLineSpaced {
+  margin-top: 6px;
+}
+
 .paymentSection {
   border-bottom: 1px solid #111111;
 }

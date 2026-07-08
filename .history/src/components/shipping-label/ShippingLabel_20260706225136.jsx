@@ -1,5 +1,4 @@
-import React, { forwardRef, useEffect, useRef } from "react";
-import JsBarcode from "jsbarcode";
+import React, { forwardRef } from "react";
 import { QRCodeSVG } from "qrcode.react";
 import styles from "./ShippingLabel.module.css";
 import {
@@ -18,46 +17,60 @@ import {
 
 const PUBLIC_TRACKING_BASE_URL = "https://cadmaxatelier.com";
 
-function TrackingBarcode({ value, trackingNumber }) {
+function TrackingBarcode({ value }) {
   const content = safeText(value);
-  const svgRef = useRef(null);
-
-  useEffect(() => {
-    if (!svgRef.current) {
-      return;
-    }
-
-    if (!content) {
-      svgRef.current.innerHTML = "";
-      return;
-    }
-
-    try {
-      JsBarcode(svgRef.current, content, {
-        format: "CODE128",
-        width: 1.2,
-        height: 66,
-        margin: 0,
-        displayValue: false,
-        lineColor: "#111111",
-        background: "#ffffff",
-      });
-    } catch (error) {
-      svgRef.current.innerHTML = "";
-    }
-  }, [content]);
 
   if (!content) {
     return null;
   }
 
+  const bars = Array.from(content).flatMap((char, index) => {
+    const code = char.charCodeAt(0);
+    const widths = [
+      2 + (code % 3),
+      1 + (code % 2),
+      3 + (code % 4),
+      1 + ((code + index) % 2),
+    ];
+
+    return widths.map((width, widthIndex) => ({
+      key: `${char}-${index}-${widthIndex}`,
+      width,
+      isBar: widthIndex % 2 === 0,
+    }));
+  });
+  const totalWidth = bars.reduce((sum, item) => sum + item.width, 0);
+  let xPosition = 0;
+
   return (
     <svg
-      ref={svgRef}
+      viewBox={`0 0 ${totalWidth} 66`}
+      preserveAspectRatio="none"
       className={styles.barcodeSvg}
       role="img"
-      aria-label={`Barcode for tracking ${safeText(trackingNumber) || content}`}
-    />
+      aria-label={`Barcode for tracking ${content}`}
+    >
+      <rect x="0" y="0" width={totalWidth} height="66" fill="#ffffff" />
+      {bars.map((item) => {
+        const currentX = xPosition;
+        xPosition += item.width;
+
+        if (!item.isBar) {
+          return null;
+        }
+
+        return (
+          <rect
+            key={item.key}
+            x={currentX}
+            y="0"
+            width={item.width}
+            height="66"
+            fill="#111111"
+          />
+        );
+      })}
+    </svg>
   );
 }
 
@@ -75,27 +88,23 @@ function AddressSection({
   const normalizedExtraLines = Array.isArray(extraLines)
     ? extraLines.filter(Boolean)
     : [];
-  const leadingExtraLines = renderAddressBeforeExtra ? [] : normalizedExtraLines;
-  const trailingExtraLines = renderAddressBeforeExtra ? normalizedExtraLines : [];
+  const orderedLines = renderAddressBeforeExtra
+    ? [...addressLines, ...normalizedExtraLines]
+    : [...normalizedExtraLines, ...addressLines];
 
   return (
     <div className={styles.addressSection}>
       <p className={styles.sectionTitle}>{title}</p>
       {name ? <p className={styles.addressName}>{name}</p> : null}
-      {leadingExtraLines.map((line, index) => (
+      {orderedLines.map((line, index) => (
         <p key={`${title}-${index}`} className={styles.addressLine}>
-          {line}
-        </p>
-      ))}
-      {addressLines.map((line, index) => (
-        <p key={`${title}-address-${index}`} className={styles.addressLine}>
           {line}
         </p>
       ))}
       {phone && renderPhoneBeforeExtra ? (
         <p className={styles.addressLine}>Phone: {phone}</p>
       ) : null}
-      {trailingExtraLines.map((line, index) => (
+      {normalizedExtraLines.map((line, index) => (
         <p
           key={`${title}-extra-${index}`}
           className={`${styles.addressLine}${
@@ -174,11 +183,7 @@ function shouldRenderMetaValue(value, alwaysShow = false) {
   return false;
 }
 
-function getPublicTrackingUrl(
-  trackingNumber,
-  courierName,
-  { includeCourier = true } = {}
-) {
+function getPublicTrackingUrl(trackingNumber, courierName) {
   const normalizedTracking = safeText(trackingNumber);
 
   if (!normalizedTracking) {
@@ -191,7 +196,7 @@ function getPublicTrackingUrl(
   );
   const normalizedCourier = safeText(courierName);
 
-  if (includeCourier && normalizedCourier) {
+  if (normalizedCourier) {
     trackingUrl.searchParams.set("courier", normalizedCourier);
   }
 
@@ -212,11 +217,6 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const carrierProvider = safeText(carrier.provider);
   const blueDart = carrier.blueDart || {};
   const trackingNumber = safeText(shipmentData.trackingNumber);
-  const publicTrackingBarcodeUrl = getPublicTrackingUrl(
-    trackingNumber,
-    shipmentData.courierName,
-    { includeCourier: false }
-  );
   const trackingQrValue = getPublicTrackingUrl(
     trackingNumber,
     shipmentData.courierName
@@ -335,10 +335,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
 
       <div className={styles.barcodeSection}>
         <div className={styles.barcodeMain}>
-          <TrackingBarcode
-            value={publicTrackingBarcodeUrl || trackingQrValue}
-            trackingNumber={trackingNumber}
-          />
+          <TrackingBarcode value={trackingNumber} />
           <p className={styles.barcodeTracking}>{trackingNumber}</p>
         </div>
         <div className={styles.qrSide}>
