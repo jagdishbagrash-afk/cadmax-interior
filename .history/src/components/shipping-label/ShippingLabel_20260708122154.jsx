@@ -18,9 +18,11 @@ import {
 
 const PUBLIC_TRACKING_BASE_URL = "https://cadmaxatelier.com";
 
-function TrackingBarcode({ trackingNumber }) {
-  const content = safeText(trackingNumber);
+function TrackingBarcode({ value, trackingNumber }) {
+  const content = safeText(value);
   const svgRef = useRef(null);
+  const barcodeFormat =
+    /^\d+$/.test(content) && content.length % 2 === 0 ? "CODE128C" : "CODE128";
 
   useEffect(() => {
     if (!svgRef.current) {
@@ -34,10 +36,10 @@ function TrackingBarcode({ trackingNumber }) {
 
     try {
       JsBarcode(svgRef.current, content, {
-        format: "CODE128",
-        width: 2,
-        height: 62,
-        margin: 8,
+        format: barcodeFormat,
+        width: 1.8,
+        height: 72,
+        margin: 4,
         displayValue: false,
         lineColor: "#111111",
         background: "#ffffff",
@@ -45,7 +47,7 @@ function TrackingBarcode({ trackingNumber }) {
     } catch (error) {
       svgRef.current.innerHTML = "";
     }
-  }, [content]);
+  }, [barcodeFormat, content]);
 
   if (!content) {
     return null;
@@ -56,8 +58,7 @@ function TrackingBarcode({ trackingNumber }) {
       ref={svgRef}
       className={styles.barcodeSvg}
       role="img"
-      preserveAspectRatio="xMidYMid meet"
-      aria-label={`Barcode for tracking ${content}`}
+      aria-label={`Barcode for tracking ${safeText(trackingNumber) || content}`}
     />
   );
 }
@@ -199,6 +200,10 @@ function getPublicTrackingUrl(
   return trackingUrl.toString();
 }
 
+function getScannableBarcodeValue(trackingNumber) {
+  return safeText(trackingNumber).replace(/\s+/g, "");
+}
+
 const ShippingLabel = forwardRef(function ShippingLabel(
   { data, showPrice = true, className = "" },
   ref
@@ -213,6 +218,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const carrierProvider = safeText(carrier.provider);
   const blueDart = carrier.blueDart || {};
   const trackingNumber = safeText(shipmentData.trackingNumber);
+  const scannableBarcodeValue = getScannableBarcodeValue(trackingNumber);
   const trackingQrValue = getPublicTrackingUrl(
     trackingNumber,
     shipmentData.courierName
@@ -332,6 +338,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       <div className={styles.barcodeSection}>
         <div className={styles.barcodeMain}>
           <TrackingBarcode
+            value={scannableBarcodeValue}
             trackingNumber={trackingNumber}
           />
           <p className={styles.barcodeTracking}>{trackingNumber}</p>

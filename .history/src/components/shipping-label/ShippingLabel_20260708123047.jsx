@@ -213,6 +213,11 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const carrierProvider = safeText(carrier.provider);
   const blueDart = carrier.blueDart || {};
   const trackingNumber = safeText(shipmentData.trackingNumber);
+  const publicTrackingBarcodeUrl = getPublicTrackingUrl(
+    trackingNumber,
+    shipmentData.courierName,
+    { includeCourier: false }
+  );
   const trackingQrValue = getPublicTrackingUrl(
     trackingNumber,
     shipmentData.courierName

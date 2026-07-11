@@ -18,8 +18,8 @@ import {
 
 const PUBLIC_TRACKING_BASE_URL = "https://cadmaxatelier.com";
 
-function TrackingBarcode({ trackingNumber }) {
-  const content = safeText(trackingNumber);
+function TrackingBarcode({ value, trackingNumber }) {
+  const content = safeText(value);
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -35,9 +35,9 @@ function TrackingBarcode({ trackingNumber }) {
     try {
       JsBarcode(svgRef.current, content, {
         format: "CODE128",
-        width: 2,
-        height: 62,
-        margin: 8,
+        width: 1.2,
+        height: 66,
+        margin: 0,
         displayValue: false,
         lineColor: "#111111",
         background: "#ffffff",
@@ -56,8 +56,7 @@ function TrackingBarcode({ trackingNumber }) {
       ref={svgRef}
       className={styles.barcodeSvg}
       role="img"
-      preserveAspectRatio="xMidYMid meet"
-      aria-label={`Barcode for tracking ${content}`}
+      aria-label={`Barcode for tracking ${safeText(trackingNumber) || content}`}
     />
   );
 }
@@ -213,6 +212,11 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const carrierProvider = safeText(carrier.provider);
   const blueDart = carrier.blueDart || {};
   const trackingNumber = safeText(shipmentData.trackingNumber);
+  const publicTrackingBarcodeUrl = getPublicTrackingUrl(
+    trackingNumber,
+    shipmentData.courierName,
+    { includeCourier: false }
+  );
   const trackingQrValue = getPublicTrackingUrl(
     trackingNumber,
     shipmentData.courierName
@@ -332,6 +336,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
       <div className={styles.barcodeSection}>
         <div className={styles.barcodeMain}>
           <TrackingBarcode
+            value={publicTrackingBarcodeUrl || trackingQrValue}
             trackingNumber={trackingNumber}
           />
           <p className={styles.barcodeTracking}>{trackingNumber}</p>
