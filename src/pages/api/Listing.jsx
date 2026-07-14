@@ -1,6 +1,10 @@
 import { Component } from "react";
 import { Api, ApiallowFile } from "./Api";
 
+function logShippingApi(stage, payload) {
+  console.log(`[DHL/BLUE_DART PRELOAD] ${stage}`, payload);
+}
+
 class Listing extends Component {
 
   async TeacherRegister(data) {
@@ -557,25 +561,93 @@ class Listing extends Component {
   }
 
   async PaymentSave(data) {
-    return Api.post("/verify-payment", data)
+    logShippingApi("verify-payment request", data);
+
+    try {
+      const response = await Api.post("/verify-payment", data);
+      logShippingApi("verify-payment response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("verify-payment error", {
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
   }
 
   async VerifyPayment(data) {
-    return Api.post("/verify-payment", data)
+    logShippingApi("verify-payment request", data);
+
+    try {
+      const response = await Api.post("/verify-payment", data);
+      logShippingApi("verify-payment response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("verify-payment error", {
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
   }
 
   async GetOrderShipment(id) {
-    return Api.get(`/order/${id}/shipment`)
+    logShippingApi("order shipment request", { orderId: id });
+
+    try {
+      const response = await Api.get(`/order/${id}/shipment`);
+      logShippingApi("order shipment response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order shipment error", {
+        orderId: id,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
   }
 
   async GetOrderTracking(id) {
-    return Api.get(`/order/${id}/tracking`)
+    logShippingApi("order tracking request", { orderId: id });
+
+    try {
+      const response = await Api.get(`/order/${id}/tracking`);
+      logShippingApi("order tracking response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order tracking error", {
+        orderId: id,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
   }
 
   async GetPublicShipmentTracking(trackingNumber, courier) {
-    return Api.get(`/shipment/track/${trackingNumber}`, {
-      params: courier ? { courier } : undefined
-    })
+    const params = courier ? { courier } : undefined;
+    logShippingApi("public tracking request", {
+      trackingNumber,
+      params,
+    });
+
+    try {
+      const response = await Api.get(`/shipment/track/${trackingNumber}`, {
+        params,
+      });
+      logShippingApi("public tracking response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("public tracking error", {
+        trackingNumber,
+        params,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
   }
 
   async DeleteImageUrl(data) {
