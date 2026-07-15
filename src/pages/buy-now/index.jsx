@@ -11,7 +11,8 @@ import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
 import { extractOrderAndShipment } from "@/components/shipmentUtils";
-import { FiShield, FiTruck, FiAward, FiHeadphones, FiArrowRight } from "react-icons/fi";
+import { FiShield, FiTruck, FiAward, FiHeadphones, FiArrowRight, FiCreditCard } from "react-icons/fi";
+import { BiRupee } from "react-icons/bi";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -25,6 +26,8 @@ export default function Index() {
   const [product, setProduct] = useState(null);
 
   const [data, setData] = useState([]);
+
+  const [paymentMethod, setPaymentMethod] = useState("ONLINE");
 
   const [formData, setFormData] = useState({
     name: "",
@@ -155,6 +158,12 @@ export default function Index() {
       return;
     }
 
+    // COD flow - place order directly without Razorpay
+    if (paymentMethod === "COD") {
+      await handleCODSubmit();
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -206,7 +215,76 @@ export default function Index() {
     }
   };
 
-  // SAVE ORDER
+  // COD ORDER - Save order without Razorpay payment
+  const handleCODSubmit = async () => {
+    try {
+      setLoading(true);
+
+      const main = new Listing();
+      const productData = buildOrderProducts();
+
+      const res = await main.AddOrder({
+        name: formData.name,
+        mobile: formData.mobile,
+        addressId: formData.addressId,
+        address: selectedAddressText,
+        product: productData,
+
+        subtotal,
+        discountAmount: discountTotal,
+        amount: finalTotal,
+
+        paymentMethod: "COD",
+        PaymentId: "",
+      });
+
+      if (res?.data?.status) {
+        localStorage.removeItem("buyNowItem");
+
+        toast.success("Order placed successfully! Pay on delivery.");
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: res?.data?.data?._id || null,
+              trackingNumber: "",
+              order: {
+                name: formData.name,
+                mobile: formData.mobile,
+                address: selectedAddressText,
+                amount: finalTotal,
+                product: buildOrderProducts(),
+              },
+              shipment: null,
+              shipToAddress: selectedAddress || null,
+              paymentMethod: "COD",
+            })
+          );
+        }
+
+        const query = new URLSearchParams();
+        const orderId = res?.data?.data?._id;
+
+        if (orderId) {
+          query.set("orderId", orderId);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
+      } else {
+        toast.error(res?.data?.message || "Order failed");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Order failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // SAVE ORDER (for Online Payment)
   const handleSubmit = async (response) => {
     try {
       setLoading(true);
@@ -225,6 +303,7 @@ export default function Index() {
         discountAmount: discountTotal,
         amount: finalTotal,
 
+        paymentMethod: "ONLINE",
         PaymentId: response.razorpay_payment_id,
       });
 
@@ -321,6 +400,8 @@ export default function Index() {
       toast.error("Payment save failed");
     }
   };
+
+  const isCOD = paymentMethod === "COD";
 
   return (
     <Layout>
@@ -456,22 +537,99 @@ export default function Index() {
                         </div>
                       </div>
                     </div>
+
+                    {/* PAYMENT METHOD */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-3">
+                        Payment Method *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          {isCOD ? (
+                            <BiRupee className="w-5 h-5 text-gray-400" />
+                          ) : (
+                            <FiCreditCard className="w-5 h-5 text-gray-400" />
+                          )}
+                        </div>
+                        <select
+                          id="paymentMethod"
+                          name="paymentMethod"
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none appearance-none cursor-pointer"
+                        >
+                          <option value="ONLINE">Online Payment</option>
+                          <option value="COD">Cash on Delivery (COD)</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {isCOD
+                          ? "Pay with cash when your order is delivered."
+                          : "Pay securely using our online payment gateway."
+                        }
+                      </p>
+                    </div>
                   </div>
 
-                  {/* Secure Checkout Badge */}
-                  <div className="mt-8 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
-                        <FiShield className="w-6 h-6 text-white" />
+                  {/* Payment Summary */}
+                  <div className="mt-8 p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-gray-700 mb-3">
+                      Payment Summary
+                    </h3>
+                    <div className="space-y-2.5">
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Payment Method</span>
+                        <span className="text-sm font-bold text-black">
+                          {isCOD ? "Cash on Delivery" : "Online Payment"}
+                        </span>
                       </div>
-                      <div>
-                        <h3 className="font-bold text-black text-lg mb-1">100% Secure payment</h3>
-                        <p className="text-sm text-gray-600 leading-relaxed">
-                          Your information is protected with encrypted payment security. Shop with confidence.
-                        </p>
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Payment Status</span>
+                        <span className={`text-sm font-bold ${isCOD ? "text-[#D4AF37]" : "text-green-600"}`}>
+                          {isCOD ? "Pay on Delivery" : "Paid Online"}
+                        </span>
                       </div>
                     </div>
                   </div>
+
+                  {/* Secure Checkout Badge - hidden for COD */}
+                  {!isCOD && (
+                    <div className="mt-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+                          <FiShield className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-black text-lg mb-1">100% Secure payment</h3>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            Your information is protected with encrypted payment security. Shop with confidence.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* COD Info */}
+                  {isCOD && (
+                    <div className="mt-6 p-6 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                      <div className="flex items-start gap-4">
+                        <div className="w-12 h-12 bg-black rounded-xl flex items-center justify-center flex-shrink-0">
+                          <BiRupee className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="font-bold text-black text-lg mb-1">Pay on Delivery</h3>
+                          <p className="text-sm text-gray-600 leading-relaxed">
+                            No online payment needed. Pay with cash when your order arrives at your doorstep.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   {/* Pay Button */}
                   <button
@@ -490,7 +648,7 @@ export default function Index() {
                       </>
                     ) : (
                       <>
-                        Pay Securely Now
+                        {isCOD ? "Place COD Order" : "Proceed to Payment"}
                         <FiArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
                       </>
                     )}
@@ -593,6 +751,24 @@ export default function Index() {
                           <div className="flex justify-between text-sm">
                             <span className="text-gray-600">Delivery Charges</span>
                             <span className="font-semibold text-green-600">FREE</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Payment Type & Status */}
+                      <div className="px-8 py-4 border-t-2 border-gray-100 bg-white">
+                        <div className="space-y-2.5">
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Payment Type</span>
+                            <span className="text-sm font-bold text-black">
+                              {isCOD ? "Cash on Delivery" : "Online Payment"}
+                            </span>
+                          </div>
+                          <div className="flex justify-between items-center">
+                            <span className="text-sm text-gray-600">Status</span>
+                            <span className={`text-sm font-bold ${isCOD ? "text-[#D4AF37]" : "text-green-600"}`}>
+                              {isCOD ? "Payment Pending" : "Paid Online"}
+                            </span>
                           </div>
                         </div>
                       </div>
