@@ -265,7 +265,7 @@ export default function Index() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           {/* Page Header */}
           <div className="text-center mb-12 md:mb-16">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-black uppercase tracking-tight text-black mb-4">
+            <h1 className="text-2xl md:text-3xl lg:text-4xl font-black uppercase tracking-tight text-black mb-4">
               Buy Now
             </h1>
             <div className="w-24 h-1 bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent mx-auto mb-4"></div>
@@ -278,7 +278,7 @@ export default function Index() {
               <div className="bg-white rounded-3xl shadow-xl border border-gray-100 lg:sticky lg:top-24 overflow-hidden">
                 {/* Form Header */}
                 <div className="bg-gradient-to-r from-black to-gray-900 px-8 py-6">
-                  <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                  <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
                     Shipping Details
                   </h2>
                   <p className="text-gray-300 mt-2 text-sm">
@@ -440,7 +440,7 @@ export default function Index() {
                 <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
                   {/* Order Summary Header */}
                   <div className="bg-gradient-to-r from-black to-gray-900 px-8 py-6">
-                    <h2 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
+                    <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight">
                       Order Summary
                     </h2>
                     <p className="text-gray-300 mt-1 text-sm">
@@ -536,7 +536,7 @@ export default function Index() {
                       <div className="px-8 py-6 bg-gradient-to-r from-black to-gray-900">
                         <div className="flex justify-between items-center">
                           <span className="text-white font-bold text-lg uppercase tracking-wide">Total Amount</span>
-                          <span className="text-white font-black text-2xl md:text-3xl">
+                          <span className="text-white font-black text-xl md:text-2xl">
                             {formatPrice(finalTotal , "INR")}
                           </span>
                         </div>
