@@ -51,6 +51,9 @@ export default function OrderHistory() {
     fetchData();
   }, []);
 
+  const handleToggleOrder = (orderId) => {
+    setActiveOrder((prev) => (prev === orderId ? null : orderId));
+  };
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -161,8 +164,12 @@ export default function OrderHistory() {
                         <p className="text-[13px] text-[#111] font-medium"><DateComponent item={order?.createdAt} /></p>
                       </div>
                       <div>
-                        <p className="uppercase text-[10px] font-bold text-gray-500">Total Paid</p>
-                        <p className="text-[13px] text-[#111] font-bold">{formatMultiPrice(order?.amount, "INR")}</p>
+                        <p className="uppercase text-[10px] font-bold text-gray-500">
+                          {order?.paymentMethod === "COD" ? "Payment Method" : "Total Paid"}
+                        </p>
+                        <p className={`text-[13px] font-bold ${order?.paymentMethod === "COD" ? "text-amber-600" : "text-[#111]"}`}>
+                          {order?.paymentMethod === "COD" ? "Cash on Delivery" : formatMultiPrice(order?.amount, "INR")}
+                        </p>
                       </div>
                     </div>
 

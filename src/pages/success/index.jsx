@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { FaCheckCircle } from "react-icons/fa";
+import { FaCheckCircle, FaMoneyBillWave } from "react-icons/fa";
+import { FiCreditCard } from "react-icons/fi";
 import Listing from "../api/Listing";
 import ShipmentCard from "@/components/ShipmentCard";
 import {
@@ -26,6 +27,7 @@ export default function Index() {
     shipment: null,
     trackingNumber: "",
   });
+  const [paymentMethod, setPaymentMethod] = useState("ONLINE");
   const [loading, setLoading] = useState(true);
 
   const orderId = useMemo(
@@ -65,7 +67,10 @@ export default function Index() {
               trackingNumber:
                 parsedState?.trackingNumber || trackingNumber,
             });
-            setLoading(false);
+
+            if (parsedState?.paymentMethod === "COD") {
+              setPaymentMethod("COD");
+            }
           }
         } catch (error) {
           console.error("Failed to read shipment state", error);
@@ -101,6 +106,10 @@ export default function Index() {
           shipment,
           trackingNumber: responseTracking || trackingNumber,
         });
+
+        if (order?.paymentMethod === "COD") {
+          setPaymentMethod("COD");
+        }
       } catch (error) {
         if (!isMounted) {
           return;
@@ -182,6 +191,8 @@ export default function Index() {
     ? `/shipment/label-preview?orderId=${encodeURIComponent(orderId)}`
     : "/shipment/label-preview";
 
+  const isCOD = paymentMethod === "COD";
+
   return (
     <div className="min-h-screen bg-gray-50 px-4 py-10">
       <div className="mx-auto max-w-4xl rounded-2xl bg-white p-6 shadow-sm md:p-10">
@@ -191,9 +202,36 @@ export default function Index() {
             Order Placed Successfully
           </h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm text-gray-600 md:text-base">
-            Razorpay payment is verified and the shipment request is created.
+            {isCOD
+              ? "Your order has been placed. You can pay with cash when it arrives at your doorstep."
+              : "Razorpay payment is verified and the shipment request is created."
+            }
             Use the tracking details below to follow delivery progress.
           </p>
+        </div>
+
+        {/* Payment Method Card */}
+        <div className={`mt-8 rounded-xl border-2 p-5 ${isCOD ? "border-amber-200 bg-amber-50" : "border-green-200 bg-green-50"}`}>
+          <div className="flex items-center gap-4">
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center flex-shrink-0 ${isCOD ? "bg-amber-500" : "bg-green-500"}`}>
+              {isCOD ? (
+                <FaMoneyBillWave className="w-6 h-6 text-white" />
+              ) : (
+                <FiCreditCard className="w-6 h-6 text-white" />
+              )}
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-wider text-gray-500 mb-1">
+                Payment Method
+              </p>
+              <p className={`text-lg font-bold ${isCOD ? "text-amber-700" : "text-green-700"}`}>
+                {isCOD ? "Cash on Delivery" : "Online Payment"}
+              </p>
+              <p className={`text-sm font-semibold ${isCOD ? "text-amber-600" : "text-green-600"}`}>
+                {isCOD ? "Pay on Delivery" : "Paid Online"}
+              </p>
+            </div>
+          </div>
         </div>
 
         {shipmentFailed ? (

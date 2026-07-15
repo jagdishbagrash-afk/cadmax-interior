@@ -3,7 +3,8 @@ import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
-import { FiPlus, FiMinus, FiTag, FiLock, FiRotateCcw, FiTruck, FiHeadphones, FiChevronRight, FiTrash2 } from "react-icons/fi";
+import { FiPlus, FiMinus, FiTag, FiLock, FiRotateCcw, FiTruck, FiHeadphones, FiChevronRight, FiTrash2, FiCreditCard } from "react-icons/fi";
+import { BiRupee } from "react-icons/bi";
 import { FaRegTrashCan } from "react-icons/fa6";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
@@ -23,8 +24,10 @@ export default function Index() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [record, setRecord] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState("ONLINE");
 
   const cartItems = record?.items || [];
+  const isCOD = paymentMethod === "COD";
   const dispatch = useDispatch();
   const { user } = useRole();
   const [formData, setFormData] = useState({
@@ -79,6 +82,88 @@ export default function Index() {
     setFormData({ ...formData, [name]: value });
   };
 
+  // COD ORDER - Save order without Razorpay payment
+  const handleCODSubmit = async () => {
+    if (!cartItems || cartItems.length === 0) {
+      toast.error("Your cart is empty");
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const products = cartItems.map((item) => ({
+        id: item.productId,
+        price: item.finalPrice,
+        originalPrice: item.originalPrice,
+        discount: item.discountAmount,
+        quantity: item.quantity,
+        total: item.finalPrice * item.quantity,
+        variant: item.variant,
+        variantTitle: item.variantTitle,
+        priceSection: item.priceSection,
+        priceSectionTitle: item.priceSection?.title,
+      }));
+
+      const totalAmount = record?.summary?.subtotal || 0;
+      const main = new Listing();
+
+      const res = await main.AddOrder({
+        name: formData?.name,
+        mobile: formData?.mobile,
+        addressId: formData?.addressId,
+        address: selectedAddressText,
+        product: products,
+        amount: totalAmount,
+        paymentMethod: "COD",
+        PaymentId: "",
+      });
+
+      if (res?.data?.status) {
+        toast.success("Order placed successfully! Pay on delivery.");
+        dispatch(clearCart());
+        await FetchCart();
+
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: res?.data?.data?._id || null,
+              trackingNumber: "",
+              order: {
+                name: formData?.name,
+                mobile: formData?.mobile,
+                address: selectedAddressText,
+                amount: totalAmount,
+                product: buildOrderProducts(),
+              },
+              shipment: null,
+              shipToAddress: selectedAddress || null,
+              paymentMethod: "COD",
+            })
+          );
+        }
+
+        const query = new URLSearchParams();
+        const orderId = res?.data?.data?._id;
+
+        if (orderId) {
+          query.set("orderId", orderId);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
+      } else {
+        toast.error(res?.data?.message || "Failed to place order");
+      }
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "An unknown error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRemove = async (item) => {
     try {
       const main = new Listing();
@@ -114,6 +199,12 @@ export default function Index() {
 
     if (totalAmount === 0) {
       toast.error("Cart is empty");
+      return;
+    }
+
+    // COD flow - place order directly without Razorpay
+    if (paymentMethod === "COD") {
+      await handleCODSubmit();
       return;
     }
 
@@ -202,6 +293,7 @@ export default function Index() {
         address: selectedAddressText,
         product: products,
         amount: totalAmount,
+        paymentMethod: "ONLINE",
         PaymentId: response.razorpay_payment_id,
         orderId: response.razorpay_order_id,
       });
@@ -268,6 +360,7 @@ export default function Index() {
               order: fallbackOrder,
               shipment,
               shipToAddress: selectedAddress || null,
+              paymentMethod: "ONLINE",
             })
           );
         }
@@ -613,6 +706,37 @@ export default function Index() {
                         ))}
                       </select>
                     </div>
+
+                    {/* PAYMENT METHOD */}
+                    <div>
+                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
+                        Payment Method *
+                      </label>
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          {isCOD ? (
+                            <BiRupee className="w-4 h-4 text-gray-400" />
+                          ) : (
+                            <FiCreditCard className="w-4 h-4 text-gray-400" />
+                          )}
+                        </div>
+                        <select
+                          id="paymentMethod"
+                          name="paymentMethod"
+                          value={paymentMethod}
+                          onChange={(e) => setPaymentMethod(e.target.value)}
+                          className="w-full pl-10 pr-4 py-3 border border-gray-300 text-black focus:border-black focus:ring-1 focus:ring-black outline-none appearance-none cursor-pointer"
+                        >
+                          <option value="ONLINE">Online Payment</option>
+                          <option value="COD">Cash on Delivery (COD)</option>
+                        </select>
+                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                          </svg>
+                        </div>
+                      </div>
+                    </div>
                   </div>
 
                   <button
@@ -625,7 +749,7 @@ export default function Index() {
                           : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
                       }`}
                   >
-                    {loading ? "Processing..." : "Proceed to Payment"}
+                    {loading ? "Processing..." : isCOD ? "Place COD Order" : "Proceed to Payment"}
                   </button>
                 </form>
               </div>
