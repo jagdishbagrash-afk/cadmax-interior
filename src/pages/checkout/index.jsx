@@ -14,6 +14,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -26,12 +27,34 @@ export default function Index() {
   const cartItems = record?.items || [];
   const dispatch = useDispatch();
   const { user } = useRole();
-
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",
     addressId: "",
   });
+  const selectedAddress = data.find((item) => item._id === formData.addressId);
+  const selectedAddressText = selectedAddress
+    ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
+    : "";
+
+  const buildOrderProducts = () =>
+    cartItems.map((item) => ({
+      id: item.productId,
+      sku: item.sku || item.productId,
+      title: item.title || item.name,
+      name: item.title || item.name,
+      price: item.finalPrice,
+      originalPrice: item.originalPrice,
+      discount: item.discountAmount,
+      quantity: item.quantity,
+      total: item.finalPrice * item.quantity,
+      variant: item.variant,
+      variantTitle: item.variantTitle,
+      priceSection: item.priceSection,
+      priceSectionTitle: item.priceSection?.title,
+      dimensions: item.dimensions || item.product?.dimensions,
+      product: item.product || null,
+    }));
 
   useEffect(() => {
     if (user) {
@@ -176,6 +199,7 @@ export default function Index() {
         name: formData?.name,
         mobile: formData?.mobile,
         addressId: formData?.addressId,
+        address: selectedAddressText,
         product: products,
         amount: totalAmount,
         PaymentId: response.razorpay_payment_id,
@@ -184,12 +208,12 @@ export default function Index() {
 
       if (res?.data?.status) {
         toast.success(res?.data?.message);
-        const orderId = res?.data?.data?._id;
+        const createdOrderId = res?.data?.data?._id;
         await savePaymentDetails(
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          orderId
+          createdOrderId
         );
       } else {
         toast.error(res?.data?.message || "Failed to place order");
@@ -222,10 +246,49 @@ export default function Index() {
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          const fallbackOrder = {
+            ...(order || {}),
+            name: formData?.name || order?.name,
+            mobile: formData?.mobile || order?.mobile,
+            addressId: formData?.addressId || order?.addressId,
+            address: selectedAddressText || order?.address,
+            amount: totalAmount || order?.amount,
+            product: buildOrderProducts(),
+          };
+
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order: fallbackOrder,
+              shipment,
+              shipToAddress: selectedAddress || null,
+            })
+          );
+        }
+
         toast.success(response.data.message);
         dispatch(clearCart());
         await FetchCart();
-        router.push(`/success`);
+
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }

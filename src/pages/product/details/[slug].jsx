@@ -500,6 +500,8 @@ export default function Index() {
         productId: ProductDetails?._id,
         variant: selectedVariant?.color,
         images: selectedVariant?.images,
+        dimensions: ProductDetails?.dimensions,
+        product: ProductDetails,
         selectedPriceSection: selectedPriceSection,
         selectedSize: selectedSize,
       };

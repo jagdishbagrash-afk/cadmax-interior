@@ -10,6 +10,7 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
+import { extractOrderAndShipment } from "@/components/shipmentUtils";
 import { FiShield, FiTruck, FiAward, FiHeadphones, FiArrowRight } from "react-icons/fi";
 
 export default function Index() {
@@ -30,6 +31,40 @@ export default function Index() {
     mobile: "",
     addressId: "",
   });
+  const selectedAddress = data.find(
+    (item) => item._id === formData.addressId
+  );
+  const selectedAddressText = selectedAddress
+    ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
+    : "";
+
+  const buildOrderProducts = () => {
+    if (!product) {
+      return [];
+    }
+
+    return [
+      {
+        id: product.productId || product.id,
+        sku: product.productId || product.id,
+        title: product.name,
+        name: product.name,
+        price: product.final_amount ?? product.price ?? 0,
+        originalPrice: product.originalPrice ?? 0,
+        discount: product.discount_amount ?? 0,
+        quantity: product.quantity ?? 1,
+        total:
+          (product.final_amount ?? product.price ?? 0) * (product.quantity ?? 1),
+        variant: product.variant,
+        variantTitle: product.variant,
+        priceSection: product.selectedPriceSection || null,
+        priceSectionTitle: product.selectedPriceSection?.title || "",
+        size: product.selectedSize?.title || "",
+        dimensions: product.dimensions || product.product?.dimensions,
+        product: product.product || null,
+      },
+    ];
+  };
 
   // BUY NOW PRODUCT
   useEffect(() => {
@@ -177,23 +212,13 @@ export default function Index() {
       setLoading(true);
 
       const main = new Listing();
-
-      const productData = [
-        {
-          id: product?.productId,
-          price: product?.price,
-          discount_amount: product?.discount_amount,
-          final_amount: product?.final_amount,
-          quantity: product?.quantity,
-          total: finalTotal,
-          variant: product?.variant,
-        },
-      ];
+      const productData = buildOrderProducts();
 
       const res = await main.AddOrder({
         name: formData.name,
         mobile: formData.mobile,
         addressId: formData.addressId,
+        address: selectedAddressText,
         product: productData,
 
         subtotal,
@@ -230,8 +255,9 @@ export default function Index() {
   ) => {
     try {
       const main = new Listing();
+      const shippingProvider = process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
 
-      const response = await main.PaymentSave({
+      const response = await main.VerifyPayment({
         order_id: orderId,
         payment_id: paymentId,
         currency: "INR",
@@ -240,14 +266,53 @@ export default function Index() {
         type: "product",
         payment_status,
         OrderID: Orderdatas,
+        shipping_provider: shippingProvider || undefined,
       });
 
       if (response?.data?.status) {
+        const { order, shipment, trackingNumber } =
+          extractOrderAndShipment(response);
+
+        if (typeof window !== "undefined") {
+          const fallbackOrder = {
+            ...(order || {}),
+            name: formData.name || order?.name,
+            mobile: formData.mobile || order?.mobile,
+            addressId: formData.addressId || order?.addressId,
+            address: selectedAddressText || order?.address,
+            amount: finalTotal || order?.amount,
+            product: buildOrderProducts(),
+          };
+
+          sessionStorage.setItem(
+            "latestShipmentState",
+            JSON.stringify({
+              orderId: Orderdatas || order?._id || null,
+              trackingNumber,
+              order: fallbackOrder,
+              shipment,
+              shipToAddress: selectedAddress || null,
+            })
+          );
+        }
+
         localStorage.removeItem("buyNowItem");
 
         toast.success(response.data.message);
 
-        router.push("/success");
+        const query = new URLSearchParams();
+
+        if (Orderdatas || order?._id) {
+          query.set("orderId", Orderdatas || order?._id);
+        }
+
+        if (trackingNumber) {
+          query.set("trackingNumber", trackingNumber);
+        }
+
+        router.push(
+          query.toString() ? `/success?${query.toString()}` : "/success"
+        );
       } else {
         toast.error(response.data.message);
       }
