@@ -235,52 +235,142 @@ export default function Index() {
         amount: finalTotal,
 
         paymentMethod: "COD",
+        paymentStatus: "PENDING",
         PaymentId: "",
       });
 
-      if (res?.data?.status) {
-        localStorage.removeItem("buyNowItem");
-
-        toast.success("Order placed successfully! Pay on delivery.");
-
-        if (typeof window !== "undefined") {
-          sessionStorage.setItem(
-            "latestShipmentState",
-            JSON.stringify({
-              orderId: res?.data?.data?._id || null,
-              trackingNumber: "",
-              order: {
-                name: formData.name,
-                mobile: formData.mobile,
-                address: selectedAddressText,
-                amount: finalTotal,
-                product: buildOrderProducts(),
-              },
-              shipment: null,
-              shipToAddress: selectedAddress || null,
-              paymentMethod: "COD",
-            })
-          );
-        }
-
-        const query = new URLSearchParams();
-        const orderId = res?.data?.data?._id;
-
-        if (orderId) {
-          query.set("orderId", orderId);
-        }
-
-        router.push(
-          query.toString() ? `/success?${query.toString()}` : "/success"
-        );
-      } else {
-        toast.error(res?.data?.message || "Order failed");
+      if (!res?.data?.status) {
+        toast.error(res?.data?.message || "COD order failed");
+        return;
       }
+
+      const orderId = res?.data?.data?._id;
+
+      if (!orderId) {
+        toast.error("Order ID not received");
+        return;
+      }
+
+      // Online payment ki tarah next shipment API call
+      await saveCODShipment(orderId);
     } catch (error) {
-      console.log(error);
-      toast.error("Order failed");
+      console.error(
+        "COD order error:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        "COD order failed"
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const saveCODShipment = async (orderId) => {
+    try {
+      const main = new Listing();
+
+      const shippingProvider =
+        process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
+
+      const response = await main.VerifyPayment({
+        order_id: `COD-${orderId}`,
+        payment_id: "",
+        currency: "INR",
+
+        product_name: [product?.name],
+        amount: finalTotal,
+        type: "product",
+
+        payment_method: "COD",
+        paymentMethod: "COD",
+
+        payment_status: "pending",
+        PaymentStatus: "PENDING",
+
+        cod_amount: finalTotal,
+        collectable_amount: finalTotal,
+
+        OrderID: orderId,
+
+        shipping_provider:
+          shippingProvider || undefined,
+      });
+
+      if (!response?.data?.status) {
+        toast.error(
+          response?.data?.message ||
+          "Order created but shipment failed"
+        );
+
+        router.push(`/success?orderId=${orderId}`);
+        return;
+      }
+
+      const {
+        order,
+        shipment,
+        trackingNumber,
+      } = extractOrderAndShipment(response);
+
+      const fallbackOrder = {
+        ...(order || {}),
+        name: formData.name,
+        mobile: formData.mobile,
+        addressId: formData.addressId,
+        address: selectedAddressText,
+        amount: finalTotal,
+        product: buildOrderProducts(),
+        paymentMethod: "COD",
+        paymentStatus: "PENDING",
+      };
+
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "latestShipmentState",
+          JSON.stringify({
+            orderId,
+            trackingNumber: trackingNumber || "",
+            order: fallbackOrder,
+            shipment: shipment || null,
+            shipToAddress: selectedAddress || null,
+            paymentMethod: "COD",
+          })
+        );
+      }
+
+      localStorage.removeItem("buyNowItem");
+
+      toast.success(
+        "COD order and shipment created successfully"
+      );
+
+      const query = new URLSearchParams();
+
+      query.set("orderId", orderId);
+
+      if (trackingNumber) {
+        query.set(
+          "trackingNumber",
+          trackingNumber
+        );
+      }
+
+      router.push(
+        `/success?${query.toString()}`
+      );
+    } catch (error) {
+      console.error(
+        "COD shipment error:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Order created but shipment generation failed"
+      );
     }
   };
 
@@ -635,11 +725,10 @@ export default function Index() {
                   <button
                     type="submit"
                     disabled={loading || !product}
-                    className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${
-                      loading || !product
+                    className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${loading || !product
                         ? "bg-gray-300 cursor-not-allowed text-gray-500"
                         : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
-                    }`}
+                      }`}
                   >
                     {loading ? (
                       <>
@@ -778,7 +867,7 @@ export default function Index() {
                         <div className="flex justify-between items-center">
                           <span className="text-white font-bold text-lg uppercase tracking-wide">Total Amount</span>
                           <span className="text-white font-black text-xl md:text-2xl">
-                            {formatPrice(finalTotal , "INR")}
+                            {formatPrice(finalTotal, "INR")}
                           </span>
                         </div>
                       </div>
