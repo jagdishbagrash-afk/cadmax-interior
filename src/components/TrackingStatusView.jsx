@@ -159,14 +159,14 @@ export default function TrackingStatusView({
           </div>
         )}
 
-        <details className="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-4">
+        {/* <details className="mt-8 rounded-xl border border-gray-200 bg-gray-50 p-4">
           <summary className="cursor-pointer text-sm font-semibold text-gray-900">
             View raw tracking response
           </summary>
           <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words text-xs text-gray-700">
             {JSON.stringify(payload, null, 2)}
           </pre>
-        </details>
+        </details> */}
 
         <div className="mt-6 flex flex-wrap gap-3">
           <Link

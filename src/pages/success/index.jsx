@@ -226,14 +226,14 @@ export default function Index() {
           emptyMessage="Shipment details will appear here once the carrier accepts the request."
         />
 
-        <details className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 print:hidden">
+        {/* <details className="mt-6 rounded-xl border border-gray-200 bg-gray-50 p-4 print:hidden">
           <summary className="cursor-pointer text-sm font-semibold text-gray-900">
             View shipment debug logs on page
           </summary>
           <pre className="mt-4 overflow-x-auto whitespace-pre-wrap break-words text-xs text-gray-700">
             {JSON.stringify(debugPayload, null, 2)}
           </pre>
-        </details>
+        </details> */}
 
         <div className="mt-8 flex flex-wrap justify-center gap-4 print:hidden">
           <Link
