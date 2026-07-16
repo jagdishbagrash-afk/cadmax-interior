@@ -66,6 +66,65 @@ export default function OrderHistory() {
     return matchesStatus && matchesSearch;
   });
 
+  const fetchShipmentForOrder = async (orderId, fallbackOrder) => {
+    const normalizedId = String(orderId || "");
+
+    if (!normalizedId) {
+      return;
+    }
+
+    if (shipmentLoadingMap[normalizedId]) {
+      return;
+    }
+
+    setShipmentLoadingMap((prev) => ({ ...prev, [normalizedId]: true }));
+    setShipmentErrorMap((prev) => ({ ...prev, [normalizedId]: "" }));
+
+    try {
+      const main = new Listing();
+      const response = await main.GetOrderShipment(normalizedId);
+      const { order, shipment, trackingNumber } = extractOrderAndShipment(response);
+
+      setShipmentMap((prev) => ({
+        ...prev,
+        [normalizedId]: {
+          order: order || fallbackOrder || null,
+          shipment: shipment || null,
+          trackingNumber: trackingNumber || "",
+        },
+      }));
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Unable to fetch shipment details.";
+      setShipmentErrorMap((prev) => ({ ...prev, [normalizedId]: message }));
+      setShipmentMap((prev) => ({
+        ...prev,
+        [normalizedId]: {
+          order: fallbackOrder || null,
+          shipment: null,
+          trackingNumber: "",
+        },
+      }));
+    } finally {
+      setShipmentLoadingMap((prev) => ({ ...prev, [normalizedId]: false }));
+    }
+  };
+
+  const handleToggleOrder = (orderId, order) => {
+    const normalizedId = String(orderId || "");
+
+    if (!normalizedId) {
+      return;
+    }
+
+    const willOpen = activeOrder !== normalizedId;
+    setActiveOrder(willOpen ? normalizedId : null);
+
+    if (willOpen && !shipmentMap[normalizedId]) {
+      fetchShipmentForOrder(normalizedId, order);
+    }
+  };
+
 
 
   return (
@@ -152,7 +211,7 @@ export default function OrderHistory() {
                   </div>
 
                   <div
-                    onClick={() => handleToggleOrder(order?._id)}
+                    onClick={() => handleToggleOrder(order?._id, order)}
                     className="bg-[#F0F2F2] px-4 py-3 flex flex-wrap items-center justify-between gap-y-3 text-[12px] text-[#565959] cursor-pointer"
                   >
                     <div className="flex gap-8 sm:gap-12">

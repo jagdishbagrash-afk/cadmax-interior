@@ -275,6 +275,114 @@ export function extractTrackingEvents(responseOrPayload) {
   return candidates.find(Array.isArray) ?? [];
 }
 
+export function extractLiveTracking(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const value =
+      payload?.liveTracking ??
+      payload?.tracking ??
+      payload?.trackingDetails ??
+      payload?.shipment?.liveTracking ??
+      payload?.order?.liveTracking ??
+      null;
+
+    if (value && typeof value === "object") {
+      return value;
+    }
+  }
+
+  return {};
+}
+
+export function extractTrackingPending(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const value =
+      payload?.trackingPending ??
+      payload?.shipment?.trackingPending ??
+      payload?.order?.trackingPending ??
+      payload?.liveTracking?.trackingPending ??
+      false;
+
+    if (value === true) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export function extractEstimatedDelivery(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const value =
+      payload?.estimatedDelivery ??
+      payload?.shipment?.estimatedDelivery ??
+      payload?.order?.estimatedDelivery ??
+      payload?.liveTracking?.estimatedDelivery ??
+      payload?.tracking?.estimatedDelivery ??
+      null;
+
+    if (value) {
+      return value;
+    }
+  }
+
+  return "";
+}
+
+export function extractTransitEstimate(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const rawValue =
+      payload?.transitEstimate ??
+      payload?.shipment?.transitEstimate ??
+      payload?.order?.transitEstimate ??
+      payload?.GetDomesticTransitTimeForPinCodeandProductResult ??
+      payload?.tracking?.transitEstimate ??
+      null;
+
+    if (rawValue && typeof rawValue === "object") {
+      return {
+        originCity:
+          rawValue.originCity ??
+          rawValue.CityDesc_Origin ??
+          rawValue.cityDescOrigin ??
+          "",
+        destinationCity:
+          rawValue.destinationCity ??
+          rawValue.CityDesc_Destination ??
+          rawValue.cityDescDestination ??
+          "",
+        serviceCenter:
+          rawValue.serviceCenter ??
+          rawValue.ServiceCenter ??
+          "",
+        estimatedDelivery:
+          rawValue.estimatedDelivery ??
+          rawValue.ExpectedDateDelivery ??
+          "",
+        estimatedPod:
+          rawValue.expectedDatePod ??
+          rawValue.ExpectedDatePOD ??
+          "",
+        area: rawValue.area ?? rawValue.Area ?? "",
+        raw: rawValue,
+      };
+    }
+  }
+
+  return {
+    originCity: "",
+    destinationCity: "",
+    serviceCenter: "",
+    estimatedDelivery: "",
+    estimatedPod: "",
+    area: "",
+    raw: null,
+  };
+}
+
 export function extractUpdatedAt(...sources) {
   for (const source of sources) {
     const value =
