@@ -626,6 +626,78 @@ class Listing extends Component {
     }
   }
 
+  async RefreshOrderShipment(id) {
+    logShippingApi("order shipment refresh request", { orderId: id });
+
+    try {
+      const response = await Api.post(`/order/${id}/shipment/refresh`);
+      logShippingApi("order shipment refresh response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order shipment refresh error", {
+        orderId: id,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
+  async CancelOrderShipment(id) {
+    logShippingApi("order shipment cancel request", { orderId: id });
+
+    try {
+      const response = await Api.post(`/order/${id}/shipment/cancel`);
+      logShippingApi("order shipment cancel response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order shipment cancel error", {
+        orderId: id,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
+  async DispatchOrderShipment(id) {
+    logShippingApi("order shipment dispatch request", { orderId: id });
+
+    try {
+      const response = await Api.post(`/order/${id}/shipment/dispatch`);
+      logShippingApi("order shipment dispatch response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order shipment dispatch error", {
+        orderId: id,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
+  async UpdateOrderDeliveryStatus(id, data) {
+    logShippingApi("order shipment delivery status request", {
+      orderId: id,
+      data,
+    });
+
+    try {
+      const response = await Api.post(`/order/${id}/shipment/delivery-status`, data);
+      logShippingApi("order shipment delivery status response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("order shipment delivery status error", {
+        orderId: id,
+        data,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
   async GetPublicShipmentTracking(trackingNumber, courier) {
     const params = courier ? { courier } : undefined;
     logShippingApi("public tracking request", {

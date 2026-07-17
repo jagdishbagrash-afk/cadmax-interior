@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import Layout from "@/pages/common/Layout";
 import Listing from "@/pages/api/Listing";
 import TrackingStatusView from "@/components/TrackingStatusView";
-import { extractTrackingPending, unwrapApiData } from "@/components/shipmentUtils";
 
 function getQueryValue(value) {
   if (Array.isArray(value)) {
@@ -16,7 +15,6 @@ function getQueryValue(value) {
 export default function OrderTrackingPage() {
   const router = useRouter();
   const [shipmentData, setShipmentData] = useState(null);
-  const [trackingData, setTrackingData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -25,9 +23,8 @@ export default function OrderTrackingPage() {
     [router.query.id]
   );
 
-  const fetchTracking = async (activeOrderId, options = {}) => {
+  const fetchTracking = async (activeOrderId) => {
     const targetOrderId = activeOrderId || orderId;
-    const shouldRefresh = Boolean(options.refresh);
 
     if (!router.isReady || !targetOrderId) {
       return;
@@ -38,24 +35,8 @@ export default function OrderTrackingPage() {
 
     try {
       const main = new Listing();
-      if (shouldRefresh) {
-        await main.RefreshOrderShipment(targetOrderId);
-      }
-
-      const shipmentResponse = await main.GetOrderShipment(targetOrderId);
-      const shipmentPayload = unwrapApiData(shipmentResponse);
-      const trackingPending = extractTrackingPending(shipmentPayload);
-
-      setShipmentData(shipmentResponse);
-
-      try {
-        const trackingResponse = await main.GetOrderTracking(targetOrderId);
-        setTrackingData(trackingResponse);
-      } catch (trackingError) {
-        if (!trackingPending) {
-          setTrackingData(null);
-        }
-      }
+      const response = await main.GetOrderShipment(targetOrderId);
+      setShipmentData(response);
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -79,29 +60,13 @@ export default function OrderTrackingPage() {
         setError("");
 
         const main = new Listing();
-        const shipmentResponse = await main.GetOrderShipment(orderId);
-        const shipmentPayload = unwrapApiData(shipmentResponse);
-        const trackingPending = extractTrackingPending(shipmentPayload);
+        const response = await main.GetOrderShipment(orderId);
 
         if (!isMounted) {
           return;
         }
 
-        setShipmentData(shipmentResponse);
-
-        try {
-          const trackingResponse = await main.GetOrderTracking(orderId);
-
-          if (!isMounted) {
-            return;
-          }
-
-          setTrackingData(trackingResponse);
-        } catch (trackingError) {
-          if (isMounted && !trackingPending) {
-            setTrackingData(null);
-          }
-        }
+        setShipmentData(response);
       } catch (err) {
         if (!isMounted) {
           return;
@@ -131,12 +96,11 @@ export default function OrderTrackingPage() {
         title={`Track Order ${orderId || ""}`.trim()}
         description="This view uses the authenticated order tracking endpoint to fetch the latest shipment updates."
         responseData={shipmentData}
-        trackingResponseData={trackingData}
         loading={loading}
         error={error}
         backHref="/orders"
         orderId={orderId}
-        onRefresh={() => fetchTracking(orderId, { refresh: true })}
+        onRefresh={() => fetchTracking(orderId)}
       />
     </Layout>
   );

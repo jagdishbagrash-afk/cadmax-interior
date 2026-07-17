@@ -1,11 +1,16 @@
 import Link from "next/link";
+import { FaCircle } from "react-icons/fa";
 import {
   extractCarrier,
+  extractEstimatedDelivery,
+  extractLiveTracking,
   extractReferenceNumber,
   extractStatus,
   extractStatusInformation,
+  extractTrackingPending,
   extractTokenNumber,
   extractTrackingNumber,
+  extractTransitEstimate,
   formatShipmentStatus,
 } from "@/components/shipmentUtils";
 
@@ -60,6 +65,20 @@ export default function ShipmentCard({
   const referenceNumber = extractReferenceNumber(shipment, order);
   const tokenNumber = extractTokenNumber(shipment, order);
   const statusInformation = extractStatusInformation(shipment, order);
+  const trackingPending = extractTrackingPending(shipment, order);
+  const liveTracking = extractLiveTracking(shipment, order);
+  const estimatedDelivery = extractEstimatedDelivery(shipment, order);
+  const transitEstimate = extractTransitEstimate(shipment, order);
+  const liveLocation =
+    liveTracking?.currentLocation ||
+    liveTracking?.location ||
+    liveTracking?.currentHub ||
+    "";
+  const liveTimeline = Array.isArray(liveTracking?.timeline)
+    ? liveTracking.timeline
+    : Array.isArray(liveTracking?.events)
+    ? liveTracking.events
+    : [];
   const isFailureState = /failed|unauthorized|error|denied/i.test(
     `${status || ""} ${statusInformation || ""}`
   );
@@ -106,6 +125,86 @@ export default function ShipmentCard({
         <DetailItem label="Token No" value={tokenNumber} />
       </div>
 
+      {trackingPending ? (
+        <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
+          <div className="flex items-start gap-2">
+            <FaCircle size={9} className="mt-1 text-yellow-500 animate-pulse" />
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-gray-900">
+                Tracking will be available after pickup
+              </p>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <DetailItem
+                  label="Estimated Delivery"
+                  value={estimatedDelivery || transitEstimate.estimatedDelivery || "Not available"}
+                />
+                <DetailItem
+                  label="Origin City"
+                  value={transitEstimate.originCity || "Not available"}
+                />
+                <DetailItem
+                  label="Destination City"
+                  value={transitEstimate.destinationCity || "Not available"}
+                />
+                <DetailItem
+                  label="Service Center"
+                  value={transitEstimate.serviceCenter || "Not available"}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {!trackingPending && (Object.keys(liveTracking || {}).length > 0 || liveTimeline.length > 0) ? (
+        <div className="mt-4 rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <DetailItem
+              label="Live Status"
+              value={formatShipmentStatus(
+                liveTracking?.status ||
+                  liveTracking?.currentStatus ||
+                  liveTracking?.shipmentStatus ||
+                  status
+              )}
+            />
+            <DetailItem
+              label="Package Location"
+              value={liveLocation || "Location unavailable"}
+            />
+            <DetailItem
+              label="Estimated Delivery"
+              value={estimatedDelivery || "Not available"}
+            />
+          </div>
+
+          {liveTimeline.length > 0 ? (
+            <div className="mt-3 space-y-2">
+              {liveTimeline.slice(0, 3).map((item, index) => {
+                const stepLabel =
+                  item?.label || item?.title || item?.status || `Update ${index + 1}`;
+                const stepDescription =
+                  item?.description || item?.details || item?.location || "";
+
+                return (
+                  <div
+                    key={`${stepLabel}-${index}`}
+                    className="rounded-md border border-gray-200 bg-white px-3 py-2"
+                  >
+                    <p className="text-sm font-medium text-gray-900">
+                      {formatShipmentStatus(stepLabel)}
+                    </p>
+                    {stepDescription ? (
+                      <p className="mt-1 text-xs text-gray-600">{stepDescription}</p>
+                    ) : null}
+                  </div>
+                );
+              })}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+
       {statusInformation ? (
         <div
           className={`mt-4 rounded-lg p-3 ${
@@ -131,4 +230,3 @@ export default function ShipmentCard({
     </div>
   );
 }
-
