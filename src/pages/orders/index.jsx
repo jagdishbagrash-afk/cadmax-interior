@@ -51,9 +51,9 @@ export default function OrderHistory() {
     fetchData();
   }, []);
 
-  const handleToggleOrder = (orderId) => {
-    setActiveOrder((prev) => (prev === orderId ? null : orderId));
-  };
+  // const handleToggleOrder = (orderId) => {
+  //   setActiveOrder((prev) => (prev === orderId ? null : orderId));
+  // };
 
   const filteredOrders = orders.filter((order) => {
     const matchesStatus =
@@ -197,12 +197,11 @@ export default function OrderHistory() {
               );
               const publicTrackingHref = shipmentState?.trackingNumber
                 ? `/shipment/track/${encodeURIComponent(
-                    shipmentState.trackingNumber
-                  )}${
-                    trackingCourier
-                      ? `?courier=${encodeURIComponent(trackingCourier)}`
-                      : ""
-                  }`
+                  shipmentState.trackingNumber
+                )}${trackingCourier
+                  ? `?courier=${encodeURIComponent(trackingCourier)}`
+                  : ""
+                }`
                 : "";
 
               return (
@@ -298,21 +297,21 @@ export default function OrderHistory() {
                           })}
                           <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
                             <div className="mt-4 p-4 bg-gray-50 rounded-lg border border-gray-100">
-  <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">
-    Shipping Address
-  </p>
+                              <p className="text-[12px] font-bold text-gray-500 uppercase mb-1">
+                                Shipping Address
+                              </p>
 
-  <p className="text-[13px] text-gray-700 leading-relaxed">
-    {order?.addressId?.street_address}, {order?.addressId?.city},{" "}
-    {order?.addressId?.state}, {order?.addressId?.country} -{" "}
-    {order?.addressId?.pincode}
-  </p>
+                              <p className="text-[13px] text-gray-700 leading-relaxed">
+                                {order?.addressId?.street_address}, {order?.addressId?.city},{" "}
+                                {order?.addressId?.state}, {order?.addressId?.country} -{" "}
+                                {order?.addressId?.pincode}
+                              </p>
 
-  <p className="text-[13px] text-gray-700 mt-2">
-    <span className="font-medium">{order?.name}</span> |{" "}
-    {order?.mobile}
-  </p>
-</div>
+                              <p className="text-[13px] text-gray-700 mt-2">
+                                <span className="font-medium">{order?.name}</span> |{" "}
+                                {order?.mobile}
+                              </p>
+                            </div>
                           </div>
 
                           <ShipmentCard
