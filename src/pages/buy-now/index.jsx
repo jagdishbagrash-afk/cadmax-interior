@@ -39,16 +39,19 @@ export default function Index() {
   const selectedAddressText = selectedAddress
     ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
     : "";
-  const paymentMethod = (() => {
+  useEffect(() => {
     const queryValue =
       router.query.paymentMethod || router.query.payment_method || "";
 
-    return String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
-      .trim()
-      .toUpperCase() === "COD"
-      ? "COD"
-      : "ONLINE";
-  })();
+    const pm =
+      String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
+        .trim()
+        .toUpperCase() === "COD"
+        ? "COD"
+        : "ONLINE";
+
+    setPaymentMethod(pm);
+  }, [router.query.paymentMethod, router.query.payment_method]);
 
   const buildOrderProducts = () => {
     if (!product) {
