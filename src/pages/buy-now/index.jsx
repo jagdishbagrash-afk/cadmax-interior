@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { formatMultiPrice } from "@/components/ValueDataHook";
 import toast from "react-hot-toast";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
@@ -40,6 +39,16 @@ export default function Index() {
   const selectedAddressText = selectedAddress
     ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
     : "";
+  const paymentMethod = (() => {
+    const queryValue =
+      router.query.paymentMethod || router.query.payment_method || "";
+
+    return String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
+      .trim()
+      .toUpperCase() === "COD"
+      ? "COD"
+      : "ONLINE";
+  })();
 
   const buildOrderProducts = () => {
     if (!product) {
@@ -168,6 +177,11 @@ export default function Index() {
 
     try {
       const main = new Listing();
+
+      if (paymentMethod === "COD") {
+        await handleSubmit(null, { paymentMethod: "COD" });
+        return;
+      }
 
       const res = await main.AddPaymentCreate({
         amount: finalTotal,
@@ -378,6 +392,7 @@ export default function Index() {
   const handleSubmit = async (response) => {
     try {
       setLoading(true);
+      const activePaymentMethod = options.paymentMethod || paymentMethod;
 
       const main = new Listing();
       const productData = buildOrderProducts();
@@ -399,13 +414,13 @@ export default function Index() {
 
       if (res?.data?.status) {
         await savePaymentDetails(
-          response.razorpay_order_id,
-          response.razorpay_payment_id,
+          response?.razorpay_order_id,
+          response?.razorpay_payment_id,
           "success",
           res?.data?.data?._id,
           {
-            razorpaySignature: response.razorpay_signature,
-            paymentMethod: "ONLINE",
+            razorpaySignature: response?.razorpay_signature,
+            paymentMethod: activePaymentMethod,
           }
         );
       } else {
@@ -470,56 +485,60 @@ export default function Index() {
         payload.shipping_provider = shippingProvider;
       }
 
-      console.log("VERIFY PAYMENT PAYLOAD", payload);
+      if (paymentMethod === "COD") {
+        console.log("COD VERIFY PAYMENT PAYLOAD", payload);
+      } else {
+        console.log("VERIFY PAYMENT PAYLOAD", payload);
+      }
 
       const response = await main.VerifyPayment(payload);
+      const fallbackOrder = {
+        name: formData.name || "",
+        mobile: formData.mobile || "",
+        addressId: formData.addressId || "",
+        address: selectedAddressText || "",
+        amount: finalTotal || 0,
+        product: buildOrderProducts(),
+      };
 
       if (response?.data?.status) {
         const { order, shipment, trackingNumber } =
           extractOrderAndShipment(response);
 
-        if (typeof window !== "undefined") {
-          const fallbackOrder = {
+        persistLatestShipmentState({
+          responsePayload: response,
+          orderId: Orderdatas || order?._id || null,
+          fallbackOrder: {
+            ...fallbackOrder,
             ...(order || {}),
-            name: formData.name || order?.name,
-            mobile: formData.mobile || order?.mobile,
-            addressId: formData.addressId || order?.addressId,
-            address: selectedAddressText || order?.address,
-            amount: finalTotal || order?.amount,
-            product: buildOrderProducts(),
-          };
-
-          sessionStorage.setItem(
-            "latestShipmentState",
-            JSON.stringify({
-              orderId: Orderdatas || order?._id || null,
-              trackingNumber,
-              order: fallbackOrder,
-              shipment,
-              shipToAddress: selectedAddress || null,
-            })
-          );
-        }
+          },
+          fallbackShipment: shipment,
+          fallbackTrackingNumber: trackingNumber || "",
+        });
 
         localStorage.removeItem("buyNowItem");
 
         toast.success(response.data.message);
-
-        const query = new URLSearchParams();
-
-        if (Orderdatas || order?._id) {
-          query.set("orderId", Orderdatas || order?._id);
-        }
-
-        if (trackingNumber) {
-          query.set("trackingNumber", trackingNumber);
-        }
-
-        router.push(
-          query.toString() ? `/success?${query.toString()}` : "/success"
-        );
+        goToSuccessPage({
+          orderId: Orderdatas || order?._id || null,
+          responsePayload: response,
+          fallbackTrackingNumber: trackingNumber || "",
+        });
       } else {
-        toast.error(response.data.message);
+        persistLatestShipmentState({
+          responsePayload: response,
+          orderId: Orderdatas || null,
+          fallbackOrder,
+        });
+        localStorage.removeItem("buyNowItem");
+        toast.error(
+          response?.data?.message ||
+            "Order placed successfully, but shipment creation is pending."
+        );
+        goToSuccessPage({
+          orderId: Orderdatas || null,
+          responsePayload: response,
+        });
       }
     } catch (error) {
       console.log(error);
