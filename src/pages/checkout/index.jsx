@@ -148,14 +148,8 @@ export default function Index() {
         };
 
         const rzp = new Razorpay(options);
-        rzp.on("payment.failed", function (response) {
-          const error = response.error;
-          const orderId = error?.metadata?.order_id;
-          const paymentId = error?.metadata?.payment_id;
-          if (orderId && paymentId) {
-            savePaymentDetails(orderId, paymentId, "failed", null);
-            router.push(`/cancel`);
-          }
+        rzp.on("payment.failed", function () {
+          router.push(`/cancel`);
         });
         rzp.open();
       } else {
@@ -213,7 +207,11 @@ export default function Index() {
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          createdOrderId
+          createdOrderId,
+          {
+            razorpaySignature: response.razorpay_signature,
+            paymentMethod: "ONLINE",
+          }
         );
       } else {
         toast.error(res?.data?.message || "Failed to place order");
@@ -225,25 +223,56 @@ export default function Index() {
     }
   };
 
-  const savePaymentDetails = async (orderId, paymentId, payment_status, Orderdatas) => {
+  const savePaymentDetails = async (
+    orderId,
+    paymentId,
+    payment_status,
+    Orderdatas,
+    options = {}
+  ) => {
     setLoading(true);
     try {
-      const itemNames = cartItems
-        .map((item) => `${item.title} (${item.variantTitle})`)
-        .join(", ");
-    const totalAmount = record?.summary?.subtotal || 0;
+      const totalAmount = record?.summary?.subtotal || 0;
+      const paymentMethod = options.paymentMethod || "ONLINE";
+      const razorpaySignature = options.razorpaySignature || "";
+
+      if (
+        paymentMethod === "ONLINE" &&
+        (!orderId || !paymentId || !razorpaySignature)
+      ) {
+        toast.error(
+          "Payment verification failed because Razorpay payment details are incomplete."
+        );
+        return;
+      }
+
+      const payload = /** @type {any} */ ({
+        OrderID: Orderdatas,
+        amount: totalAmount,
+        currency: "INR",
+        payment_status,
+        payment_method: paymentMethod,
+        type: "product",
+      });
+
+      if (paymentMethod === "ONLINE") {
+        payload.razorpay_order_id = orderId;
+        payload.razorpay_payment_id = paymentId;
+        payload.razorpay_signature = razorpaySignature;
+
+        if (orderId) {
+          payload.order_id = orderId;
+        }
+
+        if (paymentId) {
+          payload.payment_id = paymentId;
+        }
+      }
+
+      console.log("VERIFY PAYMENT PAYLOAD", payload);
 
       const main = new Listing();
-      const response = await main.PaymentSave({
-        order_id: orderId,
-        payment_id: paymentId,
-        currency: "INR",
-        product_name: itemNames,
-        amount: totalAmount,
-        type: "product",
-        payment_status: payment_status,
-        OrderID: Orderdatas,
-      });
+      const response = await main.PaymentSave(payload);
 
       if (response?.data?.status) {
         const { order, shipment, trackingNumber } =

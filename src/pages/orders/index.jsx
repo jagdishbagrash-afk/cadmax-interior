@@ -110,6 +110,39 @@ export default function OrderHistory() {
     }
   };
 
+  const refreshShipmentForOrder = async (orderId, fallbackOrder) => {
+    const normalizedId = String(orderId || "");
+
+    if (!normalizedId || shipmentLoadingMap[normalizedId]) {
+      return;
+    }
+
+    setShipmentLoadingMap((prev) => ({ ...prev, [normalizedId]: true }));
+    setShipmentErrorMap((prev) => ({ ...prev, [normalizedId]: "" }));
+
+    try {
+      const main = new Listing();
+      await main.RefreshOrderShipment(normalizedId);
+      const response = await main.GetOrderShipment(normalizedId);
+      const { order, shipment, trackingNumber } = extractOrderAndShipment(response);
+
+      setShipmentMap((prev) => ({
+        ...prev,
+        [normalizedId]: {
+          order: order || fallbackOrder || null,
+          shipment: shipment || null,
+          trackingNumber: trackingNumber || "",
+        },
+      }));
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || "Unable to refresh shipment details.";
+      setShipmentErrorMap((prev) => ({ ...prev, [normalizedId]: message }));
+    } finally {
+      setShipmentLoadingMap((prev) => ({ ...prev, [normalizedId]: false }));
+    }
+  };
+
   const handleToggleOrder = (orderId, order) => {
     const normalizedId = String(orderId || "");
 
@@ -315,6 +348,9 @@ export default function OrderHistory() {
                             loading={shipmentLoadingMap[order?._id]}
                             error={shipmentErrorMap[order?._id]}
                             trackingHref={publicTrackingHref || orderTrackingHref}
+                            onRefresh={() =>
+                              refreshShipmentForOrder(order?._id, shipmentState?.order || order)
+                            }
                             emptyMessage="Shipment details will appear after payment verification and carrier creation."
                           />
 

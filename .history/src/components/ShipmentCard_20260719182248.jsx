@@ -70,9 +70,6 @@ export default function ShipmentCard({
   const liveTracking = extractLiveTracking(shipment, order);
   const estimatedDelivery = extractEstimatedDelivery(shipment, order);
   const transitEstimate = extractTransitEstimate(shipment, order);
-  const expectedDeliveryValue =
-    estimatedDelivery || transitEstimate.estimatedDelivery || "-";
-  const expectedPodValue = transitEstimate.estimatedPod || "-";
   const liveLocation =
     liveTracking?.currentLocation ||
     liveTracking?.location ||
@@ -85,15 +82,6 @@ export default function ShipmentCard({
     : [];
   const isFailureState = /failed|unauthorized|error|denied/i.test(
     `${status || ""} ${statusInformation || ""}`
-  );
-  const hasEtaInfo = Boolean(
-    trackingPending ||
-      estimatedDelivery ||
-      transitEstimate.estimatedDelivery ||
-      transitEstimate.estimatedPod ||
-      transitEstimate.originCity ||
-      transitEstimate.destinationCity ||
-      transitEstimate.serviceCenter
   );
 
   if (!shipment && !trackingNumber) {
@@ -149,32 +137,22 @@ export default function ShipmentCard({
         <DetailItem label="Token No" value={tokenNumber} />
       </div>
 
-      {hasEtaInfo ? (
-        <div
-          className={`mt-4 rounded-lg p-4 ${
-            trackingPending
-              ? "border border-yellow-200 bg-yellow-50"
-              : "border border-gray-200 bg-gray-50"
-          }`}
-        >
+      {trackingPending ? (
+        <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4">
           <div className="flex items-start gap-2">
-            {trackingPending ? (
-              <FaCircle size={9} className="mt-1 text-yellow-500 animate-pulse" />
-            ) : null}
+            <FaCircle size={9} className="mt-1 text-yellow-500 animate-pulse" />
             <div className="min-w-0">
               <p className="text-sm font-semibold text-gray-900">
-                {trackingPending
-                  ? "Tracking will be available after pickup"
-                  : "Estimated delivery information"}
+                Tracking will be available after pickup
               </p>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+              <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <DetailItem
                   label="Estimated Delivery"
-                  value={expectedDeliveryValue}
+                  value={estimatedDelivery || transitEstimate.estimatedDelivery || "-"}
                 />
                 <DetailItem
                   label="Expected POD"
-                  value={expectedPodValue}
+                  value={transitEstimate.estimatedPod || "-"}
                 />
                 <DetailItem
                   label="Origin City"
