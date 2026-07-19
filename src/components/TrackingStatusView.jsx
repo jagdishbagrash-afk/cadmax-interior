@@ -24,7 +24,7 @@ function SummaryCard({ label, value }) {
         {label}
       </p>
       <p className="mt-1 break-words text-sm font-medium text-gray-900">
-        {value || "N/A"}
+        {value || "-"}
       </p>
     </div>
   );
@@ -112,19 +112,25 @@ export default function TrackingStatusView({
       label: "Estimated Delivery",
       value: estimatedDelivery
         ? formatDisplayDate(estimatedDelivery, "DD MMM YYYY")
-        : "Not available",
+        : "-",
+    },
+    {
+      label: "Expected POD",
+      value: transitEstimate.estimatedPod
+        ? formatDisplayDate(transitEstimate.estimatedPod, "DD MMM YYYY")
+        : "-",
     },
     {
       label: "Origin City",
-      value: transitEstimate.originCity || "Not available",
+      value: transitEstimate.originCity || "-",
     },
     {
       label: "Destination City",
-      value: transitEstimate.destinationCity || "Not available",
+      value: transitEstimate.destinationCity || "-",
     },
     {
       label: "Service Center",
-      value: transitEstimate.serviceCenter || "Not available",
+      value: transitEstimate.serviceCenter || "-",
     },
   ];
 
@@ -205,18 +211,18 @@ export default function TrackingStatusView({
         <div className="mt-4 grid gap-4 sm:grid-cols-3">
           <SummaryCard
             label="Live Status"
-            value={hasLiveTracking ? formatShipmentStatus(liveStatus) : "Not available"}
+            value={hasLiveTracking ? formatShipmentStatus(liveStatus) : "-"}
           />
           <SummaryCard
             label="Current Location"
-            value={currentLocation || "Location unavailable"}
+            value={currentLocation || "-"}
           />
           <SummaryCard
             label="Estimated Delivery"
             value={
               estimatedDelivery
                 ? formatDisplayDate(estimatedDelivery, "DD MMM YYYY")
-                : "Not available"
+                : "-"
             }
           />
         </div>
@@ -246,7 +252,7 @@ export default function TrackingStatusView({
               </button>
             </div>
 
-            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
               {compactDetailItems.map((item) => (
                 <SummaryCard key={item.label} label={item.label} value={item.value} />
               ))}
@@ -272,7 +278,7 @@ export default function TrackingStatusView({
                           {formatShipmentStatus(stepLabel)}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {stepTime ? formatDisplayDate(stepTime) : "Time unavailable"}
+                          {stepTime ? formatDisplayDate(stepTime) : "-"}
                         </p>
                       </div>
                       {stepDescription ? (

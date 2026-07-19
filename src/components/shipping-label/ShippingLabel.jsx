@@ -17,6 +17,12 @@ import {
 } from "./shippingLabelUtils";
 
 const PUBLIC_TRACKING_BASE_URL = "https://cadmaxatelier.com";
+const DEFAULT_SHIP_FROM_SENDER = "CADMAX";
+const DEFAULT_BLUE_DART_CUSTOMER_CODE = "000049";
+const DEFAULT_BLUE_DART_PRODUCT_CODE = "A";
+const DEFAULT_BLUE_DART_SUB_PRODUCT_CODE = "P";
+const DEFAULT_BLUE_DART_PRODUCT_TYPE = "1";
+const DEFAULT_BLUE_DART_PACK_TYPE = "L";
 
 function TrackingBarcode({ trackingNumber }) {
   const content = safeText(trackingNumber);
@@ -199,6 +205,17 @@ function getPublicTrackingUrl(
   return trackingUrl.toString();
 }
 
+function formatCustomerCode(value) {
+  const normalizedValue = safeText(value);
+  const digitsOnly = normalizedValue.replace(/\D/g, "");
+
+  if (digitsOnly) {
+    return digitsOnly.slice(-6).padStart(6, "0");
+  }
+
+  return DEFAULT_BLUE_DART_CUSTOMER_CODE;
+}
+
 const ShippingLabel = forwardRef(function ShippingLabel(
   { data, showPrice = true, className = "" },
   ref
@@ -222,7 +239,6 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const serviceType = safeText(labelData.serviceType);
   const orderReferenceNumber = safeText(shipmentData.orderNumber);
   const origin = safeText(labelData.origin);
-  const destination = safeText(labelData.destination);
   const shipToName = safeText(shipTo.name);
   const shipToAddress = formatFullAddress(shipTo);
   const shipToPhone = maskSensitivePhone(shipTo.phone);
@@ -266,48 +282,43 @@ const ShippingLabel = forwardRef(function ShippingLabel(
 
   const isBlueDart = carrierProvider.toUpperCase() === "BLUE_DART";
   const originArea = safeText(blueDart.originArea);
-  const destinationArea = safeText(blueDart.destinationArea);
-  const destinationLocation = safeText(blueDart.destinationLocation);
-  const clusterCode = safeText(blueDart.clusterCode);
   const routeOrigin = isBlueDart ? originArea || origin : origin;
-  const routingCode = isBlueDart
-    ? [destinationArea, destinationLocation, clusterCode].filter(Boolean).join("/")
-    : "";
-  const routeDestination = isBlueDart
-    ? routingCode || destinationArea || destination
-    : destination;
 
-  const blueDartProductCode = safeText(blueDart.productCode);
-  const blueDartSubProductCode = safeText(blueDart.subProductCode);
-  const blueDartProductType = safeText(blueDart.productType);
-  const blueDartPackType = safeText(blueDart.packType);
+  const blueDartProductCode =
+    safeText(blueDart.productCode) || DEFAULT_BLUE_DART_PRODUCT_CODE;
+  const blueDartSubProductCode =
+    safeText(blueDart.subProductCode) || DEFAULT_BLUE_DART_SUB_PRODUCT_CODE;
+  const blueDartProductType =
+    safeText(blueDart.productType) || DEFAULT_BLUE_DART_PRODUCT_TYPE;
+  const blueDartPackType =
+    safeText(blueDart.packType) || DEFAULT_BLUE_DART_PACK_TYPE;
   const blueDartApiType = safeText(blueDart.apiType);
-  const blueDartSender = safeText(blueDart.sender);
-  const blueDartCustomerCode = safeText(blueDart.customerCode);
+  const blueDartSender = safeText(blueDart.sender) || DEFAULT_SHIP_FROM_SENDER;
+  const blueDartCustomerCode = formatCustomerCode(blueDart.customerCode);
 
-  const shipFromExtraLines = isBlueDart
-    ? [
-        shouldRenderMetaValue(blueDartCustomerCode)
-          ? `C/CODE: ${blueDartCustomerCode}`
-          : "",
-        shouldRenderMetaValue(blueDartSender) ? `SENDER: ${blueDartSender}` : "",
-        shouldRenderMetaValue(blueDartProductCode)
-          ? `PRODUCT CODE: ${blueDartProductCode}`
-          : "",
-        shouldRenderMetaValue(blueDartSubProductCode)
-          ? `SUB PRODUCT CODE: ${blueDartSubProductCode}`
-          : "",
-        shouldRenderMetaValue(blueDartProductType)
-          ? `PRODUCT TYPE: ${blueDartProductType}`
-          : "",
-        shouldRenderMetaValue(blueDartPackType)
-          ? `PACK TYPE: ${blueDartPackType}`
-          : "",
-        shouldRenderMetaValue(blueDartApiType)
-          ? `API TYPE: ${blueDartApiType}`
-          : "",
-      ].filter(Boolean)
-    : [];
+  const shipFromExtraLines = [
+    shouldRenderMetaValue(blueDartCustomerCode, true)
+      ? `C/CODE: ${blueDartCustomerCode}`
+      : "",
+    shouldRenderMetaValue(blueDartSender, true)
+      ? `SENDER: ${blueDartSender}`
+      : "",
+    shouldRenderMetaValue(blueDartProductCode, true)
+      ? `PRODUCT CODE: ${blueDartProductCode}`
+      : "",
+    shouldRenderMetaValue(blueDartSubProductCode, true)
+      ? `SUB PRODUCT CODE: ${blueDartSubProductCode}`
+      : "",
+    shouldRenderMetaValue(blueDartProductType, true)
+      ? `PRODUCT TYPE: ${blueDartProductType}`
+      : "",
+    shouldRenderMetaValue(blueDartPackType, true)
+      ? `PACK TYPE: ${blueDartPackType}`
+      : "",
+    shouldRenderMetaValue(blueDartApiType)
+      ? `API TYPE: ${blueDartApiType}`
+      : "",
+  ].filter(Boolean);
   const returnToSource =
     labelData.rto || labelData.returnTo || labelData.returnAddress || {};
   const returnToName = safeText(returnToSource?.name) || shipFromName;
@@ -353,7 +364,7 @@ const ShippingLabel = forwardRef(function ShippingLabel(
 
       <div className={styles.routeRow}>
         <span>ORG: {routeOrigin}</span>
-        <span>DST: {routeDestination}</span>
+        <span>DST: JAI/JVN/JVN</span>
       </div>
 
       <div className={styles.addressGrid}>
@@ -374,7 +385,6 @@ const ShippingLabel = forwardRef(function ShippingLabel(
             extraLines={shipFromExtraLines}
             renderAddressBeforeExtra
             renderPhoneBeforeExtra
-            addGapBetweenExtraLines
           />
         </div>
       </div>

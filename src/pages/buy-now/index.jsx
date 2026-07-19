@@ -402,7 +402,11 @@ export default function Index() {
           response.razorpay_order_id,
           response.razorpay_payment_id,
           "success",
-          res?.data?.data?._id
+          res?.data?.data?._id,
+          {
+            razorpaySignature: response.razorpay_signature,
+            paymentMethod: "ONLINE",
+          }
         );
       } else {
         toast.error(res?.data?.message);
@@ -420,23 +424,55 @@ export default function Index() {
     orderId,
     paymentId,
     payment_status,
-    Orderdatas
+    Orderdatas,
+    options = {}
   ) => {
     try {
       const main = new Listing();
       const shippingProvider = process.env.NEXT_PUBLIC_SHIPPING_PROVIDER;
+      const paymentMethod = options.paymentMethod || "ONLINE";
+      const razorpaySignature = options.razorpaySignature || "";
 
-      const response = await main.VerifyPayment({
-        order_id: orderId,
-        payment_id: paymentId,
-        currency: "INR",
-        product_name: [product?.name],
-        amount: finalTotal,
-        type: "product",
-        payment_status,
+      if (
+        paymentMethod === "ONLINE" &&
+        (!orderId || !paymentId || !razorpaySignature)
+      ) {
+        toast.error(
+          "Payment verification failed because Razorpay payment details are incomplete."
+        );
+        return;
+      }
+
+      const payload = /** @type {any} */ ({
         OrderID: Orderdatas,
-        shipping_provider: shippingProvider || undefined,
+        amount: finalTotal,
+        currency: "INR",
+        payment_status,
+        payment_method: paymentMethod,
+        type: "product",
       });
+
+      if (paymentMethod === "ONLINE") {
+        payload.razorpay_order_id = orderId;
+        payload.razorpay_payment_id = paymentId;
+        payload.razorpay_signature = razorpaySignature;
+
+        if (orderId) {
+          payload.order_id = orderId;
+        }
+
+        if (paymentId) {
+          payload.payment_id = paymentId;
+        }
+      }
+
+      if (shippingProvider) {
+        payload.shipping_provider = shippingProvider;
+      }
+
+      console.log("VERIFY PAYMENT PAYLOAD", payload);
+
+      const response = await main.VerifyPayment(payload);
 
       if (response?.data?.status) {
         const { order, shipment, trackingNumber } =
