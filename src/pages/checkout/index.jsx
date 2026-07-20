@@ -39,6 +39,16 @@ export default function Index() {
   const selectedAddressText = selectedAddress
     ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
     : "";
+  const paymentMethod = (() => {
+    const queryValue =
+      router.query.paymentMethod || router.query.payment_method || "";
+
+    return String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
+      .trim()
+      .toUpperCase() === "COD"
+      ? "COD"
+      : "ONLINE";
+  })();
 
   const buildOrderProducts = () =>
     cartItems.map((item) => ({
@@ -211,6 +221,11 @@ export default function Index() {
     setLoading(true);
     const main = new Listing();
     try {
+      if (paymentMethod === "COD") {
+        await handleSubmit(null, { paymentMethod: "COD" });
+        return;
+      }
+
       const res = await main.AddPaymentCreate({
         amount: totalAmount,
         currency: "INR",
@@ -254,7 +269,49 @@ export default function Index() {
     }
   };
 
-  const handleSubmit = async (response) => {
+  const persistLatestShipmentState = ({
+    responsePayload,
+    orderId,
+    fallbackOrder,
+    fallbackShipment = null,
+    fallbackTrackingNumber = "",
+  }) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const { order, shipment, trackingNumber } = extractOrderAndShipment(
+      responsePayload
+    );
+
+    sessionStorage.setItem(
+      "latestShipmentState",
+      JSON.stringify({
+        orderId: orderId || order?._id || null,
+        trackingNumber: trackingNumber || fallbackTrackingNumber || "",
+        order: fallbackOrder || order || null,
+        shipment: shipment || fallbackShipment || null,
+        shipToAddress: selectedAddress || null,
+      })
+    );
+  };
+
+  const goToSuccessPage = ({ orderId, responsePayload, fallbackTrackingNumber = "" }) => {
+    const { order, trackingNumber } = extractOrderAndShipment(responsePayload);
+    const query = new URLSearchParams();
+
+    if (orderId || order?._id) {
+      query.set("orderId", orderId || order?._id);
+    }
+
+    if (trackingNumber || fallbackTrackingNumber) {
+      query.set("trackingNumber", trackingNumber || fallbackTrackingNumber);
+    }
+
+    router.push(query.toString() ? `/success?${query.toString()}` : "/success");
+  };
+
+  const handleSubmit = async (response, options = {}) => {
     if (!cartItems || cartItems.length === 0) {
       toast.error("Your cart is empty");
       return;
@@ -264,6 +321,7 @@ export default function Index() {
     setLoading(true);
 
     try {
+      const activePaymentMethod = options.paymentMethod || paymentMethod;
       const products = cartItems.map((item) => ({
         id: item.productId,
         price: item.finalPrice,
@@ -296,13 +354,13 @@ export default function Index() {
         toast.success(res?.data?.message);
         const createdOrderId = res?.data?.data?._id;
         await savePaymentDetails(
-          response.razorpay_order_id,
-          response.razorpay_payment_id,
+          response?.razorpay_order_id,
+          response?.razorpay_payment_id,
           "success",
           createdOrderId,
           {
-            razorpaySignature: response.razorpay_signature,
-            paymentMethod: "ONLINE",
+            razorpaySignature: response?.razorpay_signature,
+            paymentMethod: activePaymentMethod,
           }
         );
       } else {
@@ -361,17 +419,32 @@ export default function Index() {
         }
       }
 
-      console.log("VERIFY PAYMENT PAYLOAD", payload);
+      if (paymentMethod === "COD") {
+        console.log("COD VERIFY PAYMENT PAYLOAD", payload);
+      } else {
+        console.log("VERIFY PAYMENT PAYLOAD", payload);
+      }
 
       const main = new Listing();
       const response = await main.PaymentSave(payload);
+      const fallbackOrder = {
+        name: formData?.name || "",
+        mobile: formData?.mobile || "",
+        addressId: formData?.addressId || "",
+        address: selectedAddressText || "",
+        amount: totalAmount || 0,
+        product: buildOrderProducts(),
+      };
 
       if (response?.data?.status) {
         const { order, shipment, trackingNumber } =
           extractOrderAndShipment(response);
 
-        if (typeof window !== "undefined") {
-          const fallbackOrder = {
+        persistLatestShipmentState({
+          responsePayload: response,
+          orderId: Orderdatas || order?._id || null,
+          fallbackOrder: {
+            ...fallbackOrder,
             ...(order || {}),
             name: formData?.name || order?.name,
             mobile: formData?.mobile || order?.mobile,
@@ -397,22 +470,27 @@ export default function Index() {
         toast.success(response.data.message);
         dispatch(clearCart());
         await FetchCart();
-
-        const query = new URLSearchParams();
-
-        if (Orderdatas || order?._id) {
-          query.set("orderId", Orderdatas || order?._id);
-        }
-
-        if (trackingNumber) {
-          query.set("trackingNumber", trackingNumber);
-        }
-
-        router.push(
-          query.toString() ? `/success?${query.toString()}` : "/success"
-        );
+        goToSuccessPage({
+          orderId: Orderdatas || order?._id || null,
+          responsePayload: response,
+          fallbackTrackingNumber: trackingNumber || "",
+        });
       } else {
-        toast.error(response.data.message);
+        persistLatestShipmentState({
+          responsePayload: response,
+          orderId: Orderdatas || null,
+          fallbackOrder,
+        });
+        toast.error(
+          response?.data?.message ||
+            "Order placed successfully, but shipment creation is pending."
+        );
+        dispatch(clearCart());
+        await FetchCart();
+        goToSuccessPage({
+          orderId: Orderdatas || null,
+          responsePayload: response,
+        });
       }
     } catch (error) {
       toast.error(error?.response?.data?.data?.message || "An error occurred");
@@ -619,11 +697,8 @@ export default function Index() {
     }
   };
 
-  const summary = record?.summary || {};
-  const totalAmount = summary.subtotal || 0;
-
-  // Compute derived values from cart items
   const subtotal = cartItems.reduce((sum, item) => sum + ((item.originalPrice || 0) * (item.quantity || 0)), 0);
+  // discountAmount is a percentage (e.g. 10 means 10%), so calculate actual rupee discount
   // discountAmount is a percentage (e.g. 10 means 10%), so calculate actual rupee discount
   const totalDiscount = cartItems.reduce((sum, item) => {
     const perUnitDiscount = ((item.originalPrice || 0) * (item.discountAmount || 0)) / 100;
