@@ -28,27 +28,45 @@ export default function Index() {
 
   const cartItems = record?.items || [];
   const isCOD = paymentMethod === "COD";
+
   const dispatch = useDispatch();
   const { user } = useRole();
+
   const [formData, setFormData] = useState({
     name: user?.name || "",
     mobile: user?.phone ? String(user.phone) : "",
     addressId: "",
   });
-  const selectedAddress = data.find((item) => item._id === formData.addressId);
+
+  const selectedAddress = data.find(
+    (item) => item._id === formData.addressId
+  );
+
   const selectedAddressText = selectedAddress
     ? `${selectedAddress.street_address}, ${selectedAddress.city}, ${selectedAddress.state}, ${selectedAddress.country} - ${selectedAddress.pincode} (${selectedAddress.addressType})`
     : "";
-  const paymentMethod = (() => {
-    const queryValue =
-      router.query.paymentMethod || router.query.payment_method || "";
 
-    return String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
-      .trim()
-      .toUpperCase() === "COD"
-      ? "COD"
-      : "ONLINE";
-  })();
+  useEffect(() => {
+    if (!router.isReady) return;
+
+    const queryValue =
+      router.query.paymentMethod ||
+      router.query.payment_method ||
+      "";
+
+    const method =
+      String(Array.isArray(queryValue) ? queryValue[0] : queryValue)
+        .trim()
+        .toUpperCase() === "COD"
+        ? "COD"
+        : "ONLINE";
+
+    setPaymentMethod(method);
+  }, [
+    router.isReady,
+    router.query.paymentMethod,
+    router.query.payment_method,
+  ]);
 
   const buildOrderProducts = () =>
     cartItems.map((item) => ({
