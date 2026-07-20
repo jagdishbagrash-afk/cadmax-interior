@@ -335,7 +335,7 @@ export default function Index() {
         priceSectionTitle: item.priceSection?.title,
       }));
 
-    const totalAmount = record?.summary?.subtotal || 0;
+      const totalAmount = record?.summary?.subtotal || 0;
 
       const main = new Listing();
       const res = await main.AddOrder({
@@ -381,6 +381,7 @@ export default function Index() {
     options = {}
   ) => {
     setLoading(true);
+
     try {
       const totalAmount = record?.summary?.subtotal || 0;
       const paymentMethod = options.paymentMethod || "ONLINE";
@@ -396,14 +397,14 @@ export default function Index() {
         return;
       }
 
-      const payload = /** @type {any} */ ({
+      const payload = {
         OrderID: Orderdatas,
         amount: totalAmount,
         currency: "INR",
         payment_status,
         payment_method: paymentMethod,
         type: "product",
-      });
+      };
 
       if (paymentMethod === "ONLINE") {
         payload.razorpay_order_id = orderId;
@@ -420,6 +421,12 @@ export default function Index() {
       }
 
       if (paymentMethod === "COD") {
+        payload.order_id = `COD-${Orderdatas}`;
+        payload.payment_id = `COD-PAYMENT-${Orderdatas}`;
+        payload.payment_status = "pending";
+        payload.cod_amount = totalAmount;
+        payload.collectable_amount = totalAmount;
+
         console.log("COD VERIFY PAYMENT PAYLOAD", payload);
       } else {
         console.log("VERIFY PAYMENT PAYLOAD", payload);
@@ -427,6 +434,7 @@ export default function Index() {
 
       const main = new Listing();
       const response = await main.PaymentSave(payload);
+
       const fallbackOrder = {
         name: formData?.name || "",
         mobile: formData?.mobile || "",
@@ -440,36 +448,50 @@ export default function Index() {
         const { order, shipment, trackingNumber } =
           extractOrderAndShipment(response);
 
+        const finalOrder = {
+          ...fallbackOrder,
+          ...(order || {}),
+          name: formData?.name || order?.name || "",
+          mobile: formData?.mobile || order?.mobile || "",
+          addressId:
+            formData?.addressId || order?.addressId || "",
+          address:
+            selectedAddressText || order?.address || "",
+          amount:
+            totalAmount || order?.amount || 0,
+          product: buildOrderProducts(),
+        };
+
         persistLatestShipmentState({
           responsePayload: response,
           orderId: Orderdatas || order?._id || null,
-          fallbackOrder: {
-            ...fallbackOrder,
-            ...(order || {}),
-            name: formData?.name || order?.name,
-            mobile: formData?.mobile || order?.mobile,
-            addressId: formData?.addressId || order?.addressId,
-            address: selectedAddressText || order?.address,
-            amount: totalAmount || order?.amount,
-            product: buildOrderProducts(),
-          };
+          fallbackOrder: finalOrder,
+          fallbackShipment: shipment || null,
+          fallbackTrackingNumber: trackingNumber || "",
+        });
 
+        if (typeof window !== "undefined") {
           sessionStorage.setItem(
             "latestShipmentState",
             JSON.stringify({
               orderId: Orderdatas || order?._id || null,
-              trackingNumber,
-              order: fallbackOrder,
-              shipment,
+              trackingNumber: trackingNumber || "",
+              order: finalOrder,
+              shipment: shipment || null,
               shipToAddress: selectedAddress || null,
-              paymentMethod: "ONLINE",
+              paymentMethod,
             })
           );
         }
 
-        toast.success(response.data.message);
+        toast.success(
+          response?.data?.message ||
+          "Order and shipment created successfully"
+        );
+
         dispatch(clearCart());
         await FetchCart();
+
         goToSuccessPage({
           orderId: Orderdatas || order?._id || null,
           responsePayload: response,
@@ -481,24 +503,35 @@ export default function Index() {
           orderId: Orderdatas || null,
           fallbackOrder,
         });
+
         toast.error(
           response?.data?.message ||
-            "Order placed successfully, but shipment creation is pending."
+          "Order placed successfully, but shipment creation is pending."
         );
+
         dispatch(clearCart());
         await FetchCart();
+
         goToSuccessPage({
           orderId: Orderdatas || null,
           responsePayload: response,
         });
       }
     } catch (error) {
-      toast.error(error?.response?.data?.data?.message || "An error occurred");
+      console.error(
+        "PAYMENT SAVE ERROR:",
+        error?.response?.data || error
+      );
+
+      toast.error(
+        error?.response?.data?.data?.message ||
+        error?.response?.data?.message ||
+        "An error occurred"
+      );
     } finally {
       setLoading(false);
     }
   };
-
   const FetchCart = async () => {
     try {
       const main = new Listing();
@@ -847,10 +880,9 @@ export default function Index() {
                     type="submit"
                     disabled={loading || cartItems.length === 0}
                     className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
-                      ${
-                        loading || cartItems.length === 0
-                          ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                          : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
+                      ${loading || cartItems.length === 0
+                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                        : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
                       }`}
                   >
                     {loading ? "Processing..." : isCOD ? "Place COD Order" : "Proceed to Payment"}
