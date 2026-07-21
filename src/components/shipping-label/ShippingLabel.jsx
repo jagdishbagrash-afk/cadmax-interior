@@ -105,9 +105,8 @@ function AddressSection({
       {trailingExtraLines.map((line, index) => (
         <p
           key={`${title}-extra-${index}`}
-          className={`${styles.addressLine}${
-            addGapBetweenExtraLines ? ` ${styles.addressLineSpaced}` : ""
-          }`}
+          className={`${styles.addressLine}${addGapBetweenExtraLines ? ` ${styles.addressLineSpaced}` : ""
+            }`}
         >
           {line}
         </p>

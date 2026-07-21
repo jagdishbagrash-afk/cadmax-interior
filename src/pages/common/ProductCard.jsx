@@ -6,13 +6,14 @@ import { useSelector } from "react-redux";
 import useWishlist from "@/hooks/useWishlist";
 import { getProductPrices } from "@/components/productPrices";
 import { useAuthModal } from "@/context/AuthModalContext";
+import { useRole } from "@/context/RoleContext";
 
 export default function ProductCard({ item }) {
   const wishlistIds = useSelector((state) => state.wishlist.wishlistIds);
   const { toggleWishlist } = useWishlist();
   const isWishlisted = wishlistIds.includes(item?._id);
   const { openAuthModal } = useAuthModal();
-
+  const { user } = useRole();
   // Get prices using the helper
   const { displayPrice, originalPrice } = getProductPrices(item);
 
@@ -22,8 +23,13 @@ export default function ProductCard({ item }) {
   const handleWishlistClick = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    // Open auth modal for wishlist - user must login first
-    openAuthModal("login");
+    if (user && user?.role === "customer") {
+      // User is logged in, toggle wishlist directly
+      toggleWishlist(item?._id);
+    } else {
+      // User not logged in, show auth modal
+      openAuthModal("login");
+    }
   };
 
   return (
@@ -42,11 +48,10 @@ export default function ProductCard({ item }) {
             aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
           >
             <FiHeart
-              className={`text-lg transition-all duration-200 ${
-                isWishlisted
-                  ? "fill-red-500 text-red-500"
-                  : "text-gray-600 hover:text-red-400"
-              }`}
+              className={`text-lg transition-all duration-200 ${isWishlisted
+                ? "fill-red-500 text-red-500"
+                : "text-gray-600 hover:text-red-400"
+                }`}
             />
           </button>
 
