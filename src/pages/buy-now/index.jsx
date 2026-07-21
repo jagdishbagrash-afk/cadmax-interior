@@ -260,8 +260,8 @@ export default function Index() {
         toast.error(res?.data?.message || "COD order failed");
         return;
       }
-
-      const orderId = res?.data?.data?._id;
+      console.log("COD order response:", res?.data);
+      const orderId = res?.data?.data?.order?._id;
 
       if (!orderId) {
         toast.error("Order ID not received");
@@ -536,7 +536,7 @@ export default function Index() {
         localStorage.removeItem("buyNowItem");
         toast.error(
           response?.data?.message ||
-            "Order placed successfully, but shipment creation is pending."
+          "Order placed successfully, but shipment creation is pending."
         );
         goToSuccessPage({
           orderId: Orderdatas || null,
@@ -784,8 +784,8 @@ export default function Index() {
                     type="submit"
                     disabled={loading || !product}
                     className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${loading || !product
-                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                        : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                      : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                       }`}
                   >
                     {loading ? (
