@@ -648,7 +648,7 @@ export default function Index() {
                   {/* Wishlist & Share Icons */}
                   <div className="absolute top-4 right-4 flex flex-col gap-2">
                     <button
-                      onClick={() => handleWishlistClick}
+                      onClick={handleWishlistClick}
                       className={`w-8 h-8 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 ${isWishlisted
                         ? "text-red-500"
                         : "text-gray-600 hover:text-red-500"
@@ -756,7 +756,7 @@ export default function Index() {
                     {/* Wishlist & Share Icons */}
                     <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
                       <button
-                        onClick={() => handleWishlistClick}
+                        onClick={handleWishlistClick}
                         className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
                           ? "text-red-500"
                           : "text-gray-600 hover:text-red-500"
