@@ -14,6 +14,8 @@ function getQueryValue(value) {
 }
 
 function normalizeShipmentDetailsResponse(payload) {
+  console.log("[normalizeShipmentDetailsResponse] full payload:", payload);
+  
   if (!payload || typeof payload !== "object") {
     return null;
   }
@@ -85,6 +87,7 @@ function normalizeShipmentDetailsResponse(payload) {
     orderId: order?.orderId || payload?.orderId || "",
     orderNumber: order?.orderNumber || payload?.orderNumber || "",
     paymentId: order?.paymentId || payload?.paymentId || "",
+    paymentMethod: order?.paymentMethod || payload?.paymentMethod || order?.payment_mode || payload?.payment_mode || "",
     shippingStatus: order?.shippingStatus || payload?.shippingStatus || "",
     courierName: order?.courierName || payload?.courierName || "",
     trackingNumber:

@@ -245,17 +245,45 @@ const ShippingLabel = forwardRef(function ShippingLabel(
   const shipFromAddress = COMPANY_FOOTER_ADDRESS;
   const shipFromPhone = maskSensitivePhone(shipFrom.phone);
   const currency = safeText(payment.currency) || "INR";
-  const orderValue = formatCurrency(payment.orderValue, currency);
-  const codAmount = formatCurrency(payment.codAmount, currency);
+  const rawOrderValue = safeNumber(payment.orderValue);
+  const rawCodAmount = safeNumber(payment.codAmount);
+  
+  console.log("[ShippingLabel] shipmentData:", shipmentData);
+  console.log("[ShippingLabel] shipmentData.paymentMethod:", shipmentData.paymentMethod);
+  console.log("[ShippingLabel] shipmentData.paymentId:", shipmentData.paymentId);
+  console.log("[ShippingLabel] labelData.payment:", payment);
+  
+  const isCodPaymentMethod = safeText(shipmentData.paymentMethod).toUpperCase() === "COD";
+  const isCodFromPayment = !!payment.isCod;
+  const isCodFromPaymentId = safeText(shipmentData.paymentId).toUpperCase().startsWith("COD-PAYMENT-");
+  const isCod = isCodPaymentMethod || isCodFromPayment || isCodFromPaymentId;
+  
+  const effectiveCodAmount = isCod 
+    ? (rawCodAmount > 0 ? rawCodAmount : rawOrderValue) 
+    : rawCodAmount;
+  
+  console.log("[ShippingLabel] isCod:", isCod);
+  console.log("[ShippingLabel] isCodPaymentMethod:", isCodPaymentMethod);
+  console.log("[ShippingLabel] isCodFromPayment:", isCodFromPayment);
+  console.log("[ShippingLabel] isCodFromPaymentId:", isCodFromPaymentId);
+  console.log("[ShippingLabel] rawOrderValue:", rawOrderValue);
+  console.log("[ShippingLabel] rawCodAmount:", rawCodAmount);
+  console.log("[ShippingLabel] effectiveCodAmount:", effectiveCodAmount);
+  
+  const orderValue = formatCurrency(rawOrderValue, currency);
+  const codAmount = formatCurrency(effectiveCodAmount, currency);
   const weight = formatWeight(packageData.weightKg);
   const dimensions = formatDimensions(packageData.dimensionsCm);
   const pieceCount = hasVisibleValue(packageData.pieceCount)
     ? String(safeNumber(packageData.pieceCount))
     : "";
-  const codValue = hasVisibleValue(payment.codAmount) ? safeNumber(payment.codAmount) : 0;
+  const codValue = effectiveCodAmount;
   const codHeading = codValue > 0 ? `COLLECT CASH OF ${formatCurrency(codValue, currency)}` : "";
   const paymentBanner =
     codHeading || (orderValue ? `ORDER VALUE ${orderValue}` : "");
+    console.log("Payment Banner:", shipmentData);
+  // const topLevelPaymentMethod = safeText(shipmentData.paymentMethod).toUpperCase();
+  // const isCodEffective = shipmentData.paymentMethod == "COD";
   const metricItems = [
     {
       label: `Order Value (${currency})`,

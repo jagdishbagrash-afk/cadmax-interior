@@ -195,7 +195,7 @@ export default function Index() {
       if (res?.data?.orderId) {
         const options = {
           key: RAZOPAY_KEY,
-          amount: finalTotal,
+          amount: Math.round(finalTotal * 100),
           currency: "INR",
           name: "Cadmaxatelier",
           description: "Product Payment",
@@ -392,7 +392,7 @@ export default function Index() {
   };
 
   // SAVE ORDER (for Online Payment)
-  const handleSubmit = async (response) => {
+  const handleSubmit = async (response, options = {}) => {
     try {
       setLoading(true);
       const activePaymentMethod = options.paymentMethod || paymentMethod;
@@ -411,16 +411,25 @@ export default function Index() {
         discountAmount: discountTotal,
         amount: finalTotal,
 
-        paymentMethod: "ONLINE",
-        PaymentId: response.razorpay_payment_id,
+        paymentMethod: activePaymentMethod,
+        PaymentId: response?.razorpay_payment_id || "",
+        orderId: response?.razorpay_order_id || "",
       });
+
+      const createdOrderId =
+        res?.data?.data?._id || res?.data?.data?.order?._id || null;
+
+      if (!createdOrderId) {
+        toast.error("Order creation failed: missing order ID");
+        return;
+      }
 
       if (res?.data?.status) {
         await savePaymentDetails(
           response?.razorpay_order_id,
           response?.razorpay_payment_id,
           "success",
-          res?.data?.data?._id,
+          createdOrderId,
           {
             razorpaySignature: response?.razorpay_signature,
             paymentMethod: activePaymentMethod,
@@ -435,6 +444,47 @@ export default function Index() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const persistLatestShipmentState = ({
+    responsePayload,
+    orderId,
+    fallbackOrder,
+    fallbackShipment = null,
+    fallbackTrackingNumber = "",
+  }) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const { order, shipment, trackingNumber } =
+      extractOrderAndShipment(responsePayload);
+
+    sessionStorage.setItem(
+      "latestShipmentState",
+      JSON.stringify({
+        orderId: orderId || order?._id || null,
+        trackingNumber: trackingNumber || fallbackTrackingNumber || "",
+        order: fallbackOrder || order || null,
+        shipment: shipment || fallbackShipment || null,
+        shipToAddress: selectedAddress || null,
+      })
+    );
+  };
+
+  const goToSuccessPage = ({ orderId, responsePayload, fallbackTrackingNumber = "" }) => {
+    const { order, trackingNumber } = extractOrderAndShipment(responsePayload);
+    const query = new URLSearchParams();
+
+    if (orderId || order?._id) {
+      query.set("orderId", orderId || order?._id);
+    }
+
+    if (trackingNumber || fallbackTrackingNumber) {
+      query.set("trackingNumber", trackingNumber || fallbackTrackingNumber);
+    }
+
+    router.push(query.toString() ? `/success?${query.toString()}` : "/success");
   };
 
   // SAVE PAYMENT

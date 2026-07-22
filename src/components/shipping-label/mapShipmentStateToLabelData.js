@@ -426,6 +426,8 @@ function buildItems(order) {
 
 function resolveOrderValue(order) {
   return getFirstNonEmpty(
+    toNumber(order?.cod_amount),
+    toNumber(order?.collectable_amount),
     toNumber(order?.amount),
     toNumber(order?.totalAmount),
     toNumber(order?.subtotal),
@@ -536,8 +538,10 @@ export function mapShipmentStateToLabelData({
     "BLUE_DART";
   const orderValue = resolveOrderValue(order);
   const paymentMode = String(
-    order?.paymentMode ||
+    order?.paymentMethod ||
+      order?.PaymentMethod ||
       order?.payment_mode ||
+      order?.paymentMode ||
       order?.paymentType ||
       order?.payment_type ||
       ""
@@ -548,6 +552,13 @@ export function mapShipmentStateToLabelData({
       .toUpperCase()
       .includes("COD");
   const route = buildRouteData(shipment, shipFrom, shipTo);
+  const codAmount = isCod
+    ? getFirstNonEmpty(
+        toNumber(order?.cod_amount),
+        toNumber(order?.collectable_amount),
+        orderValue
+      )
+    : undefined;
 
   return {
     trackingNumber: resolvedTrackingNumber,
@@ -566,7 +577,7 @@ export function mapShipmentStateToLabelData({
     payment: {
       isCod,
       orderValue,
-      codAmount: isCod ? orderValue : undefined,
+      codAmount,
       currency: "INR",
     },
     packageDetails: resolvePackageDetails(order, shipment),
