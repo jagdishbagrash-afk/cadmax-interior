@@ -195,7 +195,7 @@ export default function Index() {
       if (res?.data?.orderId) {
         const options = {
           key: RAZOPAY_KEY,
-          amount: finalTotal,
+          amount: Math.round(finalTotal * 100),
           currency: "INR",
           name: "Cadmaxatelier",
           description: "Product Payment",
@@ -260,8 +260,8 @@ export default function Index() {
         toast.error(res?.data?.message || "COD order failed");
         return;
       }
-
-      const orderId = res?.data?.data?._id;
+      console.log("COD order response:", res?.data);
+      const orderId = res?.data?.data?.order?._id;
 
       if (!orderId) {
         toast.error("Order ID not received");
@@ -392,7 +392,7 @@ export default function Index() {
   };
 
   // SAVE ORDER (for Online Payment)
-  const handleSubmit = async (response) => {
+  const handleSubmit = async (response, options = {}) => {
     try {
       setLoading(true);
       const activePaymentMethod = options.paymentMethod || paymentMethod;
@@ -411,16 +411,25 @@ export default function Index() {
         discountAmount: discountTotal,
         amount: finalTotal,
 
-        paymentMethod: "ONLINE",
-        PaymentId: response.razorpay_payment_id,
+        paymentMethod: activePaymentMethod,
+        PaymentId: response?.razorpay_payment_id || "",
+        orderId: response?.razorpay_order_id || "",
       });
+
+      const createdOrderId =
+        res?.data?.data?._id || res?.data?.data?.order?._id || null;
+
+      if (!createdOrderId) {
+        toast.error("Order creation failed: missing order ID");
+        return;
+      }
 
       if (res?.data?.status) {
         await savePaymentDetails(
           response?.razorpay_order_id,
           response?.razorpay_payment_id,
           "success",
-          res?.data?.data?._id,
+          createdOrderId,
           {
             razorpaySignature: response?.razorpay_signature,
             paymentMethod: activePaymentMethod,
@@ -435,6 +444,47 @@ export default function Index() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const persistLatestShipmentState = ({
+    responsePayload,
+    orderId,
+    fallbackOrder,
+    fallbackShipment = null,
+    fallbackTrackingNumber = "",
+  }) => {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const { order, shipment, trackingNumber } =
+      extractOrderAndShipment(responsePayload);
+
+    sessionStorage.setItem(
+      "latestShipmentState",
+      JSON.stringify({
+        orderId: orderId || order?._id || null,
+        trackingNumber: trackingNumber || fallbackTrackingNumber || "",
+        order: fallbackOrder || order || null,
+        shipment: shipment || fallbackShipment || null,
+        shipToAddress: selectedAddress || null,
+      })
+    );
+  };
+
+  const goToSuccessPage = ({ orderId, responsePayload, fallbackTrackingNumber = "" }) => {
+    const { order, trackingNumber } = extractOrderAndShipment(responsePayload);
+    const query = new URLSearchParams();
+
+    if (orderId || order?._id) {
+      query.set("orderId", orderId || order?._id);
+    }
+
+    if (trackingNumber || fallbackTrackingNumber) {
+      query.set("trackingNumber", trackingNumber || fallbackTrackingNumber);
+    }
+
+    router.push(query.toString() ? `/success?${query.toString()}` : "/success");
   };
 
   // SAVE PAYMENT
@@ -536,7 +586,7 @@ export default function Index() {
         localStorage.removeItem("buyNowItem");
         toast.error(
           response?.data?.message ||
-            "Order placed successfully, but shipment creation is pending."
+          "Order placed successfully, but shipment creation is pending."
         );
         goToSuccessPage({
           orderId: Orderdatas || null,
@@ -784,8 +834,8 @@ export default function Index() {
                     type="submit"
                     disabled={loading || !product}
                     className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${loading || !product
-                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                        : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
+                      ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                      : "bg-gradient-to-r from-black to-gray-900 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98]"
                       }`}
                   >
                     {loading ? (

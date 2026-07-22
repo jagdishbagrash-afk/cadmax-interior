@@ -345,7 +345,7 @@ export default function Index() {
     try {
       const main = new Listing();
 
-     
+
 
       const response = await main.GetAllProductsId(
         slug,
@@ -604,7 +604,7 @@ export default function Index() {
     }
   };
 
- 
+
 
   const isOutOfStock = ProductDetails?.stock_status === "out_of_stock";
   const currentPriceData = getCurrentPrice();
@@ -671,30 +671,30 @@ export default function Index() {
                   spaceBetween={12}
                   className="mt-4"
                 >
-                  
-                   {selectedVariant?.images?.map((img, index) => (
-                 <SwiperSlide key={index}>
-                        <div
-                          onMouseEnter={() => setCurrentIndex(index)}
-                          className={`
+
+                  {selectedVariant?.images?.map((img, index) => (
+                    <SwiperSlide key={index}>
+                      <div
+                        onMouseEnter={() => setCurrentIndex(index)}
+                        className={`
       relative w-full h-[120px]
       rounded-xl overflow-hidden
       border-2 cursor-pointer bg-[#F7F7F7]
       transition-all duration-300
       ${currentIndex === index
-                              ? "border-black"
-                              : "border-gray-200"
-                            }
+                            ? "border-black"
+                            : "border-gray-200"
+                          }
     `}
-                        >
-                          <Image
-                            src={img}
-                            alt="thumb"
-                            fill
-                            className="object-cover p-0"
-                          />
-                        </div>
-                      </SwiperSlide>
+                      >
+                        <Image
+                          src={img}
+                          alt="thumb"
+                          fill
+                          className="object-cover p-0"
+                        />
+                      </div>
+                    </SwiperSlide>
                   ))}
                 </Swiper>
               </div>
@@ -740,38 +740,38 @@ export default function Index() {
 
                 {/* MAIN IMAGE */}
                 <div className="flex-1">
-               <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
-  {isOutOfStock && (
-    <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
-      Out Of Stock
-    </div>
-  )}
+                  <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
+                    {isOutOfStock && (
+                      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
+                        Out Of Stock
+                      </div>
+                    )}
 
-  <CustomZoomOnHover
-    imageSrc={selectedVariant?.images?.[currentIndex]}
-    alt="Product"
-    zoomScale={2.5}
-  />
+                    <CustomZoomOnHover
+                      imageSrc={selectedVariant?.images?.[currentIndex]}
+                      alt="Product"
+                      zoomScale={2.5}
+                    />
 
-  {/* Wishlist & Share Icons */}
-  <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
-    <button
-      onClick={handleWishlistClick}
-      className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
-        ? "text-red-500"
-        : "text-gray-600 hover:text-red-500"
-        }`}
-    >
-      <FiHeart className={`text-xl ${isWishlisted ? 'fill-red-500' : ''}`} />
-    </button>
-    <button
-      onClick={handleShare}
-      className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-black transition-all duration-300 hover:scale-110"
-    >
-      <FiShare className="text-xl" />
-    </button>
-  </div>
-</div>
+                    {/* Wishlist & Share Icons */}
+                    <div className="absolute top-6 right-6 flex flex-col gap-2 z-40">
+                      <button
+                        onClick={handleWishlistClick}
+                        className={`w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center transition-all duration-300 hover:scale-110 ${isWishlisted
+                          ? "text-red-500"
+                          : "text-gray-600 hover:text-red-500"
+                          }`}
+                      >
+                        <FiHeart className={`text-xl ${isWishlisted ? 'fill-red-500' : ''}`} />
+                      </button>
+                      <button
+                        onClick={handleShare}
+                        className="w-10 h-10 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-black transition-all duration-300 hover:scale-110"
+                      >
+                        <FiShare className="text-xl" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -911,11 +911,10 @@ export default function Index() {
                               setSelectedVariant(variant);
                               setCurrentIndex(0);
                             }}
-                            className={`rounded-2xl overflow-hidden border-2 cursor-pointer transition-all duration-300 bg-white ${
-                              isActive
-                                ? "border-black shadow-lg"
-                                : "border-gray-200"
-                            }`}
+                            className={`rounded-2xl overflow-hidden border-2 cursor-pointer transition-all duration-300 bg-white ${isActive
+                              ? "border-black shadow-lg"
+                              : "border-gray-200"
+                              }`}
                           >
                             <div className="relative aspect-square bg-[#F7F7F7]">
                               <Image
