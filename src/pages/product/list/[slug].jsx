@@ -99,10 +99,9 @@ export default function Index() {
 
                   <div
                     className={`absolute inset-0 transition-all duration-300
-                      ${
-                        selectedId === item._id
-                          ? "bg-black/20"
-                          : "bg-black/55 hover:bg-black/30"
+                      ${selectedId === item._id
+                        ? "bg-black/20"
+                        : "bg-black/55 hover:bg-black/30"
                       }
                     `}
                   />
@@ -111,10 +110,9 @@ export default function Index() {
                     <h1
                       className={`text-[11px] md:text-[12px] lg:text-[13px]
                         font-bold uppercase tracking-wide leading-tight text-center
-                        ${
-                          selectedId === item._id
-                            ? "text-yellow-300 scale-105"
-                            : "text-white"
+                        ${selectedId === item._id
+                          ? "text-yellow-300 scale-105"
+                          : "text-white"
                         }
                       `}
                     >

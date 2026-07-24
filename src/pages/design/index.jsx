@@ -1,3 +1,4 @@
+import Head from "next/head";
 import Banner from "@/components/Banner";
 import ProductListBanner from "../../Assets/Images/Desgin.png";
 import servicesbottom from "../../Assets/Images/servicesbottom.jpg"
@@ -33,23 +34,83 @@ export default function Index() {
     }, []);
 
     return (
-        <Layout>
+        <>
+            <Head>
+                <title>
+                    Interior Designers | Architects in Jaipur | Home Design | CADMAX Atelier
+                </title>
 
-            <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
-
-                <img
-                    src={ProductListBanner?.src}
-                    alt="Slide"
-                    className="object-cover w-full h-full"
+                <meta
+                    name="description"
+                    content="Looking for architects and interior designers in Jaipur? CADMAX Atelier offers residential architecture, commercial interiors, luxury villa design, and bespoke design services"
                 />
 
-                <div className="absolute inset-0 bg-black/25"></div>
+                <meta
+                    name="keywords"
+                    content="Architects in Jaipur, Interior Designers Jaipur, Home Interior Design Jaipur, Luxury Interior Design, Residential Architects Jaipur, Commercial Interior Design, Office Interior Design, Hospitality Interior Design, Architectural Design Jaipur, Urban Planning Jaipur, House Design Jaipur, Villa Design Jaipur, Modern Architecture, CADMAX Atelier"
+                />
 
-                {/* Overlay Content */}
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+                <meta name="robots" content="index, follow" />
 
-                    <h1
-                        className="
+                <link
+                    rel="canonical"
+                    href="https://cadmaxatelier.com/design"
+                />
+
+                <meta
+                    property="og:title"
+                    content="Interior Designers | Architects in Jaipur | Home Design | CADMAX Atelier"
+                />
+
+                <meta
+                    property="og:description"
+                    content="CADMAX Atelier provides architectural and interior design services in Jaipur for residential, commercial, hospitality, and luxury projects."
+                />
+
+                <meta
+                    property="og:url"
+                    content="https://cadmaxatelier.com/design"
+                />
+
+                <meta property="og:type" content="website" />
+
+                <meta
+                    property="og:image"
+                    content="https://cadmaxatelier.com/logo.png"
+                />
+            </Head>
+
+            <Layout>
+                <h1
+                    style={{
+                        position: "absolute",
+                        width: "1px",
+                        height: "1px",
+                        padding: 0,
+                        margin: "-1px",
+                        overflow: "hidden",
+                        clip: "rect(0, 0, 0, 0)",
+                        whiteSpace: "nowrap",
+                        border: 0,
+                    }}
+                >
+                    Architectural & Interior Design Services in Jaipur
+                </h1>
+                <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
+
+                    <img
+                        src={ProductListBanner?.src}
+                        alt="Slide"
+                        className="object-cover w-full h-full"
+                    />
+
+                    <div className="absolute inset-0 bg-black/25"></div>
+
+                    {/* Overlay Content */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center px-4 sm:px-6 text-center">
+
+                        <h1
+                            className="
                             font-[900]
                             text-[18px]
                             sm:text-[20px]
@@ -63,20 +124,20 @@ export default function Index() {
                             sm:max-w-[550px]
                             mx-auto
                           "
-                    >
-                     From Planning to Execution, CRAFted BY ExPerts
-                    </h1>
+                        >
+                            From Planning to Execution, CRAFted BY ExPerts
+                        </h1>
 
 
 
 
-                 <EnquiryModal/>
+                        <EnquiryModal />
+                    </div>
                 </div>
-            </div>
-            <div className="w-full">
-                <div className="container mx-auto px-4 max-w-[1430px]">
-                    <div className="max-w-5xl mx-auto mt-8 mb-12 md:mt-12 md:mb-20 flex justify-center">
-                        <h2 className="
+                <div className="w-full">
+                    <div className="container mx-auto px-4 max-w-[1430px]">
+                        <div className="max-w-5xl mx-auto mt-8 mb-12 md:mt-12 md:mb-20 flex justify-center">
+                            <h2 className="
         text-[#171717]
         text-[18px] sm:text-[20px] md:text-[22px] lg:text-[24px]
         leading-[130%]
@@ -85,32 +146,32 @@ export default function Index() {
         uppercase font-[900]
         Creato
       ">
-                            Every Cadmax project begins with clarity — measured planning, verified
-                            materials, and visual precision. We integrate creative detailing with
-                            technical practicality to ensure what’s designed is exactly what’s built.
-                        </h2>
+                                Every Cadmax project begins with clarity — measured planning, verified
+                                materials, and visual precision. We integrate creative detailing with
+                                technical practicality to ensure what’s designed is exactly what’s built.
+                            </h2>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <ResidentialDesign Residentialservices={data?.residentialServices} />
-            <Predictable />
-            <CommercialDesign Commercialservices={data?.commercialServices} />
-            {/* <Vendor /> */}
-            {/* <Execution /> */}
-            <Slider2 />
-            <div className="relative w-full h-full md:h-[450px]">
-                <img
-                    src={servicesbottom?.src}
-                    alt="Slide"
-                    className="object-cover w-full h-full"
-                />
+                <ResidentialDesign Residentialservices={data?.residentialServices} />
+                <Predictable />
+                <CommercialDesign Commercialservices={data?.commercialServices} />
+                {/* <Vendor /> */}
+                {/* <Execution /> */}
+                <Slider2 />
+                <div className="relative w-full h-full md:h-[450px]">
+                    <img
+                        src={servicesbottom?.src}
+                        alt="Slide"
+                        className="object-cover w-full h-full"
+                    />
 
-                <div className="absolute inset-0 bg-black/30"></div>
+                    <div className="absolute inset-0 bg-black/30"></div>
 
-                <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center w-full">
+                    <div className="absolute inset-0 flex flex-col items-center justify-center px-4 text-center w-full">
 
-                    <h1
-                        className="
+                        <h1
+                            className="
         font-[900]
         text-[18px]
         sm:text-[20px]
@@ -124,12 +185,12 @@ export default function Index() {
         sm:max-w-[500px]
         mx-auto
       "
-                    >
-                        Start Your Interior Journey with CadmaxAtelier
-                    </h1>
+                        >
+                            Start Your Interior Journey with CadmaxAtelier
+                        </h1>
 
-                    <div
-                        className="
+                        <div
+                            className="
         flex
         flex-wrap
         justify-center
@@ -141,17 +202,19 @@ export default function Index() {
         max-w-[95%]
         mx-auto
       "
-                    >
-                        <Button
-                            title={"Book a Design Consultation"}
-                            classes={"bg-transparent text-white border-2 border-white whitespace-nowrap px-4 py-2"}
-                        />
+                        >
+                            <Button
+                                title={"Book a Design Consultation"}
+                                classes={"bg-transparent text-white border-2 border-white whitespace-nowrap px-4 py-2"}
+                            />
+                        </div>
+
                     </div>
-
                 </div>
-            </div>
 
-  
-        </Layout>
+
+            </Layout>
+        </>
+
     );
 }

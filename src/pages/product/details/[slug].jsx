@@ -742,7 +742,7 @@ export default function Index() {
                 <div className="flex-1">
                   <div className="relative w-full aspect-[4/5] bg-[#F7F7F7] rounded-[32px] overflow-hidden">
                     {isOutOfStock && (
-                      <div className="absolute top-6 left-6 z-50 bg-red-500 text-white text-sm font-bold px-4 py-2 shadow-lg">
+                      <div className="absolute top-6 left-6 z-50 bg-[#6B4F3A] text-white text-sm font-bold px-4 py-2 rounded-full shadow-lg">
                         Out Of Stock
                       </div>
                     )}
