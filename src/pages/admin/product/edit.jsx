@@ -38,6 +38,9 @@ export default function Edit() {
     discount_amount: "",
     label_category: "",
     label_size: "",
+     meta_title: "",
+  meta_description: "",
+  meta_keywords: "",
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -132,6 +135,10 @@ export default function Edit() {
       terms: data.terms,
       discount_amount: data.discount_amount || "",
       stock: data.stock || "",
+      meta_title: data.meta_title || "",
+  meta_description: data.meta_description || "",
+  meta_keywords: data.meta_keywords || "",
+
     });
 
     setImagePreview(data.image || "");
@@ -474,7 +481,9 @@ export default function Edit() {
       fd.append("terms", form.terms);
       fd.append("label_category", form.label_category || "");
       fd.append("label_size", form.label_size || "");
-
+fd.append("meta_title", form.meta_title || "");
+fd.append("meta_description", form.meta_description || "");
+fd.append("meta_keywords", form.meta_keywords || "");
       // Price related – based on mode
       if (priceMode === "single") {
         fd.append("amount", form.amount);
@@ -911,6 +920,32 @@ export default function Edit() {
               </div>
             ))}
           </div>
+          <input
+  type="text"
+  name="meta_title"
+  placeholder="Meta Title (SEO)"
+  value={form.meta_title}
+  onChange={handleChange}
+  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+/>
+
+<input
+  type="text"
+  name="meta_description"
+  placeholder="Meta Description"
+  value={form.meta_description}
+  onChange={handleChange}
+  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+/>
+
+<input
+  type="text"
+  name="meta_keywords"
+  placeholder="Meta Keywords (comma separated)"
+  value={form.meta_keywords}
+  onChange={handleChange}
+  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+/>  
 
           <button
             type="submit"

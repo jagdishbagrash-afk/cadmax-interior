@@ -10,13 +10,18 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
 
+  // Form state with meta fields
   const [formData, setFormData] = useState({
     title: "",
     file: null,
     preview: "",
-    TypeServices: ""
+    TypeServices: "",
+    meta_title: "",
+    meta_description: "",
+    meta_keywords: "",
   });
 
+  // Populate on edit
   useEffect(() => {
     if (isEdit && item) {
       setFormData({
@@ -24,6 +29,9 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
         file: null,
         preview: item.Image || "",
         TypeServices: item.TypeServices || "",
+        meta_title: item.meta_title || "",
+        meta_description: item.meta_description || "",
+        meta_keywords: item.meta_keywords || "",
       });
     }
   }, [isEdit, item]);
@@ -47,7 +55,6 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
       toast.error("Only JPG, PNG, WEBP allowed");
       return;
     }
-
     if (selectedFile.size > 5 * 1024 * 1024) {
       toast.error("Image must be less than 5MB");
       return;
@@ -68,6 +75,9 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
 
       submitFormData.append("title", formData.title);
       submitFormData.append("TypeServices", formData.TypeServices);
+      submitFormData.append("meta_title", formData.meta_title || "");
+      submitFormData.append("meta_description", formData.meta_description || "");
+      submitFormData.append("meta_keywords", formData.meta_keywords || "");
 
       if (formData.file) {
         submitFormData.append("Image", formData.file);
@@ -84,11 +94,15 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
       if (response?.data?.status) {
         toast.success(response.data.message);
 
+        // Reset – fixed field names
         setFormData({
-          name: "",
+          title: "",
           file: null,
           preview: "",
-          serviceType: "",
+          TypeServices: "",
+          meta_title: "",
+          meta_description: "",
+          meta_keywords: "",
         });
 
         handleClose();
@@ -130,87 +144,110 @@ export default function TypeAdd({ fetchDatas, isEdit, item }) {
             <h2 className="text-xl font-semibold">
               {isEdit ? "Edit" : "Add"} Concept Type
             </h2>
-
             <button type="button" onClick={handleClose}>
               <MdClose size={24} />
             </button>
           </div>
 
-          <div className="py-4 px-4">
+          {/* Scrollable content wrapper */}
+          <div className="max-h-[calc(100vh-200px)] overflow-y-auto">
+            <div className="py-4 px-4">
+              {/* Service Type */}
+              <div className="mb-4">
+                <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
+                  Service Type
+                </label>
+                <select
+                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  value={formData.TypeServices}
+                  onChange={(e) => handleInputChange("TypeServices", e.target.value)}
+                >
+                  <option value="">Select Type</option>
+                  <option value="Commercial">Commercial</option>
+                  <option value="Residential">Residential</option>
+                </select>
+              </div>
 
-            {/* Service Type */}
-            <div className="mb-4">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
-                Service Type
-              </label>
-
-              <select
-                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                value={formData.TypeServices}
-                onChange={(e) =>
-                  handleInputChange("TypeServices", e.target.value)
-                }
-              >
-                <option value="">Select Type</option>
-                <option value="Commercial">Commercial</option>
-                <option value="Residential">Residential</option>
-              </select>
-            </div>
-
-            {/* Service Name */}
-            <div className="mb-4">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
-                Service Name
-              </label>
-              <input
-                type="text"
-                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                placeholder="Enter service title"
-                value={formData.title}
-                onChange={(e) => handleInputChange("title", e.target.value)}
-              />
-            </div>
-
-
-
-            {/* Image Upload */}
-            <div className="mb-4">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] Creato  text-left">
-                Service Image
-              </label>
-
-              <input
-                type="file"
-                accept="image/*"
-                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                onChange={handleImageChange}
-              />
-
-              {formData.preview && (
-                <img
-                  src={formData.preview}
-                  className="w-32 h-32 object-cover mt-3 rounded border"
-                  alt="Preview"
+              {/* Service Name */}
+              <div className="mb-4">
+                <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
+                  Service Name
+                </label>
+                <input
+                  type="text"
+                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  placeholder="Enter service title"
+                  value={formData.title}
+                  onChange={(e) => handleInputChange("title", e.target.value)}
                 />
-              )}
-            </div>
+              </div>
 
-            {/* Footer */}
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={handleClose}
-                className="px-4 py-2 bg-gray-300 rounded"
-              >
-                Cancel
-              </button>
+              {/* Image Upload */}
+              <div className="mb-4">
+                <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
+                  Service Image
+                </label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
+                  onChange={handleImageChange}
+                />
+                {formData.preview && (
+                  <img
+                    src={formData.preview}
+                    className="w-32 h-32 object-cover mt-3 rounded border"
+                    alt="Preview"
+                  />
+                )}
+              </div>
 
-              <button
-                onClick={handleSubmit}
-                className="px-4 py-2 bg-blue-600 text-white rounded"
-              >
-                {processing ? "Processing..." : "Submit"}
-              </button>
+              {/* ✅ Meta Fields */}
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Meta Title (SEO)"
+                  value={formData.meta_title}
+                  onChange={(e) => handleInputChange("meta_title", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Meta Description"
+                  value={formData.meta_description}
+                  onChange={(e) => handleInputChange("meta_description", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Meta Keywords (comma separated)"
+                  value={formData.meta_keywords}
+                  onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+              </div>
             </div>
+          </div>
+
+          {/* Footer */}
+          <div className="flex justify-end gap-3 px-4 py-3 border-t">
+            <button
+              onClick={handleClose}
+              className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              disabled={processing}
+            >
+              {processing ? "Processing..." : "Submit"}
+            </button>
           </div>
         </Popup>
       )}
