@@ -4,6 +4,7 @@ import moment from "moment";
 import toast from "react-hot-toast";
 import {
   extractCarrier,
+  extractCutoffInfo,
   extractEstimatedDelivery,
   extractLiveTracking,
   extractOrderAndShipment,
@@ -12,6 +13,7 @@ import {
   extractTrackingEvents,
   extractTrackingNumber,
   extractTransitEstimate,
+  extractTransitError,
   extractUpdatedAt,
   formatShipmentStatus,
   unwrapApiData,
@@ -43,6 +45,8 @@ export default function TrackingStatusView({
   description,
   responseData,
   trackingResponseData = null,
+  transitTimeResponse = null,
+  etaDisplay = null,
   loading,
   error,
   backHref = "/orders",
@@ -53,6 +57,7 @@ export default function TrackingStatusView({
 
   const payload = unwrapApiData(responseData);
   const trackingPayload = unwrapApiData(trackingResponseData);
+  const transitPayload = unwrapApiData(transitTimeResponse);
   const { order, shipment } = extractOrderAndShipment(payload);
   const trackingNumber = extractTrackingNumber(payload, shipment, order);
   const status = extractStatus(payload, shipment, order);
@@ -61,18 +66,47 @@ export default function TrackingStatusView({
   const events = extractTrackingEvents(trackingPayload || payload);
   const liveTracking = extractLiveTracking(trackingPayload, payload, shipment, order);
   const trackingPending = extractTrackingPending(payload, trackingPayload, shipment, order);
-  const estimatedDelivery = extractEstimatedDelivery(
+
+  const fallbackEstimatedDelivery = extractEstimatedDelivery(
     payload,
     trackingPayload,
     shipment,
     order
   );
-  const transitEstimate = extractTransitEstimate(
+  const fallbackTransitEstimate = extractTransitEstimate(
     payload,
     trackingPayload,
     shipment,
-    order
+    order,
+    transitPayload
   );
+
+  const estimatedDelivery =
+    etaDisplay?.deliveryDate ||
+    fallbackEstimatedDelivery;
+
+  const transitEstimate = {
+    estimatedDelivery:
+      etaDisplay?.deliveryDate ||
+      fallbackTransitEstimate.estimatedDelivery,
+    estimatedPod:
+      etaDisplay?.podDate ||
+      fallbackTransitEstimate.estimatedPod,
+    originCity:
+      etaDisplay?.originCity ||
+      fallbackTransitEstimate.originCity,
+    destinationCity:
+      etaDisplay?.destinationCity ||
+      fallbackTransitEstimate.destinationCity,
+    serviceCenter:
+      etaDisplay?.serviceCenter ||
+      fallbackTransitEstimate.serviceCenter,
+    area:
+      etaDisplay?.area ||
+      fallbackTransitEstimate.area ||
+      "",
+  };
+
   const shippingTimelineRaw =
     payload?.shippingTimeline ||
     trackingPayload?.shippingTimeline ||
@@ -110,15 +144,19 @@ export default function TrackingStatusView({
   const compactDetailItems = [
     {
       label: "Estimated Delivery",
-      value: estimatedDelivery
-        ? formatDisplayDate(estimatedDelivery, "DD MMM YYYY")
-        : "-",
+      value:
+        etaDisplay?.deliveryFormatted ||
+        (estimatedDelivery
+          ? formatDisplayDate(estimatedDelivery, "DD MMM YYYY")
+          : "-"),
     },
     {
       label: "Expected POD",
-      value: transitEstimate.estimatedPod
-        ? formatDisplayDate(transitEstimate.estimatedPod, "DD MMM YYYY")
-        : "-",
+      value:
+        etaDisplay?.podFormatted ||
+        (transitEstimate.estimatedPod
+          ? formatDisplayDate(transitEstimate.estimatedPod, "DD MMM YYYY")
+          : "-"),
     },
     {
       label: "Origin City",
@@ -133,6 +171,22 @@ export default function TrackingStatusView({
       value: transitEstimate.serviceCenter || "-",
     },
   ];
+
+  const transitError = etaDisplay?.isError
+    ? { hasError: true, message: etaDisplay.errorMessage || "Unable to estimate delivery time" }
+    : extractTransitError(transitTimeResponse || payload);
+  const cutoffInfo = etaDisplay?.isAfterCutoff
+    ? {
+        isAfterCutoff: true,
+        label: etaDisplay.cutoffLabel || "Pickup scheduled next business day",
+      }
+    : (() => {
+        const info = extractCutoffInfo(transitTimeResponse || payload);
+        if (info.isAfterCutoff) {
+          return { isAfterCutoff: true, label: "Pickup scheduled next business day" };
+        }
+        return { isAfterCutoff: false, label: "" };
+      })();
 
   const handleRefresh = async () => {
     if (!orderId || isActing || typeof onRefresh !== "function") {
@@ -220,12 +274,30 @@ export default function TrackingStatusView({
           <SummaryCard
             label="Estimated Delivery"
             value={
-              estimatedDelivery
+              etaDisplay?.deliveryFormatted ||
+              (estimatedDelivery
                 ? formatDisplayDate(estimatedDelivery, "DD MMM YYYY")
-                : "-"
+                : "-")
             }
           />
         </div>
+
+        {transitError?.hasError && (
+          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3">
+            <p className="text-sm font-medium text-amber-800">
+              {transitError.message}
+            </p>
+          </div>
+        )}
+
+        {cutoffInfo?.isAfterCutoff && (
+          <div className="mt-4 inline-flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600">
+            <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span>{cutoffInfo.label}</span>
+          </div>
+        )}
 
         <div className="mt-8">
           <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">

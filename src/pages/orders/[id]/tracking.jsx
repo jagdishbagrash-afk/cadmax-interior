@@ -3,7 +3,12 @@ import { useRouter } from "next/router";
 import Layout from "@/pages/common/Layout";
 import Listing from "@/pages/api/Listing";
 import TrackingStatusView from "@/components/TrackingStatusView";
-import { extractTrackingPending, unwrapApiData } from "@/components/shipmentUtils";
+import {
+  extractTrackingPending,
+  unwrapApiData,
+  buildTransitDisplay,
+  formatTransitDate,
+} from "@/components/shipmentUtils";
 
 function getQueryValue(value) {
   if (Array.isArray(value)) {
@@ -17,6 +22,7 @@ export default function OrderTrackingPage() {
   const router = useRouter();
   const [shipmentData, setShipmentData] = useState(null);
   const [trackingData, setTrackingData] = useState(null);
+  const [transitTimeResponse, setTransitTimeResponse] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -42,19 +48,37 @@ export default function OrderTrackingPage() {
         await main.RefreshOrderShipment(targetOrderId);
       }
 
-      const shipmentResponse = await main.GetOrderShipment(targetOrderId);
-      const shipmentPayload = unwrapApiData(shipmentResponse);
-      const trackingPending = extractTrackingPending(shipmentPayload);
+      const [shipmentResponse, transitResponse] = await Promise.allSettled([
+        main.GetOrderShipment(targetOrderId),
+        main.GetTransitTimeByOrder(targetOrderId),
+      ]);
 
-      setShipmentData(shipmentResponse);
+      if (shipmentResponse.status === "fulfilled") {
+        const shipmentPayload = unwrapApiData(shipmentResponse.value);
+        const trackingPending = extractTrackingPending(shipmentPayload);
 
-      try {
-        const trackingResponse = await main.GetOrderTracking(targetOrderId);
-        setTrackingData(trackingResponse);
-      } catch (trackingError) {
-        if (!trackingPending) {
-          setTrackingData(null);
+        setShipmentData(shipmentResponse.value);
+
+        try {
+          const trackingResponse = await main.GetOrderTracking(targetOrderId);
+          setTrackingData(trackingResponse);
+        } catch (trackingError) {
+          if (!trackingPending) {
+            setTrackingData(null);
+          }
         }
+      } else {
+        throw shipmentResponse.reason;
+      }
+
+      if (transitResponse.status === "fulfilled") {
+        setTransitTimeResponse(transitResponse.value);
+      } else {
+        console.error(
+          "ORDER TRANSIT TIME FETCH ERROR:",
+          transitResponse.reason?.response?.data || transitResponse.reason?.message
+        );
+        setTransitTimeResponse(null);
       }
     } catch (err) {
       setError(
@@ -79,28 +103,44 @@ export default function OrderTrackingPage() {
         setError("");
 
         const main = new Listing();
-        const shipmentResponse = await main.GetOrderShipment(orderId);
-        const shipmentPayload = unwrapApiData(shipmentResponse);
-        const trackingPending = extractTrackingPending(shipmentPayload);
 
-        if (!isMounted) {
-          return;
+        const [shipmentResponse, transitResponse] = await Promise.allSettled([
+          main.GetOrderShipment(orderId),
+          main.GetTransitTimeByOrder(orderId),
+        ]);
+
+        let trackingPending = false;
+
+        if (shipmentResponse.status === "fulfilled") {
+          const shipmentPayload = unwrapApiData(shipmentResponse.value);
+          trackingPending = extractTrackingPending(shipmentPayload);
+
+          if (isMounted) {
+            setShipmentData(shipmentResponse.value);
+          }
+
+          try {
+            const trackingResp = await main.GetOrderTracking(orderId);
+            if (isMounted) {
+              setTrackingData(trackingResp);
+            }
+          } catch (trackingError) {
+            if (isMounted && !trackingPending) {
+              setTrackingData(null);
+            }
+          }
+        } else if (isMounted) {
+          throw shipmentResponse.reason;
         }
 
-        setShipmentData(shipmentResponse);
-
-        try {
-          const trackingResponse = await main.GetOrderTracking(orderId);
-
-          if (!isMounted) {
-            return;
-          }
-
-          setTrackingData(trackingResponse);
-        } catch (trackingError) {
-          if (isMounted && !trackingPending) {
-            setTrackingData(null);
-          }
+        if (transitResponse.status === "fulfilled" && isMounted) {
+          setTransitTimeResponse(transitResponse.value);
+        } else if (isMounted) {
+          console.error(
+            "ORDER TRANSIT TIME FETCH ERROR:",
+            transitResponse.reason?.response?.data || transitResponse.reason?.message
+          );
+          setTransitTimeResponse(null);
         }
       } catch (err) {
         if (!isMounted) {
@@ -125,6 +165,34 @@ export default function OrderTrackingPage() {
     };
   }, [orderId, router.isReady]);
 
+  const etaDisplay = (() => {
+    const display = buildTransitDisplay(transitTimeResponse);
+    const deliveryFormatted = formatTransitDate(display.deliveryDate);
+    const podFormatted = formatTransitDate(display.podDate);
+
+    return {
+      ...display,
+      deliveryFormatted,
+      podFormatted,
+      deliveryByLabel:
+        deliveryFormatted && !display.isError
+          ? `Delivery by ${deliveryFormatted}`
+          : "",
+      podLabel:
+        podFormatted && !display.isError
+          ? `POD expected ${podFormatted}`
+          : "",
+      cutoffLabel: display.isAfterCutoff
+        ? "Pickup scheduled next business day"
+        : "",
+      hasValidData: Boolean(
+        transitTimeResponse &&
+          !display.isError &&
+          (deliveryFormatted || display.destinationCity)
+      ),
+    };
+  })();
+
   return (
     <Layout>
       <TrackingStatusView
@@ -132,6 +200,8 @@ export default function OrderTrackingPage() {
         description="This view uses the authenticated order tracking endpoint to fetch the latest shipment updates."
         responseData={shipmentData}
         trackingResponseData={trackingData}
+        transitTimeResponse={transitTimeResponse}
+        etaDisplay={etaDisplay}
         loading={loading}
         error={error}
         backHref="/orders"

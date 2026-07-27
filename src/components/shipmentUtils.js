@@ -400,3 +400,260 @@ export function extractUpdatedAt(...sources) {
 
   return null;
 }
+
+export function extractCutoffInfo(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const value =
+      payload?.meta?.cutoff ??
+      payload?.cutoff ??
+      payload?.shipment?.meta?.cutoff ??
+      payload?.order?.meta?.cutoff ??
+      null;
+
+    if (value && typeof value === "object") {
+      return {
+        rule: value.rule ?? "",
+        isAfterCutoff: Boolean(value.isAfterCutoff),
+        baseDateIso: value.baseDateIso ?? "",
+        resolvedPickupDateIso: value.resolvedPickupDateIso ?? "",
+      };
+    }
+  }
+
+  return {
+    rule: "",
+    isAfterCutoff: false,
+    baseDateIso: "",
+    resolvedPickupDateIso: "",
+  };
+}
+
+export function extractTransitError(...sources) {
+  for (const source of sources) {
+    const payload = unwrapApiData(source);
+    const bdResult =
+      payload?.GetDomesticTransitTimeForPinCodeandProductResult ??
+      payload?.shipment?.GetDomesticTransitTimeForPinCodeandProductResult ??
+      payload?.order?.GetDomesticTransitTimeForPinCodeandProductResult ??
+      null;
+
+    if (bdResult && bdResult.IsError === true) {
+      return {
+        hasError: true,
+        message: bdResult.ErrorMessage || "Unable to estimate delivery time",
+      };
+    }
+  }
+
+  return { hasError: false, message: "" };
+}
+
+export function buildTransitDisplay(transitTimeResponse) {
+  const payload = unwrapApiData(transitTimeResponse);
+  const bdResult =
+    payload?.GetDomesticTransitTimeForPinCodeandProductResult ?? {};
+  const transitEstimate = payload?.transitEstimate ?? {};
+
+  const transitError = extractTransitError(transitTimeResponse || {});
+  const cutoffInfo = extractCutoffInfo(transitTimeResponse || {});
+  const estimate = extractTransitEstimate(transitTimeResponse || {});
+
+  const rawDeliveryDate =
+    payload?.expectedDateDelivery ||
+    bdResult.ExpectedDateDelivery ||
+    transitEstimate.estimatedDelivery ||
+    estimate.estimatedDelivery;
+
+  const rawPodDate =
+    payload?.expectedDatePOD ||
+    bdResult.ExpectedDatePOD ||
+    transitEstimate.estimatedPod ||
+    estimate.estimatedPod;
+
+  const deliveryDate = rawDeliveryDate || "";
+  const podDate = rawPodDate || "";
+
+  const originCity =
+    estimate.originCity ||
+    bdResult.CityDesc_Origin ||
+    transitEstimate.originCity ||
+    "";
+  const destinationCity =
+    estimate.destinationCity ||
+    bdResult.CityDesc_Destination ||
+    transitEstimate.destinationCity ||
+    "";
+  const serviceCenter =
+    estimate.serviceCenter ||
+    bdResult.ServiceCenter ||
+    transitEstimate.serviceCenter ||
+    "";
+  const area = estimate.area || bdResult.Area || transitEstimate.area || "";
+
+  return {
+    deliveryDate,
+    podDate,
+    originCity,
+    destinationCity,
+    serviceCenter,
+    area,
+    isError: transitError.hasError,
+    errorMessage: transitError.message,
+    isAfterCutoff: cutoffInfo.isAfterCutoff,
+    cutoffRule: cutoffInfo.rule,
+    cutoffBaseDateIso: cutoffInfo.baseDateIso,
+    cutoffResolvedPickupDateIso: cutoffInfo.resolvedPickupDateIso,
+    rawPayload: payload,
+  };
+}
+
+export function formatTransitDate(value) {
+  if (!value) {
+    return "";
+  }
+
+  const str = String(value).trim();
+
+  if (/\d{2}-[A-Z]{3}-\d{2}/i.test(str)) {
+    const parts = str.split("-");
+    if (parts.length === 3) {
+      const day = parts[0];
+      const monthRaw = parts[1].toLowerCase();
+      const yearSuffix = parts[2];
+      const months = {
+        jan: "Jan", feb: "Feb", mar: "Mar", apr: "Apr", may: "May", jun: "Jun",
+        jul: "Jul", aug: "Aug", sep: "Sep", oct: "Oct", nov: "Nov", dec: "Dec",
+      };
+      const month = months[monthRaw] || monthRaw;
+      const yearPrefix =
+        Number(yearSuffix) <= 50 ? "20" : "19";
+      return `${day} ${month} ${yearPrefix}${yearSuffix}`;
+    }
+  }
+
+  try {
+    const date = new Date(str);
+    if (!Number.isNaN(date.getTime())) {
+      const day = String(date.getDate()).padStart(2, "0");
+      const monthNames = [
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+      ];
+      const month = monthNames[date.getMonth()];
+      const year = date.getFullYear();
+      return `${day} ${month} ${year}`;
+    }
+  } catch (_) {
+    // fall through
+  }
+
+  return str;
+}
+
+export function parseTransitDate(value) {
+  if (!value) {
+    return null;
+  }
+
+  const str = String(value).trim();
+
+  if (/\d{2}-[A-Z]{3}-\d{2}/i.test(str)) {
+    const parts = str.split("-");
+    if (parts.length === 3) {
+      const day = parseInt(parts[0], 10);
+      const monthRaw = parts[1].toLowerCase();
+      const yearSuffix = parts[2];
+      const months = {
+        jan: 0, feb: 1, mar: 2, apr: 3, may: 4, jun: 5,
+        jul: 6, aug: 7, sep: 8, oct: 9, nov: 10, dec: 11,
+      };
+      const monthIdx = months[monthRaw];
+      if (monthIdx === undefined || Number.isNaN(day)) {
+        return null;
+      }
+      const yearPrefix =
+        Number(yearSuffix) <= 50 ? 2000 : 1900;
+      const year = yearPrefix + Number(yearSuffix);
+      return new Date(year, monthIdx, day);
+    }
+  }
+
+  try {
+    const date = new Date(str);
+    if (!Number.isNaN(date.getTime())) {
+      return date;
+    }
+  } catch (_) {
+    // fall through
+  }
+
+  return null;
+}
+
+function formatDateParts(date) {
+  if (!date || Number.isNaN(date.getTime())) {
+    return null;
+  }
+  const day = date.getDate();
+  const monthNames = [
+    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+  ];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+  return { day, month, year };
+}
+
+export function buildDeliveryDateRange(deliveryDateRaw, podDateRaw) {
+  const deliveryDate = parseTransitDate(deliveryDateRaw);
+  const podDate = parseTransitDate(podDateRaw);
+
+  if (!deliveryDate) {
+    const fallback = formatTransitDate(deliveryDateRaw);
+    return fallback || "—";
+  }
+
+  let startDate = deliveryDate;
+  let endDate = deliveryDate;
+
+  if (podDate && Math.abs(podDate - deliveryDate) >= 86400000) {
+    endDate = podDate;
+    if (podDate < deliveryDate) {
+      startDate = podDate;
+      endDate = deliveryDate;
+    }
+  } else {
+    const start = new Date(deliveryDate);
+    start.setDate(start.getDate() - 1);
+    const end = new Date(deliveryDate);
+    end.setDate(end.getDate() + 1);
+    startDate = start;
+    endDate = end;
+  }
+
+  const startParts = formatDateParts(startDate);
+  const endParts = formatDateParts(endDate);
+
+  if (!startParts || !endParts) {
+    return formatTransitDate(deliveryDateRaw) || "—";
+  }
+
+  if (
+    startParts.year === endParts.year &&
+    startParts.month === endParts.month &&
+    startParts.day === endParts.day
+  ) {
+    return `${startParts.day} ${startParts.month} ${startParts.year}`;
+  }
+
+  if (startParts.year === endParts.year && startParts.month === endParts.month) {
+    return `${startParts.day} ${startParts.month} – ${endParts.day} ${endParts.month} ${endParts.year}`;
+  }
+
+  if (startParts.year === endParts.year) {
+    return `${startParts.day} ${startParts.month} – ${endParts.day} ${endParts.month} ${endParts.year}`;
+  }
+
+  return `${startParts.day} ${startParts.month} ${startParts.year} – ${endParts.day} ${endParts.month} ${endParts.year}`;
+}
