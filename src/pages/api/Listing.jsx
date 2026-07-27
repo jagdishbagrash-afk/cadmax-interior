@@ -722,6 +722,49 @@ class Listing extends Component {
     }
   }
 
+  async GetTransitTimeByPincode(params) {
+    const { toPincode, fromPincode = "302001", isCod = false } = params || {};
+    const queryParams = {
+      toPincode,
+      fromPincode,
+      isCod: isCod ? "true" : "false",
+    };
+
+    logShippingApi("transit-time (pincode) request", queryParams);
+
+    try {
+      const response = await Api.get("/shipment/transit-time", {
+        params: queryParams,
+      });
+      logShippingApi("transit-time (pincode) response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("transit-time (pincode) error", {
+        params: queryParams,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
+  async GetTransitTimeByOrder(orderId) {
+    logShippingApi("transit-time (order) request", { orderId });
+
+    try {
+      const response = await Api.get(`/order/${orderId}/shipment/transit-time`);
+      logShippingApi("transit-time (order) response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("transit-time (order) error", {
+        orderId,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
   async DeleteImageUrl(data) {
     return Api.post("/common/delete-image", data)
 

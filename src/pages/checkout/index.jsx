@@ -15,7 +15,12 @@ import BannerImages from "../../Assets/Images/Frame18.jpg";
 import { useRazorpay } from "react-razorpay";
 import Link from "next/link";
 import { formatPrice } from "@/components/formatPrice";
-import { extractOrderAndShipment } from "@/components/shipmentUtils";
+import {
+  extractOrderAndShipment,
+  buildTransitDisplay,
+  formatTransitDate,
+  buildDeliveryDateRange,
+} from "@/components/shipmentUtils";
 
 export default function Index() {
   const { Razorpay } = useRazorpay();
@@ -25,6 +30,8 @@ export default function Index() {
   const [loading, setLoading] = useState(false);
   const [record, setRecord] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("ONLINE");
+  const [transitTimeResponse, setTransitTimeResponse] = useState(null);
+  const [transitTimeLoading, setTransitTimeLoading] = useState(false);
 
   const cartItems = record?.items || [];
   const isCOD = paymentMethod === "COD";
@@ -710,10 +717,42 @@ export default function Index() {
     }
   };
 
+  const fetchTransitTime = async (targetAddress, isCodFlag) => {
+    const toPincode = targetAddress?.pincode;
+    if (!toPincode || String(toPincode).trim().length < 6) {
+      setTransitTimeResponse(null);
+      return;
+    }
+
+    setTransitTimeLoading(true);
+
+    try {
+      const main = new Listing();
+      const response = await main.GetTransitTimeByPincode({
+        toPincode: String(toPincode).trim(),
+        fromPincode: "302001",
+        isCod: Boolean(isCodFlag),
+      });
+      setTransitTimeResponse(response);
+    } catch (err) {
+      console.error(
+        "TRANSIT TIME FETCH ERROR:",
+        err?.response?.data || err?.message
+      );
+      setTransitTimeResponse(null);
+    } finally {
+      setTransitTimeLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchAddress();
     FetchCart();
   }, []);
+
+  useEffect(() => {
+    fetchTransitTime(selectedAddress, isCOD);
+  }, [formData.addressId, paymentMethod]);
 
   useEffect(() => {
     if (!user) return;
@@ -763,6 +802,54 @@ export default function Index() {
     { icon: FiTruck, label: "Fast Delivery", desc: "Pan India shipping" },
     { icon: FiHeadphones, label: "24/7 Support", desc: "Dedicated assistance" },
   ];
+
+  const etaDisplay = (() => {
+    const display = buildTransitDisplay(transitTimeResponse);
+    const deliveryFormatted = formatTransitDate(display.deliveryDate);
+    const podFormatted = formatTransitDate(display.podDate);
+    const deliveryRange = buildDeliveryDateRange(display.deliveryDate, display.podDate);
+    const deliveryPincode = selectedAddress?.pincode || "";
+
+    let mainDeliveryText = "—";
+    if (deliveryRange && deliveryRange !== "—") {
+      mainDeliveryText = deliveryRange;
+    } else if (deliveryFormatted) {
+      mainDeliveryText = deliveryFormatted;
+    }
+
+    let deliveryByLabel = "";
+    if (deliveryFormatted && !display.isError) {
+      deliveryByLabel = `Delivery by ${deliveryFormatted}`;
+    }
+
+    let podLabel = "";
+    if (podFormatted && !display.isError) {
+      podLabel = `POD expected ${podFormatted}`;
+    }
+
+    let showCutoffChip = false;
+    let cutoffLabel = "";
+    if (display.isAfterCutoff && !display.isError) {
+      showCutoffChip = true;
+      cutoffLabel = "Pickup scheduled next business day";
+    }
+
+    return {
+      ...display,
+      deliveryFormatted,
+      deliveryRange,
+      podFormatted,
+      deliveryPincode,
+      mainDeliveryText,
+      deliveryByLabel,
+      podLabel,
+      showCutoffChip,
+      cutoffLabel,
+      hasValidData: Boolean(
+        transitTimeResponse && !display.isError && (deliveryFormatted || display.destinationCity)
+      ),
+    };
+  })();
 
   return (
     <Layout>
@@ -893,6 +980,93 @@ export default function Index() {
                       </div>
                     </div>
                   </div>
+
+                  {/* ESTIMATED DELIVERY CARD */}
+                  {(etaDisplay.hasValidData || etaDisplay.isError || transitTimeLoading || formData.addressId) && (
+                    <div className="mt-6">
+                      {etaDisplay.isError ? (
+                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                          <p className="text-sm font-medium text-amber-800">
+                            {etaDisplay.errorMessage || "Unable to estimate delivery time"}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-5">
+                          {transitTimeLoading ? (
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+                                <svg className="w-5 h-5 animate-spin text-green-600" fill="none" viewBox="0 0 24 24">
+                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                              </div>
+                              <div>
+                                <p className="text-sm font-semibold text-gray-700">Calculating ETA…</p>
+                              </div>
+                            </div>
+                          ) : etaDisplay.hasValidData ? (
+                            <>
+                              <div className="flex items-start gap-4">
+                                <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
+                                  <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                  </svg>
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-bold uppercase tracking-wider text-green-800 mb-1">
+                                    Estimated Delivery
+                                  </p>
+                                  <p className="text-xl md:text-2xl font-black text-green-900 leading-tight">
+                                    {etaDisplay.mainDeliveryText}
+                                  </p>
+                                  {etaDisplay.podLabel && (
+                                    <p className="text-xs text-green-700 mt-1 font-medium">
+                                      {etaDisplay.podLabel}
+                                    </p>
+                                  )}
+                                  <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
+                                    <p className="text-xs text-green-700 font-medium">
+                                      Delivery to{" "}
+                                      <span className="font-bold">
+                                        {etaDisplay.deliveryPincode || "—"}
+                                      </span>
+                                    </p>
+                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-600 text-white text-xs font-bold uppercase tracking-wide">
+                                      Free
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+                              {etaDisplay.showCutoffChip && (
+                                <div className="mt-4 flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600">
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                  </svg>
+                                  {etaDisplay.cutoffLabel}
+                                </div>
+                              )}
+                              {(etaDisplay.originCity || etaDisplay.destinationCity) && (
+                                <div className="mt-3 flex items-center gap-2 text-[11px] text-green-700/80">
+                                  <span className="font-semibold">Route:</span>
+                                  <span>{etaDisplay.originCity || "—"}</span>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                  </svg>
+                                  <span>{etaDisplay.destinationCity || "—"}</span>
+                                </div>
+                              )}
+                            </>
+                          ) : formData.addressId ? null : (
+                            <div className="rounded-xl border border-dashed border-gray-300 p-4">
+                              <p className="text-sm text-gray-500 text-center">
+                                Select an address to see estimated delivery time
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   <button
                     type="submit"
