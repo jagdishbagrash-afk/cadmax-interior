@@ -776,6 +776,11 @@ class Listing extends Component {
   }
 
 
+  async orderId(id) {
+    return Api.get(`/order/${id}`)
+  }
+
+
   render() {
     return (
       <div>
