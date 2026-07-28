@@ -613,9 +613,26 @@ export default function Index() {
   const discountPercent = getDiscountPercentage();
   const hasPriceSections = ProductDetails?.product_price_section?.length > 0;
   const shouldShowPriceSections = hasPriceSections && (!ProductDetails?.amount || ProductDetails?.amount === 0);
-
+console.log("ProductDetails", ProductDetails)
   return (
-    <Layout>
+  <Layout
+  seo={{
+    title:
+      ProductDetails?.meta_title ||
+      `${ProductDetails?.name} | Buy Luxury Furniture Online in Jaipur | CADMAX Atelier`,
+
+    description:
+      ProductDetails?.meta_description ||
+      `Buy ${ProductDetails?.name} online from CADMAX Atelier Jaipur. Discover luxury designer furniture with premium craftsmanship, elegant finishes, and timeless designs for modern homes and commercial interiors.`,
+
+    keywords:
+      ProductDetails?.meta_keywords ||
+      `${ProductDetails?.name}, luxury furniture Jaipur, designer furniture, CADMAX Atelier, premium furniture, modern furniture`,
+
+    canonical: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
+    url: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
+  }}
+    >
       <div className="w-full bg-white">
         <div className="container max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8 py-1 md:py-2 lg:py-4">
 

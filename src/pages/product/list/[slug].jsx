@@ -13,7 +13,7 @@ import ProductGrid from "./ProductGrid";
 export default function Index() {
   const router = useRouter();
   const { slug } = router.query;
-
+const [seoData, setSeoData] = useState(null);
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState("");
   const [loading, setLoading] = useState(true);
@@ -29,6 +29,14 @@ export default function Index() {
       setCategories(list);
       if (list.length > 0) {
         setSelectedId(list[0]._id);
+        setSeoData({
+        title:
+          list[0]?.category?.meta_title || `${list[0]?.name} | CADMAX Atelier`,
+        description:
+          list[0]?.category?.meta_description ||
+          `Explore ${list[0]?.name} at CADMAX Atelier.`,
+        keywords: list[0]?.category?.meta_keywords || "",
+      });
       } else {
         setSelectedId("");
       }
@@ -47,9 +55,22 @@ export default function Index() {
 
     fetchData(slug);
   }, [router.isReady, slug]);
+  console.log("categories", categories ,seoData);
 
   return (
-    <Layout>
+    <Layout
+  seo={{
+    title:
+      seoData?.title ||
+      "Luxury Architects & Interior Designers in Jaipur | CADMAX Atelier",
+    description:
+      seoData?.description ||
+      "Leading architecture and interior design studio in Jaipur.",
+    keywords: seoData?.keywords || "",
+    canonical: `https://cadmaxatelier.com/category/${slug}`,
+    url: `https://cadmaxatelier.com/category/${slug}`,
+  }}
+>
       {/* CATEGORY SLIDER */}
       {categories.length > 0 && (
         <div className="w-full bg-black py-3">

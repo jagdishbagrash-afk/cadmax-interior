@@ -11,7 +11,7 @@ import Listing from "@/pages/api/Listing";
 import Link from "next/link";
 import ConceptSection from "@/pages/common/ConceptSection";
 import NoData from "@/pages/common/NoData";
-
+/* ---------------- Reusable Section ---------------- */
 // const ConceptSection = ({ title, data }) => {
 //   if (!data?.length) return null;
 
@@ -68,96 +68,103 @@ import NoData from "@/pages/common/NoData";
 //   );
 // };
 
+/* ---------------- Main Page ---------------- */
 export default function Index() {
   const router = useRouter();
-  const id = router?.query?.slug;
+  const slug = router?.query?.slug;
 
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
-  const [project, setProject] = useState([]);
 
-  // Fetch categories
-  const fetchData = async (id) => {
-    try {
-      const main = new Listing();
-      const response = await main.ServciesType(id);
-
-      if (response.data?.data) {
-        const list = response.data.data?.commercialServices || [];
-        setCategories(list);
-
-        if (list.length > 0) {
-          const matched = list.find(
-            (item) => item._id === id || item.slug === id
-          );
-
-          if (matched) {
-            setSelectedId(matched._id);
-          } else {
-            setSelectedId(list[0]._id);
-          }
-        }
-      }
-    } catch (error) {
-      console.log("Error:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (id) fetchData(id);
-  }, [id]);
-
+  const [seoData, setSeoData] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
-  const [contemporary, setContemporary] = useState([]);
   const [common, setCommon] = useState([]);
 
-  // Fetch Project Based on Selected
-  const fetchProjectData = async () => {
-    if (!selectedId) return;
+  const [contemporary, setContemporary] = useState([]);
+
+  /* -------- Fetch Categories -------- */
+  const fetchCategories = async (slug) => {
     try {
       const main = new Listing();
-      const response = await main.GetAllServicesType(selectedId);
-      const data = response?.data?.data;
+      const res = await main.ServciesType(slug);
+      const list = res?.data?.data?.commercialServices || [];
+      setCategories(list);
 
-      if (data && Array.isArray(data)) {
-        setCommon(data.filter(i => i.concept === "common"));
-        // neo_classic
-        const classicData = data.filter(item => item.concept === "neo_classic");
-        setClassic(classicData);
+      if (list.length) {
+        const match = list.find(
+          (i) => i._id === slug || i.slug === slug
+        );
+        setSelectedId(match?._id || list[0]._id);
+       if (list.length) {
+  const match = list.find(
+    (item) => item.slug === slug || item._id === slug
+  ) || list[0];
 
-        // modern
-        const modernData = data.filter(item => item.concept === "modern");
-        setModern(modernData);
-
-        // contemporary
-        const contemporaryData = data.filter(item => item.concept === "contemporary");
-        setContemporary(contemporaryData);
+  setSelectedId(match._id);
+  setSelectedCategory(match);
+}
       }
-
-    } catch (error) {
-      console.log("Error:", error);
+    } catch (err) {
+      console.log("Category Error:", err);
     }
   };
 
   useEffect(() => {
-    fetchProjectData();
+    if (slug) fetchCategories(slug);
+  }, [slug]);
+
+  /* -------- Fetch Projects -------- */
+  const fetchProjects = async () => {
+    if (!selectedId) return;
+
+    try {
+      const main = new Listing();
+      const res = await main.GetAllServicesType(selectedId);
+      const data = res?.data?.data || [];
+      setCommon(data.filter(i => i.concept === "common"));
+      setClassic(data.filter(i => i.concept === "neo_classic"));
+      setModern(data.filter(i => i.concept === "modern"));
+      setContemporary(data.filter(i => i.concept === "contemporary"));
+    } catch (err) {
+      console.log("Project Error:", err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProjects();
   }, [selectedId]);
 
-
   return (
-    <Layout>
-      {/* Swiper Category Slider */}
-      <div className="w-full  py-3">
+  <Layout
+  seo={{
+    title:
+      selectedCategory?.meta_title ||
+      `${selectedCategory?.title} | CADMAX Atelier`,
+
+    description:
+      selectedCategory?.meta_description ||
+      `Explore ${selectedCategory?.title} at CADMAX Atelier.`,
+
+    keywords: selectedCategory?.meta_keywords || "",
+
+    canonical: `https://cadmaxatelier.com/design/commercial/${selectedCategory?.slug}`,
+
+    url: `https://cadmaxatelier.com/design/commercial/${selectedCategory?.slug}`,
+  }}
+>
+      {/* -------- Category Slider -------- */}
+      <div className="w-full bg-black py-3">
         <Swiper
           spaceBetween={14}
-          loop={true}
+          loop
           speed={1000}
           autoplay={{ delay: 1800, disableOnInteraction: false }}
           modules={[Autoplay]}
-          grabCursor={true}
+          grabCursor
           breakpoints={{
-            320: { slidesPerView: 1},
+            320: { slidesPerView: 1 },
             640: { slidesPerView: 3 },
             768: { slidesPerView: 4 },
           }}
@@ -167,39 +174,25 @@ export default function Index() {
               <div
                 onClick={() => {
                   setSelectedId(item._id);
+                    setSelectedCategory(item);
 
-                  // 🔥 URL SLUG CHANGE HERE
-                  router.push(
-                    `/design/commercial/${item?.slug}`,
-                    undefined,
-                    { shallow: true }
-                  );
+                  router.push(`/design/residential/${item.slug}`, undefined, { shallow: true });
                 }}
-                className="relative h-[120px] md:h-[140px] lg:h-[150px] rounded-md overflow-hidden cursor-pointer transition-all duration-300"
+                className="relative h-[120px] md:h-[140px] lg:h-[150px]
+                rounded-md overflow-hidden cursor-pointer"
               >
                 <img
                   src={item.Image || ProductListBanner?.src}
                   alt={item.title}
-                  className="w-full h-full object-cover transition-all duration-300"
+                  className="w-full h-full object-cover"
                 />
 
-                <div
-                  className={`absolute inset-0 transition-all duration-300
-                    ${selectedId === item._id
-                      ? "bg-black/20"
-                      : "bg-black/55 hover:bg-black/30"
-                    }`}
-                />
+                <div className={`absolute inset-0
+                  ${selectedId === item._id ? "bg-black/20" : "bg-black/55 hover:bg-black/30"}`} />
 
-                <div className="absolute inset-0 flex items-center justify-center px-2">
-                  <h1
-                    className={`text-white text-[11px] md:text-[12px] lg:text-[13px]
-                    font-bold uppercase tracking-wide leading-tight text-center
-                    ${selectedId === item._id
-                        ? "text-yellow-300 scale-105"
-                        : "text-gray-200"
-                      }`}
-                  >
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <h1 className={`text-white text-[11px] md:text-[13px] font-bold uppercase
+                    ${selectedId === item._id ? "text-yellow-300" : "text-gray-200"}`}>
                     {item.title}
                   </h1>
                 </div>
@@ -209,14 +202,15 @@ export default function Index() {
         </Swiper>
       </div>
 
-      {/* Services Grid */}
+      {/* -------- Sections -------- */}
       <section className="py-4 md:py-8">
         <div className="container mx-auto px-4 max-w-[1430px]">
-          <ConceptSection title="" data={common} />
+          <ConceptSection data={common} />
           <ConceptSection title="NEO CLASSIC" data={classic} />
           <ConceptSection title="MODERN" data={modern} />
           <ConceptSection title="CONTEMPORARY" data={contemporary} />
         </div>
+
         {selectedId &&
           !common?.length &&
           !classic?.length &&
@@ -231,3 +225,4 @@ export default function Index() {
     </Layout>
   );
 }
+

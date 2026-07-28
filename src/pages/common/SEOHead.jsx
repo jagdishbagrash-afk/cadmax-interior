@@ -2,6 +2,7 @@ import Head from "next/head";
 
 export default function SEOHead({
   title = "Luxury Architects & Interior Designers in Jaipur | CADMAX Atelier",
+  keywords = "Architecture, Interior Design, Residential Architecture, Luxury Villa Design, Commercial Interiors, 3D Visualization, Jaipur, CADMAX Atelier",
   description = "Leading architecture and interior design studio in Jaipur offering residential architecture, luxury villa design, commercial interiors, and 3D visualization services.",
   canonical = "https://cadmaxatelier.com/",
   image = "https://cadmaxatelier.com/Logo.png",
@@ -66,6 +67,8 @@ export default function SEOHead({
       <title>{title || "Luxury Architects & Interior Designers in Jaipur | CADMAX Atelier"}</title>
 
       <meta name="description" content={description} />
+      <meta name="keywords" content={keywords} />
+
       <link rel="canonical" href={canonical} />
 
       {/* Robots */}

@@ -22,8 +22,26 @@ export default function Index() {
     if (slug) fetchData(slug);
   }, [slug]);
 
+        console.log("ProductDetail", ProductDetail);
+
   return (
-    <Layout>
+     <Layout
+                      seo={{
+                        title:
+                          ProductDetail?.category?.meta_title ||
+                          `${ProductDetail?.category?.name} | CADMAX Atelier`,
+                    
+                        description:
+                          ProductDetail?.category?.meta_description ||
+                          `Explore ${ProductDetail?.category?.name} at CADMAX Atelier.`,
+                    
+                        keywords: ProductDetail?.category?.meta_keywords || "",
+                    
+                        canonical: `https://cadmaxatelier.com/design/details/${ProductDetail?.category?.slug}`,
+                    
+                        url: `https://cadmaxatelier.com/design/details/${ProductDetail?.category?.slug}`,
+                      }}
+                    >
       <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
 
         <img

@@ -53,9 +53,26 @@ export default function VendorDetailPage() {
         setCurrentIndex((prev) =>
             prev === vendor.multiple_images.length - 1 ? 0 : prev + 1
         );
+        console.log("vendor", vendor);
 
     return (
-        <Layout>
+         <Layout
+                  seo={{
+                    title:
+                      vendor?.meta_title ||
+                      `${vendor?.name} | CADMAX Atelier`,
+                
+                    description:
+                      vendor?.meta_description ||
+                      `Explore ${vendor?.name} at CADMAX Atelier.`,
+                
+                    keywords: vendor?.meta_keywords || "",
+                
+                    canonical: `https://cadmaxatelier.com/design/details/${vendor?.slug}`,
+                
+                    url: `https://cadmaxatelier.com/design/details/${vendor?.slug}`,
+                  }}
+                >
             {loading ? (
                 <div className="h-[60vh] flex items-center justify-center text-gray-500">
                     Loading Vendor...
