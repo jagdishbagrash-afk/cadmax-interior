@@ -36,10 +36,12 @@ import {
     FiMessageSquare,
     FiEdit,
     FiTrash2,
+    FiAlertCircle,
 } from "react-icons/fi";
 import AdminLayout from "../common/AdminLayout";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
+import toast from "react-hot-toast";
 
 export default function OrderDetailsPage() {
     const router = useRouter();
@@ -48,11 +50,19 @@ export default function OrderDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    // ─── STATE FOR STATUS UPDATE MODAL ──────────────────────
+    const [showModal, setShowModal] = useState(false);
+    const [selectedStatus, setSelectedStatus] = useState("");
+    const [note, setNote] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [modalAction, setModalAction] = useState(""); // "approve", "cancel", "hold", "note"
+
     const fetchData = async (id) => {
         try {
             setLoading(true);
             const main = new Listing();
             const response = await main.orderId(id);
+            console.log("response", response);
             if (response?.data?.data) {
                 setProject(response.data.data);
             } else {
@@ -92,6 +102,7 @@ export default function OrderDetailsPage() {
             delivered: "bg-green-100 text-green-700 border-green-200",
             cancelled: "bg-red-100 text-red-700 border-red-200",
             "ready to ship": "bg-cyan-100 text-cyan-700 border-cyan-200",
+            "on-hold": "bg-orange-100 text-orange-700 border-orange-200",
         };
         return map[status?.toLowerCase()] || "bg-gray-100 text-gray-700 border-gray-200";
     };
@@ -105,6 +116,87 @@ export default function OrderDetailsPage() {
         };
         return map[status?.toLowerCase()] || "bg-gray-100 text-gray-700 border-gray-200";
     };
+
+    // ─── STATUS UPDATE LOGIC ────────────────────────────────
+    const openModal = (action) => {
+        setModalAction(action);
+        // Pre‑select status based on action
+        let defaultStatus = "";
+        let defaultNote = "";
+        switch (action) {
+            case "approve":
+                defaultStatus = "confirmed";
+                defaultNote = "Order approved.";
+                break;
+            case "cancel":
+                defaultStatus = "cancelled";
+                defaultNote = "Order cancelled.";
+                break;
+            case "hold":
+                defaultStatus = "on-hold";
+                defaultNote = "Order placed on hold.";
+                break;
+            case "note":
+                defaultStatus = project?.status || "pending";
+                defaultNote = "";
+                break;
+            default:
+                defaultStatus = project?.status || "pending";
+                defaultNote = "";
+        }
+        setSelectedStatus(defaultStatus);
+        setNote(defaultNote);
+        setShowModal(true);
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setSelectedStatus("");
+        setNote("");
+        setModalAction("");
+        setIsSubmitting(false);
+    };
+
+    
+
+     const handleStatusUpdate = async (e) => {
+    e.preventDefault();
+    if (isSubmitting) return;
+      if (!selectedStatus) {
+            toast.error("Please select a status.");
+            return;
+        }
+        if (!project?.orderId) {
+            toast.error("Order ID missing.");
+            return;
+        }
+    setIsSubmitting(true);
+
+    try {
+      const main = new Listing();
+      const submitFormData = new FormData();
+      submitFormData.append("orderId", project.orderId);
+      submitFormData.append("status", selectedStatus);
+      submitFormData.append("note", note);
+
+
+      const  response = await main.SupercategoryUpdate(submitFormData);
+
+      if (response?.data?.status) {
+        toast.success(response.data.message);
+        setFormData({ name: "", file: null, preview: "" });
+        handleClose();
+        fetchData();
+      } else {
+        toast.error(response?.data?.message || "Error occurred");
+      }
+
+    } catch (err) {
+      toast.error(err?.response?.data?.message || "Something went wrong");
+    }
+
+    setIsSubmitting(false);
+  };
 
     // ─── LOADING / ERROR ──────────────────────────────────────
     if (loading) {
@@ -166,10 +258,10 @@ export default function OrderDetailsPage() {
     // Calculate totals
     const subtotal = product.reduce((sum, p) => sum + (p.total || p.price * p.quantity || 0), 0);
     const discountTotal = product.reduce((sum, p) => sum + ((p.originalPrice - p.price) * p.quantity || 0), 0);
-    const deliveryCharges = 0; // adjust if you have delivery fee field
+    const deliveryCharges = 0;
     const finalTotal = amount || subtotal;
 
-    // Build timeline from shipping_timeline or fallback
+    // Build timeline
     const timelineItems = shipping_timeline.length > 0
         ? shipping_timeline.map((item) => ({
             status: item.status,
@@ -249,11 +341,17 @@ export default function OrderDetailsPage() {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="px-4 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => openModal("edit")}
+                                        className="px-4 py-1.5 rounded-lg border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center gap-1.5"
+                                    >
                                         <FiEdit className="w-3.5 h-3.5" />
                                         Edit
                                     </button>
-                                    <button className="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center gap-1.5">
+                                    <button
+                                        onClick={() => openModal("cancel")}
+                                        className="px-4 py-1.5 rounded-lg bg-red-50 text-red-600 text-xs font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center gap-1.5"
+                                    >
                                         <FiXCircle className="w-3.5 h-3.5" />
                                         Cancel
                                     </button>
@@ -446,11 +544,17 @@ export default function OrderDetailsPage() {
                                                 Download Label
                                             </button>
                                         </div>
-                                        <button className="w-full px-3 py-2 rounded-xl border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5">
+                                        <button
+                                            onClick={() => openModal("cancel")}
+                                            className="w-full px-3 py-2 rounded-xl border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
+                                        >
                                             <FiXCircle className="w-3.5 h-3.5" />
                                             Cancel Order
                                         </button>
-                                        <button className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5">
+                                        <button
+                                            onClick={() => openModal("note")}
+                                            className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
+                                        >
                                             <FiPlus className="w-3.5 h-3.5" />
                                             Add Order Note
                                         </button>
@@ -464,19 +568,31 @@ export default function OrderDetailsPage() {
                                         Admin Actions
                                     </h3>
                                     <div className="space-y-2">
-                                        <button className="w-full px-4 py-2.5 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200 hover:bg-green-100 transition-colors flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => openModal("approve")}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200 hover:bg-green-100 transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FiCheckCircle className="w-4 h-4" />
                                             Approve Order
                                         </button>
-                                        <button className="w-full px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => openModal("cancel")}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FiXCircle className="w-4 h-4" />
                                             Cancel Order
                                         </button>
-                                        <button className="w-full px-4 py-2.5 rounded-xl bg-yellow-50 text-yellow-700 text-sm font-medium border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => openModal("hold")}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-yellow-50 text-yellow-700 text-sm font-medium border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FiClock className="w-4 h-4" />
                                             Hold Order
                                         </button>
-                                        <button className="w-full px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => openModal("note")}
+                                            className="w-full px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                                        >
                                             <FiMessageSquare className="w-4 h-4" />
                                             Add Order Note
                                         </button>
@@ -503,7 +619,8 @@ export default function OrderDetailsPage() {
                                             {status === "shipped" && "Order has been shipped."}
                                             {status === "delivered" && "Order has been delivered."}
                                             {status === "cancelled" && "Order has been cancelled."}
-                                            {!["pending","confirmed","processing","shipped","delivered","cancelled"].includes(status) && "Status update pending."}
+                                            {status === "on-hold" && "Order is on hold."}
+                                            {!["pending","confirmed","processing","shipped","delivered","cancelled","on-hold"].includes(status) && "Status update pending."}
                                         </p>
                                         <p className="text-xs text-gray-400">
                                             Last Updated: {formatDate(updatedAt)}
@@ -552,6 +669,89 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ─── STATUS UPDATE MODAL ────────────────────────── */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6">
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-bold text-gray-800">
+                                {modalAction === "approve" && "Approve Order"}
+                                {modalAction === "cancel" && "Cancel Order"}
+                                {modalAction === "hold" && "Hold Order"}
+                                {modalAction === "note" && "Add Order Note"}
+                                {modalAction === "edit" && "Update Order Status"}
+                            </h3>
+                            <button
+                                onClick={closeModal}
+                                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                            >
+                                <FiXCircle className="w-5 h-5 text-gray-500" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-4">
+                            {/* Status Dropdown */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Order Status <span className="text-red-500">*</span>
+                                </label>
+                                <select
+                                    value={selectedStatus}
+                                    onChange={(e) => setSelectedStatus(e.target.value)}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                >
+                                    <option value="pending">Pending</option>
+                                    <option value="confirmed">Confirmed</option>
+                                    <option value="processing">Processing</option>
+                                    <option value="shipped">Shipped</option>
+                                    <option value="delivered">Delivered</option>
+                                    <option value="cancelled">Cancelled</option>
+                                    <option value="on-hold">On Hold</option>
+                                </select>
+                            </div>
+
+                            {/* Note Textarea */}
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">
+                                    Note (optional)
+                                </label>
+                                <textarea
+                                    value={note}
+                                    onChange={(e) => setNote(e.target.value)}
+                                    rows={4}
+                                    className="w-full px-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                                    placeholder="Add a note about this status change..."
+                                />
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="flex gap-3 pt-2">
+                                <button
+                                    onClick={closeModal}
+                                    className="flex-1 px-4 py-2.5 rounded-xl border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleStatusUpdate}
+                                    disabled={isSubmitting}
+                                    className="flex-1 px-4 py-2.5 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+                                            Updating...
+                                        </>
+                                    ) : (
+                                        "Update Status"
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </AdminLayout>
     );
 }
