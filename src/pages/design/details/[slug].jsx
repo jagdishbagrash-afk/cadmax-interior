@@ -144,7 +144,23 @@ export default function DesignLayout() {
 
 
     return (
-        <Layout>
+        <Layout
+          seo={{
+            title:
+              project?.meta_title ||
+              `${project?.title} | CADMAX Atelier`,
+        
+            description:
+              project?.meta_description ||
+              `Explore ${project?.title} at CADMAX Atelier.`,
+        
+            keywords: project?.meta_keywords || "",
+        
+            canonical: `https://cadmaxatelier.com/design/details/${project?.slug}`,
+        
+            url: `https://cadmaxatelier.com/design/details/${project?.slug}`,
+          }}
+        >
             <div className="relative w-full h-[300px] sm:h-[360px] md:h-[420px] lg:h-[480px] overflow-hidden md:mt-[-80px]">
 
                 <img

@@ -38,6 +38,9 @@ export default function Edit() {
     discount_amount: "",
     label_category: "",
     label_size: "",
+    meta_title: "",
+    meta_description: "",
+    meta_keywords: "",
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -132,6 +135,10 @@ export default function Edit() {
       terms: data.terms,
       discount_amount: data.discount_amount || "",
       stock: data.stock || "",
+      meta_title: data.meta_title || "",
+      meta_description: data.meta_description || "",
+      meta_keywords: data.meta_keywords || "",
+
     });
 
     setImagePreview(data.image || "");
@@ -474,16 +481,18 @@ export default function Edit() {
       fd.append("terms", form.terms);
       fd.append("label_category", form.label_category || "");
       fd.append("label_size", form.label_size || "");
-
+      fd.append("meta_title", form.meta_title || "");
+      fd.append("meta_description", form.meta_description || "");
+      fd.append("meta_keywords", form.meta_keywords || "");
       // Price related – based on mode
       if (priceMode === "single") {
         fd.append("amount", form.amount);
         fd.append("discount_amount", form.discount_amount);
-        
+
         // Do NOT append product_price_section
       } else {
         fd.append("product_price_section", JSON.stringify(validPriceSections));
-         fd.append("amount",0);
+        fd.append("amount", 0);
         fd.append("discount_amount", 0);
         // Do NOT append amount/discount_amount
       }
@@ -911,7 +920,59 @@ export default function Edit() {
               </div>
             ))}
           </div>
+          <div className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-5">
+            <h3 className="text-lg font-semibold text-gray-800">
+              SEO <span className="text-sm text-gray-500">(Optional)</span>
+            </h3>
 
+            {/* Meta Title */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Title
+              </label>
+              <input
+                type="text"
+                name="meta_title"
+                placeholder="Enter Meta Title"
+                value={form.meta_title}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Description
+              </label>
+              <input
+                type="text"
+                name="meta_description"
+                placeholder="Enter Meta Description"
+                value={form.meta_description}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+            </div>
+
+            {/* Meta Keywords */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Keywords
+              </label>
+              <input
+                type="text"
+                name="meta_keywords"
+                placeholder="keyword1, keyword2, keyword3"
+                value={form.meta_keywords}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Separate keywords with commas (,)
+              </p>
+            </div>
+          </div>
           <button
             type="submit"
             disabled={loading}
