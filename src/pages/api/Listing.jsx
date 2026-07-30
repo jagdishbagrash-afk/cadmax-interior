@@ -271,6 +271,10 @@ class Listing extends Component {
     return Api.post(`/order/status/update/${id}`, data);
   }
 
+  async GetWebOrderDetails(orderId) {
+    return Api.get(`/web/order/details/${orderId}`);
+  }
+
   async deleteProduct(data) {
     return Api.post(`/product/delete/${data}`);
   }
