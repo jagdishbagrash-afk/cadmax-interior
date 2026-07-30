@@ -280,7 +280,11 @@ export default function OrderDetailsPage() {
         <AdminLayout>
             <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F5F7FA]">
                 {/* Top Bar */}
-                <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+           
+
+                {/* Scrollable Content */}
+                <div className="flex-1 overflow-y-auto ">
+                         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => router.push("/admin/orders")}
@@ -305,10 +309,7 @@ export default function OrderDetailsPage() {
                         </button>
                     </div>
                 </header>
-
-                {/* Scrollable Content */}
-                <div className="flex-1 overflow-y-auto p-6">
-                    <div className="max-w-[1230px] mx-auto space-y-6">
+                    <div className="mt-3  space-y-6">
 
                         {/* ─── ORDER SUMMARY CARD ──────────────── */}
                         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
