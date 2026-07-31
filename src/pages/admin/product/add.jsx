@@ -37,6 +37,9 @@ export default function Add() {
     material: "",
     type: "",
     terms: "",
+    meta_title :"",
+    meta_description :"",
+    meta_keywords :"",
     subsubcategory: ""
   });
 
@@ -1023,6 +1026,60 @@ export default function Add() {
                 )}
               </div>
             ))}
+          </div>
+
+              <div className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-5">
+            <h3 className="text-lg font-semibold text-gray-800">
+              SEO <span className="text-sm text-gray-500">(Optional)</span>
+            </h3>
+
+            {/* Meta Title */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Title
+              </label>
+              <input
+                type="text"
+                name="meta_title"
+                placeholder="Enter Meta Title"
+                value={form.meta_title}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+            </div>
+
+            {/* Meta Description */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Description
+              </label>
+              <input
+                type="text"
+                name="meta_description"
+                placeholder="Enter Meta Description"
+                value={form.meta_description}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+            </div>
+
+            {/* Meta Keywords */}
+            <div>
+              <label className="block mb-2 text-sm font-medium text-gray-700">
+                Meta Keywords
+              </label>
+              <input
+                type="text"
+                name="meta_keywords"
+                placeholder="keyword1, keyword2, keyword3"
+                value={form.meta_keywords}
+                onChange={handleChange}
+                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Separate keywords with commas (,)
+              </p>
+            </div>
           </div>
 
           {/* Submit Button */}

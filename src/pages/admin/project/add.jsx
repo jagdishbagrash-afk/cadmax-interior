@@ -196,35 +196,58 @@ export default function Add() {
 
           {/* ===== SEO META FIELDS ===== */}
           <hr className="my-4 border-gray-200" />
-          <p className="text-sm font-semibold text-gray-500 uppercase tracking-wider">
-            SEO Metadata
-          </p>
+            <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
+  <h3 className="text-lg font-semibold text-gray-800 mb-5">
+    SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
+  </h3>
 
-          <div className="grid md:grid-cols-2 gap-4">
-            <input
-              name="meta_title"
-              value={form.meta_title}
-              onChange={handleChange}
-              placeholder="Meta Title (SEO)"
-              className="input"
-            />
-            <input
-              name="meta_description"
-              value={form.meta_description}
-              onChange={handleChange}
-              placeholder="Meta Description"
-              className="input"
-            />
-            <div className="md:col-span-2">
-              <input
-                name="meta_keywords"
-                value={form.meta_keywords}
-                onChange={handleChange}
-                placeholder="Meta Keywords (comma separated)"
-                className="input"
-              />
-            </div>
-          </div>
+  {/* Meta Title */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Title
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Title"
+      value={form.meta_title}
+      onChange={(e) => handleChange("meta_title", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Description */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Description
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Description"
+      value={form.meta_description}
+      onChange={(e) =>
+        handleChange("meta_description", e.target.value)
+      }
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Keywords */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Keywords
+    </label>
+    <input
+      type="text"
+      placeholder="e.g. web development, react, nextjs"
+      value={form.meta_keywords}
+      onChange={(e) => handleChange("meta_keywords", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+    <p className="mt-1 text-xs text-gray-500">
+      Separate multiple keywords with commas (,).
+    </p>
+  </div>
+</div>
 
           {/* ===== SINGLE IMAGE ===== */}
           <div>

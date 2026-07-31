@@ -267,7 +267,9 @@ export default function OrderHistory() {
                     <div className="flex items-center gap-4">
                       <div className="text-right hidden sm:block">
                         <p className="uppercase text-[10px] font-bold text-gray-500">Order # {order?.orderId}</p>
-                        <p className="text-[#007185] hover:underline">View details</p>
+                        <Link href={`/orders/${order?.orderId || order?._id}`} className="text-[#007185] hover:underline font-semibold">
+                          View details
+                        </Link>
                       </div>
                       <motion.div animate={{ rotate: isOpen ? 180 : 0 }}>
                         <FaChevronDown size={14} className="text-gray-400" />

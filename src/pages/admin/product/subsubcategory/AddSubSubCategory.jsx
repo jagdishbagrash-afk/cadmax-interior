@@ -170,31 +170,34 @@ export default function AddSubSubCategory({ fetchDatas, isEdit, item }) {
   return (
     <>
       {/* Add Button */}
-      <div className="flex justify-center items-center">
-        <button
-          onClick={handleOpen}
-          className="cursor-pointer m-auto flex items-center justify-center
-             w-[42px] h-[42px]
-             rounded-lg border border-gray-200 shadow-sm 
-             bg-white hover:bg-gray-50
-             transition-all duration-200"
-        >
-          {isEdit ? (
-            <MdEdit
-              size={22}
-              className="text-blue-600 group-hover:text-blue-700 transition"
-            />
-          ) : (
-            <>
-              <MdAdd
-                size={22}
-                className="text-blue-600 group-hover:text-blue-700 transition"
-              />
-              Add
-            </>
-          )}
-        </button>
-      </div>
+     <div className="flex justify-center items-center">
+  <button
+    onClick={handleOpen}
+    className="group inline-flex items-center gap-2 px-4 py-2.5
+      rounded-lg border border-gray-200 bg-white
+      text-gray-700 font-medium shadow-sm
+      hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700
+      transition-all duration-200 cursor-pointer"
+  >
+    {isEdit ? (
+      <>
+        <MdEdit
+          size={20}
+          className="text-blue-600 group-hover:text-blue-700 transition-colors"
+        />
+        <span>Edit</span>
+      </>
+    ) : (
+      <>
+        <MdAdd
+          size={20}
+          className="text-blue-600 group-hover:text-blue-700 transition-colors"
+        />
+        <span>Add</span>
+      </>
+    )}
+  </button>
+</div>
 
       {/* Popup Modal */}
       {isOpen && (
@@ -303,34 +306,58 @@ export default function AddSubSubCategory({ fetchDatas, isEdit, item }) {
             </div>
 
             {/* ✅ Meta Fields */}
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Meta Title (SEO)"
-                value={formData.meta_title}
-                onChange={(e) => handleInputChange("meta_title", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Meta Description"
-                value={formData.meta_description}
-                onChange={(e) => handleInputChange("meta_description", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-            <div className="mb-4">
-              <input
-                type="text"
-                placeholder="Meta Keywords (comma separated)"
-                value={formData.meta_keywords}
-                onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
+          <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
+  <h3 className="text-lg font-semibold text-gray-800 mb-5">
+    SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
+  </h3>
 
+  {/* Meta Title */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Title
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Title"
+      value={formData.meta_title}
+      onChange={(e) => handleInputChange("meta_title", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Description */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Description
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Description"
+      value={formData.meta_description}
+      onChange={(e) =>
+        handleInputChange("meta_description", e.target.value)
+      }
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Keywords */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Keywords
+    </label>
+    <input
+      type="text"
+      placeholder="e.g. web development, react, nextjs"
+      value={formData.meta_keywords}
+      onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+    <p className="mt-1 text-xs text-gray-500">
+      Separate multiple keywords with commas (,).
+    </p>
+  </div>
+</div>
             {/* Footer Buttons */}
             <div className="flex justify-end space-x-4">
               <button

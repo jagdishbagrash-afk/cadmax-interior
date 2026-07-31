@@ -112,9 +112,7 @@ export default function Index() {
                     Action
                   </th>
 
-                  <th className="px-6 py-4 text-[14px] font-semibold text-gray-600 uppercase tracking-wider text-center">
-                    Delete
-                  </th>
+                
                 </tr>
               </thead>
 
