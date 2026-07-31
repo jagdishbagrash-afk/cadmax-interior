@@ -76,6 +76,8 @@ export default function Index() {
   const [categories, setCategories] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
 
+  const [seoData, setSeoData] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [classic, setClassic] = useState([]);
   const [modern, setModern] = useState([]);
   const [common, setCommon] = useState([]);
@@ -95,6 +97,14 @@ export default function Index() {
           (i) => i._id === slug || i.slug === slug
         );
         setSelectedId(match?._id || list[0]._id);
+       if (list.length) {
+  const match = list.find(
+    (item) => item.slug === slug || item._id === slug
+  ) || list[0];
+
+  setSelectedId(match._id);
+  setSelectedCategory(match);
+}
       }
     } catch (err) {
       console.log("Category Error:", err);
@@ -127,8 +137,23 @@ export default function Index() {
   }, [selectedId]);
 
   return (
-    <Layout>
+  <Layout
+  seo={{
+    title:
+      selectedCategory?.meta_title ||
+      `${selectedCategory?.title} | CADMAX Atelier`,
 
+    description:
+      selectedCategory?.meta_description ||
+      `Explore ${selectedCategory?.title} at CADMAX Atelier.`,
+
+    keywords: selectedCategory?.meta_keywords || "",
+
+    canonical: `https://cadmaxatelier.com/design/residential/${selectedCategory?.slug}`,
+
+    url: `https://cadmaxatelier.com/design/residential/${selectedCategory?.slug}`,
+  }}
+>
       {/* -------- Category Slider -------- */}
       <div className="w-full bg-black py-3">
         <Swiper
@@ -149,6 +174,8 @@ export default function Index() {
               <div
                 onClick={() => {
                   setSelectedId(item._id);
+                    setSelectedCategory(item);
+
                   router.push(`/design/residential/${item.slug}`, undefined, { shallow: true });
                 }}
                 className="relative h-[120px] md:h-[140px] lg:h-[150px]

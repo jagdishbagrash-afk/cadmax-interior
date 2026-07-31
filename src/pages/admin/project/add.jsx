@@ -15,8 +15,12 @@ export default function Add() {
     title: "",
     content: "",
     brief: "",
-    solution: "hello",
+    solution: "",    // kept for compatibility (may be used later)
     designed: "",
+    // SEO Meta fields
+    meta_title: "",
+    meta_description: "",
+    meta_keywords: "",
   });
 
   const [image, setImage] = useState(null);
@@ -43,6 +47,9 @@ export default function Add() {
           brief: data.brief || "",
           solution: data.solution || "",
           designed: data.designed || "",
+          meta_title: data.meta_title || "",
+          meta_description: data.meta_description || "",
+          meta_keywords: data.meta_keywords || "",
         });
         setImagePreview(data.Image || "");
       }
@@ -94,31 +101,26 @@ export default function Add() {
     setImages(updated);
   };
 
-const HandleDeleteImages = async (img) => {
-  try {
-    setImgLoading(true);
-
-    const main = new Listing();
-
-    const res = await main.deleteProjectImage(id, {
-      image: img,
-    });
-
-    if (res?.data?.success) {
-      // remove from UI
-      setProject((prev) => ({
-        ...prev,
-        multiple_images: prev.multiple_images.filter((i) => i !== img),
-      }));
-
-      toast.success("Image deleted successfully");
+  const HandleDeleteImages = async (img) => {
+    try {
+      setImgLoading(true);
+      const main = new Listing();
+      const res = await main.deleteProjectImage(id, {
+        image: img,
+      });
+      if (res?.data?.success) {
+        setProject((prev) => ({
+          ...prev,
+          multiple_images: prev.multiple_images.filter((i) => i !== img),
+        }));
+        toast.success("Image deleted successfully");
+      }
+    } catch (err) {
+      toast.error("Delete failed");
+    } finally {
+      setImgLoading(false);
     }
-  } catch (err) {
-    toast.error("Delete failed");
-  } finally {
-    setImgLoading(false);
-  }
-};
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -126,11 +128,13 @@ const HandleDeleteImages = async (img) => {
 
     try {
       const fd = new FormData();
+      // Append all form fields
       Object.keys(form).forEach((k) => fd.append(k, form[k]));
 
       if (image) fd.append("image", image);
       images.forEach((img) => fd.append("images", img));
 
+      
       const main = new Listing();
       const res = id
         ? await main.editProject(id, fd)
@@ -150,14 +154,12 @@ const HandleDeleteImages = async (img) => {
   return (
     <AdminLayout page="Project List">
       <div className="w-full mx-auto bg-white p-8 rounded-2xl shadow-lg border">
-
         <h1 className="text-3xl font-bold text-gray-800 mb-6">
           {id ? "Edit Project" : "Add New Project"}
         </h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-
-          {/* INPUTS */}
+          {/* ===== PROJECT DETAILS ===== */}
           <div className="grid md:grid-cols-2 gap-4">
             <input
               name="title"
@@ -167,7 +169,6 @@ const HandleDeleteImages = async (img) => {
               className="input"
               required
             />
-
             <input
               name="designed"
               value={form.designed}
@@ -185,19 +186,73 @@ const HandleDeleteImages = async (img) => {
             className="input h-24"
           />
 
-          {/* <textarea
-            name="solution"
-            value={form.solution}
+          <textarea
+            name="content"
+            value={form.content}
             onChange={handleChange}
-            placeholder="Project Solution"
+            placeholder="Project Content (optional)"
             className="input h-24"
-          /> */}
+          />
 
-          {/* SINGLE IMAGE */}
+          {/* ===== SEO META FIELDS ===== */}
+          <hr className="my-4 border-gray-200" />
+            <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
+  <h3 className="text-lg font-semibold text-gray-800 mb-5">
+    SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
+  </h3>
+
+  {/* Meta Title */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Title
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Title"
+      value={form.meta_title}
+      onChange={(e) => handleChange("meta_title", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Description */}
+  <div className="mb-2">
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Description
+    </label>
+    <input
+      type="text"
+      placeholder="Enter Meta Description"
+      value={form.meta_description}
+      onChange={(e) =>
+        handleChange("meta_description", e.target.value)
+      }
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+  </div>
+
+  {/* Meta Keywords */}
+  <div>
+    <label className="block text-sm font-medium text-gray-700 mb-2">
+      Meta Keywords
+    </label>
+    <input
+      type="text"
+      placeholder="e.g. web development, react, nextjs"
+      value={form.meta_keywords}
+      onChange={(e) => handleChange("meta_keywords", e.target.value)}
+      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+    />
+    <p className="mt-1 text-xs text-gray-500">
+      Separate multiple keywords with commas (,).
+    </p>
+  </div>
+</div>
+
+          {/* ===== SINGLE IMAGE ===== */}
           <div>
             <label className="label">Main Image</label>
             <input type="file" onChange={handleImageChange} />
-
             {imagePreview && (
               <div className="mt-3 w-32 h-32 rounded-lg overflow-hidden border">
                 <img
@@ -208,7 +263,7 @@ const HandleDeleteImages = async (img) => {
             )}
           </div>
 
-          {/* MULTIPLE IMAGE */}
+          {/* ===== MULTIPLE IMAGES ===== */}
           <div>
             <label className="label">Project Images</label>
 
@@ -235,8 +290,6 @@ const HandleDeleteImages = async (img) => {
                     src={URL.createObjectURL(img)}
                     className="h-32 w-full object-cover"
                   />
-
-                  {/* Overlay */}
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex flex-col justify-center items-center gap-2 transition">
                     <button
                       onClick={() => removeImage(i)}
@@ -244,7 +297,6 @@ const HandleDeleteImages = async (img) => {
                     >
                       Remove
                     </button>
-
                     {i !== 0 && (
                       <button
                         onClick={() => makeCoverImage(i)}
@@ -254,7 +306,6 @@ const HandleDeleteImages = async (img) => {
                       </button>
                     )}
                   </div>
-
                   {i === 0 && (
                     <span className="absolute top-2 left-2 bg-white text-xs px-2 py-1 rounded">
                       Cover
@@ -271,11 +322,7 @@ const HandleDeleteImages = async (img) => {
                   key={i}
                   className="relative group rounded-xl overflow-hidden border shadow-sm"
                 >
-                  <img
-                    src={img}
-                    className="h-32 w-full object-cover"
-                  />
-
+                  <img src={img} className="h-32 w-full object-cover" />
                   <button
                     onClick={() => HandleDeleteImages(img)}
                     className="absolute top-2 right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100"
@@ -287,14 +334,17 @@ const HandleDeleteImages = async (img) => {
             </div>
           </div>
 
-          {/* BUTTON */}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-lg font-semibold transition">
+          {/* ===== SUBMIT BUTTON ===== */}
+          <button
+            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl text-lg font-semibold transition"
+            disabled={loading}
+          >
             {loading ? "Processing..." : id ? "Update Project" : "Add Project"}
           </button>
         </form>
       </div>
 
-      {/* CSS */}
+      {/* ===== INLINE STYLES ===== */}
       <style jsx>{`
         .input {
           width: 100%;
