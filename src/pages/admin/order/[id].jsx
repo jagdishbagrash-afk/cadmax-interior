@@ -62,7 +62,7 @@ export default function OrderDetailsPage() {
             setLoading(true);
             const main = new Listing();
             const response = await main.orderId(id);
-            console.log("response", response);
+            console.log("responsessss", response);
             if (response?.data?.data) {
                 setProject(response.data.data);
             } else {
@@ -157,12 +157,31 @@ export default function OrderDetailsPage() {
         setIsSubmitting(false);
     };
 
-    
+    const handleStatusChange = async (id, value) => {
+        try {
+            const main = new Listing();
+            const response = await main.updateOrderStatus(id, {
+                status: value,
+            });
+            if (response?.data?.status) {
+                toast.success(response?.data?.message);
+                fetchData();
+            } else {
+                toast.error(response?.data?.message);
+            }
+        } catch (error) {
+            console.log("Error:", error);
+            toast.error(error?.response?.data?.message || "Something went wrong");
+        }
+    };
 
-     const handleStatusUpdate = async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-      if (!selectedStatus) {
+
+
+
+    const handleStatusUpdate = async (e) => {
+        e.preventDefault();
+        if (isSubmitting) return;
+        if (!selectedStatus) {
             toast.error("Please select a status.");
             return;
         }
@@ -170,33 +189,31 @@ export default function OrderDetailsPage() {
             toast.error("Order ID missing.");
             return;
         }
-    setIsSubmitting(true);
+        setIsSubmitting(true);
 
-    try {
-      const main = new Listing();
-      const submitFormData = new FormData();
-      submitFormData.append("orderId", project.orderId);
-      submitFormData.append("status", selectedStatus);
-      submitFormData.append("note", note);
+        try {
+            const main = new Listing();
+            const response = await main.updateOrderStatus(id, {
+                status: selectedStatus,
+                note: note
+            });
+            console.log("response", response)
+            if (response?.data?.status) {
+                toast.success(response?.data?.message);
+                fetchData(id);
+                closeModal();
+            } else {
+                toast.error(response?.data?.message);
+            }
 
+        } catch (err) {
+            console.error("Error updating status:", err);
 
-      const  response = await main.SupercategoryUpdate(submitFormData);
+            toast.error("err?.response?.data?.message" || "Something went wrong");
+        }
 
-      if (response?.data?.status) {
-        toast.success(response.data.message);
-        setFormData({ name: "", file: null, preview: "" });
-        handleClose();
-        fetchData();
-      } else {
-        toast.error(response?.data?.message || "Error occurred");
-      }
-
-    } catch (err) {
-      toast.error(err?.response?.data?.message || "Something went wrong");
-    }
-
-    setIsSubmitting(false);
-  };
+        setIsSubmitting(false);
+    };
 
     // ─── LOADING / ERROR ──────────────────────────────────────
     if (loading) {
@@ -280,35 +297,35 @@ export default function OrderDetailsPage() {
         <AdminLayout>
             <div className="flex-1 flex flex-col h-screen overflow-hidden bg-[#F5F7FA]">
                 {/* Top Bar */}
-           
+
 
                 {/* Scrollable Content */}
                 <div className="flex-1 overflow-y-auto ">
-                         <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
-                    <div className="flex items-center gap-4">
-                        <button
-                            onClick={() => router.push("/admin/orders")}
-                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
-                        >
-                            <FiArrowLeft className="w-5 h-5" />
-                        </button>
-                        <div>
-                            <h2 className="text-lg font-bold text-gray-800">Order Details</h2>
-                            <p className="text-xs text-gray-500">
-                                {orderId || "N/A"} • {formatDate(createdAt)}
-                            </p>
+                    <header className="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between sticky top-0 z-10">
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => router.push("/admin/orders")}
+                                className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                            >
+                                <FiArrowLeft className="w-5 h-5" />
+                            </button>
+                            <div>
+                                <h2 className="text-lg font-bold text-gray-800">Order Details</h2>
+                                <p className="text-xs text-gray-500">
+                                    {orderId || "N/A"} • {formatDate(createdAt)}
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <button className="px-4 py-2 rounded-xl text-sm font-medium bg-black text-white hover:bg-gray-800 transition-colors flex items-center gap-2">
-                            <FiPrinter className="w-4 h-4" />
-                            Print Invoice
-                        </button>
-                        <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
-                            <FiMoreHorizontal className="w-5 h-5" />
-                        </button>
-                    </div>
-                </header>
+                        <div className="flex items-center gap-2">
+                            <button className="px-4 py-2 rounded-xl text-sm font-medium bg-black text-white hover:bg-gray-800 transition-colors flex items-center gap-2">
+                                <FiPrinter className="w-4 h-4" />
+                                Print Invoice
+                            </button>
+                            <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
+                                <FiMoreHorizontal className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </header>
                     <div className="mt-3  space-y-6">
 
                         {/* ─── ORDER SUMMARY CARD ──────────────── */}
@@ -621,7 +638,7 @@ export default function OrderDetailsPage() {
                                             {status === "delivered" && "Order has been delivered."}
                                             {status === "cancelled" && "Order has been cancelled."}
                                             {status === "on-hold" && "Order is on hold."}
-                                            {!["pending","confirmed","processing","shipped","delivered","cancelled","on-hold"].includes(status) && "Status update pending."}
+                                            {!["pending", "confirmed", "processing", "shipped", "delivered", "cancelled", "on-hold"].includes(status) && "Status update pending."}
                                         </p>
                                         <p className="text-xs text-gray-400">
                                             Last Updated: {formatDate(updatedAt)}
