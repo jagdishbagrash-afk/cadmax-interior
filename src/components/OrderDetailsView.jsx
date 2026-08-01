@@ -242,7 +242,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] py-6 sm:py-8 px-3 sm:px-6 lg:px-8 text-gray-800 font-sans">
-      <div className="max-w-5xl mx-auto space-y-5 sm:space-y-6">
+      <div className="max-w-[1430px] mx-auto space-y-5 sm:space-y-6">
         
         {/* TOP BREADCRUMB / BACK LINK */}
         <div className="flex items-center justify-between">
