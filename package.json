@@ -12,6 +12,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@netlify/plugin-nextjs": "^5.14.5",
+    "@react-google-maps/api": "^2.20.8",
     "@reduxjs/toolkit": "^2.11.1",
     "animate.css": "^4.1.1",
     "aos": "^2.3.4",
@@ -34,7 +35,8 @@
     "react-razorpay": "^3.0.1",
     "react-redux": "^9.2.0",
     "react-to-print": "^3.3.0",
-    "swiper": "^12.0.3"
+    "swiper": "^12.0.3",
+    "use-places-autocomplete": "^4.0.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
