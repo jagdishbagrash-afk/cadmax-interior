@@ -100,6 +100,14 @@ class Listing extends Component {
     return Api.get("/address/list",)
   }
 
+  async statesList() {
+    return Api.get("/app/states",)
+  }
+
+  async CityList(state) {
+    return Api.get("/app/cities/:state",)
+  }
+
   async DefalutAddressList(id) {
     return Api.get(`/address/default/${id}`,)
   }
