@@ -886,55 +886,84 @@ export default function Index() {
                             </div>
                           ) : etaDisplay.hasValidData ? (
                             <>
-                              <div className="flex items-start gap-4">
+                              <div className="flex items-start gap-2">
                                 <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
                                   <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                   </svg>
                                 </div>
-                                <div className="flex-1 min-w-0">
-                                  <p className="text-xs font-bold uppercase tracking-wider text-green-800 mb-1">
-                                    Estimated Delivery
-                                  </p>
-                                  <p className="text-xl md:text-2xl font-black text-green-900 leading-tight">
-                                    {etaDisplay.mainDeliveryText}
-                                  </p>
-                                  {etaDisplay.podLabel && (
-                                    <p className="text-xs text-green-700 mt-1 font-medium">
-                                      {etaDisplay.podLabel}
+                                <div className="flex-1">
+                                  <div className="space-y-2">
+                                    <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
+                                      Estimated Delivery
                                     </p>
-                                  )}
-                                  <div className="flex items-center justify-between mt-3 gap-3 flex-wrap">
-                                    <p className="text-xs text-green-700 font-medium">
-                                      Delivery to{" "}
-                                      <span className="font-bold">
-                                        {etaDisplay.deliveryPincode || "—"}
-                                      </span>
-                                    </p>
-                                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-600 text-white text-xs font-bold uppercase tracking-wide shadow-sm">
-                                      Free
-                                    </span>
+
+                                    <h3 className="text-1xl font-bold text-green-900 leading-tight">
+                                      {etaDisplay.mainDeliveryText}
+                                    </h3>
+
+                                    {etaDisplay.podLabel && (
+                                      <p className="text-xs text-green-700">
+                                        {etaDisplay.podLabel}
+                                      </p>
+                                    )}
                                   </div>
+
+                                  {/* <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-green-200 pt-4">
+                                    <div className="flex items-center gap-2">
+                                      <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        className="w-5 h-5 text-green-700"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657A8 8 0 1117.657 16.657z"
+                                        />
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                        />
+                                      </svg>
+
+                                      <div>
+                                        <p className="text-xs text-gray-500">Delivering to</p>
+                                        <p className="font-semibold text-green-900">
+                                          {etaDisplay.deliveryPincode || "—"}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <span className="inline-flex items-center justify-center rounded-full bg-green-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
+                                      FREE Delivery
+                                    </span>
+                                  </div> */}
                                 </div>
                               </div>
                               {etaDisplay.showCutoffChip && (
-                                <div className="mt-4 flex items-center gap-2 rounded-xl bg-gray-100 px-3 py-2.5 text-xs font-medium text-gray-600">
-                                  <svg className="w-4 h-4 text-gray-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <div className="mt-4 flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600">
+                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                   </svg>
-                                  <span className="truncate">{etaDisplay.cutoffLabel}</span>
+                                  {etaDisplay.cutoffLabel}
                                 </div>
                               )}
-                              {(etaDisplay.originCity || etaDisplay.destinationCity) && (
+                              {/* {(etaDisplay.originCity || etaDisplay.destinationCity) && (
                                 <div className="mt-3 flex items-center gap-2 text-[11px] text-green-700/80">
                                   <span className="font-semibold">Route:</span>
-                                  <span className="truncate max-w-[120px]">{etaDisplay.originCity || "—"}</span>
-                                  <svg className="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <span>{etaDisplay.originCity || "—"}</span>
+                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
                                   </svg>
-                                  <span className="truncate max-w-[120px]">{etaDisplay.destinationCity || "—"}</span>
+                                  <span>{etaDisplay.destinationCity || "—"}</span>
                                 </div>
-                              )}
+                              )} */}
                             </>
                           ) : formData.addressId ? null : (
                             <div className="rounded-2xl border-2 border-dashed border-gray-300 p-4">
