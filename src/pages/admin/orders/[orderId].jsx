@@ -190,26 +190,114 @@ export default function AdminOrderDetailsPage() {
     };
   }, [order]);
 
+  const [pincodeEstDelivery, setPincodeEstDelivery] = useState(null);
+
   const shipmentInfo = useMemo(() => {
-    const s = order?.shipment || {};
-    const label = s?.labelData || order?.labelData || {};
+    const s = order?.shipment || rawData?.shipment || rawData?.data?.shipment || {};
+    const o = order || rawData?.order || rawData?.data?.order || {};
+    const formattedWeb = rawData?.formattedForWeb || rawData?.data?.formattedForWeb || order?.formattedForWeb || {};
+    const label = s?.labelData || o?.labelData || {};
+
+    // 1. AWB / Tracking Number Hierarchy
+    const awbNumber =
+      s?.awbNumber ||
+      s?.trackingNumber ||
+      o?.tracking_number ||
+      o?.awbNumber ||
+      formattedWeb?.shipmentDetails?.trackingId ||
+      s?.trackingNo ||
+      o?.trackingNumber ||
+      o?.awb_number ||
+      label?.trackingNumber ||
+      label?.waybillNo ||
+      null;
+
+    // 2. Courier Partner Hierarchy
+    const courierPartner =
+      s?.courierPartner ||
+      o?.courier_name ||
+      formattedWeb?.shipmentDetails?.courierPartner ||
+      s?.courierName ||
+      s?.carrier ||
+      s?.courier ||
+      o?.courier_partner ||
+      label?.carrier ||
+      null;
+
+    // 3. Shipping Status Hierarchy
+    const shippingStatus =
+      s?.shippingStatus ||
+      o?.shipping_status ||
+      formattedWeb?.shipmentDetails?.status ||
+      s?.status ||
+      o?.status ||
+      null;
+
+    // 4. Dispatch Date Hierarchy
+    const dispatchDate =
+      s?.dispatchDate ||
+      formattedWeb?.shipmentDetails?.shippedOn ||
+      o?.createdAt ||
+      s?.shippedOn ||
+      s?.createdAt ||
+      s?.shippedAt ||
+      s?.bookedAt ||
+      null;
+
+    // 5. Estimated Delivery Hierarchy
+    const estDelivery =
+      formattedWeb?.estimatedDeliveryInformation?.estDelivery ||
+      formattedWeb?.estimatedDeliveryInformation?.expectedDateDelivery ||
+      s?.estDelivery ||
+      null;
+
+    // 6. Stepper Timeline / Events Hierarchy
+    const stepperTimeline =
+      formattedWeb?.stepperTimeline?.length > 0
+        ? formattedWeb.stepperTimeline
+        : s?.syncedTransit?.liveTracking?.events?.length > 0
+        ? s.syncedTransit.liveTracking.events
+        : s?.timeline?.length > 0
+        ? s.timeline
+        : s?.shippingTimeline?.length > 0
+        ? s.shippingTimeline
+        : s?.events || [];
+
     return {
-      trackingNumber:
-        s?.trackingNumber ||
-        s?.trackingNo ||
-        order?.trackingNumber ||
-        label?.trackingNumber,
-      courier: s?.carrier || s?.courier || label?.carrier || s?.courierPartner || "Blue Dart",
+      trackingNumber: awbNumber,
+      courier: courierPartner,
+      shippingStatus: shippingStatus,
+      dispatchDate: dispatchDate,
+      estDelivery: estDelivery,
       labelData: label,
-      formattedForWeb:
-        s?.formattedForWeb ||
-        order?.formattedForWeb ||
-        s?.trackingEvents ||
-        [],
-      timeline: s?.timeline || s?.shippingTimeline || s?.events || order?.shippingTimeline || [],
-      createdAt: s?.createdAt || s?.shippedAt || s?.bookedAt,
+      timeline: stepperTimeline,
+      createdAt: dispatchDate,
+      formattedForWeb: formattedWeb,
     };
-  }, [order]);
+  }, [order, rawData]);
+
+  useEffect(() => {
+    const pincode = customerInfo?.pincode;
+    if (!shipmentInfo?.estDelivery && pincode && /^\d{4,10}$/.test(String(pincode).trim())) {
+      const fetchTransitTime = async () => {
+        try {
+          const main = new Listing();
+          const res = await main.GetTransitTimeByPincode({ toPincode: String(pincode).trim() });
+          const resData = res?.data?.data || res?.data || {};
+          const est =
+            resData.expectedDateDelivery ||
+            resData.transitEstimate?.expectedDateDelivery ||
+            resData.estDelivery;
+          if (est) {
+            setPincodeEstDelivery(est);
+          }
+        } catch (err) {
+          console.warn("[ADMIN_ORDER_DETAILS] Pincode transit-time fetch notice:", err?.message);
+        }
+      };
+      fetchTransitTime();
+    }
+  }, [customerInfo?.pincode, shipmentInfo?.estDelivery]);
 
   const auditInfo = useMemo(() => {
     const a = order?.approvalAudit || order?.audit || {};
@@ -755,7 +843,7 @@ export default function AdminOrderDetailsPage() {
           shipmentInfo.timeline?.length > 0 ||
           shipmentInfo.formattedForWeb?.length > 0 ? (
             <div className="space-y-5">
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                     Tracking No.
@@ -769,27 +857,35 @@ export default function AdminOrderDetailsPage() {
                     Courier
                   </p>
                   <p className="text-sm font-bold text-gray-900 mt-1">
-                    {shipmentInfo.courier}
+                    {shipmentInfo.courier || "-"}
                   </p>
                 </div>
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                    Booked At
+                    Status
+                  </p>
+                  <p className="text-sm font-bold text-gray-900 mt-1 capitalize">
+                    {shipmentInfo.shippingStatus || "-"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
+                    Dispatched / Booked
                   </p>
                   <p className="text-sm font-semibold text-gray-800 mt-1">
-                    {shipmentInfo.createdAt
-                      ? moment(shipmentInfo.createdAt).format("DD MMM YYYY, hh:mm A")
+                    {shipmentInfo.dispatchDate
+                      ? moment(shipmentInfo.dispatchDate).isValid()
+                        ? moment(shipmentInfo.dispatchDate).format("DD MMM YYYY, hh:mm A")
+                        : String(shipmentInfo.dispatchDate)
                       : "-"}
                   </p>
                 </div>
                 <div className="rounded-xl border border-gray-200 bg-gray-50 p-4">
                   <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                    Label Ref.
+                    Est. Delivery
                   </p>
-                  <p className="text-sm font-semibold text-gray-800 mt-1 font-mono break-all">
-                    {shipmentInfo.labelData?.waybillNo ||
-                      shipmentInfo.labelData?.customerCode ||
-                      "-"}
+                  <p className="text-sm font-semibold text-green-700 mt-1">
+                    {shipmentInfo.estDelivery || pincodeEstDelivery || "-"}
                   </p>
                 </div>
               </div>
