@@ -146,6 +146,148 @@ export default function OrderDetailsView({ orderIdProp }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  const extractPincode = (str) => {
+    if (!str) return null;
+    const match = String(str).match(/\b\d{6}\b/);
+    return match ? match[0] : null;
+  };
+
+  const mapLiveTrackingEventsToStepper = (events) => {
+    if (!Array.isArray(events) || events.length === 0) return null;
+    return events.map((evt, idx) => ({
+      step: idx + 1,
+      key: evt.key || evt.status || `step_${idx + 1}`,
+      title: evt.title || evt.status || evt.event || evt.label || `Event ${idx + 1}`,
+      completed: evt.completed ?? true,
+      timestamp: evt.timestamp || evt.date || evt.time || evt.shippedOn || "--",
+      iconType: evt.iconType || (idx === 0 ? "cart" : idx === 1 ? "check" : idx === 2 ? "truck" : idx === 3 ? "box" : "delivered"),
+    }));
+  };
+
+  const mergeOrderData = (apiData) => {
+    const dataShipment = apiData?.shipment || apiData?.data?.shipment || {};
+    const dataOrder = apiData?.order || apiData?.data?.order || {};
+    const formattedWeb = apiData?.formattedForWeb || apiData?.data?.formattedForWeb || {};
+
+    const rawShipmentDetails = formattedWeb?.shipmentDetails || apiData?.shipmentDetails || {};
+    const rawEstDelivery = formattedWeb?.estimatedDeliveryInformation || apiData?.estimatedDeliveryInformation || {};
+
+    // 1. AWB / Tracking Number Hierarchy
+    const awbNumber =
+      dataShipment?.awbNumber ||
+      dataShipment?.trackingNumber ||
+      dataOrder?.tracking_number ||
+      dataOrder?.awbNumber ||
+      formattedWeb?.shipmentDetails?.trackingId ||
+      rawShipmentDetails?.trackingId ||
+      dataShipment?.trackingNo ||
+      dataOrder?.trackingNumber ||
+      dataOrder?.awb_number ||
+      apiData?.trackingNumber ||
+      apiData?.awbNumber ||
+      apiData?.tracking_number ||
+      DEFAULT_ORDER_DATA.shipmentDetails.trackingId;
+
+    // 2. Courier Partner Hierarchy
+    const courierPartner =
+      dataShipment?.courierPartner ||
+      dataOrder?.courier_name ||
+      formattedWeb?.shipmentDetails?.courierPartner ||
+      rawShipmentDetails?.courierPartner ||
+      dataShipment?.courierName ||
+      dataShipment?.carrier ||
+      dataShipment?.courier ||
+      dataOrder?.courier_partner ||
+      DEFAULT_ORDER_DATA.shipmentDetails.courierPartner;
+
+    // 3. Shipping Status Hierarchy
+    const shippingStatus =
+      dataShipment?.shippingStatus ||
+      dataOrder?.shipping_status ||
+      rawShipmentDetails?.status ||
+      dataShipment?.status ||
+      dataOrder?.status ||
+      DEFAULT_ORDER_DATA.shipmentDetails.status;
+
+    // 4. Dispatch Date Hierarchy
+    const dispatchDate =
+      dataShipment?.dispatchDate ||
+      formattedWeb?.shipmentDetails?.shippedOn ||
+      dataOrder?.createdAt ||
+      rawShipmentDetails?.shippedOn ||
+      dataShipment?.shippedOn ||
+      dataShipment?.createdAt ||
+      DEFAULT_ORDER_DATA.shipmentDetails.shippedOn;
+
+    // Stepper Timeline: data.formattedForWeb.stepperTimeline || data.shipment.syncedTransit.liveTracking.events
+    let stepperEvents =
+      formattedWeb?.stepperTimeline?.length > 0
+        ? formattedWeb.stepperTimeline
+        : apiData?.stepperTimeline?.length > 0
+        ? apiData.stepperTimeline
+        : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
+        ? mapLiveTrackingEventsToStepper(dataShipment.syncedTransit.liveTracking.events)
+        : DEFAULT_ORDER_DATA.stepperTimeline;
+
+    // Estimated Delivery Hierarchy
+    const estDeliveryVal =
+      formattedWeb?.estimatedDeliveryInformation?.estDelivery ||
+      rawEstDelivery?.estDelivery ||
+      rawEstDelivery?.expectedDateDelivery ||
+      dataShipment?.estDelivery;
+
+    return {
+      orderHeader: {
+        ...DEFAULT_ORDER_DATA.orderHeader,
+        ...apiData.orderHeader,
+        orderId: dataOrder?.orderId
+          ? (String(dataOrder.orderId).startsWith("#") ? dataOrder.orderId : `#${dataOrder.orderId}`)
+          : (apiData.orderHeader?.orderId || DEFAULT_ORDER_DATA.orderHeader.orderId),
+        rawOrderId: dataOrder?.orderId || apiData.orderHeader?.rawOrderId || DEFAULT_ORDER_DATA.orderHeader.rawOrderId,
+        status: shippingStatus || apiData.orderHeader?.status || DEFAULT_ORDER_DATA.orderHeader.status,
+      },
+      stepperTimeline: stepperEvents,
+      products:
+        apiData.products?.length > 0
+          ? apiData.products
+          : DEFAULT_ORDER_DATA.products,
+      shippingAddress: {
+        ...DEFAULT_ORDER_DATA.shippingAddress,
+        ...apiData.shippingAddress,
+      },
+      paymentMethod: {
+        ...DEFAULT_ORDER_DATA.paymentMethod,
+        ...apiData.paymentMethod,
+      },
+      orderSummary: {
+        ...DEFAULT_ORDER_DATA.orderSummary,
+        ...apiData.orderSummary,
+      },
+      shipmentDetails: {
+        ...DEFAULT_ORDER_DATA.shipmentDetails,
+        ...rawShipmentDetails,
+        trackingId: awbNumber,
+        courierPartner: courierPartner,
+        status: shippingStatus,
+        shippedOn: dispatchDate,
+      },
+      estimatedDeliveryInformation: {
+        ...DEFAULT_ORDER_DATA.estimatedDeliveryInformation,
+        ...rawEstDelivery,
+        estDelivery: estDeliveryVal || DEFAULT_ORDER_DATA.estimatedDeliveryInformation.estDelivery,
+        orderedOn: dataOrder?.createdAt
+          ? (typeof dataOrder.createdAt === "string" && dataOrder.createdAt.includes("T")
+              ? new Date(dataOrder.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+              : dataOrder.createdAt)
+          : (rawEstDelivery?.orderedOn || DEFAULT_ORDER_DATA.estimatedDeliveryInformation.orderedOn),
+      },
+      footerActions: {
+        ...DEFAULT_ORDER_DATA.footerActions,
+        ...apiData.footerActions,
+      },
+    };
+  };
+
   useEffect(() => {
     if (!orderId) return;
 
@@ -156,10 +298,46 @@ export default function OrderDetailsView({ orderIdProp }) {
         const listing = new Listing();
         const res = await listing.GetWebOrderDetails(orderId);
 
-        if (res?.data?.data) {
-          setOrderData(mergeOrderData(res.data.data));
-        } else if (res?.data && res.data.orderHeader) {
-          setOrderData(mergeOrderData(res.data));
+        const payload = res?.data?.data || res?.data || {};
+        if (payload) {
+          const merged = mergeOrderData(payload);
+          setOrderData(merged);
+
+          // Pincode Transit Tracking fallback hit if estimated delivery is missing
+          const currentEst =
+            payload?.formattedForWeb?.estimatedDeliveryInformation?.estDelivery ||
+            payload?.data?.formattedForWeb?.estimatedDeliveryInformation?.estDelivery ||
+            payload?.estimatedDeliveryInformation?.estDelivery;
+
+          const targetPincode =
+            payload?.shippingAddress?.pincode ||
+            payload?.order?.addressId?.pincode ||
+            payload?.data?.order?.addressId?.pincode ||
+            extractPincode(payload?.shippingAddress?.address) ||
+            extractPincode(DEFAULT_ORDER_DATA.shippingAddress.address);
+
+          if (!currentEst && targetPincode && /^\d{4,10}$/.test(String(targetPincode).trim())) {
+            try {
+              const transitRes = await listing.GetTransitTimeByPincode({ toPincode: String(targetPincode).trim() });
+              const transitData = transitRes?.data?.data || transitRes?.data || {};
+              const fetchedEst =
+                transitData.expectedDateDelivery ||
+                transitData.transitEstimate?.expectedDateDelivery ||
+                transitData.estDelivery;
+
+              if (fetchedEst) {
+                setOrderData((prev) => ({
+                  ...prev,
+                  estimatedDeliveryInformation: {
+                    ...prev.estimatedDeliveryInformation,
+                    estDelivery: fetchedEst,
+                  },
+                }));
+              }
+            } catch (transitErr) {
+              console.warn("Pincode transit time fetch notice:", transitErr?.message);
+            }
+          }
         }
       } catch (err) {
         console.warn("Using fallback default order design data:", err);
@@ -179,47 +357,6 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   }
 
-  const mergeOrderData = (apiData) => {
-    return {
-      orderHeader: {
-        ...DEFAULT_ORDER_DATA.orderHeader,
-        ...apiData.orderHeader,
-      },
-      stepperTimeline:
-        apiData.stepperTimeline?.length > 0
-          ? apiData.stepperTimeline
-          : DEFAULT_ORDER_DATA.stepperTimeline,
-      products:
-        apiData.products?.length > 0
-          ? apiData.products
-          : DEFAULT_ORDER_DATA.products,
-      shippingAddress: {
-        ...DEFAULT_ORDER_DATA.shippingAddress,
-        ...apiData.shippingAddress,
-      },
-      paymentMethod: {
-        ...DEFAULT_ORDER_DATA.paymentMethod,
-        ...apiData.paymentMethod,
-      },
-      orderSummary: {
-        ...DEFAULT_ORDER_DATA.orderSummary,
-        ...apiData.orderSummary,
-      },
-      shipmentDetails: {
-        ...DEFAULT_ORDER_DATA.shipmentDetails,
-        ...apiData.shipmentDetails,
-      },
-      estimatedDeliveryInformation: {
-        ...DEFAULT_ORDER_DATA.estimatedDeliveryInformation,
-        ...apiData.estimatedDeliveryInformation,
-      },
-      footerActions: {
-        ...DEFAULT_ORDER_DATA.footerActions,
-        ...apiData.footerActions,
-      },
-    };
-  };
-
   const handleDownloadInvoice = () => {
     if (typeof window !== "undefined") {
       window.print();
@@ -228,7 +365,11 @@ export default function OrderDetailsView({ orderIdProp }) {
 
   const handleTrackShipment = () => {
     const trackingId = orderData.shipmentDetails?.trackingId || "1234567890";
-    alert(`Tracking Shipment #${trackingId} via ${orderData.shipmentDetails?.courierPartner}`);
+    if (trackingId && trackingId !== "1234567890") {
+      router.push?.(`/shipment/track/${encodeURIComponent(trackingId)}?courier=${encodeURIComponent(orderData.shipmentDetails?.courierPartner || "")}`);
+    } else {
+      alert(`Tracking Shipment #${trackingId} via ${orderData.shipmentDetails?.courierPartner}`);
+    }
   };
 
   const header = orderData.orderHeader;

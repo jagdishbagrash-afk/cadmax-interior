@@ -275,6 +275,26 @@ class Listing extends Component {
     return Api.get(`/web/order/details/${orderId}`);
   }
 
+  async adminGetAllOrders(data) {
+    console.log("[ADMIN_ORDERS] Fetching admin orders list");
+    return Api.get("/order/admin/orders", data);
+  }
+
+  async adminGetOrderDetails(orderId) {
+    console.log("[ADMIN_ORDER_DETAILS] Fetching order details", { orderId });
+    return Api.get(`/order/admin/order/details/${orderId}`);
+  }
+
+  async adminApproveOrder(orderId) {
+    console.log("[ADMIN_APPROVE] Approving order", { orderId });
+    return Api.post(`/order/admin/approve/${orderId}`);
+  }
+
+  async adminRejectOrder(orderId, payload) {
+    console.log("[ADMIN_REJECT] Rejecting order", { orderId, payload });
+    return Api.post(`/order/admin/reject/${orderId}`, payload);
+  }
+
   async deleteProduct(data) {
     return Api.post(`/product/delete/${data}`);
   }

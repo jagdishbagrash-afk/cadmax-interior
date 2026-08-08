@@ -50,12 +50,13 @@ export default function OrderDetailsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // ─── STATE FOR STATUS UPDATE MODAL ──────────────────────
+    // ─── STATE FOR STATUS UPDATE MODAL & TRANSIT ─────────────
     const [showModal, setShowModal] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState("");
     const [note, setNote] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalAction, setModalAction] = useState(""); // "approve", "cancel", "hold", "note"
+    const [pincodeEstDelivery, setPincodeEstDelivery] = useState(null);
 
     const fetchData = async (id) => {
         try {
@@ -79,6 +80,60 @@ export default function OrderDetailsPage() {
     useEffect(() => {
         if (id) fetchData(id);
     }, [id]);
+
+    // ─── PINCODE-BASED TRANSIT TIME FETCH ────────────────────
+    useEffect(() => {
+        if (!project) return;
+
+        const currentEst =
+            project?.formattedForWeb?.estimatedDeliveryInformation?.estDelivery ||
+            project?.formattedForWeb?.estimatedDeliveryInformation?.expectedDateDelivery ||
+            project?.delivered_at ||
+            project?.shipment?.estDelivery;
+
+        if (currentEst) return;
+
+        const extractPincode = (projectObj) => {
+            if (!projectObj) return null;
+            const addr = projectObj.addressId || projectObj.shippingAddress || projectObj.address || {};
+            const direct = addr.pincode || addr.zip || addr.postalCode || projectObj.pincode;
+            if (direct && /^\d{4,10}$/.test(String(direct).trim())) return String(direct).trim();
+
+            const fullStr = [
+                addr.street_address,
+                addr.address1,
+                addr.street,
+                addr.address,
+                addr.city,
+                addr.state,
+                projectObj.address,
+            ].filter(Boolean).join(" ");
+
+            const match = fullStr.match(/\b\d{6}\b/);
+            return match ? match[0] : null;
+        };
+
+        const targetPincode = extractPincode(project);
+        if (targetPincode && /^\d{4,10}$/.test(targetPincode)) {
+            const fetchTransitTime = async () => {
+                try {
+                    const main = new Listing();
+                    const res = await main.GetTransitTimeByPincode({ toPincode: targetPincode });
+                    const resData = res?.data?.data || res?.data || {};
+                    const est =
+                        resData.expectedDateDelivery ||
+                        resData.transitEstimate?.expectedDateDelivery ||
+                        resData.estDelivery;
+                    if (est) {
+                        setPincodeEstDelivery(est);
+                    }
+                } catch (err) {
+                    console.warn("Pincode transit time fetch notice:", err?.message);
+                }
+            };
+            fetchTransitTime();
+        }
+    }, [project]);
 
     // ─── HELPERS ──────────────────────────────────────────────
     const formatDate = (dateStr) => {
@@ -260,7 +315,7 @@ export default function OrderDetailsPage() {
         createdAt,
         updatedAt,
         shipping_status = "pending",
-        courier_name = "N/A",
+        courier_name = "BLUE_DART",
         shipping_timeline = [],
         addressId,
         userId,
@@ -272,6 +327,78 @@ export default function OrderDetailsPage() {
     const user = userId || {};
     const address = addressId || {};
 
+    // ─── RESOLVE SHIPMENT DETAILS WITH HIERARCHY ─────────────
+    const dataShipment = project?.shipment || {};
+    const formattedWeb = project?.formattedForWeb || {};
+    const rawShipmentDetails = formattedWeb?.shipmentDetails || {};
+    const rawEstDelivery = formattedWeb?.estimatedDeliveryInformation || {};
+
+    const resolvedAwbNumber =
+        dataShipment?.awbNumber ||
+        dataShipment?.trackingNumber ||
+        project?.tracking_number ||
+        project?.trackingNumber ||
+        project?.awbNumber ||
+        project?.awb_number ||
+        project?.trackingId ||
+        formattedWeb?.shipmentDetails?.trackingId ||
+        rawShipmentDetails?.trackingId ||
+        dataShipment?.trackingNo ||
+        project?.labelData?.trackingNumber ||
+        project?.labelData?.waybillNo ||
+        project?.shipping_response?.AWBNo ||
+        project?.shipping_response?.awbNumber ||
+        "N/A";
+
+    const resolvedCourierName =
+        dataShipment?.courierPartner ||
+        project?.courier_name ||
+        project?.courierPartner ||
+        formattedWeb?.shipmentDetails?.courierPartner ||
+        rawShipmentDetails?.courierPartner ||
+        dataShipment?.courierName ||
+        dataShipment?.carrier ||
+        dataShipment?.courier ||
+        courier_name ||
+        "BLUE_DART";
+
+    const resolvedShippingStatus =
+        dataShipment?.shippingStatus ||
+        project?.shipping_status ||
+        rawShipmentDetails?.status ||
+        dataShipment?.status ||
+        shipping_status ||
+        status ||
+        "pending";
+
+    const resolvedDispatchDate =
+        dataShipment?.dispatchDate ||
+        formattedWeb?.shipmentDetails?.shippedOn ||
+        rawShipmentDetails?.shippedOn ||
+        dispatched_at ||
+        dataShipment?.shippedOn ||
+        dataShipment?.createdAt ||
+        createdAt ||
+        null;
+
+    const resolvedDeliveryDate =
+        formattedWeb?.estimatedDeliveryInformation?.estDelivery ||
+        rawEstDelivery?.estDelivery ||
+        rawEstDelivery?.expectedDateDelivery ||
+        delivered_at ||
+        dataShipment?.estDelivery ||
+        pincodeEstDelivery ||
+        null;
+
+    const isOrderApproved =
+        project?.admin_approval_status === "approved" ||
+        status === "confirmed" ||
+        status === "approved" ||
+        status === "shipped" ||
+        status === "delivered" ||
+        resolvedShippingStatus === "shipment_created" ||
+        (resolvedAwbNumber && resolvedAwbNumber !== "N/A");
+
     // Calculate totals
     const subtotal = product.reduce((sum, p) => sum + (p.total || p.price * p.quantity || 0), 0);
     const discountTotal = product.reduce((sum, p) => sum + ((p.originalPrice - p.price) * p.quantity || 0), 0);
@@ -279,18 +406,31 @@ export default function OrderDetailsPage() {
     const finalTotal = amount || subtotal;
 
     // Build timeline
-    const timelineItems = shipping_timeline.length > 0
-        ? shipping_timeline.map((item) => ({
-            status: item.status,
-            date: formatDate(item.date) || item.date,
-            active: true,
-        }))
-        : [
-            { status: "Order Placed", date: formatDate(createdAt), active: true },
-            { status: "Payment Success", date: formatDate(createdAt), active: true },
-            { status: "Shipped", date: formatDate(dispatched_at), active: !!dispatched_at },
-            { status: "Delivered", date: formatDate(delivered_at), active: !!delivered_at },
-        ].filter(item => item.date !== "N/A");
+    const timelineItems =
+        formattedWeb?.stepperTimeline?.length > 0
+            ? formattedWeb.stepperTimeline.map((item) => ({
+                status: item.title || item.status,
+                date: item.timestamp || "--",
+                active: item.completed ?? true,
+            }))
+            : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
+            ? dataShipment.syncedTransit.liveTracking.events.map((item) => ({
+                status: item.status || item.title || item.event,
+                date: item.timestamp || item.date || item.time || "--",
+                active: true,
+            }))
+            : shipping_timeline.length > 0
+            ? shipping_timeline.map((item) => ({
+                status: item.status,
+                date: formatDate(item.date) || item.date,
+                active: true,
+            }))
+            : [
+                { status: "Order Placed", date: formatDate(createdAt), active: true },
+                { status: "Payment Success", date: formatDate(createdAt), active: true },
+                { status: "Shipped", date: formatDate(resolvedDispatchDate), active: !!resolvedDispatchDate && resolvedDispatchDate !== "N/A" },
+                { status: "Delivered", date: formatDate(resolvedDeliveryDate), active: !!resolvedDeliveryDate && resolvedDeliveryDate !== "N/A" },
+            ].filter(item => item.date !== "N/A");
 
     // ─── RENDER ───────────────────────────────────────────────
     return (
@@ -480,25 +620,25 @@ export default function OrderDetailsPage() {
                                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Courier Partner</p>
-                                            <p className="text-sm font-medium text-gray-700 mt-1">{courier_name || "N/A"}</p>
+                                            <p className="text-sm font-medium text-gray-700 mt-1">{resolvedCourierName}</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">AWB Number</p>
-                                            <p className="text-sm font-medium text-gray-700 mt-1 font-mono">{project.awb_number || "N/A"}</p>
+                                            <p className="text-sm font-medium text-gray-700 mt-1 font-mono">{resolvedAwbNumber}</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Shipping Status</p>
-                                            <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(shipping_status)}`}>
-                                                {shipping_status}
+                                            <span className={`inline-block mt-1 px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(resolvedShippingStatus)}`}>
+                                                {resolvedShippingStatus}
                                             </span>
                                         </div>
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Dispatch Date</p>
-                                            <p className="text-sm font-medium text-gray-700 mt-1">{formatDate(dispatched_at) || "N/A"}</p>
+                                            <p className="text-sm font-medium text-gray-700 mt-1">{resolvedDispatchDate ? formatDate(resolvedDispatchDate) : "N/A"}</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Delivery Date</p>
-                                            <p className="text-sm font-medium text-gray-700 mt-1">{formatDate(delivered_at) || "N/A"}</p>
+                                            <p className="text-sm font-medium text-gray-700 mt-1">{resolvedDeliveryDate ? formatDate(resolvedDeliveryDate) : "N/A"}</p>
                                         </div>
                                         <div>
                                             <p className="text-[10px] uppercase tracking-wider text-gray-400 font-semibold">Last Updated</p>
@@ -580,42 +720,44 @@ export default function OrderDetailsPage() {
                                 </div>
 
                                 {/* ─── ADMIN ACTIONS ────────────── */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                                    <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
-                                        <FiClipboard className="w-4 h-4 text-gray-400" />
-                                        Admin Actions
-                                    </h3>
-                                    <div className="space-y-2">
-                                        <button
-                                            onClick={() => openModal("approve")}
-                                            className="w-full px-4 py-2.5 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200 hover:bg-green-100 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <FiCheckCircle className="w-4 h-4" />
-                                            Approve Order
-                                        </button>
-                                        <button
-                                            onClick={() => openModal("cancel")}
-                                            className="w-full px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <FiXCircle className="w-4 h-4" />
-                                            Cancel Order
-                                        </button>
-                                        <button
-                                            onClick={() => openModal("hold")}
-                                            className="w-full px-4 py-2.5 rounded-xl bg-yellow-50 text-yellow-700 text-sm font-medium border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <FiClock className="w-4 h-4" />
-                                            Hold Order
-                                        </button>
-                                        <button
-                                            onClick={() => openModal("note")}
-                                            className="w-full px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
-                                        >
-                                            <FiMessageSquare className="w-4 h-4" />
-                                            Add Order Note
-                                        </button>
+                                {!isOrderApproved && (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                        <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                            <FiClipboard className="w-4 h-4 text-gray-400" />
+                                            Admin Actions
+                                        </h3>
+                                        <div className="space-y-2">
+                                            <button
+                                                onClick={() => openModal("approve")}
+                                                className="w-full px-4 py-2.5 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200 hover:bg-green-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <FiCheckCircle className="w-4 h-4" />
+                                                Approve Order
+                                            </button>
+                                            <button
+                                                onClick={() => openModal("cancel")}
+                                                className="w-full px-4 py-2.5 rounded-xl bg-red-50 text-red-600 text-sm font-medium border border-red-200 hover:bg-red-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <FiXCircle className="w-4 h-4" />
+                                                Cancel Order
+                                            </button>
+                                            <button
+                                                onClick={() => openModal("hold")}
+                                                className="w-full px-4 py-2.5 rounded-xl bg-yellow-50 text-yellow-700 text-sm font-medium border border-yellow-200 hover:bg-yellow-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <FiClock className="w-4 h-4" />
+                                                Hold Order
+                                            </button>
+                                            <button
+                                                onClick={() => openModal("note")}
+                                                className="w-full px-4 py-2.5 rounded-xl bg-blue-50 text-blue-700 text-sm font-medium border border-blue-200 hover:bg-blue-100 transition-colors flex items-center justify-center gap-2"
+                                            >
+                                                <FiMessageSquare className="w-4 h-4" />
+                                                Add Order Note
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* ─── ORDER STATUS ──────────────── */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
