@@ -271,6 +271,33 @@ export default function Index() {
                                             const isPending = currentStatus === "pending";
                                             const isProcessing = currentStatus === "processing";
 
+                                            const resolvedAwb =
+                                                 order?.awbNumber ||
+                                                 order?.trackingNumber ||
+                                                 order?.tracking_number ||
+                                                 order?.awb_number ||
+                                                 order?.trackingId ||
+                                                 order?.shipment?.awbNumber ||
+                                                 order?.shipment?.trackingNumber ||
+                                                 order?.formattedForWeb?.shipmentDetails?.trackingId ||
+                                                 order?.labelData?.trackingNumber ||
+                                                 order?.labelData?.waybillNo ||
+                                                 order?.shipping_response?.AWBNo ||
+                                                 order?.shipping_response?.awbNumber ||
+                                                 order?.shipping_meta?.trackingNumber ||
+                                                 order?.awb ||
+                                                 null;
+
+                                             const resolvedCourier =
+                                                 order?.courierPartner ||
+                                                 order?.courier_name ||
+                                                 order?.courierPartner ||
+                                                 order?.shipment?.courierPartner ||
+                                                 order?.formattedForWeb?.shipmentDetails?.courierPartner ||
+                                                 order?.shipment?.carrier ||
+                                                 order?.courier ||
+                                                 "BLUE_DART";
+
                                             // Sample product items for display
                                             const sampleItems = order?.product
                                                 ? Array.isArray(order.product)
@@ -378,25 +405,21 @@ export default function Index() {
                                                                 }
                                                             `}
                                                         >
-                                                            <option value="pending">Pending</option>
-                                                            <option value="confirmed">Confirmed</option>
-                                                            <option value="processing">Processing</option>
-                                                            <option value="ready_to_ship">Ready to Ship</option>
-                                                            <option value="shipped">Shipped</option>
-                                                            <option value="delivered">Delivered</option>
-                                                            <option value="cancelled">Cancelled</option>
+                                                            {isPending && <option value="pending">Pending</option>}
+                                                            <option value="confirmed">Approved</option>
+                                                            <option value="cancelled">Rejected</option>
                                                         </select>
                                                     </td>
 
                                                     {/* AWB / TRACKING */}
                                                     <td className="px-4 py-3.5">
-                                                        {isShipped || isDelivered ? (
+                                                        {resolvedAwb ? (
                                                             <div className="flex flex-col">
-                                                                <span className="font-mono text-[10px] text-gray-600">
-                                                                    {order?.awb || "12345678901"}
+                                                                <span className="font-mono text-xs font-semibold text-gray-800">
+                                                                    {resolvedAwb}
                                                                 </span>
-                                                                <span className="text-[10px] text-gray-400">
-                                                                    {order?.courier || "Blue Dart"}
+                                                                <span className="text-[10px] text-gray-500 font-medium">
+                                                                    {resolvedCourier}
                                                                 </span>
                                                             </div>
                                                         ) : (
@@ -414,6 +437,17 @@ export default function Index() {
                                                             >
                                                                 <FiEye className="w-4 h-4" />
                                                             </Link>
+                                                            {resolvedAwb && (
+                                                                <a
+                                                                    href={`/shipment/label-preview?orderId=${encodeURIComponent(order._id || order.orderId)}`}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    className="p-1.5 rounded-lg hover:bg-blue-50 transition-colors text-blue-600 hover:text-blue-700"
+                                                                    title="Download / Print Shipment Label PDF"
+                                                                >
+                                                                    <FiDownload className="w-4 h-4" />
+                                                                </a>
+                                                            )}
                                                         </div>
                                                     </td>
                                                 </tr>

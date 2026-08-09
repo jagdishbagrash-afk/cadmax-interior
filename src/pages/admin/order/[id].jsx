@@ -42,6 +42,9 @@ import AdminLayout from "../common/AdminLayout";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
+import ShippingLabel from "@/components/shipping-label/ShippingLabel";
+import { exportShippingLabelPdf } from "@/components/shipping-label/exportShippingLabelPdf";
+import { useReactToPrint } from "react-to-print";
 
 export default function OrderDetailsPage() {
     const router = useRouter();
@@ -57,6 +60,8 @@ export default function OrderDetailsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [modalAction, setModalAction] = useState(""); // "approve", "cancel", "hold", "note"
     const [pincodeEstDelivery, setPincodeEstDelivery] = useState(null);
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+    const labelRef = useRef(null);
 
     const fetchData = async (id) => {
         try {
@@ -227,6 +232,123 @@ export default function OrderDetailsPage() {
         } catch (error) {
             console.log("Error:", error);
             toast.error(error?.response?.data?.message || "Something went wrong");
+        }
+    };
+
+    // ─── DYNAMIC SHIPPING LABEL GENERATION & PDF EXPORT ───────
+    const normalizedLabelData = useMemo(() => {
+        if (!project) return null;
+        const address = project.addressId || project.shippingAddress || project.address || {};
+        const dataShipment = project.shipment || {};
+        const formattedWeb = project.formattedForWeb || {};
+
+        const resolvedAwb =
+            dataShipment?.awbNumber ||
+            dataShipment?.trackingNumber ||
+            project?.tracking_number ||
+            project?.trackingNumber ||
+            project?.awbNumber ||
+            project?.awb_number ||
+            project?.trackingId ||
+            formattedWeb?.shipmentDetails?.trackingId ||
+            project?.labelData?.trackingNumber ||
+            project?.labelData?.waybillNo ||
+            "N/A";
+
+        const items = Array.isArray(project.product)
+            ? project.product.map((p) => ({
+                name: p.name || p.title || "Item",
+                qty: p.quantity || p.qty || 1,
+                price: p.price || 0,
+                sku: p.sku || "",
+            }))
+            : [];
+
+        return {
+            orderId: project.orderId || project._id || "",
+            orderNumber: project.orderId || project._id || "",
+            paymentId: project.PaymentId || project.paymentId || "",
+            paymentMethod: project.paymentMethod || "ONLINE",
+            shippingStatus: dataShipment?.shippingStatus || project.shipping_status || project.status || "shipped",
+            courierName: dataShipment?.courierPartner || project.courier_name || "BLUE_DART",
+            trackingNumber: resolvedAwb,
+            labelData: {
+                bookingDate: project.createdAt ? new Date(project.createdAt).toLocaleDateString("en-IN") : "",
+                serviceType: "Surface / Express",
+                carrier: {
+                    provider: "BLUE_DART",
+                    blueDart: {
+                        customerCode: "000049",
+                        productCode: "A",
+                        subProductCode: "P",
+                        originArea: "DEL",
+                        destinationArea: address.city || "JAI",
+                        destinationLocation: address.city || "JAIPUR",
+                    },
+                },
+                shipTo: {
+                    name: project.name || address.name || "Customer",
+                    phone: project.mobile || address.mobile || address.phone || "",
+                    address1: address.street_address || address.address1 || address.address || "",
+                    city: address.city || "",
+                    state: address.state || "",
+                    pincode: address.pincode || "",
+                    fullAddress: [
+                        address.street_address || address.address1 || address.address,
+                        address.city,
+                        address.state,
+                        address.pincode ? `- ${address.pincode}` : "",
+                        "India",
+                    ].filter(Boolean).join(", "),
+                },
+                shipFrom: {
+                    name: "CADMAX ATELIER",
+                    phone: "9876543210",
+                    fullAddress: "CADMAX Atelier HQ, Industrial Area, Jaipur, Rajasthan - 302020, India",
+                    city: "Jaipur",
+                    state: "Rajasthan",
+                    pincode: "302020",
+                },
+                items: items,
+                package: {
+                    weight: "1.5 kg",
+                    dimensions: "30 x 20 x 15 cm",
+                    totalAmount: project.amount || 0,
+                },
+                ...(project.labelData || {}),
+            },
+        };
+    }, [project]);
+
+    const triggerPrint = useReactToPrint({
+        contentRef: labelRef,
+        documentTitle: `shipment-label-${project?.orderId || "order"}`,
+        pageStyle: "@page { size: A4 portrait; margin: 10mm; } body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }",
+    });
+
+    const handlePrintLabel = () => {
+        if (!labelRef.current) {
+            toast.error("Label element not ready for printing.");
+            return;
+        }
+        triggerPrint();
+    };
+
+    const handleDownloadLabel = async () => {
+        if (!labelRef.current || isDownloadingPdf) return;
+        try {
+            setIsDownloadingPdf(true);
+            const toastId = toast.loading("Generating shipment label PDF...");
+            await exportShippingLabelPdf({
+                element: labelRef.current,
+                fileName: `shipment-label-${project?.orderId || "order"}.pdf`,
+            });
+            toast.success("Shipment label PDF downloaded successfully!", { id: toastId });
+        } catch (err) {
+            console.error("PDF download error:", err);
+            toast.error("Failed to generate PDF label. Please try again.");
+        } finally {
+            setIsDownloadingPdf(false);
         }
     };
 
@@ -693,11 +815,17 @@ export default function OrderDetailsPage() {
                                             </span>
                                         </div>
                                         <div className="flex gap-2">
-                                            <button className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5">
+                                            <button
+                                                onClick={handlePrintLabel}
+                                                className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
+                                            >
                                                 <FiPrinter className="w-3.5 h-3.5" />
                                                 Print Label
                                             </button>
-                                            <button className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5">
+                                            <button
+                                                onClick={handleDownloadLabel}
+                                                className="flex-1 px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
+                                            >
                                                 <FiDownload className="w-3.5 h-3.5" />
                                                 Download Label
                                             </button>
@@ -796,36 +924,6 @@ export default function OrderDetailsPage() {
                             </div>
                         </div>
 
-                        {/* ─── ORDER TIMELINE ──────────────────── */}
-                        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                            <h3 className="text-sm font-bold text-gray-800 mb-6 flex items-center gap-2">
-                                <FiClock className="w-4 h-4 text-gray-400" />
-                                Order Timeline
-                            </h3>
-                            {timelineItems.length > 0 ? (
-                                <div className="relative pl-8 space-y-6 before:absolute before:left-3 before:top-2 before:bottom-2 before:w-0.5 before:bg-gray-200">
-                                    {timelineItems.map((item, idx) => (
-                                        <div key={idx} className="relative">
-                                            <div className={`
-                                                absolute -left-8 top-1.5 w-4 h-4 rounded-full border-2
-                                                ${item.active ? "bg-green-500 border-green-500" : "bg-gray-200 border-gray-300"}
-                                            `} />
-                                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
-                                                <span className={`text-sm font-medium ${item.active ? "text-gray-800" : "text-gray-400"}`}>
-                                                    {item.status}
-                                                </span>
-                                                <span className={`text-xs ${item.active ? "text-gray-500" : "text-gray-400"}`}>
-                                                    {item.date}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="text-sm text-gray-500">No timeline events available.</p>
-                            )}
-                        </div>
-
                     </div>
                 </div>
             </div>
@@ -912,6 +1010,11 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             )}
+
+            {/* HIDDEN SHIPPING LABEL FOR DIRECT PRINT/DOWNLOAD */}
+            <div style={{ position: "fixed", top: "-10000px", left: "-10000px", zIndex: -1000, pointerEvents: "none" }}>
+                {normalizedLabelData && <ShippingLabel ref={labelRef} data={normalizedLabelData} />}
+            </div>
         </AdminLayout>
     );
 }
