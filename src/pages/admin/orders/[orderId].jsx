@@ -83,6 +83,62 @@ export default function AdminOrderDetailsPage() {
 
   const [retryLoading, setRetryLoading] = useState(false);
 
+  const [cancelWaybillOpen, setCancelWaybillOpen] = useState(false);
+  const [cancelWaybillLoading, setCancelWaybillLoading] = useState(false);
+  const [extraTimeline, setExtraTimeline] = useState([]);
+
+  const handleCancelBlueDartWaybill = async () => {
+    const awb = shipmentInfo?.trackingNumber;
+    if (!awb || awb === "-") {
+      toast.error("No valid tracking number found for cancellation");
+      return;
+    }
+
+    try {
+      setCancelWaybillLoading(true);
+      const main = new Listing();
+      const res = await main.cancelWaybill({ AWBNo: awb });
+      const msg = res?.data?.message || res?.data?.Message || "Waybill process completed.";
+
+      if (res?.data?.status === false || res?.data?.error) {
+        toast.error(msg);
+      } else {
+        toast.success(msg);
+      }
+
+      setOrder((prev) => ({
+        ...prev,
+        status: "cancelled",
+        shipping_status: "cancelled",
+        shipment: {
+          ...(prev?.shipment || {}),
+          shippingStatus: "cancelled",
+          status: "cancelled",
+        },
+      }));
+
+      setExtraTimeline((prev) => [
+        ...prev,
+        {
+          label: "BlueDart Waybill Cancelled",
+          status: "Cancelled",
+          description: msg,
+          timestamp: new Date().toISOString(),
+          completed: true,
+        },
+      ]);
+
+      setCancelWaybillOpen(false);
+    } catch (err) {
+      console.error("Cancel BlueDart waybill error:", err);
+      const errMsg = err?.response?.data?.message || err?.message || "Failed to cancel waybill";
+      toast.error(errMsg);
+    } finally {
+      setCancelWaybillLoading(false);
+    }
+  };
+
+
   const fetchDetails = useCallback(async () => {
     if (!orderId) return;
     try {
@@ -270,7 +326,7 @@ export default function AdminOrderDetailsPage() {
       dispatchDate: dispatchDate,
       estDelivery: estDelivery,
       labelData: label,
-      timeline: stepperTimeline,
+      timeline: [...stepperTimeline, ...extraTimeline],
       createdAt: dispatchDate,
       formattedForWeb: formattedWeb,
     };
@@ -890,6 +946,36 @@ export default function AdminOrderDetailsPage() {
                 </div>
               </div>
 
+              {/* ─── AWB CANCELLATION ─── */}
+              <div className="rounded-xl border border-red-100 bg-red-50/50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <h5 className="text-xs font-bold uppercase tracking-wider text-red-700 flex items-center gap-1.5">
+                    <FaTimes className="w-3.5 h-3.5" />
+                    AWB Cancellation
+                  </h5>
+                  <p className="text-sm font-semibold text-gray-800 mt-1">
+                    Waybill: <span className="font-mono">{shipmentInfo.trackingNumber || "N/A"}</span>
+                  </p>
+                  <p className="text-xs text-gray-500 mt-0.5">
+                    {order?.status === "cancelled" || shipmentInfo.shippingStatus === "cancelled"
+                      ? "This shipment/waybill is already cancelled."
+                      : "Cancel BlueDart shipment waybill via backend carrier API."}
+                  </p>
+                </div>
+                {shipmentInfo.trackingNumber && (
+                  <button
+                    onClick={() => setCancelWaybillOpen(true)}
+                    disabled={order?.status === "cancelled" || shipmentInfo.shippingStatus === "cancelled" || cancelWaybillLoading}
+                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2 flex-shrink-0"
+                  >
+                    <FaTimes size={12} />
+                    {order?.status === "cancelled" || shipmentInfo.shippingStatus === "cancelled"
+                      ? "Waybill Cancelled"
+                      : "Cancel BlueDart Waybill"}
+                  </button>
+                )}
+              </div>
+
               {(shipmentInfo.timeline?.length > 0 ||
                 shipmentInfo.formattedForWeb?.length > 0) && (
                 <div>
@@ -1177,6 +1263,18 @@ export default function AdminOrderDetailsPage() {
           </div>
         </Popup>
       )}
+
+      <ConfirmModal
+        isOpen={cancelWaybillOpen}
+        onClose={() => !cancelWaybillLoading && setCancelWaybillOpen(false)}
+        onConfirm={handleCancelBlueDartWaybill}
+        title={`Cancel BlueDart Waybill ${shipmentInfo?.trackingNumber || ""}?`}
+        message="Are you sure you want to cancel this BlueDart shipment? This will invoke the BlueDart waybill cancellation API."
+        confirmText="Confirm Cancellation"
+        cancelText="Cancel"
+        confirmClassName="bg-red-600 hover:bg-red-700 text-white"
+        loading={cancelWaybillLoading}
+      />
     </AdminLayout>
   );
 }

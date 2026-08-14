@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
+import toast from "react-hot-toast";
 import {
   HiCheck,
   HiOutlineShoppingBag,
@@ -14,6 +15,7 @@ import {
   HiOutlineArrowPath,
   HiOutlineEye,
   HiOutlineCalendar,
+  HiOutlineExclamationTriangle,
 } from "react-icons/hi2";
 import { FaBox, FaCheck } from "react-icons/fa";
 
@@ -363,6 +365,69 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   };
 
+  const [isCancellingShipment, setIsCancellingShipment] = useState(false);
+  const [cancelAlert, setCancelAlert] = useState(null); // { type: 'success' | 'warning', message: string }
+
+  const handleCancelOrderShipment = async () => {
+    const awbNo = orderData.shipmentDetails?.trackingId || orderData?.tracking_number || orderData?.awbNumber;
+    if (!awbNo) {
+      toast.error("No valid tracking number found for cancellation.");
+      return;
+    }
+
+    try {
+      setIsCancellingShipment(true);
+      setCancelAlert(null);
+
+      const listing = new Listing();
+      const res = await listing.cancelWaybill({ AWBNo: awbNo });
+      const data = res?.data || {};
+
+      const isError = data.IsError === true || data.status === false || data.error === true;
+      const backendMessage = data.message || data.Message || data.error_message || "";
+
+      if (!isError && (data.IsError === false || data.status === true || data.success === true)) {
+        const successMsg = `Your registered shipment ${awbNo} has been cancelled successfully`;
+        setCancelAlert({
+          type: "success",
+          message: successMsg,
+        });
+        toast.success(successMsg);
+
+        setOrderData((prev) => ({
+          ...prev,
+          orderHeader: {
+            ...prev.orderHeader,
+            status: "Cancelled",
+          },
+          shipmentDetails: {
+            ...prev.shipmentDetails,
+            status: "Cancelled",
+          },
+        }));
+      } else {
+        const warningMsg = backendMessage || "Waybill Number has been already cancelled.";
+        setCancelAlert({
+          type: "warning",
+          message: warningMsg,
+        });
+        toast.error(warningMsg);
+      }
+    } catch (err) {
+      console.error("Cancel order shipment error:", err);
+      const data = err?.response?.data || {};
+      const backendMessage = data.message || data.Message || err?.message || "Failed to cancel shipment";
+
+      setCancelAlert({
+        type: "warning",
+        message: backendMessage,
+      });
+      toast.error(backendMessage);
+    } finally {
+      setIsCancellingShipment(false);
+    }
+  };
+
   const handleTrackShipment = () => {
     const trackingId = orderData.shipmentDetails?.trackingId || "1234567890";
     if (trackingId && trackingId !== "1234567890") {
@@ -687,7 +752,25 @@ export default function OrderDetailsView({ orderIdProp }) {
                 </p>
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 flex-wrap">
+                {String(shipment?.status || header?.status || "").toLowerCase() !== "delivered" && (
+                  <button
+                    type="button"
+                    onClick={handleCancelOrderShipment}
+                    disabled={isCancellingShipment || String(shipment?.status || "").toLowerCase() === "cancelled"}
+                    className="border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isCancellingShipment ? (
+                      <>
+                        <span className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></span>
+                        Cancelling...
+                      </>
+                    ) : (
+                      "Cancel Order Shipment"
+                    )}
+                  </button>
+                )}
+
                 <button
                   type="button"
                   onClick={handleTrackShipment}
@@ -706,6 +789,37 @@ export default function OrderDetailsView({ orderIdProp }) {
                 </button>
               </div>
             </div>
+
+            {/* ALERT CARD FOR SHIPMENT CANCELLATION */}
+            {cancelAlert && (
+              <div
+                className={`p-4 rounded-xl border shadow-xs flex items-center justify-between gap-3 ${
+                  cancelAlert.type === "success"
+                    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                    : "bg-amber-50 border-amber-200 text-amber-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  {cancelAlert.type === "success" ? (
+                    <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                      <HiCheck className="w-4 h-4" />
+                    </div>
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center flex-shrink-0">
+                      <HiOutlineExclamationTriangle className="w-4 h-4" />
+                    </div>
+                  )}
+                  <p className="text-sm font-semibold">{cancelAlert.message}</p>
+                </div>
+                <button
+                  onClick={() => setCancelAlert(null)}
+                  className="text-xs font-bold text-gray-400 hover:text-gray-600"
+                >
+                  &times;
+                </button>
+              </div>
+            )}
+
 
             {/* Details Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 pt-2">
