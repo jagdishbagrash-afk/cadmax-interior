@@ -42,6 +42,7 @@ import AdminLayout from "../common/AdminLayout";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
+import moment from "moment";
 import ShippingLabel from "@/components/shipping-label/ShippingLabel";
 import { exportShippingLabelPdf } from "@/components/shipping-label/exportShippingLabelPdf";
 import { useReactToPrint } from "react-to-print";
@@ -62,6 +63,12 @@ export default function OrderDetailsPage() {
     const [pincodeEstDelivery, setPincodeEstDelivery] = useState(null);
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const labelRef = useRef(null);
+
+    // ─── BLUE DART WAYBILL CANCEL & EXTRA TIMELINE STATE ──────
+    const [extraTimelineEvents, setExtraTimelineEvents] = useState([]);
+    const [cancelModalOpen, setCancelModalOpen] = useState(false);
+    const [isCancellingWaybill, setIsCancellingWaybill] = useState(false);
+
 
     const fetchData = async (id) => {
         try {
@@ -528,22 +535,25 @@ export default function OrderDetailsPage() {
     const finalTotal = amount || subtotal;
 
     // Build timeline
-    const timelineItems =
+    const baseTimelineItems =
         formattedWeb?.stepperTimeline?.length > 0
             ? formattedWeb.stepperTimeline.map((item) => ({
                 status: item.title || item.status,
+                message: item.description || item.message || "",
                 date: item.timestamp || "--",
                 active: item.completed ?? true,
             }))
             : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
             ? dataShipment.syncedTransit.liveTracking.events.map((item) => ({
                 status: item.status || item.title || item.event,
+                message: item.description || item.location || "",
                 date: item.timestamp || item.date || item.time || "--",
                 active: true,
             }))
             : shipping_timeline.length > 0
             ? shipping_timeline.map((item) => ({
                 status: item.status,
+                message: item.message || "",
                 date: formatDate(item.date) || item.date,
                 active: true,
             }))
@@ -553,6 +563,60 @@ export default function OrderDetailsPage() {
                 { status: "Shipped", date: formatDate(resolvedDispatchDate), active: !!resolvedDispatchDate && resolvedDispatchDate !== "N/A" },
                 { status: "Delivered", date: formatDate(resolvedDeliveryDate), active: !!resolvedDeliveryDate && resolvedDeliveryDate !== "N/A" },
             ].filter(item => item.date !== "N/A");
+
+    const timelineItems = [...baseTimelineItems, ...extraTimelineEvents];
+
+    const handleConfirmCancelWaybill = async () => {
+        if (!resolvedAwbNumber || resolvedAwbNumber === "N/A") {
+            toast.error("Invalid AWB Number");
+            return;
+        }
+
+        try {
+            setIsCancellingWaybill(true);
+            const main = new Listing();
+            const response = await main.cancelWaybill({ AWBNo: resolvedAwbNumber });
+            const msg = response?.data?.message || response?.data?.Message || "Waybill cancelled successfully.";
+
+            if (response?.data?.status === false || response?.data?.error) {
+                toast.error(msg);
+            } else {
+                toast.success(msg);
+            }
+
+            // Dynamically update status
+            setProject((prev) => ({
+                ...prev,
+                status: "cancelled",
+                shipping_status: "cancelled",
+                shipment: {
+                    ...(prev?.shipment || {}),
+                    shippingStatus: "cancelled",
+                    status: "cancelled",
+                },
+            }));
+
+            // Append response message to Order Timeline
+            setExtraTimelineEvents((prev) => [
+                ...prev,
+                {
+                    status: "BlueDart Waybill Cancelled",
+                    message: msg,
+                    date: moment().format("DD MMM YYYY, hh:mm A"),
+                    active: true,
+                },
+            ]);
+
+            setCancelModalOpen(false);
+        } catch (error) {
+            console.error("Cancel waybill error:", error);
+            const errMessage = error?.response?.data?.message || error?.message || "Failed to cancel waybill";
+            toast.error(errMessage);
+        } finally {
+            setIsCancellingWaybill(false);
+        }
+    };
+
 
     // ─── RENDER ───────────────────────────────────────────────
     return (
@@ -769,6 +833,40 @@ export default function OrderDetailsPage() {
                                     </div>
                                 </div>
 
+                                {/* ─── AWB CANCELLATION SECTION ──────── */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                    <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+                                        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                            <FiXCircle className="w-4 h-4 text-red-500" />
+                                            AWB Cancellation
+                                        </h3>
+                                        <span className="text-xs text-gray-400 font-medium">Carrier: {resolvedCourierName}</span>
+                                    </div>
+
+                                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                        <div>
+                                            <p className="text-xs text-gray-500 font-medium">Waybill / Tracking Number</p>
+                                            <p className="text-sm font-bold font-mono text-gray-900 mt-0.5">{resolvedAwbNumber}</p>
+                                            <p className="text-xs text-gray-500 mt-1">
+                                                {status === "cancelled" || resolvedShippingStatus === "cancelled"
+                                                    ? "This shipment/waybill has been marked as cancelled."
+                                                    : "Cancel BlueDart waybill directly via carrier API."}
+                                            </p>
+                                        </div>
+
+                                        {resolvedAwbNumber && resolvedAwbNumber !== "N/A" && (
+                                            <button
+                                                onClick={() => setCancelModalOpen(true)}
+                                                disabled={status === "cancelled" || resolvedShippingStatus === "cancelled" || isCancellingWaybill}
+                                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0"
+                                            >
+                                                <FiXCircle className="w-4 h-4" />
+                                                {status === "cancelled" || resolvedShippingStatus === "cancelled" ? "Waybill Cancelled" : "Cancel BlueDart Waybill"}
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {/* ─── PAYMENT INFORMATION ────────── */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                                     <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -887,6 +985,34 @@ export default function OrderDetailsPage() {
                                     </div>
                                 )}
 
+                                {/* ─── ORDER TIMELINE ──────────────── */}
+                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                    <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
+                                        <FiClock className="w-4 h-4 text-gray-400" />
+                                        Order Timeline
+                                    </h3>
+                                    <div className="space-y-3">
+                                        {timelineItems?.length > 0 ? (
+                                            timelineItems.map((evt, idx) => (
+                                                <div key={idx} className="flex items-start gap-3 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                                                    <div className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${String(evt.status || "").toLowerCase().includes("cancel") ? "bg-red-500" : evt.active ? "bg-green-500" : "bg-gray-300"}`} />
+                                                    <div className="flex-1 min-w-0">
+                                                        <div className="flex items-center justify-between gap-2">
+                                                            <p className="text-xs font-bold text-gray-800">{evt.status}</p>
+                                                            <span className="text-[10px] text-gray-400">{evt.date}</span>
+                                                        </div>
+                                                        {evt.message && (
+                                                            <p className="text-xs text-gray-600 mt-1 leading-relaxed">{evt.message}</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <p className="text-xs text-gray-400">No timeline events recorded.</p>
+                                        )}
+                                    </div>
+                                </div>
+
                                 {/* ─── ORDER STATUS ──────────────── */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                                     <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -927,6 +1053,54 @@ export default function OrderDetailsPage() {
                     </div>
                 </div>
             </div>
+
+            {/* ─── BLUE DART WAYBILL CANCEL MODAL ─── */}
+            {cancelModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="bg-white rounded-2xl shadow-xl max-w-md w-full mx-4 p-6">
+                        <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-3">
+                            <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                <FiXCircle className="w-5 h-5 text-red-500" />
+                                Cancel BlueDart Waybill
+                            </h3>
+                            <button
+                                onClick={() => !isCancellingWaybill && setCancelModalOpen(false)}
+                                className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+                            >
+                                <FiXCircle className="w-5 h-5 text-gray-400" />
+                            </button>
+                        </div>
+                        
+                        <p className="text-sm text-gray-600 leading-relaxed mb-6">
+                            Are you sure you want to cancel BlueDart Waybill <span className="font-mono font-bold text-gray-900">{resolvedAwbNumber}</span> for order <span className="font-bold text-gray-900">{orderId || id}</span>? This will submit a cancellation request to the BlueDart API.
+                        </p>
+
+                        <div className="flex items-center justify-end gap-3">
+                            <button
+                                onClick={() => !isCancellingWaybill && setCancelModalOpen(false)}
+                                disabled={isCancellingWaybill}
+                                className="px-4 py-2 rounded-xl text-sm font-semibold border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleConfirmCancelWaybill}
+                                disabled={isCancellingWaybill}
+                                className="px-4 py-2 rounded-xl text-sm font-semibold bg-red-600 hover:bg-red-700 text-white transition-all shadow-sm disabled:opacity-50 flex items-center gap-2"
+                            >
+                                {isCancellingWaybill ? (
+                                    <>
+                                        <span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"></span>
+                                        Cancelling...
+                                    </>
+                                ) : (
+                                    "Confirm Cancellation"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* ─── STATUS UPDATE MODAL ────────────────────────── */}
             {showModal && (

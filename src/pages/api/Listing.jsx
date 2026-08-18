@@ -804,6 +804,23 @@ class Listing extends Component {
     return Api.get(`/order/${id}`)
   }
 
+  async cancelWaybill(data) {
+    logShippingApi("cancel waybill request", data);
+    try {
+      const response = await Api.post("/shipment/cancel-waybill", data);
+      logShippingApi("cancel waybill response", response?.data);
+      return response;
+    } catch (error) {
+      logShippingApi("cancel waybill error", {
+        data,
+        message: error?.message,
+        response: error?.response?.data,
+      });
+      throw error;
+    }
+  }
+
+
 
   render() {
     return (

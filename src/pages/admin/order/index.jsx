@@ -37,8 +37,49 @@ export default function Index() {
 
     // DIRECT PDF DOWNLOAD STATE & REF
     const [downloadingOrderId, setDownloadingOrderId] = useState(null);
+    const [cancellingOrderId, setCancellingOrderId] = useState(null);
     const [activeLabelOrder, setActiveLabelOrder] = useState(null);
     const activeLabelRef = useRef(null);
+
+    const handleCancelWaybill = async (order, trackingNumber) => {
+        if (!trackingNumber) {
+            toast.error("Tracking number not found");
+            return;
+        }
+
+        try {
+            setCancellingOrderId(order._id);
+            const main = new Listing();
+            const response = await main.cancelWaybill({ AWBNo: trackingNumber });
+            const msg = response?.data?.message || response?.data?.Message || "Waybill process completed.";
+
+            if (response?.data?.status === false || response?.data?.error) {
+                toast.error(msg);
+            } else {
+                toast.success(msg);
+            }
+
+            // Update row status badge to "cancelled"
+            setStatusMap((prev) => ({
+                ...prev,
+                [order._id]: "cancelled",
+            }));
+
+            // Update local order data status as well
+            setData((prevData) =>
+                prevData.map((o) =>
+                    o._id === order._id ? { ...o, status: "cancelled", shipping_status: "cancelled" } : o
+                )
+            );
+        } catch (error) {
+            console.error("Cancel waybill error:", error);
+            const errMessage = error?.response?.data?.message || error?.message || "Failed to cancel waybill";
+            toast.error(errMessage);
+        } finally {
+            setCancellingOrderId(null);
+        }
+    };
+
 
     const buildLabelDataForOrder = (order) => {
         if (!order) return null;
@@ -526,20 +567,32 @@ export default function Index() {
                                                             >
                                                                 {isPending && <option value="pending">Pending</option>}
                                                                 <option value="confirmed">Approved</option>
-                                                                <option value="cancelled">Rejected</option>
+                                                                <option value="cancelled">Cancelled</option>
                                                             </select>
                                                         </td>
 
                                                         {/* AWB / TRACKING */}
                                                         <td className="px-4 py-3.5">
                                                             {resolvedAwb ? (
-                                                                <div className="flex flex-col">
+                                                                <div className="flex flex-col gap-1">
                                                                     <span className="font-mono text-xs font-semibold text-gray-800">
                                                                         {resolvedAwb}
                                                                     </span>
-                                                                    <span className="text-[10px] text-gray-500 font-medium">
-                                                                        {resolvedCourier}
-                                                                    </span>
+                                                                    <div className="flex items-center gap-2 flex-wrap">
+                                                                        <span className="text-[10px] text-gray-500 font-medium">
+                                                                            {resolvedCourier}
+                                                                        </span>
+                                                                        {String(resolvedCourier || "").toUpperCase().includes("BLUE") && !isCancelled && (
+                                                                            <button
+                                                                                onClick={() => handleCancelWaybill(order, resolvedAwb)}
+                                                                                disabled={cancellingOrderId === order._id}
+                                                                                className="px-2 py-0.5 rounded-full text-[10px] font-bold text-red-600 bg-red-50 hover:bg-red-100 border border-red-200 transition-colors disabled:opacity-50"
+                                                                                title="Cancel BlueDart Waybill"
+                                                                            >
+                                                                                {cancellingOrderId === order._id ? "Cancelling..." : "Cancel Waybill"}
+                                                                            </button>
+                                                                        )}
+                                                                    </div>
                                                                 </div>
                                                             ) : (
                                                                 <span className="text-[10px] text-gray-300">—</span>
@@ -548,7 +601,7 @@ export default function Index() {
 
                                                         {/* ACTIONS */}
                                                         <td className="px-4 py-3.5">
-                                                            <div className="flex items-center gap-1">
+                                                            <div className="flex items-center gap-1.5">
                                                                 <Link
                                                                     href={`/admin/order/${order._id}`}
                                                                     className="p-1.5 rounded-lg hover:bg-gray-100 transition-colors text-gray-500 hover:text-gray-700"
@@ -566,8 +619,19 @@ export default function Index() {
                                                                         <FiDownload className="w-4 h-4" />
                                                                     </button>
                                                                 )}
+                                                                {String(resolvedCourier || "").toUpperCase().includes("BLUE") && resolvedAwb && !isCancelled && (
+                                                                    <button
+                                                                        onClick={() => handleCancelWaybill(order, resolvedAwb)}
+                                                                        disabled={cancellingOrderId === order._id}
+                                                                        className="px-2 py-1 rounded-lg text-xs font-semibold bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 transition-colors disabled:opacity-50 whitespace-nowrap"
+                                                                        title="Cancel BlueDart Waybill"
+                                                                    >
+                                                                        {cancellingOrderId === order._id ? "Cancelling..." : "Cancel Waybill"}
+                                                                    </button>
+                                                                )}
                                                             </div>
                                                         </td>
+
                                                     </tr>
                                                 );
                                             })
