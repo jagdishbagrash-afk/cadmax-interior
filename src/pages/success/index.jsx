@@ -172,18 +172,18 @@ export default function Index() {
 
   const trackingHref = shipmentData.trackingNumber
     ? (() => {
-        const courier = extractCarrier(
-          shipmentData.shipment,
-          shipmentData.order
-        );
-        const query = courier
-          ? `?courier=${encodeURIComponent(courier)}`
-          : "";
+      const courier = extractCarrier(
+        shipmentData.shipment,
+        shipmentData.order
+      );
+      const query = courier
+        ? `?courier=${encodeURIComponent(courier)}`
+        : "";
 
-        return `/shipment/track/${encodeURIComponent(
-          shipmentData.trackingNumber
-        )}${query}`;
-      })()
+      return `/shipment/track/${encodeURIComponent(
+        shipmentData.trackingNumber
+      )}${query}`;
+    })()
     : orderId
       ? `/orders/${orderId}/tracking`
       : "";
@@ -228,7 +228,7 @@ export default function Index() {
                 {isCOD ? "Cash on Delivery" : "Online Payment"}
               </p>
               <p className={`text-sm font-semibold ${isCOD ? "text-amber-600" : "text-green-600"}`}>
-                {isCOD ? "Pay on Delivery" : "Paid Online"}
+                {isCOD ? "Pay on Delivery" : "Payment Made Online"}
               </p>
             </div>
           </div>

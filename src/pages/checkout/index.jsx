@@ -3,9 +3,24 @@ import Image from "next/image";
 import { useDispatch } from "react-redux";
 import { clearCart } from "@/redux/cartSlice";
 import toast from "react-hot-toast";
-import { FiPlus, FiMinus, FiTag, FiLock, FiRotateCcw, FiTruck, FiHeadphones, FiChevronRight, FiTrash2, FiCreditCard } from "react-icons/fi";
+import {
+  FiPlus,
+  FiMinus,
+  FiTag,
+  FiLock,
+  FiRotateCcw,
+  FiTruck,
+  FiHeadphones,
+  FiChevronRight,
+  FiTrash2,
+  FiCreditCard,
+  FiMapPin,
+  FiUser,
+  FiPhone,
+  FiClock,
+} from "react-icons/fi";
 import { BiRupee } from "react-icons/bi";
-import { FaRegTrashCan } from "react-icons/fa6";
+import { FaCreditCard, FaMoneyBillWave } from "react-icons/fa";
 import Layout from "../common/Layout";
 import Listing from "../api/Listing";
 import { useRouter } from "next/router";
@@ -788,8 +803,6 @@ export default function Index() {
   };
 
   const subtotal = cartItems.reduce((sum, item) => sum + ((item.originalPrice || 0) * (item.quantity || 0)), 0);
-  // discountAmount is a percentage (e.g. 10 means 10%), so calculate actual rupee discount
-  // discountAmount is a percentage (e.g. 10 means 10%), so calculate actual rupee discount
   const totalDiscount = cartItems.reduce((sum, item) => {
     const perUnitDiscount = ((item.originalPrice || 0) * (item.discountAmount || 0)) / 100;
     return sum + (perUnitDiscount * (item.quantity || 0));
@@ -854,148 +867,174 @@ export default function Index() {
   return (
     <Layout>
       <Banner Slider1={BannerImages} />
-      <section className="w-full bg-white py-12 md:py-20 lg:py-24 text-black antialiased">
+      <section className="w-full bg-gradient-to-br from-slate-50 via-white to-slate-50 py-12 md:py-16 lg:py-20 text-black antialiased">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col lg:flex-row gap-12">
+          <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
             {/* LEFT COLUMN: FORM */}
             <div className="w-full lg:w-6/12">
-              <div className="bg-[#F9F9F9] rounded-sm border border-gray-200 shadow-sm lg:sticky lg:top-24">
-                <div className="px-6 py-5 border-b border-gray-200">
-                  <h2 className="text-2xl font-semibold tracking-tight">
+              <div className="bg-white rounded-3xl shadow-2xl border border-gray-100/80 lg:sticky lg:top-24 overflow-hidden transition-all duration-300 hover:shadow-[0_20px_70px_-15px_rgba(0,0,0,0.15)]">
+                <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-8 py-7">
+                  <h2 className="text-xl md:text-2xl font-bold text-white tracking-tight flex items-center gap-3">
+                    <FiMapPin className="w-6 h-6 text-amber-400" />
                     Shipping Details
                   </h2>
-                  <p className="text-sm text-gray-500 mt-1">
+                  <p className="text-gray-300 mt-1.5 text-sm">
                     Please enter your delivery information.
                   </p>
                 </div>
 
-                <form className="p-6" onSubmit={handlePaymentCreateSubmit}>
-                  <div className="space-y-6">
+                <form className="p-8" onSubmit={handlePaymentCreateSubmit}>
+                  <div className="space-y-7">
                     {/* NAME */}
                     <div>
                       <label
                         htmlFor="name"
-                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                        className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2.5"
                       >
-                        Full Name *
+                        Full Name <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        id="name"
-                        type="text"
-                        name="name"
-                        placeholder="John Doe"
-                        autoComplete="name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
-                        required
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FiUser className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="name"
+                          type="text"
+                          name="name"
+                          placeholder="John Doe"
+                          autoComplete="name"
+                          value={formData.name}
+                          onChange={handleChange}
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none placeholder:text-gray-400"
+                          required
+                        />
+                      </div>
                     </div>
 
                     {/* MOBILE */}
                     <div>
                       <label
                         htmlFor="mobile"
-                        className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                        className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2.5"
                       >
-                        Mobile Number *
+                        Mobile Number <span className="text-red-500">*</span>
                       </label>
-                      <input
-                        id="mobile"
-                        type="tel"
-                        name="mobile"
-                        placeholder="9876543210"
-                        autoComplete="tel"
-                        value={formData.mobile}
-                        onChange={handleChange}
-                        maxLength={10}
-                        pattern="[0-9]{10}"
-                        className="w-full border border-gray-300 px-4 py-3 text-black transition focus:border-black focus:ring-1 focus:ring-black outline-none"
-                        required
-                      />
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FiPhone className="w-5 h-5 text-gray-400" />
+                        </div>
+                        <input
+                          id="mobile"
+                          type="tel"
+                          name="mobile"
+                          placeholder="9876543210"
+                          autoComplete="tel"
+                          value={formData.mobile}
+                          onChange={handleChange}
+                          maxLength={10}
+                          pattern="[0-9]{10}"
+                          className="w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none placeholder:text-gray-400"
+                          required
+                        />
+                      </div>
                     </div>
 
                     {/* ADDRESS SELECTION */}
                     <div>
-                      <div className="flex justify-between items-center text-center mt-2">
+                      <div className="flex justify-between items-center mb-2.5">
                         <label
                           htmlFor="addressId"
-                          className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2"
+                          className="block text-xs font-semibold uppercase tracking-wider text-gray-600"
                         >
-                          Select Address *
+                          Select Address <span className="text-red-500">*</span>
                         </label>
                         <Link
-                          href={"/address"}
-                          className="mt-2 text-sm text-blue-600 underline mb-2"
+                          href="/address"
+                          className="text-sm text-[#D4AF37] hover:text-black transition-colors duration-200 font-semibold flex items-center gap-1.5"
                         >
                           + Add New Address
                         </Link>
                       </div>
 
-                      <select
-                        id="addressId"
-                        name="addressId"
-                        value={formData.addressId || ""}
-                        onChange={handleChange}
-                        className="w-full border border-gray-300 px-4 py-3 text-black focus:border-black focus:ring-1 focus:ring-black outline-none"
-                        required
-                      >
-                        <option value="">Select Address</option>
-                        {data?.map((item) => (
-                          <option key={item._id} value={item._id}>
-                            {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode} (${item.addressType})`}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    {/* PAYMENT METHOD */}
-                    <div>
-                      <label className="block text-xs font-bold uppercase tracking-wider text-gray-700 mb-2">
-                        Payment Method *
-                      </label>
                       <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                          {isCOD ? (
-                            <BiRupee className="w-4 h-4 text-gray-400" />
-                          ) : (
-                            <FiCreditCard className="w-4 h-4 text-gray-400" />
-                          )}
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <FiMapPin className="w-5 h-5 text-gray-400" />
                         </div>
                         <select
-                          id="paymentMethod"
-                          name="paymentMethod"
-                          value={paymentMethod}
-                          onChange={(e) => setPaymentMethod(e.target.value)}
-                          className="w-full pl-10 pr-4 py-3 border border-gray-300 text-black focus:border-black focus:ring-1 focus:ring-black outline-none appearance-none cursor-pointer"
+                          id="addressId"
+                          name="addressId"
+                          value={formData.addressId || ""}
+                          onChange={handleChange}
+                          className="w-full pl-12 pr-10 py-4 bg-gray-50 border-2 border-gray-200 rounded-2xl text-black transition-all duration-200 focus:border-black focus:bg-white focus:ring-0 outline-none appearance-none cursor-pointer"
+                          required
                         >
-                          <option value="ONLINE">Online Payment</option>
-                          <option value="COD">Cash on Delivery (COD)</option>
+                          <option value="">Select Address</option>
+                          {data?.map((item) => (
+                            <option key={item._id} value={item._id}>
+                              {`${item.street_address}, ${item.city}, ${item.state}, ${item.country} - ${item.pincode} (${item.addressType})`}
+                            </option>
+                          ))}
                         </select>
-                        <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
+                          <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                           </svg>
                         </div>
                       </div>
                     </div>
+
+                    {/* PAYMENT METHOD - modern toggle buttons */}
+                    <div>
+                      <label className="block text-xs font-semibold uppercase tracking-wider text-gray-600 mb-2.5">
+                        Payment Method <span className="text-red-500">*</span>
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod("ONLINE")}
+                          className={`flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl border-2 font-semibold transition-all duration-200 ${paymentMethod === "ONLINE"
+                              ? "border-black bg-black text-white shadow-lg shadow-black/10"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                            }`}
+                        >
+                          <FaCreditCard className="w-5 h-5" />
+                          <span>Online</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setPaymentMethod("COD")}
+                          className={`flex items-center justify-center gap-3 px-4 py-3.5 rounded-2xl border-2 font-semibold transition-all duration-200 ${paymentMethod === "COD"
+                              ? "border-black bg-black text-white shadow-lg shadow-black/10"
+                              : "border-gray-200 bg-white text-gray-700 hover:border-gray-400 hover:bg-gray-50"
+                            }`}
+                        >
+                          <FaMoneyBillWave className="w-5 h-5" />
+                          <span>Cash on Delivery</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2.5">
+                        {isCOD
+                          ? "Pay with cash when your order is delivered."
+                          : "Pay securely using our online payment gateway."}
+                      </p>
+                    </div>
                   </div>
 
                   {/* ESTIMATED DELIVERY CARD */}
                   {(etaDisplay.hasValidData || etaDisplay.isError || transitTimeLoading || formData.addressId) && (
-                    <div className="mt-6">
+                    <div className="mt-7">
                       {etaDisplay.isError ? (
-                        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+                        <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
                           <p className="text-sm font-medium text-amber-800">
                             {etaDisplay.errorMessage || "Unable to estimate delivery time"}
                           </p>
                         </div>
                       ) : (
-                        <div className="rounded-xl border-2 border-green-200 bg-gradient-to-br from-green-50 to-emerald-50 p-5">
+                        <div className="rounded-2xl border-2 border-emerald-200 bg-gradient-to-br from-emerald-50 to-teal-50 p-5 shadow-sm">
                           {transitTimeLoading ? (
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                                <svg className="w-5 h-5 animate-spin text-green-600" fill="none" viewBox="0 0 24 24">
+                              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center">
+                                <svg className="w-6 h-6 animate-spin text-emerald-600" fill="none" viewBox="0 0 24 24">
                                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                 </svg>
@@ -1005,88 +1044,32 @@ export default function Index() {
                               </div>
                             </div>
                           ) : etaDisplay.hasValidData ? (
-                            <>
-                              <div className="flex items-start gap-2">
-                                <div className="w-12 h-12 rounded-2xl bg-green-100 flex items-center justify-center flex-shrink-0">
-                                  <svg className="w-6 h-6 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                  </svg>
-                                </div>
-                                <div className="flex-1">
-                                  <div className="space-y-2">
-                                    <p className="text-xs font-semibold uppercase tracking-widest text-green-700">
-                                      Estimated Delivery
-                                    </p>
-
-                                    <h3 className="text-1xl font-bold text-green-900 leading-tight">
-                                      {etaDisplay.mainDeliveryText}
-                                    </h3>
-
-                                    {etaDisplay.podLabel && (
-                                      <p className="text-xs text-green-700">
-                                        {etaDisplay.podLabel}
-                                      </p>
-                                    )}
-                                  </div>
-
-                                  {/* <div className="mt-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 border-t border-green-200 pt-4">
-                                    <div className="flex items-center gap-2">
-                                      <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        className="w-5 h-5 text-green-700"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                      >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.343 16.657A8 8 0 1117.657 16.657z"
-                                        />
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                                        />
-                                      </svg>
-
-                                      <div>
-                                        <p className="text-xs text-gray-500">Delivering to</p>
-                                        <p className="font-semibold text-green-900">
-                                          {etaDisplay.deliveryPincode || "—"}
-                                        </p>
-                                      </div>
-                                    </div>
-
-                                    <span className="inline-flex items-center justify-center rounded-full bg-green-600 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-white shadow-sm">
-                                      FREE Delivery
-                                    </span>
-                                  </div> */}
-                                </div>
+                            <div className="flex items-start gap-3">
+                              <div className="w-12 h-12 rounded-2xl bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                                <FiClock className="w-6 h-6 text-emerald-700" />
                               </div>
-                              {etaDisplay.showCutoffChip && (
-                                <div className="mt-4 flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600">
-                                  <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                  </svg>
-                                  {etaDisplay.cutoffLabel}
-                                </div>
-                              )}
-                              {/* {(etaDisplay.originCity || etaDisplay.destinationCity) && (
-                                <div className="mt-3 flex items-center gap-2 text-[11px] text-green-700/80">
-                                  <span className="font-semibold">Route:</span>
-                                  <span>{etaDisplay.originCity || "—"}</span>
-                                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                  </svg>
-                                  <span>{etaDisplay.destinationCity || "—"}</span>
-                                </div>
-                              )} */}
-                            </>
+                              <div className="flex-1">
+                                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-700">
+                                  Estimated Delivery
+                                </p>
+                                <h3 className="text-xl font-bold text-emerald-900 leading-tight mt-1">
+                                  {etaDisplay.mainDeliveryText}
+                                </h3>
+                                {etaDisplay.podLabel && (
+                                  <p className="text-xs text-emerald-700 mt-1">{etaDisplay.podLabel}</p>
+                                )}
+                                {etaDisplay.showCutoffChip && (
+                                  <div className="mt-3 flex items-center gap-2 rounded-lg bg-gray-100 px-3 py-2 text-xs font-medium text-gray-600">
+                                    <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                    {etaDisplay.cutoffLabel}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
                           ) : formData.addressId ? null : (
-                            <div className="rounded-xl border border-dashed border-gray-300 p-4">
+                            <div className="rounded-2xl border-2 border-dashed border-gray-300 p-4">
                               <p className="text-sm text-gray-500 text-center">
                                 Select an address to see estimated delivery time
                               </p>
@@ -1100,13 +1083,22 @@ export default function Index() {
                   <button
                     type="submit"
                     disabled={loading || cartItems.length === 0}
-                    className={`w-full py-4 mt-8 font-bold uppercase tracking-widest transition duration-300 
-                      ${loading || cartItems.length === 0
-                        ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                        : "cursor-pointer bg-black text-white hover:bg-gray-800 active:scale-[0.98]"
+                    className={`w-full mt-8 py-5 px-6 rounded-2xl font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group ${loading || cartItems.length === 0
+                        ? "bg-gray-200 cursor-not-allowed text-gray-500"
+                        : "bg-gradient-to-r from-slate-900 to-slate-800 text-white hover:shadow-2xl hover:scale-[1.02] active:scale-[0.98] hover:shadow-black/20"
                       }`}
                   >
-                    {loading ? "Processing..." : isCOD ? "Place COD Order" : "Proceed to Payment"}
+                    {loading ? (
+                      <>
+                        <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        {isCOD ? "Place COD Order" : "Proceed to Payment"}
+                        <FiChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
                   </button>
                 </form>
               </div>
@@ -1114,11 +1106,12 @@ export default function Index() {
 
             {/* RIGHT COLUMN: ORDER SUMMARY */}
             <div className="w-full lg:w-6/12">
-              <div className="sticky top-10 space-y-6">
+              <div className="lg:sticky lg:top-24 space-y-6">
                 {/* ---------- ORDER SUMMARY HEADING ---------- */}
                 <div className="flex items-center justify-between pb-4 border-b border-gray-200">
                   <div>
-                    <h2 className="text-2xl font-semibold tracking-tight text-gray-900">
+                    <h2 className="text-2xl font-bold tracking-tight text-black flex items-center gap-3">
+                      <FiTruck className="w-6 h-6 text-amber-400" />
                       Order Summary
                     </h2>
                     <p className="text-sm text-gray-500 mt-0.5">
@@ -1132,14 +1125,14 @@ export default function Index() {
                 </div>
 
                 {cartItems?.length === 0 ? (
-                  <div className="text-center py-16">
+                  <div className="text-center py-16 bg-white rounded-3xl shadow-xl border border-gray-100/80">
                     <div className="w-20 h-20 mx-auto mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                       <FiTruck size={32} className="text-gray-400" />
                     </div>
                     <p className="text-gray-500 text-lg">Your cart is empty</p>
                     <Link
                       href="/"
-                      className="mt-6 inline-flex items-center gap-2 bg-black text-white px-8 py-3 hover:bg-gray-800 transition"
+                      className="mt-6 inline-flex items-center gap-2 bg-black text-white px-8 py-4 rounded-2xl font-semibold hover:bg-gray-900 transition-all duration-200"
                     >
                       Continue Shopping
                       <FiChevronRight size={16} />
@@ -1158,26 +1151,26 @@ export default function Index() {
                         return (
                           <div
                             key={item.productId || idx}
-                            className="group relative bg-white rounded-xl border border-gray-200 shadow-sm hover:shadow-md transition-all duration-300 p-4 sm:p-5"
+                            className="group relative bg-white rounded-2xl border-2 border-gray-100 shadow-lg hover:shadow-2xl transition-all duration-300 p-5"
                           >
                             {/* Remove Button */}
                             <button
                               type="button"
                               onClick={() => handleRemove(item)}
-                              className="absolute -top-2 -right-2 z-10 w-7 h-7 rounded-full bg-white border border-gray-200 shadow-sm flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-200 transition-all opacity-0 group-hover:opacity-100"
+                              className="absolute -top-2 -right-2 z-10 w-8 h-8 rounded-full bg-white border-2 border-gray-200 shadow-md flex items-center justify-center text-gray-400 hover:text-red-500 hover:border-red-200 transition-all opacity-0 group-hover:opacity-100"
                               title="Remove Item"
                             >
-                              <FiTrash2 size={12} />
+                              <FiTrash2 size={14} />
                             </button>
 
-                            <div className="flex gap-4 sm:gap-5">
+                            <div className="flex gap-5">
                               {/* Product Image */}
-                              <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-gray-50 rounded-lg border border-gray-100 overflow-hidden">
+                              <div className="relative w-24 h-24 sm:w-28 sm:h-28 flex-shrink-0 bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
                                 <Image
                                   src={productImage}
                                   fill
                                   alt={item.title}
-                                  className="object-contain p-1.5 group-hover:scale-105 transition-transform duration-500"
+                                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                                 />
                               </div>
 
@@ -1185,7 +1178,7 @@ export default function Index() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="font-medium text-sm sm:text-base text-gray-900 leading-snug line-clamp-2">
+                                    <h3 className="font-bold text-gray-900 text-base leading-snug line-clamp-2">
                                       {item.title}
                                     </h3>
 
@@ -1217,7 +1210,7 @@ export default function Index() {
 
                                   {/* Price */}
                                   <div className="text-right flex-shrink-0">
-                                    <p className="text-sm sm:text-base font-bold text-gray-900">
+                                    <p className="text-base font-bold text-black">
                                       {formatPrice(finalPrice * item.quantity)}
                                     </p>
                                     {discount > 0 && (
@@ -1228,16 +1221,16 @@ export default function Index() {
                                   </div>
                                 </div>
 
-                                {/* Quantity Controls + Line Total */}
+                                {/* Quantity Controls */}
                                 <div className="flex items-center justify-between mt-3 pt-3 border-t border-gray-100">
-                                  <div className="flex items-center gap-1.5">
+                                  <div className="flex items-center gap-2">
                                     <button
                                       type="button"
                                       onClick={() => handleQtyChange(item, "decrease")}
-                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-100 transition disabled:opacity-30"
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg border-2 border-gray-200 hover:bg-gray-100 transition disabled:opacity-30"
                                       disabled={item.quantity === 1}
                                     >
-                                      <FiMinus size={11} />
+                                      <FiMinus size={12} />
                                     </button>
                                     <span className="text-sm font-semibold text-gray-900 w-8 text-center select-none">
                                       {item.quantity}
@@ -1245,9 +1238,9 @@ export default function Index() {
                                     <button
                                       type="button"
                                       onClick={() => handleQtyChange(item, "increase")}
-                                      className="w-7 h-7 flex items-center justify-center rounded-md border border-gray-200 hover:bg-gray-100 transition"
+                                      className="w-8 h-8 flex items-center justify-center rounded-lg border-2 border-gray-200 hover:bg-gray-100 transition"
                                     >
-                                      <FiPlus size={11} />
+                                      <FiPlus size={12} />
                                     </button>
                                     {item.maxStock && (
                                       <span className="text-[10px] text-gray-400 ml-1">
@@ -1255,17 +1248,6 @@ export default function Index() {
                                       </span>
                                     )}
                                   </div>
-
-                                  {/* <div className="text-right">
-                                    <span className="text-sm font-bold text-gray-900">
-                                      {formatPrice(finalPrice * item.quantity)}
-                                    </span>
-                                    {discount > 0 && (
-                                      <span className="text-[10px] text-gray-400 line-through block">
-                                        {formatPrice(originalPrice * item.quantity)}
-                                      </span>
-                                    )}
-                                  </div> */}
                                 </div>
                               </div>
                             </div>
@@ -1275,9 +1257,9 @@ export default function Index() {
                     </div>
 
                     {/* ---------- COUPON SECTION ---------- */}
-                    <div className="rounded-xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-5 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50">
+                    <div className="rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 p-5 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50">
                       <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center flex-shrink-0">
+                        <div className="w-10 h-10 rounded-full bg-white border-2 border-gray-200 flex items-center justify-center flex-shrink-0">
                           <FiTag size={18} className="text-gray-600" />
                         </div>
                         <div className="flex-1">
@@ -1290,7 +1272,7 @@ export default function Index() {
                         </div>
                         <button
                           type="button"
-                          className="flex items-center gap-1.5 text-sm font-semibold text-black hover:text-gray-600 transition-colors px-4 py-2 rounded-lg border border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
+                          className="flex items-center gap-1.5 text-sm font-semibold text-black hover:text-gray-600 transition-colors px-4 py-2 rounded-xl border-2 border-gray-200 hover:border-gray-300 bg-white hover:bg-gray-50"
                         >
                           Apply Coupon
                           <FiChevronRight size={14} />
@@ -1299,23 +1281,23 @@ export default function Index() {
                     </div>
 
                     {/* ---------- PRICE SUMMARY CARD ---------- */}
-                    <div className="rounded-xl border border-gray-200 bg-white shadow-sm overflow-hidden">
-                      <div className="px-5 py-4 border-b border-gray-100">
+                    <div className="rounded-2xl border-2 border-gray-200 bg-white shadow-lg overflow-hidden">
+                      <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
                         <h3 className="text-sm font-bold uppercase tracking-wider text-gray-900">
                           Price Summary
                         </h3>
                       </div>
-                      <div className="px-5 py-4 space-y-3">
+                      <div className="px-6 py-5 space-y-3">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-600">Subtotal</span>
-                          <span className="font-medium text-gray-900">
+                          <span className="font-medium text-black">
                             {formatPrice(subtotal)}
                           </span>
                         </div>
                         {totalDiscount > 0 && (
                           <div className="flex items-center justify-between text-sm">
                             <span className="text-gray-600">Discount</span>
-                            <span className="font-medium text-green-600">
+                            <span className="font-medium text-emerald-600">
                               - {formatPrice(totalDiscount)}
                             </span>
                           </div>
@@ -1323,7 +1305,7 @@ export default function Index() {
                       </div>
 
                       {/* ---------- GRAND TOTAL ---------- */}
-                      <div className="mx-5 mb-5 rounded-xl bg-gray-900 px-5 py-4 flex items-center justify-between shadow-lg">
+                      <div className="mx-6 mb-6 rounded-2xl bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5 flex items-center justify-between shadow-xl">
                         <div>
                           <p className="text-xs font-semibold uppercase tracking-widest text-gray-400">
                             Grand Total
@@ -1358,10 +1340,10 @@ export default function Index() {
                         return (
                           <div
                             key={i}
-                            className="flex flex-col items-center text-center p-3 rounded-xl border border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm transition-all duration-200"
+                            className="flex flex-col items-center text-center p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-gray-200 hover:shadow-md transition-all duration-200"
                           >
-                            <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center mb-2">
-                              <Icon size={16} className="text-gray-700" />
+                            <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mb-2">
+                              <Icon size={18} className="text-gray-700" />
                             </div>
                             <p className="text-[11px] font-bold uppercase tracking-wider text-gray-800">
                               {feature.label}
