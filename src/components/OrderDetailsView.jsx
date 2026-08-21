@@ -226,10 +226,10 @@ export default function OrderDetailsView({ orderIdProp }) {
       formattedWeb?.stepperTimeline?.length > 0
         ? formattedWeb.stepperTimeline
         : apiData?.stepperTimeline?.length > 0
-        ? apiData.stepperTimeline
-        : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
-        ? mapLiveTrackingEventsToStepper(dataShipment.syncedTransit.liveTracking.events)
-        : DEFAULT_ORDER_DATA.stepperTimeline;
+          ? apiData.stepperTimeline
+          : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
+            ? mapLiveTrackingEventsToStepper(dataShipment.syncedTransit.liveTracking.events)
+            : DEFAULT_ORDER_DATA.stepperTimeline;
 
     // Estimated Delivery Hierarchy
     const estDeliveryVal =
@@ -279,8 +279,8 @@ export default function OrderDetailsView({ orderIdProp }) {
         estDelivery: estDeliveryVal || DEFAULT_ORDER_DATA.estimatedDeliveryInformation.estDelivery,
         orderedOn: dataOrder?.createdAt
           ? (typeof dataOrder.createdAt === "string" && dataOrder.createdAt.includes("T")
-              ? new Date(dataOrder.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
-              : dataOrder.createdAt)
+            ? new Date(dataOrder.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
+            : dataOrder.createdAt)
           : (rawEstDelivery?.orderedOn || DEFAULT_ORDER_DATA.estimatedDeliveryInformation.orderedOn),
       },
       footerActions: {
@@ -303,6 +303,11 @@ export default function OrderDetailsView({ orderIdProp }) {
         const payload = res?.data?.data || res?.data || {};
         if (payload) {
           const merged = mergeOrderData(payload);
+          console.log("========== ORDER DATA ==========");
+          console.log("Order ID:", orderId);
+          console.log("Payload:", payload);
+          console.log("Merged Order Data:", merged);
+          console.log("================================");
           setOrderData(merged);
 
           // Pincode Transit Tracking fallback hit if estimated delivery is missing
@@ -449,7 +454,7 @@ export default function OrderDetailsView({ orderIdProp }) {
   return (
     <div className="min-h-screen bg-[#f8fafc] py-6 sm:py-8 px-3 sm:px-6 lg:px-8 text-gray-800 font-sans">
       <div className="max-w-[1430px] mx-auto space-y-5 sm:space-y-6">
-        
+
         {/* TOP BREADCRUMB / BACK LINK */}
         <div className="flex items-center justify-between">
           <Link
@@ -465,7 +470,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
         {/* MAIN ORDER CONTAINER CARD */}
         <div className="bg-white rounded-2xl border border-gray-200/80 shadow-xs p-5 sm:p-8 space-y-8">
-          
+
           {/* 1. HEADER CARD */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-100">
             <div className="flex items-center gap-8 flex-wrap">
@@ -517,30 +522,27 @@ export default function OrderDetailsView({ orderIdProp }) {
                         {/* Connecting Line (left side) */}
                         {idx > 0 && (
                           <div
-                            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${
-                              isCompleted ? "bg-[#22c55e]" : "bg-gray-200"
-                            }`}
+                            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${isCompleted ? "bg-[#22c55e]" : "bg-gray-200"
+                              }`}
                           />
                         )}
 
                         {/* Connecting Line (right side) */}
                         {!isLast && (
                           <div
-                            className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${
-                              stepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
-                            }`}
+                            className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${stepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
+                              }`}
                           />
                         )}
 
                         {/* ICON CIRCLE BADGE */}
                         <div
-                          className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
-                            isCompleted
-                              ? isLast
-                                ? "bg-[#16a34a] text-white shadow-xs ring-4 ring-emerald-50"
-                                : "bg-white border-2 border-[#16a34a] text-[#16a34a]"
-                              : "bg-white border-2 border-gray-300 text-gray-400"
-                          }`}
+                          className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isCompleted
+                            ? isLast
+                              ? "bg-[#16a34a] text-white shadow-xs ring-4 ring-emerald-50"
+                              : "bg-white border-2 border-[#16a34a] text-[#16a34a]"
+                            : "bg-white border-2 border-gray-300 text-gray-400"
+                            }`}
                         >
                           {isLast && isCompleted ? (
                             <FaCheck className="w-4 h-4 text-white" />
@@ -561,9 +563,8 @@ export default function OrderDetailsView({ orderIdProp }) {
                       {/* STEP LABEL AND TIMESTAMP */}
                       <div className="mt-3 space-y-0.5">
                         <p
-                          className={`text-xs sm:text-sm font-bold transition-colors ${
-                            isCompleted ? "text-gray-900" : "text-gray-400"
-                          }`}
+                          className={`text-xs sm:text-sm font-bold transition-colors ${isCompleted ? "text-gray-900" : "text-gray-400"
+                            }`}
                         >
                           {item.title}
                         </p>
@@ -618,7 +619,9 @@ export default function OrderDetailsView({ orderIdProp }) {
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-end pt-2 sm:pt-0">
                   <button
                     type="button"
-                    onClick={() => router.push?.(prod.actions?.buyAgainUrl || "/cart")}
+                    onClick={() => {
+                      router.push(`/buy-now?type=buy-now`);
+                    }}
                     className="flex-1 sm:flex-none border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-5 py-2.5 rounded-lg text-sm transition-all active:scale-95 text-center"
                   >
                     Buy Again
@@ -639,7 +642,7 @@ export default function OrderDetailsView({ orderIdProp }) {
           {/* 4. THREE-COLUMN SECTION */}
           <div className="border border-gray-200/90 rounded-2xl p-5 sm:p-6 bg-white">
             <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-200/80 gap-6 md:gap-0">
-              
+
               {/* Left Column: SHIPPING ADDRESS */}
               <div className="md:pr-6 space-y-3 pt-2 md:pt-0">
                 <div className="flex items-center gap-3">
@@ -740,7 +743,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
           {/* 5. SHIPMENT DETAILS CARD */}
           <div className="border border-gray-200/90 rounded-2xl p-5 sm:p-6 bg-white space-y-6">
-            
+
             {/* Shipment Header & Action Buttons */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -793,11 +796,10 @@ export default function OrderDetailsView({ orderIdProp }) {
             {/* ALERT CARD FOR SHIPMENT CANCELLATION */}
             {cancelAlert && (
               <div
-                className={`p-4 rounded-xl border shadow-xs flex items-center justify-between gap-3 ${
-                  cancelAlert.type === "success"
-                    ? "bg-emerald-50 border-emerald-200 text-emerald-800"
-                    : "bg-amber-50 border-amber-200 text-amber-900"
-                }`}
+                className={`p-4 rounded-xl border shadow-xs flex items-center justify-between gap-3 ${cancelAlert.type === "success"
+                  ? "bg-emerald-50 border-emerald-200 text-emerald-800"
+                  : "bg-amber-50 border-amber-200 text-amber-900"
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   {cancelAlert.type === "success" ? (
@@ -871,7 +873,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
             {/* 6. ESTIMATED DELIVERY INFORMATION BANNER */}
             <div className="bg-[#f0fdf4] border border-emerald-200/80 rounded-2xl p-5 sm:p-6 relative overflow-hidden flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              
+
               <div className="space-y-4 flex-1 w-full">
                 {/* Banner Title */}
                 <div className="flex items-center gap-2.5">
@@ -942,7 +944,7 @@ export default function OrderDetailsView({ orderIdProp }) {
           {/* 7. BOTTOM ACTION LINKS BAR */}
           <div className="pt-2">
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-6 border-t border-gray-100">
-              
+
               {/* Need Help? */}
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 flex-shrink-0">

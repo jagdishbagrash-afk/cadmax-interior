@@ -12,6 +12,7 @@ import { toast } from "react-hot-toast";
 export default function AddCategory({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
   const [processing, setProcessing] = useState(false);
+  const [showSeo, setShowSeo] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     file: null,
@@ -161,7 +162,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
           isOpen={isOpen}
           onClose={handleClose}
           size={"max-w-2xl"}
-          className="shadow-none"
+          className="shadow-none border border-gray-300 rounded-xl"
         >
           <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
             <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
@@ -177,7 +178,6 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
           </div>
 
           <div className="py-4 px-4">
-          
 
             {/* Category Name */}
             <div className="mb-4">
@@ -186,7 +186,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
               </label>
               <input
                 type="text"
-                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8] focus:ring-1 focus:ring-gray-300 outline-none"
+                className="input-primary"
                 placeholder="Enter category name"
                 value={formData.name}
                 onChange={(e) => handleInputChange("name", e.target.value)}
@@ -201,7 +201,7 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
               <input
                 type="file"
                 accept="image/*"
-                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8]"
+                className="input-primary"
                 onChange={handleImageChange}
               />
               {formData.preview && (
@@ -213,59 +213,78 @@ export default function AddCategory({ fetchDatas, isEdit, item }) {
               )}
             </div>
 
-          {/* ================= SEO (Optional) ================= */}
-<div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
-  <h3 className="text-lg font-semibold text-gray-800 mb-5">
-    SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
-  </h3>
+            {/* ================= SEO with Toggle ================= */}
+            <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
+              {/* Header with toggle */}
+              <div className="flex justify-between items-center mb-5">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
+                </h3>
+                {/* Toggle Switch - FIXED */}
+                <button
+                  type="button"
+                  onClick={() => setShowSeo(!showSeo)}
+                  className={`relative w-12 h-6 rounded-full transition-colors duration-200 focus:outline-none flex items-center ${showSeo ? "bg-blue-600" : "bg-gray-300"
+                    }`}
+                >
+                  <span
+                    className={`inline-block w-5 h-5 bg-white rounded-full shadow transform transition-transform duration-200 ${showSeo ? "translate-x-6" : "translate-x-0.5"
+                      }`}
+                  />
+                </button>
+              </div>
 
-  {/* Meta Title */}
-  <div className="mb-2">
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Meta Title
-    </label>
-    <input
-      type="text"
-      placeholder="Enter Meta Title"
-      value={formData.meta_title}
-      onChange={(e) => handleInputChange("meta_title", e.target.value)}
-      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-    />
-  </div>
+              {/* SEO fields – only shown when toggle is ON */}
+              {showSeo && (
+                <div className="space-y-3">
+                  {/* Meta Title */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meta Title
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter Meta Title"
+                      value={formData.meta_title}
+                      onChange={(e) => handleInputChange("meta_title", e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                  </div>
 
-  {/* Meta Description */}
-  <div className="mb-2">
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Meta Description
-    </label>
-    <input
-      type="text"
-      placeholder="Enter Meta Description"
-      value={formData.meta_description}
-      onChange={(e) =>
-        handleInputChange("meta_description", e.target.value)
-      }
-      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-    />
-  </div>
+                  {/* Meta Description */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meta Description
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Enter Meta Description"
+                      value={formData.meta_description}
+                      onChange={(e) => handleInputChange("meta_description", e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                  </div>
 
-  {/* Meta Keywords */}
-  <div>
-    <label className="block text-sm font-medium text-gray-700 mb-2">
-      Meta Keywords
-    </label>
-    <input
-      type="text"
-      placeholder="e.g. web development, react, nextjs"
-      value={formData.meta_keywords}
-      onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
-      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-    />
-    <p className="mt-1 text-xs text-gray-500">
-      Separate multiple keywords with commas (,).
-    </p>
-  </div>
-</div>
+                  {/* Meta Keywords */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Meta Keywords
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. web development, react, nextjs"
+                      value={formData.meta_keywords}
+                      onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                    />
+                    <p className="mt-1 text-xs text-gray-500">
+                      Separate multiple keywords with commas (,).
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
             {/* Footer Buttons */}
             <div className="flex justify-end space-x-4">
               <button
