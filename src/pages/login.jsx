@@ -38,7 +38,7 @@ export default function Login() {
   const [timer, setTimer] = useState(0);
 
   const [activeTab, setActiveTab] = useState("login"); // 'login' or 'signup'
-  
+
   const [data, setData] = useState({
     phone: "",
     otp: "",
@@ -183,7 +183,7 @@ export default function Login() {
 
       toast.error(
         error?.response?.data?.errors ||
-          "Verification failed"
+        "Verification failed"
       );
     }
 
@@ -237,7 +237,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-[#F7F7F7] p-4">
       {/* Floating Login Card */}
       <div className="relative w-full max-w-[1050px] bg-white rounded-[22px] shadow-2xl overflow-hidden">
-        
+
         {/* Close Button */}
         <button
           onClick={handleClose}
@@ -247,7 +247,7 @@ export default function Login() {
         </button>
 
         <div className="flex flex-col lg:flex-row">
-          
+
           {/* LEFT SECTION - Promotional Image */}
           <div className="relative w-full lg:w-[48%] h-[300px] lg:h-[560px] overflow-hidden">
             <Image
@@ -257,7 +257,7 @@ export default function Login() {
               className="object-cover"
               priority
             />
-            
+
             {/* Dark Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
 
@@ -289,14 +289,13 @@ export default function Login() {
 
           {/* RIGHT SECTION - Login Form */}
           <div className="w-full lg:w-[52%] px-8 md:px-12 lg:px-[45px] py-10 lg:py-[50px]">
-            
+
             {/* Tabs */}
             <div className="flex gap-8 mb-6 border-b border-gray-200">
               <button
                 onClick={() => handleTabSwitch("login")}
-                className={`pb-3 text-lg font-semibold transition relative ${
-                  activeTab === "login" ? "text-[#222]" : "text-gray-400"
-                }`}
+                className={`pb-3 text-lg font-semibold transition relative ${activeTab === "login" ? "text-[#222]" : "text-gray-400"
+                  }`}
               >
                 Login
                 {activeTab === "login" && (
@@ -305,9 +304,8 @@ export default function Login() {
               </button>
               <button
                 onClick={() => handleTabSwitch("signup")}
-                className={`pb-3 text-lg font-semibold transition relative ${
-                  activeTab === "signup" ? "text-[#222]" : "text-gray-400"
-                }`}
+                className={`pb-3 text-lg font-semibold transition relative ${activeTab === "signup" ? "text-[#222]" : "text-gray-400"
+                  }`}
               >
                 Sign Up
                 {activeTab === "signup" && (
@@ -327,7 +325,7 @@ export default function Login() {
                 {/* Phone Input with Country Selector */}
                 <div className="mb-6">
                   <div className="flex h-[52px] border border-[#E7D4AF] rounded-md overflow-hidden relative">
-                    
+
                     {/* Country Selector */}
                     <button
                       type="button"
@@ -406,11 +404,10 @@ export default function Login() {
                           type="button"
                           onClick={handleSendOTP}
                           disabled={timer > 0}
-                          className={`text-sm font-medium transition ${
-                            timer > 0
+                          className={`text-sm font-medium transition ${timer > 0
                               ? "text-gray-400 cursor-not-allowed"
                               : "text-[#C8942E] hover:underline"
-                          }`}
+                            }`}
                         >
                           {timer > 0
                             ? `Resend OTP in ${formatTime(timer)}`
@@ -432,8 +429,8 @@ export default function Login() {
                       ? "Sending OTP..."
                       : "Verifying..."
                     : step === 1
-                    ? "Get OTP"
-                    : "Login"}
+                      ? "Get OTP"
+                      : "Login"}
                 </button>
               </form>
             )}
