@@ -4,7 +4,65 @@ import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import seoConfig from "@/config/seoConfig.json";
+const cleanSeoText = (value = "") => {
+  return String(value)
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
+const replaceSeoVariables = (template = "", values = {}) => {
+  return template.replace(
+    /\{(\w+)\}/g,
+    (_, key) => values[key] || ""
+  );
+};
+
+const generateProductSEO = ({
+  title,
+  description,
+  category,
+  subcategory,
+}) => {
+  const cleanTitle = cleanSeoText(title);
+  const cleanDescription = cleanSeoText(description);
+  const cleanCategory = cleanSeoText(category);
+  const cleanSubcategory = cleanSeoText(subcategory);
+
+  const productType =
+    cleanSubcategory ||
+    cleanCategory ||
+    "Furniture";
+
+  const values = {
+    title: cleanTitle,
+    description: cleanDescription,
+    category: cleanCategory,
+    subcategory: cleanSubcategory,
+    productType,
+    brand: seoConfig.brand,
+  };
+
+  const metaTitle = replaceSeoVariables(
+    seoConfig.product.metaTitle,
+    values
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const metaDescription = replaceSeoVariables(
+    seoConfig.product.metaDescription,
+    values
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return {
+    meta_title: metaTitle,
+    meta_description: metaDescription,
+  };
+};
 export default function Edit() {
   const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
@@ -38,9 +96,9 @@ export default function Edit() {
     discount_amount: "",
     label_category: "",
     label_size: "",
-    meta_title: "",
-    meta_description: "",
-    meta_keywords: "",
+    // meta_title: "",
+    // meta_description: "",
+    // meta_keywords: "",
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -254,13 +312,20 @@ export default function Edit() {
     }
   }, [id]);
 
+  // const handleChange = (e) => {
+  //   setForm({
+  //     ...form,
+  //     [e.target.name]: e.target.value,
+  //   });
+  // };
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+    const { name, value } = e.target;
 
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   // ---------- VARIANT HANDLERS ----------
   const toggleVariant = (index) => {
     setVariants((prev) =>
@@ -413,127 +478,487 @@ export default function Edit() {
       fetchSubSubCategories();
     }
   }, [form?.subcategory]);
+  const getSeoData = () => {
+    const selectedCategory = categories.find(
+      (item) =>
+        String(item?._id) ===
+        String(form.category)
+    );
 
+    const selectedSubCategory = subCategories.find(
+      (item) =>
+        String(item?._id) ===
+        String(form.subcategory)
+    );
+
+    return generateProductSEO({
+      title: form.title,
+      description: form.description,
+      category: selectedCategory?.name || "",
+      subcategory: selectedSubCategory?.name || "",
+    });
+  };
   // ---------- HANDLE EDIT SUBMIT ----------
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    const selectedVariants = variants.filter(v => v.selected);
+    const selectedVariants = variants.filter(
+      (v) => v.selected
+    );
 
     if (!selectedVariants.length) {
-      toast.error("Select at least one color variant");
+      toast.error(
+        "Select at least one color variant"
+      );
       return;
     }
 
-    if (!selectedVariants.every(v => (v.images.length > 0 || v.newImages.length > 0))) {
-      toast.error("Each selected variant must have at least one image");
+    if (
+      !selectedVariants.every(
+        (v) =>
+          v.images.length > 0 ||
+          v.newImages.length > 0
+      )
+    ) {
+      toast.error(
+        "Each selected variant must have at least one image"
+      );
       return;
     }
 
-    // Build price sections only if in multiple mode
+    // ========================================
+    // MULTIPLE PRICE SECTIONS
+    // ========================================
+
     let validPriceSections = [];
+
     if (priceMode === "multiple") {
       for (const section of priceSections) {
-        const hasValidTitle = section.title && section.title.trim() !== '';
-        const amountNum = parseFloat(section.amount);
-        const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
+        const hasValidTitle =
+          section.title &&
+          section.title.trim() !== "";
 
-        if (hasValidTitle && hasValidAmount) {
-          const validSizes = section.sizes
-            .filter(size => {
-              const hasSizeTitle = size.title && size.title.trim() !== '';
-              const sizeAmountNum = parseFloat(size.amount);
-              const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-              return hasSizeTitle && hasSizeAmount;
-            })
-            .map(size => ({
-              title: size.title.trim(),
-              amount: parseFloat(size.amount),
-              discount_amount: parseFloat(size.discount_amount) || 10,
-              final_amount: 0
-            }));
+        const amountNum =
+          parseFloat(section.amount);
+
+        const hasValidAmount =
+          section.amount !== "" &&
+          !isNaN(amountNum) &&
+          amountNum >= 0;
+
+        if (
+          hasValidTitle &&
+          hasValidAmount
+        ) {
+          const validSizes =
+            section.sizes
+              .filter((size) => {
+                const hasSizeTitle =
+                  size.title &&
+                  size.title.trim() !== "";
+
+                const sizeAmountNum =
+                  parseFloat(size.amount);
+
+                const hasSizeAmount =
+                  size.amount !== "" &&
+                  !isNaN(sizeAmountNum) &&
+                  sizeAmountNum >= 0;
+
+                return (
+                  hasSizeTitle &&
+                  hasSizeAmount
+                );
+              })
+              .map((size) => ({
+                title: size.title.trim(),
+
+                amount:
+                  parseFloat(size.amount),
+
+                discount_amount:
+                  parseFloat(
+                    size.discount_amount
+                  ) || 10,
+
+                final_amount: 0,
+              }));
 
           validPriceSections.push({
-            title: section.title.trim(),
-            amount: parseFloat(section.amount),
-            discount_amount: parseFloat(section.discount_amount) || 10,
+            title:
+              section.title.trim(),
+
+            amount:
+              parseFloat(section.amount),
+
+            discount_amount:
+              parseFloat(
+                section.discount_amount
+              ) || 10,
+
             final_amount: 0,
-            sizes: validSizes
+
+            sizes: validSizes,
           });
         }
       }
     }
 
     setLoading(true);
+
     try {
       const fd = new FormData();
 
-      // Append common fields
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock || "0");
-      fd.append("category", form.category);
-      fd.append("subcategory", form.subcategory);
-      fd.append("subsubcategory", form.subsubcategory || "");
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("type", form.type);
-      fd.append("terms", form.terms);
-      fd.append("label_category", form.label_category || "");
-      fd.append("label_size", form.label_size || "");
-      fd.append("meta_title", form.meta_title || "");
-      fd.append("meta_description", form.meta_description || "");
-      fd.append("meta_keywords", form.meta_keywords || "");
-      // Price related – based on mode
-      if (priceMode === "single") {
-        fd.append("amount", form.amount);
-        fd.append("discount_amount", form.discount_amount);
+      // ========================================
+      // PRODUCT DATA
+      // ========================================
 
-        // Do NOT append product_price_section
+      fd.append(
+        "title",
+        form.title.trim()
+      );
+
+      fd.append(
+        "description",
+        form.description.trim()
+      );
+
+      fd.append(
+        "stock",
+        form.stock || "0"
+      );
+
+      fd.append(
+        "category",
+        form.category
+      );
+
+      fd.append(
+        "subcategory",
+        form.subcategory
+      );
+
+      fd.append(
+        "subsubcategory",
+        form.subsubcategory || ""
+      );
+
+      fd.append(
+        "dimensions",
+        form.dimensions
+      );
+
+      fd.append(
+        "material",
+        form.material
+      );
+
+      fd.append(
+        "type",
+        form.type
+      );
+
+      fd.append(
+        "terms",
+        form.terms
+      );
+
+      fd.append(
+        "label_category",
+        form.label_category || ""
+      );
+
+      fd.append(
+        "label_size",
+        form.label_size || ""
+      );
+
+      // ========================================
+      // DYNAMIC SEO
+      // ========================================
+
+      const seoData = getSeoData();
+
+      fd.append(
+        "meta_title",
+        seoData.meta_title
+      );
+
+      fd.append(
+        "meta_description",
+        seoData.meta_description
+      );
+
+      // meta_keywords completely removed
+
+      // ========================================
+      // PRICE
+      // ========================================
+
+      if (priceMode === "single") {
+        fd.append(
+          "amount",
+          form.amount
+        );
+
+        fd.append(
+          "discount_amount",
+          form.discount_amount
+        );
       } else {
-        fd.append("product_price_section", JSON.stringify(validPriceSections));
-        fd.append("amount", 0);
-        fd.append("discount_amount", 0);
-        // Do NOT append amount/discount_amount
+        fd.append(
+          "product_price_section",
+          JSON.stringify(
+            validPriceSections
+          )
+        );
+
+        fd.append(
+          "amount",
+          "0"
+        );
+
+        fd.append(
+          "discount_amount",
+          "0"
+        );
       }
+
+      // ========================================
+      // VARIANTS
+      // ========================================
 
       fd.append(
         "variants",
         JSON.stringify(
-          selectedVariants.map(v => ({
-            color: v.color,
-            title: v.title,
-            stock: v.stock,
-            images: v.images
-          }))
+          selectedVariants.map(
+            (variant) => ({
+              color: variant.color,
+              title: variant.title,
+              stock: variant.stock,
+
+              // Existing S3/image URLs
+              images: variant.images,
+            })
+          )
         )
       );
 
-      selectedVariants.forEach(v =>
-        v.newImages.forEach(img =>
-          fd.append(`variantImages_${v.color}`, img)
-        )
+      // ========================================
+      // NEW VARIANT IMAGES
+      // ========================================
+
+      selectedVariants.forEach(
+        (variant) => {
+          variant.newImages.forEach(
+            (img) => {
+              fd.append(
+                `variantImages_${variant.color}`,
+                img
+              );
+            }
+          );
+        }
       );
+
+      // ========================================
+      // MAIN PRODUCT IMAGE
+      // ========================================
 
       if (image instanceof File) {
-        fd.append("image", image);
+        fd.append(
+          "image",
+          image
+        );
       }
 
-      const main = new Listing();
-      const res = await main.editProduct(id, fd);
-      if (res?.data?.status) {
-        toast.success(res?.data?.message);
-        router.push("/admin/product");
+      // ========================================
+      // DEBUG
+      // ========================================
+
+      console.log(
+        "========== EDIT PRODUCT =========="
+      );
+
+      console.log(
+        "SEO:",
+        seoData
+      );
+
+      for (
+        const [key, value]
+        of fd.entries()
+      ) {
+        console.log(
+          key,
+          value
+        );
+      }
+
+      // ========================================
+      // UPDATE API
+      // ========================================
+
+      const main =
+        new Listing();
+
+      const res =
+        await main.editProduct(
+          id,
+          fd
+        );
+
+      if (
+        res?.data?.status ||
+        res?.data?.success
+      ) {
+        toast.success(
+          res?.data?.message ||
+          "Product updated successfully"
+        );
+
+        router.push(
+          "/admin/product"
+        );
       } else {
-        toast.error(res?.data?.message || "Failed to edit product");
+        toast.error(
+          res?.data?.message ||
+          "Failed to edit product"
+        );
       }
     } catch (error) {
-      toast.error("Internal Server Error");
-      console.error(error);
+      console.error(
+        "Edit product error:",
+        error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Internal Server Error"
+      );
     } finally {
       setLoading(false);
     }
   };
+  // const handleEdit = async (e) => {
+  //   e.preventDefault();
+
+  //   const selectedVariants = variants.filter(v => v.selected);
+
+  //   if (!selectedVariants.length) {
+  //     toast.error("Select at least one color variant");
+  //     return;
+  //   }
+
+  //   if (!selectedVariants.every(v => (v.images.length > 0 || v.newImages.length > 0))) {
+  //     toast.error("Each selected variant must have at least one image");
+  //     return;
+  //   }
+
+  //   // Build price sections only if in multiple mode
+  //   let validPriceSections = [];
+  //   if (priceMode === "multiple") {
+  //     for (const section of priceSections) {
+  //       const hasValidTitle = section.title && section.title.trim() !== '';
+  //       const amountNum = parseFloat(section.amount);
+  //       const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
+
+  //       if (hasValidTitle && hasValidAmount) {
+  //         const validSizes = section.sizes
+  //           .filter(size => {
+  //             const hasSizeTitle = size.title && size.title.trim() !== '';
+  //             const sizeAmountNum = parseFloat(size.amount);
+  //             const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
+  //             return hasSizeTitle && hasSizeAmount;
+  //           })
+  //           .map(size => ({
+  //             title: size.title.trim(),
+  //             amount: parseFloat(size.amount),
+  //             discount_amount: parseFloat(size.discount_amount) || 10,
+  //             final_amount: 0
+  //           }));
+
+  //         validPriceSections.push({
+  //           title: section.title.trim(),
+  //           amount: parseFloat(section.amount),
+  //           discount_amount: parseFloat(section.discount_amount) || 10,
+  //           final_amount: 0,
+  //           sizes: validSizes
+  //         });
+  //       }
+  //     }
+  //   }
+
+  //   setLoading(true);
+  //   try {
+  //     const fd = new FormData();
+
+  //     // Append common fields
+  //     fd.append("title", form.title);
+  //     fd.append("description", form.description);
+  //     fd.append("stock", form.stock || "0");
+  //     fd.append("category", form.category);
+  //     fd.append("subcategory", form.subcategory);
+  //     fd.append("subsubcategory", form.subsubcategory || "");
+  //     fd.append("dimensions", form.dimensions);
+  //     fd.append("material", form.material);
+  //     fd.append("type", form.type);
+  //     fd.append("terms", form.terms);
+  //     fd.append("label_category", form.label_category || "");
+  //     fd.append("label_size", form.label_size || "");
+  //     fd.append("meta_title", form.meta_title || "");
+  //     fd.append("meta_description", form.meta_description || "");
+  //     fd.append("meta_keywords", form.meta_keywords || "");
+  //     // Price related – based on mode
+  //     if (priceMode === "single") {
+  //       fd.append("amount", form.amount);
+  //       fd.append("discount_amount", form.discount_amount);
+
+  //       // Do NOT append product_price_section
+  //     } else {
+  //       fd.append("product_price_section", JSON.stringify(validPriceSections));
+  //       fd.append("amount", 0);
+  //       fd.append("discount_amount", 0);
+  //       // Do NOT append amount/discount_amount
+  //     }
+
+  //     fd.append(
+  //       "variants",
+  //       JSON.stringify(
+  //         selectedVariants.map(v => ({
+  //           color: v.color,
+  //           title: v.title,
+  //           stock: v.stock,
+  //           images: v.images
+  //         }))
+  //       )
+  //     );
+
+  //     selectedVariants.forEach(v =>
+  //       v.newImages.forEach(img =>
+  //         fd.append(`variantImages_${v.color}`, img)
+  //       )
+  //     );
+
+  //     if (image instanceof File) {
+  //       fd.append("image", image);
+  //     }
+
+  //     const main = new Listing();
+  //     const res = await main.editProduct(id, fd);
+  //     if (res?.data?.status) {
+  //       toast.success(res?.data?.message);
+  //       router.push("/admin/product");
+  //     } else {
+  //       toast.error(res?.data?.message || "Failed to edit product");
+  //     }
+  //   } catch (error) {
+  //     toast.error("Internal Server Error");
+  //     console.error(error);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   // ---------- RENDER ----------
   return (
@@ -920,59 +1345,7 @@ export default function Edit() {
               </div>
             ))}
           </div>
-          <div className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-5">
-            <h3 className="text-lg font-semibold text-gray-800">
-              SEO <span className="text-sm text-gray-500">(Optional)</span>
-            </h3>
 
-            {/* Meta Title */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Title
-              </label>
-              <input
-                type="text"
-                name="meta_title"
-                placeholder="Enter Meta Title"
-                value={form.meta_title}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-
-            {/* Meta Description */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Description
-              </label>
-              <input
-                type="text"
-                name="meta_description"
-                placeholder="Enter Meta Description"
-                value={form.meta_description}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-
-            {/* Meta Keywords */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Keywords
-              </label>
-              <input
-                type="text"
-                name="meta_keywords"
-                placeholder="keyword1, keyword2, keyword3"
-                value={form.meta_keywords}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Separate keywords with commas (,)
-              </p>
-            </div>
-          </div>
           <button
             type="submit"
             disabled={loading}

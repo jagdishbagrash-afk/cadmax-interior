@@ -6,6 +6,73 @@ import Popup from "@/pages/common/Popup";
 import { MdAdd, MdClose, MdEdit } from "react-icons/md";
 import Listing from "@/pages/api/Listing";
 import { toast } from "react-hot-toast";
+import seoConfig from "@/config/seoConfig.json";
+const cleanSeoText = (value = "") => {
+  return String(value)
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
+const replaceSeoVariables = (
+  template = "",
+  values = {}
+) => {
+  return template.replace(
+    /\{(\w+)\}/g,
+    (_, key) => values[key] || ""
+  );
+};
+
+
+const generateSubCategorySEO = ({
+  name,
+  category,
+}) => {
+  const cleanName =
+    cleanSeoText(name);
+
+  const cleanCategory =
+    cleanSeoText(category);
+
+  const values = {
+    name: cleanName,
+    category: cleanCategory,
+    brand: seoConfig.brand,
+  };
+
+
+  const metaTitle =
+    replaceSeoVariables(
+      seoConfig.subcategory.metaTitle,
+      values
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+
+  let metaDescription =
+    replaceSeoVariables(
+      seoConfig.subcategory.metaDescription,
+      values
+    )
+      .replace(/\s+/g, " ")
+      .trim();
+
+
+  // Meta description limit
+  if (metaDescription.length > 165) {
+    metaDescription =
+      `${metaDescription
+        .substring(0, 162)
+        .trim()}...`;
+  }
+
+
+  return {
+    meta_title: metaTitle,
+    meta_description: metaDescription,
+  };
+};
 
 export default function AddSubCategory({ fetchDatas, isEdit, item }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -18,9 +85,9 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
     preview: "",
     SuperCategory: "",
     Category: "",
-    meta_title: "",
-    meta_description: "",
-    meta_keywords: "",
+    // meta_title: "",
+    // meta_description: "",
+    // meta_keywords: "",
   });
 
   const [data, setData] = useState([]); // for SuperCategory
@@ -66,9 +133,9 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
         preview: item.Image || "",
         SuperCategory: item?.SuperCategory?._id || "",
         Category: item?.category?._id || "",
-        meta_title: item.meta_title || "",
-        meta_description: item.meta_description || "",
-        meta_keywords: item.meta_keywords || "",
+        // meta_title: item.meta_title || "",
+        // meta_description: item.meta_description || "",
+        // meta_keywords: item.meta_keywords || "",
       });
     }
   }, [isEdit, item]);
@@ -102,21 +169,89 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
     handleInputChange("file", selectedFile);
     handleInputChange("preview", URL.createObjectURL(selectedFile));
   };
+  // ========================================
+  // GET DYNAMIC SEO
+  // ========================================
 
-  // Submit
+  const getSeoData = () => {
+
+    const selectedCategory =
+      datacategiroes.find(
+        (category) =>
+          String(category?._id) ===
+          String(formData.Category)
+      );
+
+
+    return generateSubCategorySEO({
+
+      name:
+        formData.name,
+
+      category:
+        selectedCategory?.name || "",
+    });
+  };
+
+  // ========================================
+  // SUBMIT
+  // ========================================
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (processing) return;
+    if (
+      !formData.Category
+    ) {
+
+      toast.error(
+        "Please select category"
+      );
+
+      return;
+    }
+
+
+    if (
+      !formData.name?.trim()
+    ) {
+
+      toast.error(
+        "Please enter sub category name"
+      );
+
+      return;
+    }
+
     setProcessing(true);
 
     try {
       const main = new Listing();
+      // =====================================
+      // DYNAMIC SEO
+      // =====================================
+
+      const seoData =
+        getSeoData();
+
+
+      console.log(
+        "Sub Category SEO:",
+        seoData
+      );
       const submitFormData = new FormData();
       submitFormData.append("name", formData.name);
-      submitFormData.append("meta_title", formData.meta_title || "");
-      submitFormData.append("meta_description", formData.meta_description || "");
-      submitFormData.append("meta_keywords", formData.meta_keywords || "");
-      submitFormData.append("SuperCategory", formData.SuperCategory);
+      submitFormData.append("meta_title", seoData.meta_title || "");
+      submitFormData.append("meta_description", seoData.meta_description || "");
+      // submitFormData.append("meta_keywords", formData.meta_keywords || "");
+      if (
+        formData.SuperCategory
+      ) {
+
+        submitFormData.append(
+          "SuperCategory",
+          formData.SuperCategory
+        );
+      }
       submitFormData.append("category", formData.Category);
 
       if (formData.file) {
@@ -139,9 +274,9 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
           preview: "",
           SuperCategory: "",
           Category: "",
-          meta_title: "",
-          meta_description: "",
-          meta_keywords: "",
+          // meta_title: "",
+          // meta_description: "",
+          // meta_keywords: "",
         });
         handleClose();
         fetchDatas(); // refresh parent list
@@ -158,198 +293,439 @@ export default function AddSubCategory({ fetchDatas, isEdit, item }) {
 
   return (
     <>
-      {/* Toggle Button */}
-      <div className="flex justify-center items-center">
+
+      {/* ADD / EDIT BUTTON */}
+
+      <div
+        className="
+          flex
+          justify-center
+          items-center
+        "
+      >
+
         <button
+          type="button"
           onClick={handleOpen}
-          className="cursor-pointer flex items-center justify-center gap-2
-       min-w-[42px] h-[42px] px-4
-       rounded-lg border border-gray-200 shadow-sm 
-       bg-white hover:bg-gray-50
-       transition-all duration-200"
+          className="
+            cursor-pointer
+            flex
+            items-center
+            justify-center
+            gap-2
+            min-w-[42px]
+            h-[42px]
+            px-4
+            rounded-lg
+            border
+            border-gray-200
+            shadow-sm
+            bg-white
+            hover:bg-gray-50
+            transition-all
+            duration-200
+          "
         >
+
           {isEdit ? (
-            <MdEdit size={22} className="text-blue-600" />
+
+            <MdEdit
+              size={22}
+              className="text-blue-600"
+            />
+
           ) : (
+
             <>
-              <MdAdd size={22} className="text-blue-600" />
-              <span className="text-sm font-medium text-gray-700">Add</span>
+              <MdAdd
+                size={22}
+                className="text-blue-600"
+              />
+
+              <span
+                className="
+                  text-sm
+                  font-medium
+                  text-gray-700
+                "
+              >
+                Add
+              </span>
             </>
           )}
+
         </button>
+
       </div>
 
-      {/* Popup Modal */}
+
+      {/* ====================================
+          POPUP
+      ==================================== */}
+
       {isOpen && (
+
         <Popup
           isOpen={isOpen}
           onClose={handleClose}
-          size={"max-w-2xl"}
+          size="max-w-2xl"
           className="shadow-none"
         >
-          {/* Header */}
-          <div className="border-b border-black/10 px-4 py-4 lg:px-6 lg:py-5 flex justify-between items-center">
-            <h2 className="text-xl lg:text-2xl text-[#212121] font-semibold">
-              {isEdit ? "Edit" : "Add"} Sub Category
+
+          {/* HEADER */}
+
+          <div
+            className="
+              border-b
+              border-black/10
+              px-4
+              py-4
+              lg:px-6
+              lg:py-5
+              flex
+              justify-between
+              items-center
+            "
+          >
+
+            <h2
+              className="
+                text-xl
+                lg:text-2xl
+                text-[#212121]
+                font-semibold
+              "
+            >
+              {isEdit
+                ? "Edit"
+                : "Add"}{" "}
+              Sub Category
             </h2>
+
+
             <button
               type="button"
               onClick={handleClose}
-              className="text-gray-700 hover:text-gray-900"
+              className="
+                text-gray-700
+                hover:text-gray-900
+              "
             >
-              <MdClose size={24} />
+
+              <MdClose
+                size={24}
+              />
+
             </button>
+
           </div>
 
-          {/* Body */}
-          <div className="py-4 px-4">
-            {/* Category Dropdown */}
+
+          {/* ====================================
+              FORM
+          ==================================== */}
+
+          <form
+            onSubmit={handleSubmit}
+            className="py-4 px-4"
+          >
+
+            {/* CATEGORY */}
+
             <div className="mb-4">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
+
+              <label
+                className="
+                  block
+                  text-[14px]
+                  font-medium
+                  text-[#3E3E3E]
+                  text-left
+                  mb-1
+                "
+              >
                 Category
               </label>
+
+
               <select
-                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                value={formData.Category}
-                onChange={(e) => handleInputChange("Category", e.target.value)}
+                className="
+                  w-full
+                  px-4
+                  lg:px-5
+                  py-2
+                  border
+                  h-[48px]
+                  lg:h-[56px]
+                  border-[#F4F6F8]
+                  rounded-[10px]
+                  bg-[#F4F6F8]
+                  focus:outline-none
+                  focus:ring-1
+                  focus:ring-[#c9c9c9]
+                "
+
+                value={
+                  formData.Category
+                }
+
+                onChange={(e) =>
+                  handleInputChange(
+                    "Category",
+                    e.target.value
+                  )
+                }
+
                 required
               >
-                <option value="">Select Category</option>
-                {datacategiroes?.map((item) => (
-                  <option value={item._id} key={item._id}>
-                    {item.name}
-                  </option>
-                ))}
+
+                <option value="">
+                  Select Category
+                </option>
+
+
+                {datacategiroes?.map(
+                  (category) => (
+
+                    <option
+                      value={
+                        category?._id
+                      }
+
+                      key={
+                        category?._id
+                      }
+                    >
+                      {category?.name}
+                    </option>
+
+                  )
+                )}
+
               </select>
+
             </div>
 
-            {/* SuperCategory Dropdown (optional – uncomment if needed) */}
-            {/* <div className="mb-4">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
-                Main Category
-              </label>
-              <select
-                className="w-full px-4 lg:px-5 py-2 border h-[48px] lg:h-[56px] border-[#F4F6F8] rounded-[6px] lg:rounded-[10px] bg-[#F4F6F8] focus:outline-none focus:ring-1 focus:ring-[#c9c9c9]"
-                value={formData.SuperCategory}
-                onChange={(e) => handleInputChange("SuperCategory", e.target.value)}
-                required
-              >
-                <option value="">Select Main Category</option>
-                {data?.map((item) => (
-                  <option value={item._id} key={item._id}>
-                    {item.name}
-                  </option>
-                ))}
-              </select>
-            </div> */}
 
-            {/* Sub Category Name */}
-            <div className="mb-2">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
+            {/* SUB CATEGORY NAME */}
+
+            <div className="mb-4">
+
+              <label
+                className="
+                  block
+                  text-[14px]
+                  font-medium
+                  text-[#3E3E3E]
+                  text-left
+                  mb-1
+                "
+              >
                 Sub Category Name
               </label>
+
+
               <input
                 type="text"
-                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8] focus:ring-1 focus:ring-gray-300 outline-none"
+
+                className="
+                  w-full
+                  px-4
+                  py-2
+                  h-[48px]
+                  lg:h-[56px]
+                  border
+                  border-[#F4F6F8]
+                  rounded-[10px]
+                  bg-[#F4F6F8]
+                  focus:ring-1
+                  focus:ring-gray-300
+                  outline-none
+                "
+
                 placeholder="Enter sub category name"
-                value={formData.name}
-                onChange={(e) => handleInputChange("name", e.target.value)}
+
+                value={
+                  formData.name
+                }
+
+                onChange={(e) =>
+                  handleInputChange(
+                    "name",
+                    e.target.value
+                  )
+                }
+
+                required
               />
+
             </div>
 
-            {/* Category Image */}
-            <div className="mb-2">
-              <label className="block text-[14px] font-medium text-[#3E3E3E] text-left">
-                Category Image
+
+            {/* IMAGE */}
+
+            <div className="mb-4">
+
+              <label
+                className="
+                  block
+                  text-[14px]
+                  font-medium
+                  text-[#3E3E3E]
+                  text-left
+                  mb-1
+                "
+              >
+                Sub Category Image
               </label>
+
+
               <input
                 type="file"
-                accept="image/*"
-                className="w-full px-4 py-2 h-[48px] lg:h-[56px] border border-[#F4F6F8] rounded-[10px] bg-[#F4F6F8]"
-                onChange={handleImageChange}
+
+                accept=".jpg,.jpeg,.png,.webp"
+
+                className="
+                  w-full
+                  px-4
+                  py-2
+                  h-[48px]
+                  lg:h-[56px]
+                  border
+                  border-[#F4F6F8]
+                  rounded-[10px]
+                  bg-[#F4F6F8]
+                "
+
+                onChange={
+                  handleImageChange
+                }
               />
+
+
               {formData.preview && (
+
                 <img
-                  src={formData.preview}
-                  alt="Preview"
-                  className="w-32 h-32 object-cover mt-3 rounded border"
-                />
-              )}
-            </div>
-
-            {/* ✅ Meta Fields */}
-            <div className="border border-gray-200 rounded-xl p-2 bg-gray-50 mb-2">
-              <h3 className="text-lg font-semibold text-gray-800 mb-5">
-                SEO <span className="text-sm font-normal text-gray-500">(Optional)</span>
-              </h3>
-
-              {/* Meta Title */}
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta Title
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter Meta Title"
-                  value={formData.meta_title}
-                  onChange={(e) => handleInputChange("meta_title", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
-
-              {/* Meta Description */}
-              <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta Description
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter Meta Description"
-                  value={formData.meta_description}
-                  onChange={(e) =>
-                    handleInputChange("meta_description", e.target.value)
+                  src={
+                    formData.preview
                   }
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-                />
-              </div>
 
-              {/* Meta Keywords */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Meta Keywords
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. web development, react, nextjs"
-                  value={formData.meta_keywords}
-                  onChange={(e) => handleInputChange("meta_keywords", e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                  alt={
+                    formData.name ||
+                    "Sub Category Preview"
+                  }
+
+                  className="
+                    w-32
+                    h-32
+                    object-cover
+                    mt-3
+                    rounded
+                    border
+                  "
                 />
-                <p className="mt-1 text-xs text-gray-500">
-                  Separate multiple keywords with commas (,).
-                </p>
-              </div>
+
+              )}
+
             </div>
 
-            {/* Footer Buttons */}
-            <div className="flex justify-end space-x-4">
+
+            {/* ====================================
+                AUTO SEO INFO
+            ==================================== */}
+
+            <div
+              className="
+                mb-5
+                p-3
+                rounded-lg
+                bg-blue-50
+                border
+                border-blue-100
+              "
+            >
+
+              <p
+                className="
+                  text-sm
+                  text-gray-600
+                "
+              >
+                SEO title and description will
+                be generated automatically from
+                the sub category and category
+                name.
+              </p>
+
+            </div>
+
+
+            {/* FOOTER */}
+
+            <div
+              className="
+                flex
+                justify-end
+                space-x-4
+              "
+            >
+
               <button
+                type="button"
                 onClick={handleClose}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded hover:bg-gray-300"
+
+                className="
+                  px-4
+                  py-2
+                  text-sm
+                  font-medium
+                  text-gray-700
+                  bg-gray-200
+                  rounded
+                  hover:bg-gray-300
+                "
               >
                 Cancel
               </button>
+
+
               <button
-                onClick={handleSubmit}
-                className="cursor-pointer px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded hover:bg-blue-700"
-                disabled={processing}
+                type="submit"
+
+                disabled={
+                  processing
+                }
+
+                className="
+                  cursor-pointer
+                  px-4
+                  py-2
+                  text-sm
+                  font-medium
+                  text-white
+                  bg-blue-600
+                  rounded
+                  hover:bg-blue-700
+                  disabled:bg-gray-400
+                  disabled:cursor-not-allowed
+                "
               >
-                {processing ? "Processing..." : "Submit"}
+
+                {processing
+                  ? "Processing..."
+                  : isEdit
+                    ? "Update"
+                    : "Submit"}
+
               </button>
+
             </div>
-          </div>
+
+          </form>
+
         </Popup>
       )}
+
     </>
   );
 }
