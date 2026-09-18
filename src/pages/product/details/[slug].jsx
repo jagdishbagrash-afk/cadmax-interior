@@ -613,25 +613,25 @@ export default function Index() {
   const discountPercent = getDiscountPercentage();
   const hasPriceSections = ProductDetails?.product_price_section?.length > 0;
   const shouldShowPriceSections = hasPriceSections && (!ProductDetails?.amount || ProductDetails?.amount === 0);
-console.log("ProductDetails", ProductDetails)
+  console.log("ProductDetails", ProductDetails)
   return (
-  <Layout
-  seo={{
-    title:
-      ProductDetails?.meta_title ||
-      `${ProductDetails?.name} | Buy Luxury Furniture Online in Jaipur | CADMAX Atelier`,
+    <Layout
+      seo={{
+        title:
+          ProductDetails?.meta_title ||
+          `${ProductDetails?.name} | Buy Luxury Furniture Online in Jaipur | CADMAX Atelier`,
 
-    description:
-      ProductDetails?.meta_description ||
-      `Buy ${ProductDetails?.name} online from CADMAX Atelier Jaipur. Discover luxury designer furniture with premium craftsmanship, elegant finishes, and timeless designs for modern homes and commercial interiors.`,
+        description:
+          ProductDetails?.meta_description ||
+          `Buy ${ProductDetails?.name} online from CADMAX Atelier Jaipur. Discover luxury designer furniture with premium craftsmanship, elegant finishes, and timeless designs for modern homes and commercial interiors.`,
 
-    keywords:
-      ProductDetails?.meta_keywords ||
-      `${ProductDetails?.name}, luxury furniture Jaipur, designer furniture, CADMAX Atelier, premium furniture, modern furniture`,
+        keywords:
+          ProductDetails?.meta_keywords ||
+          `${ProductDetails?.name}, luxury furniture Jaipur, designer furniture, CADMAX Atelier, premium furniture, modern furniture`,
 
-    canonical: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
-    url: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
-  }}
+        canonical: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
+        url: `https://cadmaxatelier.com/product/details/${ProductDetails?.slug}`,
+      }}
     >
       <div className="w-full bg-white">
         <div className="container max-w-[1450px] mx-auto px-4 sm:px-6 lg:px-8 py-1 md:py-2 lg:py-4">
@@ -732,20 +732,21 @@ console.log("ProductDetails", ProductDetails)
                       <SwiperSlide key={index}>
                         <div
                           onMouseEnter={() => setCurrentIndex(index)}
+                          onClick={() => setCurrentIndex(index)}
                           className={`
-      relative w-full h-[120px]
-      rounded-xl overflow-hidden
-      border-2 cursor-pointer bg-[#F7F7F7]
-      transition-all duration-300
-      ${currentIndex === index
+        relative w-full h-[120px]
+        rounded-xl overflow-hidden
+        border-2 cursor-pointer bg-[#F7F7F7]
+        transition-all duration-300
+        ${currentIndex === index
                               ? "border-black"
                               : "border-gray-200"
                             }
-    `}
+      `}
                         >
                           <Image
                             src={img}
-                            alt="thumb"
+                            alt={`Product thumbnail ${index + 1}`}
                             fill
                             className="object-cover p-0"
                           />
