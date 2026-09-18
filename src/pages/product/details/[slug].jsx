@@ -727,30 +727,66 @@ export default function Index() {
                     spaceBetween={14}
                     modules={[Thumbs]}
                     className="h-[700px]"
+                    watchSlidesProgress={true}
+
+                    // Important for iPhone / iOS Chrome
+                    preventClicks={false}
+                    preventClicksPropagation={false}
+                    touchStartPreventDefault={false}
+                    threshold={5}
                   >
                     {selectedVariant?.images?.map((img, index) => (
                       <SwiperSlide key={index}>
-                        <div
-                          onMouseEnter={() => setCurrentIndex(index)}
-                          onClick={() => setCurrentIndex(index)}
+                        <button
+                          type="button"
+
+                          // Desktop
+                          onMouseEnter={() => {
+                            setCurrentIndex(index);
+                          }}
+
+                          // iPhone / touch devices
+                          onPointerUp={(e) => {
+                            e.stopPropagation();
+                            setCurrentIndex(index);
+                          }}
+
+                          // Normal click fallback
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setCurrentIndex(index);
+                          }}
+
                           className={`
-        relative w-full h-[120px]
-        rounded-xl overflow-hidden
-        border-2 cursor-pointer bg-[#F7F7F7]
-        transition-all duration-300
-        ${currentIndex === index
+            relative
+            block
+            w-full
+            h-[120px]
+            rounded-xl
+            overflow-hidden
+            border-2
+            cursor-pointer
+            bg-[#F7F7F7]
+            transition-all
+            duration-300
+            touch-manipulation
+            ${currentIndex === index
                               ? "border-black"
                               : "border-gray-200"
                             }
-      `}
+          `}
+                          style={{
+                            WebkitTapHighlightColor: "transparent",
+                          }}
                         >
                           <Image
                             src={img}
                             alt={`Product thumbnail ${index + 1}`}
                             fill
-                            className="object-cover p-0"
+                            draggable={false}
+                            className="object-cover p-0 pointer-events-none select-none"
                           />
-                        </div>
+                        </button>
                       </SwiperSlide>
                     ))}
                   </Swiper>
