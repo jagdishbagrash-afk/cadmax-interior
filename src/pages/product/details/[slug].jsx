@@ -728,8 +728,7 @@ export default function Index() {
                     modules={[Thumbs]}
                     className="h-[700px]"
                     watchSlidesProgress={true}
-
-                    // Important for iPhone / iOS Chrome
+                    allowTouchMove={false}   // 👈 add this
                     preventClicks={false}
                     preventClicksPropagation={false}
                     touchStartPreventDefault={false}
@@ -739,19 +738,11 @@ export default function Index() {
                       <SwiperSlide key={index}>
                         <button
                           type="button"
-
-                          // Desktop
-                          onMouseEnter={() => {
-                            setCurrentIndex(index);
-                          }}
-
-                          // iPhone / touch devices
-                          onPointerUp={(e) => {
+                          onMouseEnter={() => setCurrentIndex(index)}
+                          onTouchEnd={(e) => {
                             e.stopPropagation();
                             setCurrentIndex(index);
                           }}
-
-                          // Normal click fallback
                           onClick={(e) => {
                             e.stopPropagation();
                             setCurrentIndex(index);
