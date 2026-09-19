@@ -728,7 +728,10 @@ export default function Index() {
                     modules={[Thumbs]}
                     className="h-[700px]"
                     watchSlidesProgress={true}
-                    allowTouchMove={false}   // 👈 add this
+
+                    // 👇 KEY FIX: stop Swiper from grabbing taps on thumbnails
+                    allowTouchMove={false}
+
                     preventClicks={false}
                     preventClicksPropagation={false}
                     touchStartPreventDefault={false}
@@ -738,11 +741,23 @@ export default function Index() {
                       <SwiperSlide key={index}>
                         <button
                           type="button"
-                          onMouseEnter={() => setCurrentIndex(index)}
+
+                          // Desktop: hover preview
+                          onMouseEnter={() => {
+                            // 👇 Guard: don't run on iOS ghost mouse events
+                            if (typeof window !== "undefined" &&
+                              window.matchMedia("(hover: hover)").matches) {
+                              setCurrentIndex(index);
+                            }
+                          }}
+
+                          // 👇 iOS / touch: use onTouchEnd (reliable) instead of onPointerUp
                           onTouchEnd={(e) => {
                             e.stopPropagation();
                             setCurrentIndex(index);
                           }}
+
+                          // Normal click fallback (desktop / non-touch)
                           onClick={(e) => {
                             e.stopPropagation();
                             setCurrentIndex(index);
@@ -763,11 +778,11 @@ export default function Index() {
             touch-manipulation
             ${currentIndex === index
                               ? "border-black"
-                              : "border-gray-200"
-                            }
+                              : "border-gray-200"}
           `}
                           style={{
                             WebkitTapHighlightColor: "transparent",
+                            touchAction: "manipulation",   // 👈 iOS tap responsiveness
                           }}
                         >
                           <Image
