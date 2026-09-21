@@ -203,7 +203,7 @@ const ProductGrid = ({ selectedId }) => {
         if (priceDebounceRef.current) {
             clearTimeout(priceDebounceRef.current);
         }
-        
+
         priceDebounceRef.current = setTimeout(() => {
             prevFilterRef.current = ""; // Reset so useEffect triggers
             setPriceRange((currentRange) => {
@@ -269,7 +269,7 @@ const ProductGrid = ({ selectedId }) => {
                         <div className="bg-white p-5 md:p-7 sticky top-24 h-max space-y-6 rounded-2xl border border-gray-200 shadow-[0_8px_30px_rgb(0,0,0,0.08)]">
 
                             {/* FILTER HEADER */}
-                            <div className="flex items-center justify-between border-b border-gray-100 pb-5">
+                            {/* <div className="flex items-center justify-between border-b border-gray-100 pb-5">
                                 <div className="flex items-center gap-2.5">
                                     <div className="w-8 h-8 rounded-lg bg-gray-900 flex items-center justify-center">
                                         <FiSliders size={14} className="text-white" />
@@ -287,10 +287,10 @@ const ProductGrid = ({ selectedId }) => {
                                         Clear
                                     </button>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* COLOR FILTER */}
-                            <div className="border-b border-gray-100 pb-6">
+                            {/* <div className="border-b border-gray-100 pb-6">
                                 <button
                                     onClick={() => setColorExpanded(!colorExpanded)}
                                     className="flex items-center justify-between w-full group"
@@ -315,20 +315,18 @@ const ProductGrid = ({ selectedId }) => {
                                                 <button
                                                     key={i}
                                                     onClick={() => handleColorChange(c)}
-                                                    className={`group flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 ${
-                                                        isSelected
+                                                    className={`group flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all duration-200 ${isSelected
                                                             ? "bg-gray-50 ring-1 ring-gray-900/10"
                                                             : "hover:bg-gray-50/50"
-                                                    }`}
+                                                        }`}
                                                     title={c}
                                                 >
                                                     <div className="relative">
                                                         <div
-                                                            className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${
-                                                                isSelected
+                                                            className={`w-7 h-7 rounded-full border-2 transition-all duration-200 ${isSelected
                                                                     ? "border-gray-900 scale-110 shadow-sm"
                                                                     : "border-gray-200 group-hover:border-gray-300"
-                                                            }`}
+                                                                }`}
                                                             style={{ backgroundColor: c }}
                                                         />
                                                         {isSelected && (
@@ -339,9 +337,8 @@ const ProductGrid = ({ selectedId }) => {
                                                             </div>
                                                         )}
                                                     </div>
-                                                    <span className={`text-[9px] uppercase tracking-wider font-medium truncate max-w-full ${
-                                                        isSelected ? "text-gray-900" : "text-gray-500"
-                                                    }`}>
+                                                    <span className={`text-[9px] uppercase tracking-wider font-medium truncate max-w-full ${isSelected ? "text-gray-900" : "text-gray-500"
+                                                        }`}>
                                                         {c}
                                                     </span>
                                                 </button>
@@ -349,7 +346,7 @@ const ProductGrid = ({ selectedId }) => {
                                         })}
                                     </div>
                                 )}
-                            </div>
+                            </div> */}
 
                             {/* SORT BY FILTER */}
                             <div className="border-b border-gray-100 pb-6">
@@ -385,11 +382,10 @@ const ProductGrid = ({ selectedId }) => {
                                                 <button
                                                     key={opt.value}
                                                     onClick={() => setSortBy(opt.value)}
-                                                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all duration-200 ${
-                                                        isActive
-                                                            ? "bg-gray-900 text-white border-gray-900 shadow-sm"
-                                                            : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-800"
-                                                    }`}
+                                                    className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg border transition-all duration-200 ${isActive
+                                                        ? "bg-gray-900 text-white border-gray-900 shadow-sm"
+                                                        : "bg-white text-gray-600 border-gray-200 hover:border-gray-300 hover:text-gray-800"
+                                                        }`}
                                                 >
                                                     {opt.label}
                                                 </button>
@@ -441,7 +437,7 @@ const ProductGrid = ({ selectedId }) => {
                                         <div className="relative h-8">
                                             {/* Track Background */}
                                             <div className="absolute top-1/2 -translate-y-1/2 w-full h-1 bg-gray-200 rounded-full" />
-                                            
+
                                             {/* Active Track */}
                                             <div
                                                 className="absolute top-1/2 -translate-y-1/2 h-1 bg-gray-900 rounded-full"
