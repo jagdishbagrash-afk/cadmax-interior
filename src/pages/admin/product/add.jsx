@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
@@ -78,6 +78,8 @@ const generateProductSEO = ({
   };
 };
 export default function Add() {
+  // Default preset of colors. This is now just a STARTING POINT —
+  // users can add any additional custom color dynamically below.
   const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
     { name: "blue", hex: "#3b82f6" },
@@ -133,9 +135,76 @@ export default function Add() {
       title: `${c.name.charAt(0).toUpperCase() + c.name.slice(1)} Variant`,
       stock: "",
       images: [],
-      previews: []
+      previews: [],
+      isCustom: false
     }))
   );
+
+  // ---------- DYNAMIC / CUSTOM COLOR ADD ----------
+  const [customColorName, setCustomColorName] = useState("");
+  const [customColorHex, setCustomColorHex] = useState("#000000");
+  const [highlightIndex, setHighlightIndex] = useState(null);
+  const variantRefs = useRef([]);
+
+  const scrollToAndHighlight = (index) => {
+    setHighlightIndex(index);
+    // Wait a tick so the DOM node is definitely there, then scroll to it
+    setTimeout(() => {
+      variantRefs.current[index]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 50);
+    // Remove the highlight after a couple seconds
+    setTimeout(() => setHighlightIndex(null), 2000);
+  };
+
+  const addCustomColor = () => {
+    const name = customColorName.trim().toLowerCase();
+
+    if (!name) {
+      toast.error("Enter a color name");
+      return;
+    }
+
+    const existingIndex = variants.findIndex(
+      (v) => v.color.toLowerCase() === name
+    );
+
+    if (existingIndex !== -1) {
+      toast.error(`"${name}" is already in the list — scrolled to it below`);
+      scrollToAndHighlight(existingIndex);
+      return;
+    }
+
+    setVariants((prev) => [
+      ...prev,
+      {
+        color: name,
+        hex: customColorHex,
+        selected: true,
+        title: `${name.charAt(0).toUpperCase() + name.slice(1)} Variant`,
+        stock: "",
+        images: [],
+        previews: [],
+        isCustom: true
+      }
+    ]);
+
+    setCustomColorName("");
+    setCustomColorHex("#000000");
+    toast.success(`"${name}" color added`);
+  };
+
+  const removeCustomColor = (index) => {
+    setVariants((prev) => {
+      const target = prev[index];
+      // Safety: never remove one of the default preset colors,
+      // only ones the user added dynamically.
+      if (!target?.isCustom) return prev;
+      return prev.filter((_, i) => i !== index);
+    });
+  };
 
   const [priceSections, setPriceSections] = useState([
     {
@@ -223,7 +292,8 @@ export default function Add() {
         }
 
         if (data.variants && data.variants.length > 0) {
-          const updatedVariants = AVAILABLE_COLORS.map(color => {
+          // Start from the default preset, marking any that match saved data as selected
+          const presetVariants = AVAILABLE_COLORS.map(color => {
             const existingVariant = data.variants.find(v => v.color === color.name);
             if (existingVariant) {
               return {
@@ -234,7 +304,8 @@ export default function Add() {
                 stock: existingVariant.stock,
                 images: [],
                 previews: [],
-                existingImages: existingVariant.images || []
+                existingImages: existingVariant.images || [],
+                isCustom: false
               };
             }
             return {
@@ -244,10 +315,30 @@ export default function Add() {
               title: `${color.name.charAt(0).toUpperCase() + color.name.slice(1)} Variant`,
               stock: "",
               images: [],
-              previews: []
+              previews: [],
+              isCustom: false
             };
           });
-          setVariants(updatedVariants);
+
+          // Any saved color that ISN'T part of the default preset is a
+          // custom color the product was created with — add it dynamically
+          // so it isn't lost when editing.
+          const presetNames = AVAILABLE_COLORS.map(c => c.name.toLowerCase());
+          const customVariants = data.variants
+            .filter(v => !presetNames.includes(String(v.color).toLowerCase()))
+            .map(v => ({
+              color: v.color,
+              hex: v.hex || "#000000",
+              selected: true,
+              title: v.title || `${String(v.color).charAt(0).toUpperCase() + String(v.color).slice(1)} Variant`,
+              stock: v.stock,
+              images: [],
+              previews: [],
+              existingImages: v.images || [],
+              isCustom: true
+            }));
+
+          setVariants([...presetVariants, ...customVariants]);
         }
 
         if (data.product_price_section && data.product_price_section.length > 0) {
@@ -344,12 +435,6 @@ export default function Add() {
     }
   }, [id]);
 
-  // const handleChange = (e) => {
-  //   setForm({
-  //     ...form,
-  //     [e.target.name]: e.target.value,
-  //   });
-  // };
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -529,12 +614,14 @@ export default function Add() {
       .map(
         ({
           color,
+          hex,
           title,
           stock,
           images,
           existingImages,
         }) => ({
           color,
+          hex,
           title,
           stock,
           images:
@@ -710,10 +797,12 @@ export default function Add() {
           selectedVariants.map(
             ({
               color,
+              hex,
               title,
               stock,
             }) => ({
               color,
+              hex,
               title,
               stock,
             })
@@ -869,134 +958,6 @@ export default function Add() {
       setLoading(false);
     }
   };
-  // const handleSubmit = async (e) => {
-  //   e.preventDefault();
-  //   const selectedVariants = variants
-  //     .filter(v => v.selected)
-  //     .map(({ color, title, stock, images, existingImages }) => ({
-  //       color,
-  //       title,
-  //       stock,
-  //       images: images.length > 0 ? images : (existingImages || [])
-  //     }));
-
-  //   if (!selectedVariants.length) {
-  //     toast.error("Select at least one color variant");
-  //     return;
-  //   }
-
-  //   if (!selectedVariants.every(v => v.images.length > 0)) {
-  //     toast.error("Each selected variant must have at least one image");
-  //     return;
-  //   }
-
-  //   // Build price sections only if in multiple mode
-  //   let validPriceSections = [];
-  //   if (priceMode === "multiple") {
-  //     for (const section of priceSections) {
-  //       const hasValidTitle = section.title && section.title.trim() !== '';
-  //       const amountNum = parseFloat(section.amount);
-  //       const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-
-  //       if (hasValidTitle && hasValidAmount) {
-  //         const validSizes = section.sizes
-  //           .filter(size => {
-  //             const hasSizeTitle = size.title && size.title.trim() !== '';
-  //             const sizeAmountNum = parseFloat(size.amount);
-  //             const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-  //             return hasSizeTitle && hasSizeAmount;
-  //           })
-  //           .map(size => ({
-  //             title: size.title.trim(),
-  //             amount: parseFloat(size.amount),
-  //             discount_amount: parseFloat(size.discount_amount) || 10,
-  //             final_amount: 0
-  //           }));
-
-  //         validPriceSections.push({
-  //           title: section.title.trim(),
-  //           amount: parseFloat(section.amount),
-  //           discount_amount: parseFloat(section.discount_amount) || 10,
-  //           final_amount: 0,
-  //           sizes: validSizes  // can be []
-  //         });
-  //       }
-  //     }
-  //   }
-
-  //   setLoading(true);
-  //   try {
-  //     const fd = new FormData();
-  //     Object.entries(form).forEach(([key, value]) => {
-  //       // Skip amount if in multiple mode – we'll handle it separately
-  //       if (key === 'amount' && priceMode === 'multiple') return;
-  //       fd.append(key, value);
-  //     });
-
-  //     fd.append("variants", JSON.stringify(
-  //       selectedVariants.map(({ color, title, stock }) => ({
-  //         color,
-  //         title,
-  //         stock
-  //       }))
-  //     ));
-
-  //     if (priceMode === "multiple") {
-  //       fd.append("product_price_section", JSON.stringify(validPriceSections));
-  //       // Do not append amount
-  //     } else {
-  //       // Single price mode – append amount and discount
-  //       fd.append("amount", form.amount);
-  //       fd.append("discount_amount", form.discount_amount);
-  //       fd.append("label_size", form.label_size);
-  //       fd.append("label_category", form.label_category);
-  //       // Do not append product_price_section
-  //     }
-
-  //     selectedVariants.forEach(v => {
-  //       v.images.forEach(img => {
-  //         if (img instanceof File) {
-  //           fd.append(`variantImages_${v.color}`, img);
-  //         }
-  //       });
-  //     });
-
-  //     // Append main product image (if any)
-  //     if (image instanceof File) {
-  //       fd.append("image", image);
-  //     }
-
-  //     const main = new Listing();
-  //     const res = await main.productAdd(fd);
-  //     if (res?.data?.status) {
-  //       toast.success(res?.data?.message);
-  //       setForm({
-  //         title: "",
-  //         description: "",
-  //         stock: "",
-  //         amount: "",
-  //         discount_amount: "10",
-  //         category: "",
-  //         subcategory: "",
-  //         dimensions: "",
-  //         material: "",
-  //         label_category: "",
-  //         label_size: "",
-  //         type: "",
-  //         terms: "",
-  //       });
-  //       setImage(null);
-  //       router.push("/admin/product");
-  //     } else {
-  //       toast.error(res?.data?.message || "Failed to add product");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Internal Server Error");
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   // ========== FIXED handleEdit ==========
   const handleEdit = async (e) => {
@@ -1007,12 +968,14 @@ export default function Add() {
       .map(
         ({
           color,
+          hex,
           title,
           stock,
           images,
           existingImages,
         }) => ({
           color,
+          hex,
           title,
           stock,
 
@@ -1164,11 +1127,13 @@ export default function Add() {
           selectedVariants.map(
             ({
               color,
+              hex,
               title,
               stock,
               images,
             }) => ({
               color,
+              hex,
               title,
               stock,
 
@@ -1315,106 +1280,6 @@ export default function Add() {
       setLoading(false);
     }
   };
-  // const handleEdit = async (e) => {
-  //   e.preventDefault();
-
-  //   const selectedVariants = variants
-  //     .filter(v => v.selected)
-  //     .map(({ color, title, stock, images, existingImages }) => ({
-  //       color,
-  //       title,
-  //       stock,
-  //       images: images.length > 0 ? images : (existingImages || [])
-  //     }));
-
-  //   let validPriceSections = [];
-  //   if (priceMode === "multiple") {
-  //     for (const section of priceSections) {
-  //       const hasValidTitle = section.title && section.title.trim() !== '';
-  //       const amountNum = parseFloat(section.amount);
-  //       const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
-
-  //       if (hasValidTitle && hasValidAmount) {
-  //         const validSizes = section.sizes
-  //           .filter(size => {
-  //             const hasSizeTitle = size.title && size.title.trim() !== '';
-  //             const sizeAmountNum = parseFloat(size.amount);
-  //             const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-  //             return hasSizeTitle && hasSizeAmount;
-  //           })
-  //           .map(size => ({
-  //             title: size.title.trim(),
-  //             amount: parseFloat(size.amount),
-  //             discount_amount: parseFloat(size.discount_amount) || 10,
-  //             final_amount: 0
-  //           }));
-
-  //         validPriceSections.push({
-  //           title: section.title.trim(),
-  //           amount: parseFloat(section.amount),
-  //           discount_amount: parseFloat(section.discount_amount) || 10,
-  //           final_amount: 0,
-  //           sizes: validSizes
-  //         });
-  //       }
-  //     }
-  //   }
-
-  //   setLoading(true);
-  //   try {
-  //     const fd = new FormData();
-
-  //     // Append all form fields except amount if multiple mode
-  //     Object.entries(form).forEach(([key, value]) => {
-  //       if (key === 'amount' && priceMode === 'multiple') return;
-  //       fd.append(key, value);
-  //     });
-
-  //     // Variants
-  //     fd.append("variants", JSON.stringify(
-  //       selectedVariants.map(({ color, title, stock, images }) => ({
-  //         color,
-  //         title,
-  //         stock,
-  //         images: images.filter(img => typeof img === 'string')
-  //       }))
-  //     ));
-
-  //     if (priceMode === "multiple") {
-  //       fd.append("product_price_section", JSON.stringify(validPriceSections));
-  //     } else {
-  //       fd.append("amount", form.amount);
-  //       fd.append("discount_amount", form.discount_amount);
-  //     }
-
-  //     // Variant images (files)
-  //     selectedVariants.forEach(v => {
-  //       v.images.forEach(img => {
-  //         if (img instanceof File) {
-  //           fd.append(`variantImages_${v.color}`, img);
-  //         }
-  //       });
-  //     });
-
-  //     if (image instanceof File) {
-  //       fd.append("image", image);
-  //     }
-
-  //     const main = new Listing();
-  //     const res = await main.editProduct(id, fd);
-  //     if (res?.data?.status) {
-  //       toast.success(res?.data?.message);
-  //       router.push("/admin/product");
-  //     } else {
-  //       toast.error(res?.data?.message || "Failed to edit product");
-  //     }
-  //   } catch (error) {
-  //     toast.error("Internal Server Error");
-  //     console.error(error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   return (
     <AdminLayout page={"Product List"}>
@@ -1704,10 +1569,44 @@ export default function Add() {
 
           {/* Color Variants */}
           <div className="border rounded-lg p-5 bg-white shadow-sm space-y-5">
-            <h2 className="text-xl font-semibold text-gray-800">🎨 Color Variants</h2>
+            <div className="flex justify-between items-center flex-wrap gap-3">
+              <h2 className="text-xl font-semibold text-gray-800">🎨 Color Variants</h2>
+            </div>
+
+            {/* ---------- ADD CUSTOM COLOR (DYNAMIC) ---------- */}
+            <div className="flex flex-wrap items-center gap-3 border border-dashed border-blue-300 rounded-lg p-3 bg-blue-50">
+              <input
+                type="color"
+                value={customColorHex}
+                onChange={(e) => setCustomColorHex(e.target.value)}
+                className="w-10 h-10 p-0 border rounded cursor-pointer"
+                title="Pick color"
+              />
+              <input
+                type="text"
+                placeholder="Custom color name (e.g., Maroon)"
+                value={customColorName}
+                onChange={(e) => setCustomColorName(e.target.value)}
+                className="border rounded-lg p-2 flex-1 min-w-[180px] focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+              <button
+                type="button"
+                onClick={addCustomColor}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                + Add Custom Color
+              </button>
+            </div>
 
             {variants.map((v, i) => (
-              <div key={v.color} className="border rounded-lg p-4 bg-gray-50 hover:shadow transition">
+              <div
+                key={`${v.color}-${i}`}
+                ref={(el) => (variantRefs.current[i] = el)}
+                className={`border rounded-lg p-4 transition-all duration-500 ${highlightIndex === i
+                    ? "ring-4 ring-yellow-400 bg-yellow-50 scale-[1.01]"
+                    : "bg-gray-50 hover:shadow"
+                  }`}
+              >
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-3 cursor-pointer">
                     <input
@@ -1723,11 +1622,40 @@ export default function Add() {
                     <span className="capitalize font-medium text-gray-700">
                       {v.color}
                     </span>
+                    {v.isCustom && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                        Custom
+                      </span>
+                    )}
                   </label>
+
+                  {v.isCustom && (
+                    <button
+                      type="button"
+                      onClick={() => removeCustomColor(i)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      title="Remove this custom color"
+                    >
+                      ✕ Remove
+                    </button>
+                  )}
                 </div>
 
                 {v.selected && (
                   <div className="mt-4 pl-6 space-y-4">
+                    <div>
+                      <label className="text-sm font-medium text-gray-600">
+                        Variant Title
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Variant title"
+                        value={v.title}
+                        onChange={(e) => updateVariantTitle(i, e.target.value)}
+                        className="w-full mt-1 rounded border px-3 py-2 focus:outline-none focus:ring focus:ring-blue-200"
+                      />
+                    </div>
+
                     <div>
                       <label className="text-sm font-medium text-gray-600">
                         Stock Quantity

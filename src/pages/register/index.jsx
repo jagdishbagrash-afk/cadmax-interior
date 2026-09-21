@@ -36,7 +36,7 @@ export default function Register() {
   const [timer, setTimer] = useState(0);
 
   const [activeTab, setActiveTab] = useState("signup"); // 'login' or 'signup'
-  
+
   const [data, setData] = useState({
     phone: "",
     otp: "",
@@ -77,7 +77,7 @@ export default function Register() {
       const onlyDigits = value.replace(/\D/g, "").slice(0, 10);
       setData((prev) => ({ ...prev, phone: onlyDigits }));
     }
-    
+
     if (name === "otp") {
       const onlyDigits = value.replace(/\D/g, "").slice(0, 6);
       setData((prev) => ({ ...prev, otp: onlyDigits }));
@@ -203,7 +203,7 @@ export default function Register() {
     <div className="min-h-screen flex items-center justify-center bg-[#F7F7F7] p-4">
       {/* Floating Register Card */}
       <div className="relative w-full max-w-[1050px] bg-white rounded-[22px] shadow-2xl overflow-hidden">
-        
+
         {/* Close Button */}
         <Link href="/login">
           <button
@@ -214,7 +214,7 @@ export default function Register() {
         </Link>
 
         <div className="flex flex-col lg:flex-row">
-          
+
           {/* LEFT SECTION - Promotional Image */}
           <div className="relative w-full lg:w-[48%] h-[300px] lg:h-[560px] overflow-hidden">
             <Image
@@ -224,7 +224,7 @@ export default function Register() {
               className="object-cover"
               priority
             />
-            
+
             {/* Dark Gradient Overlay */}
             <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent"></div>
 
@@ -256,14 +256,13 @@ export default function Register() {
 
           {/* RIGHT SECTION - Register Form */}
           <div className="w-full lg:w-[52%] px-8 md:px-12 lg:px-[45px] py-10 lg:py-[50px]">
-            
+
             {/* Tabs */}
             <div className="flex gap-8 mb-6 border-b border-gray-200">
               <button
                 onClick={() => handleTabSwitch("login")}
-                className={`pb-3 text-lg font-semibold transition relative ${
-                  activeTab === "login" ? "text-[#222]" : "text-gray-400"
-                }`}
+                className={`pb-3 text-lg font-semibold transition relative ${activeTab === "login" ? "text-[#222]" : "text-gray-400"
+                  }`}
               >
                 Login
                 {activeTab === "login" && (
@@ -272,9 +271,8 @@ export default function Register() {
               </button>
               <button
                 onClick={() => handleTabSwitch("signup")}
-                className={`pb-3 text-lg font-semibold transition relative ${
-                  activeTab === "signup" ? "text-[#222]" : "text-gray-400"
-                }`}
+                className={`pb-3 text-lg font-semibold transition relative ${activeTab === "signup" ? "text-[#222]" : "text-gray-400"
+                  }`}
               >
                 Sign Up
                 {activeTab === "signup" && (
@@ -291,179 +289,178 @@ export default function Register() {
             {/* Form */}
             {activeTab === "signup" && (
               <form onSubmit={step === 3 ? handleRegister : (e) => {
-              e.preventDefault();
-              if (step === 1) {
-                sendOTP();
-              } else {
-                verifyOTP();
-              }
-            }}>
-              
-              {/* STEP 1: Phone Input */}
-              {step === 1 && (
-                <div className="mb-5">
-                  <div className="flex h-[50px] border border-[#E7D4AF] rounded-md overflow-hidden relative">
-                    
-                    {/* Country Selector */}
-                    <button
-                      type="button"
-                      onClick={() => setShowCountryDropdown(!showCountryDropdown)}
-                      className="w-[80px] bg-black flex items-center justify-center gap-1 flex-shrink-0 hover:bg-gray-900 transition"
-                    >
-                      <span className="text-lg">{selectedCountry.flag}</span>
-                      <span className="text-white text-xs font-medium">{selectedCountry.code}</span>
-                      <FaChevronDown className="text-white text-xs" />
-                    </button>
+                e.preventDefault();
+                if (step === 1) {
+                  sendOTP();
+                } else {
+                  verifyOTP();
+                }
+              }}>
 
-                    {/* Separator Line */}
-                    <div className="w-px bg-[#E7D4AF]"></div>
+                {/* STEP 1: Phone Input */}
+                {step === 1 && (
+                  <div className="mb-5">
+                    <div className="flex h-[50px] border border-[#E7D4AF] rounded-md overflow-hidden relative">
 
-                    {/* Phone Input */}
+                      {/* Country Selector */}
+                      <button
+                        type="button"
+                        onClick={() => setShowCountryDropdown(!showCountryDropdown)}
+                        className="w-[80px] bg-black flex items-center justify-center gap-1 flex-shrink-0 hover:bg-gray-900 transition"
+                      >
+                        <span className="text-lg">{selectedCountry.flag}</span>
+                        <span className="text-white text-xs font-medium">{selectedCountry.code}</span>
+                        <FaChevronDown className="text-white text-xs" />
+                      </button>
+
+                      {/* Separator Line */}
+                      <div className="w-px bg-[#E7D4AF]"></div>
+
+                      {/* Phone Input */}
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={data.phone}
+                        onChange={handleChange}
+                        placeholder="Enter Phone Number"
+                        className="flex-1 px-4 text-sm focus:outline-none"
+                        maxLength={10}
+                      />
+
+                      {/* Country Dropdown */}
+                      {showCountryDropdown && (
+                        <div className="absolute top-full left-0 mt-1 w-[200px] bg-white border border-gray-200 rounded-md shadow-lg z-30 max-h-[200px] overflow-y-auto">
+                          {countries.map((country, index) => (
+                            <button
+                              key={index}
+                              type="button"
+                              onClick={() => {
+                                setSelectedCountry(country);
+                                setShowCountryDropdown(false);
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition text-left"
+                            >
+                              <span className="text-lg">{country.flag}</span>
+                              <span className="text-sm text-gray-700">{country.country}</span>
+                              <span className="text-xs text-gray-500 ml-auto">{country.code}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 2: OTP Input */}
+                {step === 2 && (
+                  <div className="mb-5">
+                    <div className="relative">
+                      <input
+                        type="text"
+                        name="otp"
+                        value={data.otp}
+                        onChange={handleChange}
+                        placeholder="Enter 6 digit OTP"
+                        maxLength={6}
+                        className="w-full h-[50px] px-4 pr-12 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
+                      />
+                      <FaLock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                    </div>
+
+                    <div className="flex items-center justify-between mt-2.5">
+                      <button
+                        type="button"
+                        onClick={handleBack}
+                        className="text-sm text-[#222] font-medium hover:text-[#C8942E] transition"
+                      >
+                        ← Back
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={sendOTP}
+                        disabled={timer > 0}
+                        className={`text-sm font-medium transition ${timer > 0
+                            ? "text-gray-400 cursor-not-allowed"
+                            : "text-[#C8942E] hover:underline"
+                          }`}
+                      >
+                        {timer > 0
+                          ? `Resend OTP in ${formatTime(timer)}`
+                          : "Resend OTP"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* STEP 3: Additional Details */}
+                {step === 3 && (
+                  <div className="space-y-3 mb-5">
+                    <div className="p-2.5 bg-green-50 border border-green-200 rounded-md">
+                      <p className="text-green-700 text-sm text-center font-medium">
+                        ✅ Phone Number Verified
+                      </p>
+                    </div>
+
                     <input
-                      type="tel"
-                      name="phone"
-                      value={data.phone}
+                      name="name"
+                      placeholder="Full Name"
+                      value={data.name}
                       onChange={handleChange}
-                      placeholder="Enter Phone Number"
-                      className="flex-1 px-4 text-sm focus:outline-none"
-                      maxLength={10}
+                      required
+                      className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
                     />
 
-                    {/* Country Dropdown */}
-                    {showCountryDropdown && (
-                      <div className="absolute top-full left-0 mt-1 w-[200px] bg-white border border-gray-200 rounded-md shadow-lg z-30 max-h-[200px] overflow-y-auto">
-                        {countries.map((country, index) => (
-                          <button
-                            key={index}
-                            type="button"
-                            onClick={() => {
-                              setSelectedCountry(country);
-                              setShowCountryDropdown(false);
-                            }}
-                            className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 transition text-left"
-                          >
-                            <span className="text-lg">{country.flag}</span>
-                            <span className="text-sm text-gray-700">{country.country}</span>
-                            <span className="text-xs text-gray-500 ml-auto">{country.code}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* STEP 2: OTP Input */}
-              {step === 2 && (
-                <div className="mb-5">
-                  <div className="relative">
                     <input
-                      type="text"
-                      name="otp"
-                      value={data.otp}
+                      name="email"
+                      placeholder="Email Address"
+                      type="email"
+                      value={data.email}
                       onChange={handleChange}
-                      placeholder="Enter 6 digit OTP"
-                      maxLength={6}
-                      className="w-full h-[50px] px-4 pr-12 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
+                      required
+                      className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
                     />
-                    <FaLock className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
-                  </div>
 
-                  <div className="flex items-center justify-between mt-2.5">
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      className="text-sm text-[#222] font-medium hover:text-[#C8942E] transition"
+                    <select
+                      name="gender"
+                      value={data.gender}
+                      onChange={handleChange}
+                      required
+                      className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
                     >
-                      ← Back
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={sendOTP}
-                      disabled={timer > 0}
-                      className={`text-sm font-medium transition ${
-                        timer > 0
-                          ? "text-gray-400 cursor-not-allowed"
-                          : "text-[#C8942E] hover:underline"
-                      }`}
-                    >
-                      {timer > 0
-                        ? `Resend OTP in ${formatTime(timer)}`
-                        : "Resend OTP"}
-                    </button>
+                      <option value="">Select Gender</option>
+                      <option value="male">Male</option>
+                      <option value="female">Female</option>
+                      <option value="other">Other</option>
+                    </select>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* STEP 3: Additional Details */}
-              {step === 3 && (
-                <div className="space-y-3 mb-5">
-                  <div className="p-2.5 bg-green-50 border border-green-200 rounded-md">
-                    <p className="text-green-700 text-sm text-center font-medium">
-                      ✅ Phone Number Verified
-                    </p>
-                  </div>
-
-                  <input
-                    name="name"
-                    placeholder="Full Name"
-                    value={data.name}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
-                  />
-
-                  <input
-                    name="email"
-                    placeholder="Email Address"
-                    type="email"
-                    value={data.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
-                  />
-
-                  <select
-                    name="gender"
-                    value={data.gender}
-                    onChange={handleChange}
-                    required
-                    className="w-full h-[50px] px-4 border border-[#E7D4AF] rounded-md text-sm focus:outline-none"
+                {/* Submit Button */}
+                {step !== 2 && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-[50px] bg-gradient-to-r from-[#C8942E] to-[#D4A84B] hover:from-[#B8842E] hover:to-[#C4983B] text-white font-bold rounded-md transition-all duration-300 disabled:opacity-50 mb-5"
                   >
-                    <option value="">Select Gender</option>
-                    <option value="male">Male</option>
-                    <option value="female">Female</option>
-                    <option value="other">Other</option>
-                  </select>
-                </div>
-              )}
+                    {loading
+                      ? "Processing..."
+                      : step === 1
+                        ? "Send OTP"
+                        : "Create Account"}
+                  </button>
+                )}
 
-              {/* Submit Button */}
-              {step !== 2 && (
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-[50px] bg-gradient-to-r from-[#C8942E] to-[#D4A84B] hover:from-[#B8842E] hover:to-[#C4983B] text-white font-bold rounded-md transition-all duration-300 disabled:opacity-50 mb-5"
-                >
-                  {loading
-                    ? "Processing..."
-                    : step === 1
-                    ? "Send OTP"
-                    : "Create Account"}
-                </button>
-              )}
-
-              {step === 2 && (
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-[50px] bg-gradient-to-r from-[#C8942E] to-[#D4A84B] hover:from-[#B8842E] hover:to-[#C4983B] text-white font-bold rounded-md transition-all duration-300 disabled:opacity-50 mb-5"
-                >
-                  {loading ? "Verifying..." : "Verify OTP"}
-                </button>
-              )}
-            </form>
+                {step === 2 && (
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="w-full h-[50px] bg-gradient-to-r from-[#C8942E] to-[#D4A84B] hover:from-[#B8842E] hover:to-[#C4983B] text-white font-bold rounded-md transition-all duration-300 disabled:opacity-50 mb-5"
+                  >
+                    {loading ? "Verifying..." : "Verify OTP"}
+                  </button>
+                )}
+              </form>
             )}
 
             {activeTab === "login" && (
