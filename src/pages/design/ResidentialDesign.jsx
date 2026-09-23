@@ -44,21 +44,21 @@ export default function ResidentialDesign({ Residentialservices }) {
                 href={`/design/residential/${item.slug}`}
                 className=" block"
               >
-                   <div className="relative h-[300px] overflow-hidden group rounded-xl">
-                                 <Image
-                                   src={item?.Image}
-                                   alt={item.title}
-                                   fill
-                                   className="object-cover transition-transform duration-500 group-hover:scale-105"
-                                 />
-               
-                                 {/* Overlay */}
-                                 <div className="absolute inset-0 bg-black/45 uppercase flex items-center justify-center text-center p-4">
-                                   <h3 className="text-white text-[16px] lg:text-[18px]">
-                                     {item.title}
-                                   </h3>
-                                 </div>
-                               </div>
+                <div className="relative h-[300px] overflow-hidden group rounded-xl">
+                  <Image
+                    src={item?.Image}
+                    alt={item.title}
+                    fill
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
+
+                  {/* Overlay */}
+                  <div className="absolute inset-0 bg-black/45 uppercase flex items-center justify-center text-center p-4">
+                    <h3 className="text-white text-[16px] lg:text-[18px]">
+                      {item.title}
+                    </h3>
+                  </div>
+                </div>
               </Link>
             </SwiperSlide>
           ))}

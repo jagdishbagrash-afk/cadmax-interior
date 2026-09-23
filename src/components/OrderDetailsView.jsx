@@ -857,7 +857,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                   DELIVERED ON
                 </p>
                 <p className="text-sm font-bold text-[#16a34a] mt-1">
-                  {shipment.deliveredOn || "24 July 2026, 12:20 PM"}
+                  {shipment.deliveredOn || "--"}
                 </p>
               </div>
 
@@ -901,7 +901,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                       EST. SHIPPING
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5">
-                      {estDelivery.estShipping || "24 July 2026"}
+                      {estDelivery.estShipping || "--"}
                     </p>
                   </div>
 
@@ -919,7 +919,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                       ACTUAL DELIVERY
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5">
-                      {estDelivery.actualDelivery || "24 July 2026, 12:20 PM"}
+                      {estDelivery.actualDelivery || "--"}
                     </p>
                   </div>
                 </div>
