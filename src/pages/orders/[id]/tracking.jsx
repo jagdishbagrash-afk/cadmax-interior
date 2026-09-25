@@ -125,7 +125,7 @@ export default function OrderTrackingPage() {
     } catch (err) {
       setError(
         err?.response?.data?.message ||
-          "Unable to fetch tracking details for this order."
+        "Unable to fetch tracking details for this order."
       );
     } finally {
       setLoading(false);
@@ -179,7 +179,7 @@ export default function OrderTrackingPage() {
         if (!isMounted) return;
         setError(
           err?.response?.data?.message ||
-            "Unable to fetch tracking details for this order."
+          "Unable to fetch tracking details for this order."
         );
       } finally {
         if (isMounted) setLoading(false);
@@ -215,8 +215,8 @@ export default function OrderTrackingPage() {
         : "",
       hasValidData: Boolean(
         transitTimeResponse &&
-          !display.isError &&
-          (deliveryFormatted || display.destinationCity)
+        !display.isError &&
+        (deliveryFormatted || display.destinationCity)
       ),
     };
   })();
@@ -543,10 +543,13 @@ export default function OrderTrackingPage() {
 
               {/* Action Buttons */}
               <div className="space-y-2">
-                <button className="w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                <Link
+                  href="/contact"
+                  className="w-full py-2.5 rounded-lg bg-gray-100 text-gray-700 font-medium text-sm hover:bg-gray-200 transition-colors flex items-center justify-center gap-2"
+                >
                   <FiMail className="w-4 h-4" />
                   Need Help? Contact Support
-                </button>
+                </Link>
                 <button className="w-full py-2.5 rounded-lg bg-orange-50 text-orange-700 font-medium text-sm border border-orange-200 hover:bg-orange-100 transition-colors flex items-center justify-center gap-2">
                   <FiRefreshCw className="w-4 h-4" />
                   Return / Replace

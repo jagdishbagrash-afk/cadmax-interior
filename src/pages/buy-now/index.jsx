@@ -106,21 +106,51 @@ export default function Index() {
     router.query.paymentMethod,
     router.query.payment_method,
   ]);
+  const getProductImage = (item) => {
+    if (!item) return "";
 
+    const image =
+      item?.selectedVariant?.images?.[0] ||
+      item?.selectedColor?.images?.[0] ||
+      item?.images?.[0] ||
+      item?.image ||
+      item?.product?.images?.[0] ||
+      item?.product?.image ||
+      "";
+
+    // if image is already string
+    if (typeof image === "string") {
+      return image;
+    }
+
+    // if image is object
+    return (
+      image?.url ||
+      image?.image ||
+      image?.src ||
+      image?.path ||
+      ""
+    );
+  };
   // ============================================================
   // ORDER PRODUCTS
   // ============================================================
 
   const buildOrderProducts = () => {
     if (!product) return [];
-
+    const productImage = getProductImage(product);
+    console.log("ONLINE PRODUCT DATA BEFORE API:", JSON.stringify(productImage, null, 2));
     return [
       {
         id: product.productId || product.id,
         sku: product.productId || product.id,
         title: product.name,
         name: product.name,
+        // ADD IMAGE
+        image: productImage,
 
+        // optional - useful for future
+        images: productImage ? [productImage] : [],
         price:
           product.final_amount ??
           product.price ??
@@ -620,7 +650,10 @@ export default function Index() {
 
         const productData =
           buildOrderProducts();
-
+        console.log(
+          "FINAL PRODUCT DATA BEFORE API:",
+          JSON.stringify(productData, null, 2)
+        );
         const res =
           await main.AddOrder(
             {
