@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
+import { useRole } from "@/context/RoleContext";
 import toast from "react-hot-toast";
 import {
   HiCheck,
@@ -25,7 +26,7 @@ const DEFAULT_ORDER_DATA = {
     orderId: "#ORD-792456",
     rawOrderId: "ORD-792456",
     placedOn: "23 July 2026, 12:47 PM",
-    status: "Delivered",
+    status: "Order Placed",
     statusBadgeColor: "#22c55e",
   },
   stepperTimeline: [
@@ -41,32 +42,32 @@ const DEFAULT_ORDER_DATA = {
       step: 2,
       key: "confirmed",
       title: "Confirmed",
-      completed: true,
-      timestamp: "23 July, 01:10 PM",
+      completed: false,
+      timestamp: "--",
       iconType: "check",
     },
     {
       step: 3,
       key: "shipped",
       title: "Shipped",
-      completed: true,
-      timestamp: "24 July, 10:30 AM",
+      completed: false,
+      timestamp: "--",
       iconType: "truck",
     },
     {
       step: 4,
       key: "out_for_delivery",
       title: "Out for Delivery",
-      completed: true,
-      timestamp: "24 July, 09:15 AM",
+      completed: false,
+      timestamp: "--",
       iconType: "box",
     },
     {
       step: 5,
       key: "delivered",
       title: "Delivered",
-      completed: true,
-      timestamp: "24 July, 12:20 PM",
+      completed: false,
+      timestamp: "--",
       iconType: "delivered",
     },
   ],
@@ -110,9 +111,9 @@ const DEFAULT_ORDER_DATA = {
     shipmentId: "SHP-554789",
     courierPartner: "Ecom Express",
     trackingId: "1234567890",
-    shippedOn: "24 July 2026, 10:30 AM",
-    deliveredOn: "24 July 2026, 12:20 PM",
-    status: "Delivered",
+    shippedOn: "--",
+    deliveredOn: "--",
+    status: "Order Placed",
     actions: {
       canTrackShipment: true,
       canDownloadInvoice: true,
@@ -142,11 +143,130 @@ const DEFAULT_ORDER_DATA = {
 
 export default function OrderDetailsView({ orderIdProp }) {
   const router = RouterHook();
+  const { user } = useRole();
   const orderId = orderIdProp || router.query?.id || router.query?.orderId || "ORD-792456";
 
-  const [orderData, setOrderData] = useState(DEFAULT_ORDER_DATA);
+  const [orderData, setOrderData] = useState(() => ({
+    ...DEFAULT_ORDER_DATA,
+    orderHeader: {
+      ...DEFAULT_ORDER_DATA.orderHeader,
+      status: "Order Placed",
+    },
+    stepperTimeline: DEFAULT_ORDER_DATA.stepperTimeline.map((step, index) => ({
+      ...step,
+      completed: index === 0,
+    })),
+    shipmentDetails: {
+      ...DEFAULT_ORDER_DATA.shipmentDetails,
+      status: "Order Placed",
+      shippedOn: "--",
+      deliveredOn: "--",
+    },
+  }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const header = orderData.orderHeader;
+  const stepper = orderData.stepperTimeline;
+  const products = orderData.products;
+  const address = orderData.shippingAddress;
+  const payment = orderData.paymentMethod;
+  const summary = orderData.orderSummary;
+  const shipment = orderData.shipmentDetails;
+  const estDelivery = orderData.estimatedDeliveryInformation;
+  const handleBuyAgain = (product) => {
+    const productSlug =
+      product?.slug ||
+      product?.productSlug ||
+      product?.handle ||
+      product?.seoSlug ||
+      product?.urlSlug ||
+      product?.productUrl?.slug ||
+      product?.url?.slug ||
+      product?.title ||
+      product?.name ||
+      "";
+
+    const toSlug = (text) =>
+      String(text || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    const finalProductSlug = toSlug(productSlug) || toSlug(product?.productId) || toSlug(product?.title) || "";
+
+    if (finalProductSlug) {
+      router.push(`/product/details/${encodeURIComponent(finalProductSlug)}`);
+      return;
+    }
+
+    router.push("/products");
+  };
+
+  const handleWriteReviewForProduct = (product) => {
+    const toSlug = (text) =>
+      String(text || "")
+        .trim()
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "");
+
+    const productSlug =
+      product?.slug ||
+      product?.productSlug ||
+      product?.handle ||
+      product?.seoSlug ||
+      product?.urlSlug ||
+      product?.productUrl?.slug ||
+      product?.url?.slug ||
+      product?.title ||
+      product?.name ||
+      "";
+
+    const finalProductSlug =
+      toSlug(productSlug) ||
+      toSlug(product?.productId) ||
+      toSlug(product?.title) ||
+      "";
+
+    const hasLoggedInUser = !!(
+      user?._id ||
+      user?.id ||
+      user?.email ||
+      (typeof window !== "undefined" && localStorage.getItem("token"))
+    );
+
+    if (!hasLoggedInUser) {
+      toast.error("Please login to write a review");
+      router.push("/login");
+      return;
+    }
+
+    if (user && user.role && user.role !== "customer") {
+      toast.error("Only customers can write product reviews");
+      return;
+    }
+
+    if (!finalProductSlug) {
+      toast.error("Product review is not available for this item right now.");
+      return;
+    }
+
+    router.push({
+      pathname: `/product/details/${encodeURIComponent(finalProductSlug)}`,
+      query: { writeReview: "1" },
+    });
+  };
+  // Replace the activeTrackingStepIndex / truckMarkerLeft block with this:
+
 
   const extractPincode = (str) => {
     if (!str) return null;
@@ -364,9 +484,241 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   }
 
-  const handleDownloadInvoice = () => {
-    if (typeof window !== "undefined") {
-      window.print();
+  const handleDownloadInvoice = async () => {
+    if (typeof window === "undefined") return;
+
+    const findPdfUrlInObject = (value, visited = new WeakSet()) => {
+      if (!value) return null;
+
+      if (typeof value === "string") {
+        const trimmed = value.trim();
+        if (!trimmed) return null;
+
+        if (trimmed.startsWith("data:application/pdf")) return trimmed;
+        if (trimmed.startsWith("blob:")) return trimmed;
+        if (/^https?:\/\//i.test(trimmed) && /(amazonaws|s3\.|cloudfront|\.pdf(?:\?|$)|\/pdf(?:\/|\?|$)|invoice|download)/i.test(trimmed)) {
+          return trimmed;
+        }
+
+        if (
+          /^https?:\/\//i.test(trimmed) ||
+          trimmed.startsWith("/") ||
+          trimmed.startsWith("./")
+        ) {
+          if (
+            /(\.pdf(?:\?|$)|\/pdf(?:\/|\?|$)|\/invoice(?:\/|\?|$)|invoice|download|amazonaws|s3\.|cloudfront)/i.test(trimmed)
+          ) {
+            return trimmed;
+          }
+        }
+
+        return null;
+      }
+
+      if (typeof value !== "object") return null;
+      if (visited.has(value)) return null;
+      visited.add(value);
+
+      if (Array.isArray(value)) {
+        for (const item of value) {
+          const match = findPdfUrlInObject(item, visited);
+          if (match) return match;
+        }
+        return null;
+      }
+
+      for (const [key, val] of Object.entries(value)) {
+        const lowered = String(key).toLowerCase();
+        const isLikelyPdfKey = /pdf|invoice|download|file|url|document|aws|s3|bucket|signed|blob/.test(lowered);
+
+        if (isLikelyPdfKey || (typeof val === "string" && /(\.pdf|amazonaws|s3\.|cloudfront)/i.test(val))) {
+          const match = findPdfUrlInObject(val, visited);
+          if (match) return match;
+        }
+      }
+
+      for (const val of Object.values(value)) {
+        const match = findPdfUrlInObject(val, visited);
+        if (match) return match;
+      }
+
+      return null;
+    };
+
+    const extractErrorMessage = (error) => {
+      const data = error?.response?.data || error?.data || {};
+      if (typeof data === "string") return data;
+
+      if (typeof data === "object") {
+        return (
+          data.message ||
+          data.Message ||
+          data.error ||
+          data.error_message ||
+          data.errorMessage ||
+          ""
+        );
+      }
+
+      return error?.message || "";
+    };
+
+    const openPdfWindow = (pdfUrl) => {
+      if (!pdfUrl) return false;
+
+      const safeUrl = String(pdfUrl).trim();
+
+      if (!safeUrl) return false;
+
+      // Base64 PDF / Blob PDF
+      if (
+        safeUrl.startsWith("data:application/pdf") ||
+        safeUrl.startsWith("blob:")
+      ) {
+        window.open(safeUrl, "_blank", "noopener,noreferrer");
+        return true;
+      }
+
+      const productionApiUrl =
+        process.env.NEXT_PUBLIC_API_URL ||
+        process.env.NEXT_PUBLIC_BASE_URL ||
+        "";
+
+      if (!productionApiUrl) {
+        if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://") || safeUrl.startsWith("/")) {
+          window.open(safeUrl, "_blank", "noopener,noreferrer");
+          return true;
+        }
+
+        console.error(
+          "NEXT_PUBLIC_API_URL or NEXT_PUBLIC_BASE_URL is missing"
+        );
+        return false;
+      }
+
+      // Remove trailing slash
+      const cleanBase = String(productionApiUrl).replace(/\/+$/, "");
+
+      // Remove /api only for file URLs
+      const serverOrigin = cleanBase.replace(/\/api$/, "");
+
+      let finalUrl = "";
+
+      try {
+        const parsed = new URL(safeUrl);
+
+        const isLocalUrl =
+          parsed.hostname === "localhost" ||
+          parsed.hostname === "127.0.0.1" ||
+          parsed.hostname === "0.0.0.0";
+
+        if (isLocalUrl) {
+          // IMPORTANT:
+          // localhost URL -> LIVE SERVER URL
+
+          finalUrl =
+            `${serverOrigin}${parsed.pathname}${parsed.search}${parsed.hash}`;
+
+          console.log("Original local invoice URL:", safeUrl);
+          console.log("Converted live invoice URL:", finalUrl);
+        } else {
+          // Already production URL
+          finalUrl = safeUrl;
+        }
+      } catch (error) {
+        // Relative URL
+        if (safeUrl.startsWith("/")) {
+          finalUrl = `${serverOrigin}${safeUrl}`;
+        } else {
+          finalUrl = `${serverOrigin}/${safeUrl.replace(/^\.?\//, "")}`;
+        }
+      }
+
+      if (!finalUrl) {
+        return false;
+      }
+
+      console.log("Opening invoice:", finalUrl);
+
+      window.open(
+        finalUrl,
+        "_blank",
+        "noopener,noreferrer"
+      );
+
+      return true;
+    };
+
+    const directPdfUrl =
+      findPdfUrlInObject(orderData) ||
+      findPdfUrlInObject(orderData?.invoice) ||
+      findPdfUrlInObject(orderData?.data) ||
+      findPdfUrlInObject(orderData?.formattedForWeb) ||
+      findPdfUrlInObject(orderData?.shipmentDetails) ||
+      orderData?.shipmentDetails?.actions?.invoiceUrl ||
+      orderData?.shipmentDetails?.actions?.invoiceDownloadUrl ||
+      orderData?.shipmentDetails?.actions?.downloadInvoiceUrl;
+
+    if (directPdfUrl && openPdfWindow(directPdfUrl)) {
+      toast.success("Invoice opened in a new tab.");
+      return;
+    }
+
+    try {
+      const listing = new Listing();
+      const res = await listing.DownloadOrderInvoice(orderId);
+      const responseData = res?.data;
+
+      const pdfUrlFromApi =
+        res?.invoiceUrl ||
+        res?.awsUrl ||
+        res?.pdfUrl ||
+        res?.downloadUrl ||
+        res?.fileUrl ||
+        res?.signedUrl ||
+        res?.url ||
+        responseData?.pdfUrl ||
+        responseData?.downloadUrl ||
+        responseData?.invoiceUrl ||
+        responseData?.awsUrl ||
+        responseData?.fileUrl ||
+        responseData?.signedUrl ||
+        responseData?.url ||
+        responseData?.data?.pdfUrl ||
+        responseData?.data?.downloadUrl ||
+        responseData?.data?.invoiceUrl ||
+        responseData?.data?.awsUrl ||
+        responseData?.data?.fileUrl ||
+        responseData?.data?.signedUrl ||
+        responseData?.data?.url ||
+        findPdfUrlInObject(responseData);
+      if (pdfUrlFromApi && openPdfWindow(pdfUrlFromApi)) {
+        toast.success("Invoice opened in a new tab.");
+        return;
+      }
+
+      toast.error("Invoice PDF URL is not available right nowwww.");
+    } catch (error) {
+      console.warn("Invoice download failed:", error);
+
+      const pdfUrlFromError =
+        error?.response?.data?.pdfUrl ||
+        error?.response?.data?.downloadUrl ||
+        error?.response?.data?.invoiceUrl ||
+        error?.response?.data?.awsUrl ||
+        error?.response?.data?.fileUrl ||
+        error?.response?.data?.signedUrl ||
+        error?.response?.data?.url ||
+        findPdfUrlInObject(error?.response?.data) ||
+        findPdfUrlInObject(error?.data);
+
+      if (pdfUrlFromError && openPdfWindow(pdfUrlFromError)) {
+        toast.success("Invoice opened in a new tab.");
+        return;
+      }
+
+      const msg = extractErrorMessage(error);
+      toast.error(msg || "Invoice PDF URL is not available right now catch.");
     }
   };
 
@@ -442,14 +794,84 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   };
 
-  const header = orderData.orderHeader;
-  const stepper = orderData.stepperTimeline;
-  const products = orderData.products;
-  const address = orderData.shippingAddress;
-  const payment = orderData.paymentMethod;
-  const summary = orderData.orderSummary;
-  const shipment = orderData.shipmentDetails;
-  const estDelivery = orderData.estimatedDeliveryInformation;
+
+
+  const normalizedShipmentStatus = String(shipment?.status || header?.status || "")
+    .trim()
+    .toLowerCase();
+
+  const statusToStepIndex = {
+    order_placed: 0,
+    orderplaced: 0,
+    placed: 0,
+    confirmed: 1,
+    shipped: 2,
+    out_for_delivery: 3,
+    outfordelivery: 3,
+    out_for_delivery_pending: 3,
+    delivered: 4,
+  };
+
+
+  const currentStatusStepIndex = (() => {
+    if (!normalizedShipmentStatus) return 0;
+
+    const exactMatch = statusToStepIndex[normalizedShipmentStatus];
+    if (typeof exactMatch === "number") return exactMatch;
+
+    if (normalizedShipmentStatus.includes("confirm")) return 1;
+    if (normalizedShipmentStatus.includes("ship")) return 2;
+    if (normalizedShipmentStatus.includes("out") || normalizedShipmentStatus.includes("delivery")) return 3;
+    if (normalizedShipmentStatus.includes("deliver")) return 4;
+    return 0;
+  })();
+
+  const hasKnownStatusStep = (() => {
+    if (!normalizedShipmentStatus) return false;
+    return (
+      statusToStepIndex[normalizedShipmentStatus] !== undefined ||
+      normalizedShipmentStatus.includes("confirm") ||
+      normalizedShipmentStatus.includes("ship") ||
+      normalizedShipmentStatus.includes("out") ||
+      normalizedShipmentStatus.includes("delivery") ||
+      normalizedShipmentStatus.includes("deliver")
+    );
+  })();
+
+  const activeTrackingStepIndex = (() => {
+    if (hasKnownStatusStep) {
+      return Math.min(currentStatusStepIndex, stepper.length - 1);
+    }
+
+    const firstIncomplete = stepper.findIndex((item) => !item.completed);
+
+    if (firstIncomplete === -1) {
+      return Math.max(stepper.length - 1, 0);
+    }
+
+    return firstIncomplete;
+  })();
+
+  const carMarkerLeft = stepper.length
+    ? (() => {
+      if (normalizedShipmentStatus === "delivered") {
+        return `${((stepper.length - 1 + 0.96) / stepper.length) * 100}%`;
+      }
+
+      const baseIndex = Math.min(currentStatusStepIndex, stepper.length - 1);
+      const betweenOffset = normalizedShipmentStatus === "placed" || normalizedShipmentStatus === "order_placed" || normalizedShipmentStatus === "orderplaced"
+        ? 0.32
+        : normalizedShipmentStatus.includes("confirm")
+          ? 0.56
+          : normalizedShipmentStatus.includes("ship")
+            ? 0.0
+            : normalizedShipmentStatus.includes("out") || normalizedShipmentStatus.includes("delivery")
+              ? 0.88
+              : 0.96;
+
+      return `${((baseIndex + betweenOffset) / stepper.length) * 100}%`;
+    })()
+    : "50%";
 
   return (
     <div className="min-h-screen bg-[#f8fafc] py-6 sm:py-8 px-3 sm:px-6 lg:px-8 text-gray-800 font-sans">
@@ -507,74 +929,92 @@ export default function OrderDetailsView({ orderIdProp }) {
           {/* 2. HORIZONTAL STEPPER TIMELINE */}
           <div className="py-2 overflow-x-auto">
             <div className="min-w-[620px] sm:min-w-0">
-              <div className="grid grid-cols-5 gap-2 relative z-10">
-                {stepper.map((item, idx) => {
-                  const isLast = idx === stepper.length - 1;
-                  const isCompleted = item.completed;
+              <div className="relative z-10">
+                <div
+                  className="absolute z-30 pointer-events-none"
+                  style={{
+                    left: carMarkerLeft,
+                    top: "52px",
+                    transform: "translate(-50%, -50%)",
+                  }}
+                >
+                  <div className="w-8 h-8 shadow-sm flex items-center justify-center">
+                    <img
+                      src="/car-marker.png"
+                      alt="Current shipment position"
 
-                  return (
-                    <div
-                      key={item.step || idx}
-                      className="flex flex-col items-center text-center group"
-                    >
-                      {/* STEP ICON CIRCLE */}
-                      <div className="relative flex items-center justify-center w-full">
-                        {/* Connecting Line (left side) */}
-                        {idx > 0 && (
-                          <div
-                            className={`absolute left-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${isCompleted ? "bg-[#22c55e]" : "bg-gray-200"
-                              }`}
-                          />
-                        )}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-5 gap-2 relative z-10 pt-8">
+                  {stepper.map((item, idx) => {
+                    const isLast = idx === stepper.length - 1;
+                    const isCompleted = item.completed;
 
-                        {/* Connecting Line (right side) */}
-                        {!isLast && (
-                          <div
-                            className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${stepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
-                              }`}
-                          />
-                        )}
-
-                        {/* ICON CIRCLE BADGE */}
-                        <div
-                          className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isCompleted
-                            ? isLast
-                              ? "bg-[#16a34a] text-white shadow-xs ring-4 ring-emerald-50"
-                              : "bg-white border-2 border-[#16a34a] text-[#16a34a]"
-                            : "bg-white border-2 border-gray-300 text-gray-400"
-                            }`}
-                        >
-                          {isLast && isCompleted ? (
-                            <FaCheck className="w-4 h-4 text-white" />
-                          ) : item.iconType === "cart" || item.key === "order_placed" ? (
-                            <HiOutlineShoppingBag className="w-5 h-5 text-[#16a34a]" />
-                          ) : item.iconType === "check" || item.key === "confirmed" ? (
-                            <HiCheck className="w-5 h-5 text-[#16a34a]" />
-                          ) : item.iconType === "truck" || item.key === "shipped" ? (
-                            <HiOutlineTruck className="w-5 h-5 text-[#16a34a]" />
-                          ) : item.iconType === "box" || item.key === "out_for_delivery" ? (
-                            <HiOutlineDocumentText className="w-5 h-5 text-[#16a34a]" />
-                          ) : (
-                            <FaCheck className="w-3.5 h-3.5" />
+                    return (
+                      <div
+                        key={item.step || idx}
+                        className="flex flex-col items-center text-center group"
+                      >
+                        {/* STEP ICON CIRCLE */}
+                        <div className="relative flex items-center justify-center w-full">
+                          {/* Connecting Line (left side) */}
+                          {idx > 0 && (
+                            <div
+                              className={`absolute left-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${isCompleted ? "bg-[#22c55e]" : "bg-gray-200"
+                                }`}
+                            />
                           )}
+
+                          {/* Connecting Line (right side) */}
+                          {!isLast && (
+                            <div
+                              className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${stepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
+                                }`}
+                            />
+                          )}
+
+                          {/* ICON CIRCLE BADGE */}
+                          <div
+                            className={`relative z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center transition-all duration-300 ${isCompleted
+                              ? isLast
+                                ? "bg-[#16a34a] text-white shadow-xs ring-4 ring-emerald-50"
+                                : "bg-white border-2 border-[#16a34a] text-[#16a34a]"
+                              : "bg-white border-2 border-gray-300 text-gray-400"
+                              }`}
+                          >
+                            {isLast && isCompleted ? (
+                              <FaCheck className="w-4 h-4 text-white" />
+                            ) : item.iconType === "cart" || item.key === "order_placed" ? (
+                              <HiOutlineShoppingBag className="w-5 h-5 text-[#16a34a]" />
+                            ) : item.iconType === "check" || item.key === "confirmed" ? (
+                              <HiCheck className="w-5 h-5 text-[#16a34a]" />
+                            ) : item.iconType === "truck" || item.key === "shipped" ? (
+                              <HiOutlineTruck className="w-5 h-5 text-[#16a34a]" />
+                            ) : item.iconType === "box" || item.key === "out_for_delivery" ? (
+                              <HiOutlineDocumentText className="w-5 h-5 text-[#16a34a]" />
+                            ) : (
+                              <FaCheck className="w-3.5 h-3.5" />
+                            )}
+                          </div>
+                        </div>
+
+                        {/* STEP LABEL AND TIMESTAMP */}
+                        <div className="mt-3 space-y-0.5">
+                          <p
+                            className={`text-xs sm:text-sm font-bold transition-colors ${isCompleted ? "text-gray-900" : "text-gray-400"
+                              }`}
+                          >
+                            {item.title}
+                          </p>
+                          <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
+                            {item.timestamp || "--"}
+                          </p>
                         </div>
                       </div>
-
-                      {/* STEP LABEL AND TIMESTAMP */}
-                      <div className="mt-3 space-y-0.5">
-                        <p
-                          className={`text-xs sm:text-sm font-bold transition-colors ${isCompleted ? "text-gray-900" : "text-gray-400"
-                            }`}
-                        >
-                          {item.title}
-                        </p>
-                        <p className="text-[11px] sm:text-xs text-gray-400 font-medium">
-                          {item.timestamp || "--"}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
@@ -619,9 +1059,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-end pt-2 sm:pt-0">
                   <button
                     type="button"
-                    onClick={() => {
-                      router.push(`/buy-now?type=buy-now`);
-                    }}
+                    onClick={() => handleBuyAgain(prod)}
                     className="flex-1 sm:flex-none border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-5 py-2.5 rounded-lg text-sm transition-all active:scale-95 text-center"
                   >
                     Buy Again
@@ -629,7 +1067,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
                   <button
                     type="button"
-                    onClick={() => alert(`Reviewing product: ${prod.title}`)}
+                    onClick={() => handleWriteReviewForProduct(prod)}
                     className="flex-1 sm:flex-none bg-[#111827] hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-lg text-sm transition-all shadow-xs active:scale-95 text-center"
                   >
                     Write a Review
@@ -952,12 +1390,12 @@ export default function OrderDetailsView({ orderIdProp }) {
                 </div>
                 <div>
                   <p className="text-xs font-semibold text-gray-500">Need Help?</p>
-                  <a
-                    href="tel:+919876543210"
+                  <Link
+                    href="/contact"
                     className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline inline-block mt-0.5"
                   >
                     Contact Support
-                  </a>
+                  </Link>
                 </div>
               </div>
 

@@ -275,6 +275,55 @@ class Listing extends Component {
     return Api.get(`/web/order/details/${orderId}`);
   }
 
+  async DownloadOrderInvoice(orderId) {
+    const apiBase = (
+      process.env.NEXT_PUBLIC_API_URL ||
+      process.env.NEXT_PUBLIC_BASE_URL ||
+      ""
+    ).replace(/\/+$/, "");
+
+    if (!apiBase) {
+      throw new Error(
+        "NEXT_PUBLIC_API_URL or NEXT_PUBLIC_BASE_URL is not configured."
+      );
+    }
+
+    const normalizedBase = apiBase.endsWith("/api")
+      ? apiBase
+      : `${apiBase}/api`;
+
+    const endpoint =
+      `${normalizedBase}/order/invoice/${encodeURIComponent(orderId)}`;
+
+    const response = await Api.get(endpoint, {
+      responseType: "json",
+    });
+
+    const payload =
+      response?.data?.data ||
+      response?.data ||
+      {};
+
+    const invoiceUrl =
+      payload?.pdfUrl ||
+      payload?.downloadUrl ||
+      payload?.invoiceUrl ||
+      payload?.awsUrl ||
+      payload?.url ||
+      payload?.fileUrl ||
+      payload?.signedUrl ||
+      payload?.data?.pdfUrl ||
+      payload?.data?.downloadUrl ||
+      payload?.data?.invoiceUrl ||
+      endpoint;
+
+    return {
+      ...response,
+      invoiceUrl,
+      data: payload,
+    };
+  }
+
   async adminGetAllOrders(data) {
     console.log("[ADMIN_ORDERS] Fetching admin orders list");
     return Api.get("/order/admin/orders", data);
