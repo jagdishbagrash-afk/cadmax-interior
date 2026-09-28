@@ -12,7 +12,7 @@ import Button from "../common/Button";
 import Listing from "../api/Listing";
 import { useEffect, useState } from "react";
 import EnquiryModal from "./EnquiryModal";
-
+import Link from "next/link";
 export default function Index() {
 
     const [data, setData] = useState([]);
@@ -154,8 +154,9 @@ export default function Index() {
                     </div>
                 </div>
                 <ResidentialDesign Residentialservices={data?.residentialServices} />
-                <Predictable />
+
                 <CommercialDesign Commercialservices={data?.commercialServices} />
+                <Predictable />
                 {/* <Vendor /> */}
                 {/* <Execution /> */}
                 <Slider2 />
@@ -203,10 +204,12 @@ export default function Index() {
         mx-auto
       "
                         >
-                            <Button
-                                title={"Book a Design Consultation"}
-                                classes={"bg-transparent text-white border-2 border-white whitespace-nowrap px-4 py-2"}
-                            />
+                            <Link href="/contact">
+                                <Button
+                                    title="Book a Design Consultation"
+                                    classes="bg-transparent text-white border-2 border-white whitespace-nowrap px-4 py-2"
+                                />
+                            </Link>
                         </div>
 
                     </div>

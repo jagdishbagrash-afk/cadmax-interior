@@ -10,6 +10,7 @@ import Layout from "../common/Layout";
 import Listing from "../api/Listing";
 import { InputBox } from "@/components/InputBox";
 import { State, City } from "country-state-city";
+
 const libraries = ["places"];
 const mapContainerStyle = {
     width: "100%",
@@ -75,6 +76,11 @@ const AddressAutocompleteInput = ({
                     setValue(e.target.value);
                     if (handleChange) handleChange(e);
                 }}
+                onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                        e.preventDefault();
+                    }
+                }}
                 required={required}
                 placeholder={placeholder}
                 className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -123,24 +129,24 @@ export default function ManageAddress() {
     // ---- Nearby places states ----
     const [nearbyPlaces, setNearbyPlaces] = useState([]);
     const [showNearby, setShowNearby] = useState(false);
-    const mapRef = useRef(null); // Google Map instance
+    const mapRef = useRef(null);
 
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY,
         libraries,
     });
-    const [statesList, setStatesList] = useState([]);      // keep the name
-    const [citiesList, setCitiesList] = useState([]);      // keep the name
+
+    const [statesList, setStatesList] = useState([]);
+    const [citiesList, setCitiesList] = useState([]);
     const [selectedStateCode, setSelectedStateCode] = useState("");
-    // loading states are optional; we'll set them to false for UI
     const [loadingStates, setLoadingStates] = useState(false);
     const [loadingCities, setLoadingCities] = useState(false);
+
     useEffect(() => {
-        // Load all Indian states once when component mounts
         const allStates = State.getStatesOfCountry("IN");
         setStatesList(allStates);
     }, []);
-    // Handle state dropdown change
+
     const handleStateChange = (e) => {
         const stateCode = e.target.value;
         setSelectedStateCode(stateCode);
@@ -149,19 +155,16 @@ export default function ManageAddress() {
         setForm((prev) => ({
             ...prev,
             state: stateName,
-            city: "", // reset city when state changes
+            city: "",
         }));
-        // Fetch cities for the selected state
         const cityList = City.getCitiesOfState("IN", stateCode);
         setCitiesList(cityList);
     };
 
-    // Handle city dropdown change
     const handleCityChange = (e) => {
         setForm((prev) => ({ ...prev, city: e.target.value }));
     };
 
-    // Helper: find state by name, set the dropdown, and load its cities
     const setStateByNameAndFetchCities = (stateName) => {
         if (!stateName) {
             setSelectedStateCode("");
@@ -178,12 +181,12 @@ export default function ManageAddress() {
             const cityList = City.getCitiesOfState("IN", code);
             setCitiesList(cityList);
         } else {
-            // If no match, just set the name (no cities)
             setForm((prev) => ({ ...prev, state: stateName }));
             setCitiesList([]);
             setSelectedStateCode("");
         }
     };
+
     // --- Places Autocomplete for Street Address ---
     const {
         ready: streetReady,
@@ -197,22 +200,10 @@ export default function ManageAddress() {
         cache: 86400,
     });
 
-    // --- Places Autocomplete for Landmark / Area ---
-    const {
-        ready: landmarkReady,
-        value: landmarkValue,
-        suggestions: { status: landmarkStatus, data: landmarkSuggestions },
-        setValue: setLandmarkValue,
-        clearSuggestions: clearLandmarkSuggestions,
-    } = usePlacesAutocomplete({
-        requestOptions: { componentRestrictions: { country: "in" } },
-        debounce: 300,
-        cache: 86400,
-    });
-
     const [form, setForm] = useState({
         street_address: "",
         flatNo: "",
+        landmark: "",
         city: "",
         state: "",
         country: "India",
@@ -220,7 +211,6 @@ export default function ManageAddress() {
         addressType: "",
     });
 
-    // ---------- Fetch Addresses ----------
     const fetchAddress = async () => {
         try {
             const main = new Listing();
@@ -236,12 +226,10 @@ export default function ManageAddress() {
         fetchAddress();
     }, []);
 
-    // ---------- Input Change ----------
     const handleChange = (e) => {
         setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
     };
 
-    // ---------- Fill form from place details ----------
     const fillFormFromPlace = (place) => {
         const components = place.address_components;
         let street = "",
@@ -271,16 +259,14 @@ export default function ManageAddress() {
             country: country || prev.country,
             pincode: pincode || prev.pincode,
         }));
-        // 🔥 NEW: sync the state dropdown and fetch its cities
+
         if (state) {
             setStateByNameAndFetchCities(state);
         }
         setStreetValue(street, false);
         clearStreetSuggestions();
-        clearLandmarkSuggestions();
     };
 
-    // ---------- Nearby Search ----------
     const fetchNearbyPlaces = (lat, lng) => {
         if (!window.google || !mapRef.current) {
             setShowNearby(false);
@@ -305,7 +291,6 @@ export default function ManageAddress() {
         });
     };
 
-    // ---------- Reverse geocode and fill form + fetch nearby ----------
     const reverseGeocodeAndFill = async (lat, lng) => {
         try {
             const results = await getGeocode({ location: { lat, lng } });
@@ -320,12 +305,10 @@ export default function ManageAddress() {
         }
     };
 
-    // ---------- Map onLoad ----------
     const onMapLoad = (map) => {
         mapRef.current = map;
     };
 
-    // ---------- Marker drag handler ----------
     const onMarkerDragEnd = (e) => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
@@ -334,7 +317,6 @@ export default function ManageAddress() {
         reverseGeocodeAndFill(lat, lng);
     };
 
-    // ---------- Map click handler ----------
     const onMapClick = (e) => {
         const lat = e.latLng.lat();
         const lng = e.latLng.lng();
@@ -343,10 +325,9 @@ export default function ManageAddress() {
         reverseGeocodeAndFill(lat, lng);
     };
 
-    // ---------- Common function to handle address selection from autocomplete ----------
-    const handlePlaceSelect = async (address, setValueFunc, clearSuggestionsFunc) => {
-        setValueFunc(address, false);
-        clearSuggestionsFunc();
+    const handlePlaceSelect = async (address) => {
+        setStreetValue(address, false);
+        clearStreetSuggestions();
         try {
             const results = await getGeocode({ address });
             if (!results.length) throw new Error("No results");
@@ -363,7 +344,6 @@ export default function ManageAddress() {
         }
     };
 
-    // ---------- Get Current Location ----------
     const getCurrentLocation = () => {
         if (!navigator.geolocation)
             return toast.error("Geolocation not supported");
@@ -391,7 +371,6 @@ export default function ManageAddress() {
         );
     };
 
-    // ---------- Add / Update / Delete / Default ----------
     const handleAddAddress = async () => {
         if (!form.street_address.trim() || !form.city.trim() || !form.state.trim() ||
             !form.country.trim() || !form.pincode.trim() || !form.addressType.trim()) {
@@ -452,13 +431,13 @@ export default function ManageAddress() {
         }
     };
 
-    // ---------- Open Modal for Add ----------
     const openAddModal = () => {
         setModalMode("add");
         setEditId(null);
         setForm({
             street_address: "",
             flatNo: "",
+            landmark: "",
             city: "",
             state: "",
             country: "India",
@@ -466,9 +445,7 @@ export default function ManageAddress() {
             addressType: "",
         });
         setStreetValue("", false);
-        setLandmarkValue("", false);
         clearStreetSuggestions();
-        clearLandmarkSuggestions();
         setMarkerPos(defaultCenter);
         setMapCenter(defaultCenter);
         setNearbyPlaces([]);
@@ -476,16 +453,15 @@ export default function ManageAddress() {
         setModalOpen(true);
         setSelectedStateCode("");
         setCitiesList([]);
-
     };
 
-    // ---------- Open Modal for Edit ----------
     const openEditModal = (item) => {
         setModalMode("edit");
         setEditId(item._id);
         setForm({
             street_address: item.street_address || "",
             flatNo: item.flatNo || "",
+            landmark: item.landmark || "",
             city: item.city || "",
             state: item.state || "",
             country: item.country || "India",
@@ -493,15 +469,12 @@ export default function ManageAddress() {
             addressType: item.addressType || "",
         });
         setStreetValue(item.street_address || "", false);
-        setLandmarkValue("", false);
         clearStreetSuggestions();
-        clearLandmarkSuggestions();
         setNearbyPlaces([]);
         setShowNearby(false);
         setMarkerPos(defaultCenter);
         setMapCenter(defaultCenter);
 
-        // 🔥 NEW: load cities for the existing state
         if (item.state) {
             setStateByNameAndFetchCities(item.state);
         } else {
@@ -512,7 +485,6 @@ export default function ManageAddress() {
         setModalOpen(true);
     };
 
-    // ---------- Close Modal & Reset ----------
     const closeModal = () => {
         setModalOpen(false);
         setModalMode("add");
@@ -522,6 +494,7 @@ export default function ManageAddress() {
         setForm({
             street_address: "",
             flatNo: "",
+            landmark: "",
             city: "",
             state: "",
             country: "India",
@@ -529,264 +502,13 @@ export default function ManageAddress() {
             addressType: "",
         });
         setStreetValue("", false);
-        setLandmarkValue("", false);
         clearStreetSuggestions();
-        clearLandmarkSuggestions();
         setMarkerPos(defaultCenter);
         setMapCenter(defaultCenter);
         setNearbyPlaces([]);
         setShowNearby(false);
     };
 
-    // ---------- Map Component (used inside modal) ----------
-    const AddressMap = () => (
-        <div className="w-full px-2.5 mb-4">
-            <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                Pick location on map <span className="text-gray-400 text-xs font-normal">(drag pin or click)</span>
-            </label>
-            {isLoaded ? (
-                <GoogleMap
-                    mapContainerStyle={mapContainerStyle}
-                    center={mapCenter}
-                    zoom={15}
-                    onClick={onMapClick}
-                    onLoad={onMapLoad}
-                    options={{ streetViewControl: false, mapTypeControl: false }}
-                >
-                    <MarkerF
-                        position={markerPos}
-                        draggable={true}
-                        onDragEnd={onMarkerDragEnd}
-                    />
-                </GoogleMap>
-            ) : (
-                <div className="h-[280px] bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">
-                    Loading map...
-                </div>
-            )}
-            <p className="text-xs text-gray-400 mt-1">
-                Click on the map or drag the pin to set your exact address.
-            </p>
-        </div>
-    );
-
-    // ---------- Nearby Places UI (inside modal) ----------
-    const NearbyList = () => {
-        if (!showNearby || nearbyPlaces.length === 0) return null;
-        return (
-            <div className="w-full px-2.5 mt-2 mb-4">
-                <div className="flex justify-between items-center mb-2">
-                    <label className="font-medium text-sm text-[#8D929A]">
-                        📍 Nearby Places (Click to select)
-                    </label>
-                    <button
-                        type="button"
-                        onClick={() => setShowNearby(false)}
-                        className="text-xs text-gray-400 hover:text-gray-600"
-                    >
-                        Hide
-                    </button>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                    {nearbyPlaces.map((place) => (
-                        <div
-                            key={place.place_id}
-                            onClick={async () => {
-                                const lat = place.geometry.location.lat();
-                                const lng = place.geometry.location.lng();
-                                setMarkerPos({ lat, lng });
-                                setMapCenter({ lat, lng });
-                                try {
-                                    const results = await getGeocode({ location: { lat, lng } });
-                                    if (results.length) {
-                                        fillFormFromPlace(results[0]);
-                                        toast.success("Address updated from nearby place");
-                                    }
-                                } catch (error) {
-                                    toast.error("Could not fetch address details");
-                                }
-                                fetchNearbyPlaces(lat, lng);
-                            }}
-                            className="border border-gray-200 p-3 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition"
-                        >
-                            <p className="font-medium text-gray-800 text-sm">{place.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{place.vicinity}</p>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        );
-    };
-
-    // ---------- Modal JSX ----------
-    const AddressModal = () => (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl w-full max-w-4xl p-6 max-h-[90vh] overflow-y-auto">
-                <h3 className="text-lg font-semibold mb-6">
-                    {modalMode === "add" ? "Add New Address" : "Edit Address"}
-                </h3>
-                <div className="flex flex-wrap -mx-2.5">
-                    {/* Map */}
-                    <AddressMap />
-
-                    {/* Nearby Places List */}
-                    <NearbyList />
-
-                    {/* Street Address Autocomplete */}
-                    <AddressAutocompleteInput
-                        label="Street Address"
-                        name="street_address"
-                        value={streetValue}
-                        setValue={setStreetValue}
-                        suggestions={streetSuggestions}
-                        status={streetStatus}
-                        onSelect={(address) => handlePlaceSelect(address, setStreetValue, clearStreetSuggestions)}
-                        placeholder="Enter street address"
-                        required={true}
-                        showCurrentButton={true}
-                        getCurrentLocation={getCurrentLocation}
-                        locationLoading={locationLoading}
-                        isLoaded={isLoaded}
-                        handleChange={handleChange}
-                    />
-
-                    {/* Landmark / Area Autocomplete */}
-                    <AddressAutocompleteInput
-                        label="Landmark / Area (Optional)"
-                        name="landmark"
-                        value={landmarkValue}
-                        setValue={setLandmarkValue}
-                        suggestions={landmarkSuggestions}
-                        status={landmarkStatus}
-                        onSelect={(address) => handlePlaceSelect(address, setLandmarkValue, clearLandmarkSuggestions)}
-                        placeholder="Search landmark or area"
-                        required={false}
-                        showCurrentButton={false}
-                    />
-
-                    {/* Flat No */}
-                    <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
-                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                            Flat / House No <span className="text-gray-400 text-xs font-normal">(optional)</span>
-                        </label>
-                        <input
-                            type="text"
-                            name="flatNo"
-                            value={form.flatNo}
-                            onChange={handleChange}
-                            placeholder="e.g. Flat 101, B-12"
-                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* City, State, Country via InputBox */}
-                    {/* State Dropdown */}
-                    {/* State Dropdown */}
-                    <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
-                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                            State <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            name="state"
-                            value={selectedStateCode}   // use the code as value
-                            onChange={handleStateChange}
-                            required
-                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="">Select State</option>
-                            {statesList.map((state) => (
-                                <option key={state.isoCode} value={state.isoCode}>
-                                    {state.name}
-                                </option>
-                            ))}
-                        </select>
-                        {loadingStates && <span className="text-xs text-gray-400">Loading states...</span>}
-                    </div>
-
-                    {/* City Dropdown */}
-                    <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
-                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                            City <span className="text-red-500">*</span>
-                        </label>
-                        <select
-                            name="city"
-                            value={form.city}
-                            onChange={handleCityChange}
-                            required
-                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            disabled={!selectedStateCode}   // only enable when a state is selected
-                        >
-                            <option value="">Select City</option>
-                            {citiesList.map((city, index) => (
-                                <option key={index} value={city.name}>
-                                    {city.name}
-                                </option>
-                            ))}
-                        </select>
-                        {loadingCities && <span className="text-xs text-gray-400">Loading cities...</span>}
-                    </div>
-
-                    {/* Pincode */}
-                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                            Pincode
-                        </label>
-                        <input
-                            type="text"
-                            name="pincode"
-                            value={form.pincode}
-                            onChange={handleChange}
-                            required
-                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                    </div>
-
-                    {/* Address Type */}
-                    <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
-                        <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
-                            Address Type
-                        </label>
-                        <select
-                            name="addressType"
-                            value={form.addressType}
-                            onChange={handleChange}
-                            required
-                            className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                            <option value="">Select Type</option>
-                            <option value="Home">Home</option>
-                            <option value="Office">Office</option>
-                            <option value="Other">Other</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
-                    <button
-                        onClick={closeModal}
-                        className="px-5 py-2 border rounded-lg hover:bg-gray-50 transition cursor-pointer"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={modalMode === "add" ? handleAddAddress : updateAddress}
-                        disabled={loading}
-                        className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
-                    >
-                        {loading
-                            ? modalMode === "add"
-                                ? "Adding..."
-                                : "Updating..."
-                            : modalMode === "add"
-                                ? "Save Address"
-                                : "Update Address"}
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-
-    // ---------- Error state ----------
     if (loadError) {
         return (
             <Layout heading="Manage Address">
@@ -797,7 +519,6 @@ export default function ManageAddress() {
         );
     }
 
-    // ---------- Main Render ----------
     return (
         <Layout heading="Manage Address">
             <div className="bg-gray-50 min-h-screen py-10">
@@ -807,16 +528,17 @@ export default function ManageAddress() {
                         <h2 className="text-2xl font-semibold text-gray-800">Your Addresses</h2>
                         <div className="flex flex-wrap gap-3">
                             <button
+                                type="button"
                                 onClick={openAddModal}
-                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer transition"
+                                className="bg-gradient-to-r from-slate-900 to-slate-800 hover:bg-blue-700 text-white px-6 py-2 rounded-lg cursor-pointer transition"
                             >
                                 + Add Address
                             </button>
                         </div>
                     </div>
 
-                    {/* Address List */}
-                    <div className="space-y-4">
+                    {/* Address List - Hidden when Modal is Open */}
+                    <div className={`space-y-4 transition-all duration-300 ${modalOpen ? "opacity-0 hidden" : "opacity-100 block"}`}>
                         {data?.length === 0 && (
                             <div className="text-center py-10 text-gray-500 bg-white rounded-xl border">
                                 No address found
@@ -856,6 +578,9 @@ export default function ManageAddress() {
                                                         </span>
                                                     )}
                                                 </div>
+                                                {item.landmark && (
+                                                    <p className="text-gray-500 text-sm mt-1">Landmark: {item.landmark}</p>
+                                                )}
                                                 <p className="text-gray-500 text-sm mt-1">{item.addressType}</p>
                                                 <p className="text-gray-600 text-sm break-words">
                                                     {item.city}, {item.state}, {item.country} - {item.pincode}
@@ -865,6 +590,7 @@ export default function ManageAddress() {
                                         <div className="flex justify-end items-center gap-4 flex-shrink-0 w-full sm:w-auto">
                                             {!isDeleted && (
                                                 <button
+                                                    type="button"
                                                     onClick={() => openEditModal(item)}
                                                     className="text-blue-500 hover:text-blue-700 text-sm cursor-pointer"
                                                 >
@@ -872,6 +598,7 @@ export default function ManageAddress() {
                                                 </button>
                                             )}
                                             <button
+                                                type="button"
                                                 onClick={() => deleteAddress(item._id)}
                                                 className={`${isDeleted ? "text-green-500 hover:text-green-700" : "text-red-500 hover:text-red-700"} text-sm cursor-pointer`}
                                             >
@@ -886,8 +613,270 @@ export default function ManageAddress() {
                 </div>
             </div>
 
-            {/* ---------- Unified Modal ---------- */}
-            {modalOpen && <AddressModal />}
+            {/* ---------- Unified Modal (Inlined to prevent re-mounting & refreshing) ---------- */}
+            {modalOpen && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-start sm:items-center justify-center z-50 p-4 pt-28 pb-10 overflow-y-auto">
+                    <div className="bg-white rounded-xl w-full max-w-4xl p-6 max-h-[calc(100vh-160px)] overflow-y-auto relative my-auto shadow-2xl">
+                        {/* Wrap in form to prevent Enter key from refreshing the page */}
+                        <form onSubmit={(e) => e.preventDefault()}>
+                            {/* Close (X) Button */}
+                            <button
+                                type="button"
+                                onClick={closeModal}
+                                aria-label="Close"
+                                className="absolute top-4 right-4 z-10 flex items-center justify-center h-9 w-9 rounded-full bg-gray-100 text-gray-500 hover:bg-gray-200 hover:text-gray-800 transition cursor-pointer"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+
+                            <h3 className="text-lg font-semibold mb-6 pr-12">
+                                {modalMode === "add" ? "Add New Address" : "Edit Address"}
+                            </h3>
+
+                            <div className="flex flex-wrap -mx-2.5">
+                                {/* Map */}
+                                <div className="w-full px-2.5 mb-4">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Pick location on map <span className="text-gray-400 text-xs font-normal">(drag pin or click)</span>
+                                    </label>
+                                    {isLoaded ? (
+                                        <GoogleMap
+                                            mapContainerStyle={mapContainerStyle}
+                                            center={mapCenter}
+                                            zoom={15}
+                                            onClick={onMapClick}
+                                            onLoad={onMapLoad}
+                                            options={{ streetViewControl: false, mapTypeControl: false }}
+                                        >
+                                            <MarkerF
+                                                position={markerPos}
+                                                draggable={true}
+                                                onDragEnd={onMarkerDragEnd}
+                                            />
+                                        </GoogleMap>
+                                    ) : (
+                                        <div className="h-[280px] bg-gray-100 rounded-xl flex items-center justify-center text-gray-500">
+                                            Loading map...
+                                        </div>
+                                    )}
+                                    <p className="text-xs text-gray-400 mt-1">
+                                        Click on the map or drag the pin to set your exact address.
+                                    </p>
+                                </div>
+
+                                {/* Nearby Places List */}
+                                {showNearby && nearbyPlaces.length > 0 && (
+                                    <div className="w-full px-2.5 mt-2 mb-4">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <label className="font-medium text-sm text-[#8D929A]">
+                                                📍 Nearby Places (Click to select)
+                                            </label>
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowNearby(false)}
+                                                className="text-xs text-gray-400 hover:text-gray-600"
+                                            >
+                                                Hide
+                                            </button>
+                                        </div>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            {nearbyPlaces.map((place) => (
+                                                <div
+                                                    key={place.place_id}
+                                                    onClick={async () => {
+                                                        const lat = place.geometry.location.lat();
+                                                        const lng = place.geometry.location.lng();
+                                                        setMarkerPos({ lat, lng });
+                                                        setMapCenter({ lat, lng });
+                                                        try {
+                                                            const results = await getGeocode({ location: { lat, lng } });
+                                                            if (results.length) {
+                                                                fillFormFromPlace(results[0]);
+                                                                toast.success("Address updated from nearby place");
+                                                            }
+                                                        } catch (error) {
+                                                            toast.error("Could not fetch address details");
+                                                        }
+                                                        fetchNearbyPlaces(lat, lng);
+                                                    }}
+                                                    className="border border-gray-200 p-3 rounded-lg cursor-pointer hover:bg-blue-50 hover:border-blue-300 transition"
+                                                >
+                                                    <p className="font-medium text-gray-800 text-sm">{place.name}</p>
+                                                    <p className="text-xs text-gray-500 truncate">{place.vicinity}</p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Street Address Autocomplete */}
+                                <AddressAutocompleteInput
+                                    label="Street Address"
+                                    name="street_address"
+                                    value={streetValue}
+                                    setValue={setStreetValue}
+                                    suggestions={streetSuggestions}
+                                    status={streetStatus}
+                                    onSelect={handlePlaceSelect}
+                                    placeholder="Enter street address"
+                                    required={true}
+                                    showCurrentButton={true}
+                                    getCurrentLocation={getCurrentLocation}
+                                    locationLoading={locationLoading}
+                                    isLoaded={isLoaded}
+                                    handleChange={handleChange}
+                                />
+
+                                {/* Landmark / Area - Now a standard manual input */}
+                                <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Landmark / Area <span className="text-gray-400 text-xs font-normal">(optional)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="landmark"
+                                        value={form.landmark}
+                                        onChange={handleChange}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") e.preventDefault();
+                                        }}
+                                        placeholder="e.g. Near City Mall"
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* Flat No - fully manual, optional */}
+                                <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Flat / House No <span className="text-gray-400 text-xs font-normal">(optional)</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="flatNo"
+                                        value={form.flatNo}
+                                        onChange={handleChange}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") e.preventDefault();
+                                        }}
+                                        placeholder="e.g. Flat 101, B-12"
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* State Dropdown */}
+                                <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        State <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        name="state"
+                                        value={selectedStateCode}
+                                        onChange={handleStateChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select State</option>
+                                        {statesList.map((state) => (
+                                            <option key={state.isoCode} value={state.isoCode}>
+                                                {state.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {loadingStates && <span className="text-xs text-gray-400">Loading states...</span>}
+                                </div>
+
+                                {/* City Dropdown */}
+                                <div className="w-full lg:w-6/12 px-2.5 mb-3 lg:mb-6">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        City <span className="text-red-500">*</span>
+                                    </label>
+                                    <select
+                                        name="city"
+                                        value={form.city}
+                                        onChange={handleCityChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        disabled={!selectedStateCode}
+                                    >
+                                        <option value="">Select City</option>
+                                        {citiesList.map((city, index) => (
+                                            <option key={index} value={city.name}>
+                                                {city.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {loadingCities && <span className="text-xs text-gray-400">Loading cities...</span>}
+                                </div>
+
+                                {/* Pincode - fully manual */}
+                                <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Pincode <span className="text-red-500">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        name="pincode"
+                                        value={form.pincode}
+                                        onChange={handleChange}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "Enter") e.preventDefault();
+                                        }}
+                                        placeholder="6 digit pincode"
+                                        maxLength={6}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    />
+                                </div>
+
+                                {/* Address Type */}
+                                <div className="w-full lg:w-6/12 mb-3 lg:mb-6 px-2.5">
+                                    <label className="font-medium text-sm lg:text-base text-[#8D929A] mb-2 block">
+                                        Address Type
+                                    </label>
+                                    <select
+                                        name="addressType"
+                                        value={form.addressType}
+                                        onChange={handleChange}
+                                        required
+                                        className="w-full h-11 lg:h-[54px] font-semibold bg-white text-[#46494D] border border-gray-300 rounded-lg px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    >
+                                        <option value="">Select Type</option>
+                                        <option value="Home">Home</option>
+                                        <option value="Office">Office</option>
+                                        <option value="Other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-6">
+                                <button
+                                    type="button"
+                                    onClick={closeModal}
+                                    className="px-5 py-2 border rounded-lg hover:bg-gray-50 transition cursor-pointer"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={modalMode === "add" ? handleAddAddress : updateAddress}
+                                    disabled={loading}
+                                    className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition cursor-pointer disabled:opacity-50"
+                                >
+                                    {loading
+                                        ? modalMode === "add"
+                                            ? "Adding..."
+                                            : "Updating..."
+                                        : modalMode === "add"
+                                            ? "Save Address"
+                                            : "Update Address"}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </Layout>
     );
 }

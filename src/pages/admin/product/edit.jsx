@@ -1,11 +1,71 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import AdminLayout from "../common/AdminLayout";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
 import { useRouter } from "next/router";
+import seoConfig from "@/config/seoConfig.json";
+const cleanSeoText = (value = "") => {
+  return String(value)
+    .replace(/<[^>]*>/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+};
 
+const replaceSeoVariables = (template = "", values = {}) => {
+  return template.replace(
+    /\{(\w+)\}/g,
+    (_, key) => values[key] || ""
+  );
+};
+
+const generateProductSEO = ({
+  title,
+  description,
+  category,
+  subcategory,
+}) => {
+  const cleanTitle = cleanSeoText(title);
+  const cleanDescription = cleanSeoText(description);
+  const cleanCategory = cleanSeoText(category);
+  const cleanSubcategory = cleanSeoText(subcategory);
+
+  const productType =
+    cleanSubcategory ||
+    cleanCategory ||
+    "Furniture";
+
+  const values = {
+    title: cleanTitle,
+    description: cleanDescription,
+    category: cleanCategory,
+    subcategory: cleanSubcategory,
+    productType,
+    brand: seoConfig.brand,
+  };
+
+  const metaTitle = replaceSeoVariables(
+    seoConfig.product.metaTitle,
+    values
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  const metaDescription = replaceSeoVariables(
+    seoConfig.product.metaDescription,
+    values
+  )
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return {
+    meta_title: metaTitle,
+    meta_description: metaDescription,
+  };
+};
 export default function Edit() {
+  // Default preset of colors. This is just a STARTING POINT —
+  // users can add any additional custom color dynamically below.
   const AVAILABLE_COLORS = [
     { name: "red", hex: "#ef4444" },
     { name: "blue", hex: "#3b82f6" },
@@ -38,9 +98,9 @@ export default function Edit() {
     discount_amount: "",
     label_category: "",
     label_size: "",
-    meta_title: "",
-    meta_description: "",
-    meta_keywords: "",
+    // meta_title: "",
+    // meta_description: "",
+    // meta_keywords: "",
   });
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
@@ -80,8 +140,75 @@ export default function Edit() {
       stock: "",
       images: [],
       newImages: [],
+      isCustom: false,
     }))
   );
+
+  // ---------- DYNAMIC / CUSTOM COLOR ADD ----------
+  const [customColorName, setCustomColorName] = useState("");
+  const [customColorHex, setCustomColorHex] = useState("#000000");
+  const [highlightIndex, setHighlightIndex] = useState(null);
+  const variantRefs = useRef([]);
+
+  const scrollToAndHighlight = (index) => {
+    setHighlightIndex(index);
+    // Wait a tick so the DOM node is definitely there, then scroll to it
+    setTimeout(() => {
+      variantRefs.current[index]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, 50);
+    // Remove the highlight after a couple seconds
+    setTimeout(() => setHighlightIndex(null), 2000);
+  };
+
+  const addCustomColor = () => {
+    const name = customColorName.trim().toLowerCase();
+
+    if (!name) {
+      toast.error("Enter a color name");
+      return;
+    }
+
+    const existingIndex = variants.findIndex(
+      (v) => v.color.toLowerCase() === name
+    );
+
+    if (existingIndex !== -1) {
+      toast.error(`"${name}" is already in the list — scrolled to it below`);
+      scrollToAndHighlight(existingIndex);
+      return;
+    }
+
+    setVariants((prev) => [
+      ...prev,
+      {
+        color: name,
+        hex: customColorHex,
+        selected: true,
+        title: `${name.charAt(0).toUpperCase() + name.slice(1)} Variant`,
+        stock: "",
+        images: [],
+        newImages: [],
+        isCustom: true,
+      }
+    ]);
+
+    setCustomColorName("");
+    setCustomColorHex("#000000");
+    toast.success(`"${name}" color added`);
+  };
+
+  const removeCustomColor = (index) => {
+    setVariants((prev) => {
+      const target = prev[index];
+      // Safety: never remove one of the default preset colors,
+      // only ones the user added dynamically.
+      if (!target?.isCustom) return prev;
+      return prev.filter((_, i) => i !== index);
+    });
+  };
 
   // ---------- HANDLE PRICE MODE CHANGE ----------
   const handlePriceModeChange = (mode) => {
@@ -190,21 +317,50 @@ export default function Edit() {
       ]);
     }
 
-    setVariants((prev) =>
-      prev.map((v) => {
-        const found = data.variants?.find((x) => x.color === v.color);
-        return found
-          ? {
-            ...v,
-            selected: true,
-            title: found.title || `${v.color.charAt(0).toUpperCase() + v.color.slice(1)} Variant`,
-            stock: found.stock,
-            images: found.images || [],
-            newImages: [],
-          }
-          : v;
-      })
-    );
+    // Start from the default preset, marking any that match saved data as selected
+    const presetVariants = AVAILABLE_COLORS.map((c) => {
+      const found = data.variants?.find((x) => x.color === c.name);
+      return found
+        ? {
+          color: c.name,
+          hex: found.hex || c.hex,
+          selected: true,
+          title: found.title || `${c.name.charAt(0).toUpperCase() + c.name.slice(1)} Variant`,
+          stock: found.stock,
+          images: found.images || [],
+          newImages: [],
+          isCustom: false,
+        }
+        : {
+          color: c.name,
+          hex: c.hex,
+          selected: false,
+          title: `${c.name.charAt(0).toUpperCase() + c.name.slice(1)} Variant`,
+          stock: "",
+          images: [],
+          newImages: [],
+          isCustom: false,
+        };
+    });
+
+    // Any saved color that ISN'T part of the default preset is a custom
+    // color the product was created/edited with — add it dynamically so
+    // it isn't lost when opening this edit screen.
+    const presetNames = AVAILABLE_COLORS.map((c) => c.name.toLowerCase());
+    const customVariants = (data.variants || [])
+      .filter((v) => !presetNames.includes(String(v.color).toLowerCase()))
+      .map((v) => ({
+        color: v.color,
+        hex: v.hex || "#000000",
+        selected: true,
+        title: v.title || `${String(v.color).charAt(0).toUpperCase() + String(v.color).slice(1)} Variant`,
+        stock: v.stock,
+        images: v.images || [],
+        newImages: [],
+        isCustom: true,
+      }));
+
+    setVariants([...presetVariants, ...customVariants]);
   };
 
   // ---------- FETCH CATEGORIES ----------
@@ -255,12 +411,13 @@ export default function Edit() {
   }, [id]);
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+    const { name, value } = e.target;
 
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   // ---------- VARIANT HANDLERS ----------
   const toggleVariant = (index) => {
     setVariants((prev) =>
@@ -413,123 +570,365 @@ export default function Edit() {
       fetchSubSubCategories();
     }
   }, [form?.subcategory]);
+  const getSeoData = () => {
+    const selectedCategory = categories.find(
+      (item) =>
+        String(item?._id) ===
+        String(form.category)
+    );
 
+    const selectedSubCategory = subCategories.find(
+      (item) =>
+        String(item?._id) ===
+        String(form.subcategory)
+    );
+
+    return generateProductSEO({
+      title: form.title,
+      description: form.description,
+      category: selectedCategory?.name || "",
+      subcategory: selectedSubCategory?.name || "",
+    });
+  };
   // ---------- HANDLE EDIT SUBMIT ----------
   const handleEdit = async (e) => {
     e.preventDefault();
 
-    const selectedVariants = variants.filter(v => v.selected);
+    const selectedVariants = variants.filter(
+      (v) => v.selected
+    );
 
     if (!selectedVariants.length) {
-      toast.error("Select at least one color variant");
+      toast.error(
+        "Select at least one color variant"
+      );
       return;
     }
 
-    if (!selectedVariants.every(v => (v.images.length > 0 || v.newImages.length > 0))) {
-      toast.error("Each selected variant must have at least one image");
+    if (
+      !selectedVariants.every(
+        (v) =>
+          v.images.length > 0 ||
+          v.newImages.length > 0
+      )
+    ) {
+      toast.error(
+        "Each selected variant must have at least one image"
+      );
       return;
     }
 
-    // Build price sections only if in multiple mode
+    // ========================================
+    // MULTIPLE PRICE SECTIONS
+    // ========================================
+
     let validPriceSections = [];
+
     if (priceMode === "multiple") {
       for (const section of priceSections) {
-        const hasValidTitle = section.title && section.title.trim() !== '';
-        const amountNum = parseFloat(section.amount);
-        const hasValidAmount = section.amount !== '' && !isNaN(amountNum) && amountNum >= 0;
+        const hasValidTitle =
+          section.title &&
+          section.title.trim() !== "";
 
-        if (hasValidTitle && hasValidAmount) {
-          const validSizes = section.sizes
-            .filter(size => {
-              const hasSizeTitle = size.title && size.title.trim() !== '';
-              const sizeAmountNum = parseFloat(size.amount);
-              const hasSizeAmount = size.amount !== '' && !isNaN(sizeAmountNum) && sizeAmountNum >= 0;
-              return hasSizeTitle && hasSizeAmount;
-            })
-            .map(size => ({
-              title: size.title.trim(),
-              amount: parseFloat(size.amount),
-              discount_amount: parseFloat(size.discount_amount) || 10,
-              final_amount: 0
-            }));
+        const amountNum =
+          parseFloat(section.amount);
+
+        const hasValidAmount =
+          section.amount !== "" &&
+          !isNaN(amountNum) &&
+          amountNum >= 0;
+
+        if (
+          hasValidTitle &&
+          hasValidAmount
+        ) {
+          const validSizes =
+            section.sizes
+              .filter((size) => {
+                const hasSizeTitle =
+                  size.title &&
+                  size.title.trim() !== "";
+
+                const sizeAmountNum =
+                  parseFloat(size.amount);
+
+                const hasSizeAmount =
+                  size.amount !== "" &&
+                  !isNaN(sizeAmountNum) &&
+                  sizeAmountNum >= 0;
+
+                return (
+                  hasSizeTitle &&
+                  hasSizeAmount
+                );
+              })
+              .map((size) => ({
+                title: size.title.trim(),
+
+                amount:
+                  parseFloat(size.amount),
+
+                discount_amount:
+                  parseFloat(
+                    size.discount_amount
+                  ) || 10,
+
+                final_amount: 0,
+              }));
 
           validPriceSections.push({
-            title: section.title.trim(),
-            amount: parseFloat(section.amount),
-            discount_amount: parseFloat(section.discount_amount) || 10,
+            title:
+              section.title.trim(),
+
+            amount:
+              parseFloat(section.amount),
+
+            discount_amount:
+              parseFloat(
+                section.discount_amount
+              ) || 10,
+
             final_amount: 0,
-            sizes: validSizes
+
+            sizes: validSizes,
           });
         }
       }
     }
 
     setLoading(true);
+
     try {
       const fd = new FormData();
 
-      // Append common fields
-      fd.append("title", form.title);
-      fd.append("description", form.description);
-      fd.append("stock", form.stock || "0");
-      fd.append("category", form.category);
-      fd.append("subcategory", form.subcategory);
-      fd.append("subsubcategory", form.subsubcategory || "");
-      fd.append("dimensions", form.dimensions);
-      fd.append("material", form.material);
-      fd.append("type", form.type);
-      fd.append("terms", form.terms);
-      fd.append("label_category", form.label_category || "");
-      fd.append("label_size", form.label_size || "");
-      fd.append("meta_title", form.meta_title || "");
-      fd.append("meta_description", form.meta_description || "");
-      fd.append("meta_keywords", form.meta_keywords || "");
-      // Price related – based on mode
-      if (priceMode === "single") {
-        fd.append("amount", form.amount);
-        fd.append("discount_amount", form.discount_amount);
+      // ========================================
+      // PRODUCT DATA
+      // ========================================
 
-        // Do NOT append product_price_section
+      fd.append(
+        "title",
+        form.title.trim()
+      );
+
+      fd.append(
+        "description",
+        form.description.trim()
+      );
+
+      fd.append(
+        "stock",
+        form.stock || "0"
+      );
+
+      fd.append(
+        "category",
+        form.category
+      );
+
+      fd.append(
+        "subcategory",
+        form.subcategory
+      );
+
+      fd.append(
+        "subsubcategory",
+        form.subsubcategory || ""
+      );
+
+      fd.append(
+        "dimensions",
+        form.dimensions
+      );
+
+      fd.append(
+        "material",
+        form.material
+      );
+
+      fd.append(
+        "type",
+        form.type
+      );
+
+      fd.append(
+        "terms",
+        form.terms
+      );
+
+      fd.append(
+        "label_category",
+        form.label_category || ""
+      );
+
+      fd.append(
+        "label_size",
+        form.label_size || ""
+      );
+
+      // ========================================
+      // DYNAMIC SEO
+      // ========================================
+
+      const seoData = getSeoData();
+
+      fd.append(
+        "meta_title",
+        seoData.meta_title
+      );
+
+      fd.append(
+        "meta_description",
+        seoData.meta_description
+      );
+
+      // meta_keywords completely removed
+
+      // ========================================
+      // PRICE
+      // ========================================
+
+      if (priceMode === "single") {
+        fd.append(
+          "amount",
+          form.amount
+        );
+
+        fd.append(
+          "discount_amount",
+          form.discount_amount
+        );
       } else {
-        fd.append("product_price_section", JSON.stringify(validPriceSections));
-        fd.append("amount", 0);
-        fd.append("discount_amount", 0);
-        // Do NOT append amount/discount_amount
+        fd.append(
+          "product_price_section",
+          JSON.stringify(
+            validPriceSections
+          )
+        );
+
+        fd.append(
+          "amount",
+          "0"
+        );
+
+        fd.append(
+          "discount_amount",
+          "0"
+        );
       }
+
+      // ========================================
+      // VARIANTS
+      // ========================================
 
       fd.append(
         "variants",
         JSON.stringify(
-          selectedVariants.map(v => ({
-            color: v.color,
-            title: v.title,
-            stock: v.stock,
-            images: v.images
-          }))
+          selectedVariants.map(
+            (variant) => ({
+              color: variant.color,
+              hex: variant.hex,
+              title: variant.title,
+              stock: variant.stock,
+
+              // Existing S3/image URLs
+              images: variant.images,
+            })
+          )
         )
       );
 
-      selectedVariants.forEach(v =>
-        v.newImages.forEach(img =>
-          fd.append(`variantImages_${v.color}`, img)
-        )
+      // ========================================
+      // NEW VARIANT IMAGES
+      // ========================================
+
+      selectedVariants.forEach(
+        (variant) => {
+          variant.newImages.forEach(
+            (img) => {
+              fd.append(
+                `variantImages_${variant.color}`,
+                img
+              );
+            }
+          );
+        }
       );
+
+      // ========================================
+      // MAIN PRODUCT IMAGE
+      // ========================================
 
       if (image instanceof File) {
-        fd.append("image", image);
+        fd.append(
+          "image",
+          image
+        );
       }
 
-      const main = new Listing();
-      const res = await main.editProduct(id, fd);
-      if (res?.data?.status) {
-        toast.success(res?.data?.message);
-        router.push("/admin/product");
+      // ========================================
+      // DEBUG
+      // ========================================
+
+      console.log(
+        "========== EDIT PRODUCT =========="
+      );
+
+      console.log(
+        "SEO:",
+        seoData
+      );
+
+      for (
+        const [key, value]
+        of fd.entries()
+      ) {
+        console.log(
+          key,
+          value
+        );
+      }
+
+      // ========================================
+      // UPDATE API
+      // ========================================
+
+      const main =
+        new Listing();
+
+      const res =
+        await main.editProduct(
+          id,
+          fd
+        );
+
+      if (
+        res?.data?.status ||
+        res?.data?.success
+      ) {
+        toast.success(
+          res?.data?.message ||
+          "Product updated successfully"
+        );
+
+        router.push(
+          "/admin/product"
+        );
       } else {
-        toast.error(res?.data?.message || "Failed to edit product");
+        toast.error(
+          res?.data?.message ||
+          "Failed to edit product"
+        );
       }
     } catch (error) {
-      toast.error("Internal Server Error");
-      console.error(error);
+      console.error(
+        "Edit product error:",
+        error
+      );
+
+      toast.error(
+        error?.response?.data?.message ||
+        "Internal Server Error"
+      );
     } finally {
       setLoading(false);
     }
@@ -827,14 +1226,44 @@ export default function Edit() {
           <div className="border rounded-xl p-5 bg-white shadow-sm space-y-4">
             <h2 className="text-lg font-semibold text-gray-800">🎨 Color Variants</h2>
 
+            {/* ---------- ADD CUSTOM COLOR (DYNAMIC) ---------- */}
+            <div className="flex flex-wrap items-center gap-3 border border-dashed border-blue-300 rounded-lg p-3 bg-blue-50">
+              <input
+                type="color"
+                value={customColorHex}
+                onChange={(e) => setCustomColorHex(e.target.value)}
+                className="w-10 h-10 p-0 border rounded cursor-pointer"
+                title="Pick color"
+              />
+              <input
+                type="text"
+                placeholder="Custom color name (e.g., Maroon)"
+                value={customColorName}
+                onChange={(e) => setCustomColorName(e.target.value)}
+                className="border rounded-lg p-2 flex-1 min-w-[180px] focus:ring-2 focus:ring-blue-400 outline-none"
+              />
+              <button
+                type="button"
+                onClick={addCustomColor}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+              >
+                + Add Custom Color
+              </button>
+            </div>
+
             {variants.map((v, i) => (
               <div
-                key={v.color}
-                className={`rounded-lg border p-4 transition ${v.selected ? "bg-blue-50 border-blue-400" : "bg-gray-50"
+                key={`${v.color}-${i}`}
+                ref={(el) => (variantRefs.current[i] = el)}
+                className={`rounded-lg border p-4 transition-all duration-500 ${highlightIndex === i
+                    ? "ring-4 ring-yellow-400 bg-yellow-50 scale-[1.01]"
+                    : v.selected
+                      ? "bg-blue-50 border-blue-400"
+                      : "bg-gray-50"
                   }`}
               >
-                <label className="flex items-center justify-between cursor-pointer">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
                       checked={v.selected}
@@ -846,8 +1275,24 @@ export default function Edit() {
                       style={{ background: v.hex }}
                     />
                     <span className="capitalize font-medium text-gray-700">{v.color}</span>
-                  </div>
-                </label>
+                    {v.isCustom && (
+                      <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">
+                        Custom
+                      </span>
+                    )}
+                  </label>
+
+                  {v.isCustom && (
+                    <button
+                      type="button"
+                      onClick={() => removeCustomColor(i)}
+                      className="text-red-600 hover:text-red-800 text-sm font-medium"
+                      title="Remove this custom color"
+                    >
+                      ✕ Remove
+                    </button>
+                  )}
+                </div>
 
                 {v.selected && (
                   <div className="mt-4 ml-7 space-y-4">
@@ -920,59 +1365,7 @@ export default function Edit() {
               </div>
             ))}
           </div>
-          <div className="border border-gray-200 rounded-xl p-5 bg-gray-50 space-y-5">
-            <h3 className="text-lg font-semibold text-gray-800">
-              SEO <span className="text-sm text-gray-500">(Optional)</span>
-            </h3>
 
-            {/* Meta Title */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Title
-              </label>
-              <input
-                type="text"
-                name="meta_title"
-                placeholder="Enter Meta Title"
-                value={form.meta_title}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-
-            {/* Meta Description */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Description
-              </label>
-              <input
-                type="text"
-                name="meta_description"
-                placeholder="Enter Meta Description"
-                value={form.meta_description}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-            </div>
-
-            {/* Meta Keywords */}
-            <div>
-              <label className="block mb-2 text-sm font-medium text-gray-700">
-                Meta Keywords
-              </label>
-              <input
-                type="text"
-                name="meta_keywords"
-                placeholder="keyword1, keyword2, keyword3"
-                value={form.meta_keywords}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Separate keywords with commas (,)
-              </p>
-            </div>
-          </div>
           <button
             type="submit"
             disabled={loading}

@@ -70,7 +70,7 @@ export default function Slider2() {
 
       <div className="relative z-10 w-[92%] max-w-[1200px] mx-auto">
 
-     <div className="container mx-auto px-4 max-w-[1430px]">
+        <div className="container mx-auto px-4 max-w-[1430px]">
 
           {/* Heading */}
           <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8 md:mb-12">
@@ -93,7 +93,7 @@ export default function Slider2() {
           centeredSlides={true}
           slidesPerView={1.2}
           spaceBetween={20}
-          loop={data.length > 2} 
+          loop={data.length > 2}
           autoplay={{
             delay: 3000,
             disableOnInteraction: false,
@@ -120,16 +120,15 @@ export default function Slider2() {
               {({ isActive }) => (
                 <Link
                   href={`/project/${item?.slug}`}
-                  className={`transition-all duration-500 block ${
-                    isActive ? "scale-100" : "scale-90 opacity-70"
-                  }`}
+                  className={`transition-all duration-500 block ${isActive ? "scale-100" : "scale-90 opacity-70"
+                    }`}
                 >
                   <div className="bg-white p-3 sm:p-4 rounded-xl shadow-2xl">
 
                     {/* Image */}
                     <div className="overflow-hidden rounded-md">
                       <img
-                        src={item?.Image ||  item?.multiple_images?.[0]}
+                        src={item?.Image || item?.multiple_images?.[0]}
                         alt={item?.title}
                         className="w-full h-[200px] sm:h-[260px] md:h-[300px] object-cover"
                       />

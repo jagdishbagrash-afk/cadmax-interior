@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FiUser, FiShoppingBag, FiSearch, FiHeart, FiMapPin, FiSettings, FiLogOut } from "react-icons/fi";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,8 +15,8 @@ import SearchPopup from "./SearchPopup";
 import Listing from "../api/Listing";
 import AuthModal from "@/components/AuthModal";
 
-
 import { DiJava } from "react-icons/di";
+
 export default function Header() {
   const { user, setUser } = useRole();
 
@@ -29,6 +29,25 @@ export default function Header() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authTab, setAuthTab] = useState("login");
 
+  const profileDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleOutsideClick = (e) => {
+      const dropdown = profileDropdownRef.current;
+
+      if (!dropdown) return;
+
+      if (!dropdown.contains(e.target)) {
+        setDropdownOpen(false);
+      }
+    };
+
+    window.addEventListener("pointerdown", handleOutsideClick, true);
+
+    return () => {
+      window.removeEventListener("pointerdown", handleOutsideClick, true);
+    };
+  }, []);
   // SEARCH STATES
 
   const cartItemsRedux = useSelector((state) => state.cart.cartItems);
@@ -166,23 +185,28 @@ export default function Header() {
 
             {/* USER */}
             {role === "customer" ? (
-              <div className="relative">
+              <div
+                ref={profileDropdownRef}
+                className="relative"
+              >
                 <FiUser
                   size={24}
                   className={`cursor-pointer ${textColor}`}
-                  onClick={() =>
-                    setDropdownOpen(!dropdownOpen)
-                  }
+                  onClick={() => {
+                    setDropdownOpen((prev) => !prev);
+                  }}
                 />
 
                 {dropdownOpen && (
                   <div className="hidden md:block absolute -right-4 mt-3 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
 
                     {/* Profile Header */}
-                    <div  
-                    onClick={() => setDropdownOpen(false)}
-                     className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">
-                      <Link href="/setting"  className="flex items-center gap-3">
+                    <div className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">
+                      <Link
+                        href="/setting"
+                        onClick={() => setDropdownOpen(false)}
+                        className="flex items-center gap-3"
+                      >
                         <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
                           {user?.name?.charAt(0)?.toUpperCase() || "U"}
                         </div>
@@ -201,6 +225,7 @@ export default function Header() {
 
                     {/* Menu Items */}
                     <div className="py-2">
+
                       <Link
                         href="/orders"
                         onClick={() => setDropdownOpen(false)}
@@ -210,16 +235,6 @@ export default function Header() {
                         <span>Order History</span>
                       </Link>
 
-                    <Link
-  href="/wishlist"
-  onClick={() => setDropdownOpen(false)}
-  className="flex items-center gap-3 px-4 py-3 hover:bg-gray-50 transition-all duration-200"
->
-  <FiHeart size={18} />
-  <span>Wishlist</span>
-</Link>
-
-                      
 
                       <Link
                         href="/setting"
@@ -242,24 +257,56 @@ export default function Header() {
                       <div className="border-t border-gray-100 my-1" />
 
                       <button
-                        onClick={handleLogout}
+                        onClick={() => {
+                          setDropdownOpen(false);
+                          handleLogout();
+                        }}
                         className="w-full flex items-center gap-3 px-4 py-3 text-red-500 hover:bg-red-50 transition-all duration-200"
                       >
                         <FiLogOut size={18} />
                         <span>Logout</span>
                       </button>
+
                     </div>
                   </div>
                 )}
               </div>
             ) : (
               <div className={`flex gap-3 ${textColor}`}>
-                <button onClick={() => { setAuthTab("login"); setAuthModalOpen(true); }} className="hover:underline">Login</button>
+                <button
+                  onClick={() => {
+                    setAuthTab("login");
+                    setAuthModalOpen(true);
+                  }}
+                  className="hover:underline"
+                >
+                  Login
+                </button>
+
                 <span>/</span>
-                <button onClick={() => { setAuthTab("signup"); setAuthModalOpen(true); }} className="hover:underline">Signup</button>
+
+                <button
+                  onClick={() => {
+                    setAuthTab("signup");
+                    setAuthModalOpen(true);
+                  }}
+                  className="hover:underline"
+                >
+                  Signup
+                </button>
               </div>
             )}
+            {role === "customer" && (
+              <Link
+                href="/wishlist"
+                className="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100 transition-all duration-200"
+              >
+                <FiHeart
+                  className={`${textColor} text-[22px]`}
+                />
 
+              </Link>
+            )}
             {/* CART */}
             {role === "customer" && (
               <Link

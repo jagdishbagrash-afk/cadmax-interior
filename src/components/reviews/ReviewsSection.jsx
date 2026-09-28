@@ -91,6 +91,35 @@ export default function ReviewsSection({ productId, productName = "" }) {
     }
   }, [productId, user, checkEligibility]);
 
+  useEffect(() => {
+    const shouldOpenReviewModal =
+      router.query?.writeReview === "1" ||
+      router.query?.writeReview === "true";
+
+    if (!shouldOpenReviewModal) return;
+
+    const hasLoggedInUser = !!(
+      user?._id ||
+      user?.id ||
+      user?.email ||
+      (typeof window !== "undefined" && localStorage.getItem("token"))
+    );
+
+    if (!hasLoggedInUser) {
+      toast.error("Please login to write a review");
+      router.push("/login");
+      return;
+    }
+
+    if (user && user.role && user.role !== "customer") {
+      toast.error("Only customers can write product reviews");
+      return;
+    }
+
+    setEditReviewData(null);
+    setShowWriteModal(true);
+  }, [router.query?.writeReview, user, productId]);
+
   // Update hasMore when pagination changes
   useEffect(() => {
     if (pagination) {
@@ -131,11 +160,24 @@ export default function ReviewsSection({ productId, productName = "" }) {
   };
 
   const handleWriteReview = async () => {
-    if (!user || user?.role !== "customer") {
+    const hasValidLogin = !!(
+      user?._id ||
+      user?.id ||
+      user?.email ||
+      (typeof window !== "undefined" && localStorage.getItem("token"))
+    );
+
+    if (!hasValidLogin) {
       toast.error("Please login to write a review");
       router.push("/login");
       return;
     }
+
+    if (user && user?.role && user.role !== "customer") {
+      toast.error("Only customers can write product reviews");
+      return;
+    }
+
     // If user already reviewed, open edit modal directly
     if (eligibility?.hasReviewed && eligibility?.existingReviewId) {
       try {
@@ -161,7 +203,7 @@ export default function ReviewsSection({ productId, productName = "" }) {
     setEditReviewData(null);
     setShowWriteModal(true);
   };
-  
+
   const handleEditReview = (review) => {
     setEditReviewData(review);
     setShowWriteModal(true);
@@ -258,11 +300,10 @@ export default function ReviewsSection({ productId, productName = "" }) {
                   <button
                     key={option.value}
                     onClick={() => handleSort(option.value)}
-                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${
-                      activeSort === option.value
-                        ? "bg-black text-white"
-                        : "bg-gray-100 text-[#4D5466] hover:bg-gray-200"
-                    }`}
+                    className={`px-3 py-1.5 text-xs rounded-lg font-medium transition-all ${activeSort === option.value
+                      ? "bg-black text-white"
+                      : "bg-gray-100 text-[#4D5466] hover:bg-gray-200"
+                      }`}
                   >
                     {option.label}
                   </button>

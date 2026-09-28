@@ -1,0 +1,19 @@
+{
+    "brand": "CADMAX Atelier",
+    "category": {
+        "metaTitle": "Luxury {name} Online | {brand}",
+        "metaDescription": "Explore premium {name} from {brand}. Discover luxury designer {name} crafted for modern and elegant interiors."
+    },
+    "subcategory": {
+        "metaTitle": "Luxury {name} Online | {brand}",
+        "metaDescription": "Shop premium {name} from {brand}. Explore luxury designer {name} for modern living spaces."
+    },
+    "subsubcategory": {
+        "metaTitle": "Buy Luxury {name} Online | {brand}",
+        "metaDescription": "Discover premium {name} from {brand}. Shop designer {name} crafted for sophisticated interiors."
+    },
+    "product": {
+        "metaTitle": "{title} | Buy Luxury {productType} Online",
+        "metaDescription": "Buy the {title} from {brand}. {description}"
+    }
+}
