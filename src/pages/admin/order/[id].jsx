@@ -46,6 +46,8 @@ import moment from "moment";
 import ShippingLabel from "@/components/shipping-label/ShippingLabel";
 import { exportShippingLabelPdf } from "@/components/shipping-label/exportShippingLabelPdf";
 import { useReactToPrint } from "react-to-print";
+import { InvoiceTemplate } from "@/components/invoice/InvoiceTemplate";
+import { exportInvoicePdf } from "@/components/invoice/exportInvoicePdf";
 
 export default function OrderDetailsPage() {
     const router = useRouter();
@@ -63,6 +65,9 @@ export default function OrderDetailsPage() {
     const [pincodeEstDelivery, setPincodeEstDelivery] = useState(null);
     const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
     const labelRef = useRef(null);
+
+    const invoicePdfRef = useRef(null);
+    const [isGeneratingInvoicePdf, setIsGeneratingInvoicePdf] = useState(false);
 
     // ─── BLUE DART WAYBILL CANCEL & EXTRA TIMELINE STATE ──────
     const [extraTimelineEvents, setExtraTimelineEvents] = useState([]);
@@ -326,6 +331,85 @@ export default function OrderDetailsPage() {
             },
         };
     }, [project]);
+
+    const invoiceOrderData = useMemo(() => {
+        if (!project) return null;
+        const address = project.addressId || project.shippingAddress || project.address || {};
+        const dataShipment = project.shipment || {};
+        const formattedWeb = project.formattedForWeb || {};
+
+        const products = Array.isArray(project.product)
+            ? project.product.map((p) => ({
+                title: p.title || p.name || "Product",
+                variant: p.variant || p.variantTitle || "Standard",
+                quantity: p.quantity || p.qty || 1,
+                price: p.price || 0,
+                priceFormatted: `₹ ${(p.price || 0).toLocaleString("en-IN")}`,
+                total: p.total || (p.price || 0) * (p.quantity || 1),
+                totalFormatted: `₹ ${(p.total || (p.price || 0) * (p.quantity || 1)).toLocaleString("en-IN")}`,
+            }))
+            : [];
+
+        const subtotal = products.reduce((sum, p) => sum + p.total, 0);
+        const grandTotal = project.amount || subtotal;
+
+        return {
+            orderHeader: {
+                orderId: project.orderId
+                    ? (String(project.orderId).startsWith("#") ? project.orderId : `#${project.orderId}`)
+                    : "#ORD-000000",
+                rawOrderId: project.orderId || "ORD-000000",
+                placedOn: project.createdAt ? formatDate(project.createdAt) : "N/A",
+                status: project.status || "Confirmed",
+            },
+            products: products,
+            shippingAddress: {
+                name: project.name || address.name || "Customer",
+                address: [
+                    address.street_address || address.address1 || address.address,
+                    address.city,
+                    address.state,
+                    address.pincode ? `- ${address.pincode}` : "",
+                ].filter(Boolean).join(", "),
+                phone: project.mobile || address.mobile || address.phone || "",
+            },
+            paymentMethod: {
+                method: project.paymentMethod || "Online Payment",
+                status: project.PaymentId ? `Paid (${project.PaymentId})` : "Paid",
+            },
+            orderSummary: {
+                subtotalFormatted: `₹ ${subtotal.toLocaleString("en-IN")}`,
+                shippingFormatted: "₹ 0.00",
+                taxFormatted: "Included",
+                taxPercentage: "18%",
+                totalFormatted: `₹ ${grandTotal.toLocaleString("en-IN")}`,
+            },
+            shipmentDetails: {
+                shipmentId: dataShipment?.shipmentId || formattedWeb?.shipmentDetails?.shipmentId || "SHP-554789",
+                courierPartner: dataShipment?.courierPartner || project.courier_name || "BLUE_DART",
+                trackingId: dataShipment?.awbNumber || project.tracking_number || "N/A",
+                status: dataShipment?.shippingStatus || project.shipping_status || "shipped",
+            },
+        };
+    }, [project, formatDate]);
+
+    const handleDownloadAdminInvoice = async () => {
+        if (!invoicePdfRef.current || isGeneratingInvoicePdf) return;
+        try {
+            setIsGeneratingInvoicePdf(true);
+            const toastId = toast.loading("Generating PDF Invoice...");
+            await exportInvoicePdf({
+                element: invoicePdfRef.current,
+                fileName: `Invoice-${project?.orderId || "order"}.pdf`,
+            });
+            toast.success("Invoice PDF downloaded successfully!", { id: toastId });
+        } catch (err) {
+            console.error("PDF download error:", err);
+            toast.error("Failed to generate PDF invoice.");
+        } finally {
+            setIsGeneratingInvoicePdf(false);
+        }
+    };
 
     const triggerPrint = useReactToPrint({
         contentRef: labelRef,
@@ -643,9 +727,22 @@ export default function OrderDetailsPage() {
                             </div>
                         </div>
                         <div className="flex items-center gap-2">
-                            <button className="px-4 py-2 rounded-xl text-sm font-medium bg-black text-white hover:bg-gray-800 transition-colors flex items-center gap-2">
-                                <FiPrinter className="w-4 h-4" />
-                                Print Invoice
+                            <button
+                                onClick={handleDownloadAdminInvoice}
+                                disabled={isGeneratingInvoicePdf}
+                                className="px-4 py-2 rounded-xl text-sm font-medium bg-black text-white hover:bg-gray-800 transition-colors flex items-center gap-2 disabled:opacity-50"
+                            >
+                                {isGeneratingInvoicePdf ? (
+                                    <>
+                                        <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                                        Generating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FiPrinter className="w-4 h-4" />
+                                        Print / Download Invoice
+                                    </>
+                                )}
                             </button>
                             <button className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-500">
                                 <FiMoreHorizontal className="w-5 h-5" />
@@ -1188,6 +1285,10 @@ export default function OrderDetailsPage() {
             {/* HIDDEN SHIPPING LABEL FOR DIRECT PRINT/DOWNLOAD */}
             <div style={{ position: "fixed", top: "-10000px", left: "-10000px", zIndex: -1000, pointerEvents: "none" }}>
                 {normalizedLabelData && <ShippingLabel ref={labelRef} data={normalizedLabelData} />}
+            </div>
+            {/* HIDDEN INVOICE TEMPLATE FOR CLEAN PDF INVOICE EXPORT */}
+            <div style={{ position: "fixed", top: "-10000px", left: "-10000px", width: "794px", zIndex: -1000, pointerEvents: "none" }}>
+                <InvoiceTemplate ref={invoicePdfRef} orderData={invoiceOrderData} />
             </div>
         </AdminLayout>
     );

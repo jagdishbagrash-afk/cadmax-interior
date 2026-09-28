@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
 import toast from "react-hot-toast";
+import { InvoiceTemplate } from "@/components/invoice/InvoiceTemplate";
+import { exportInvoicePdf } from "@/components/invoice/exportInvoicePdf";
 import {
   HiCheck,
   HiOutlineShoppingBag,
@@ -147,6 +149,8 @@ export default function OrderDetailsView({ orderIdProp }) {
   const [orderData, setOrderData] = useState(DEFAULT_ORDER_DATA);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const invoiceRef = useRef(null);
 
   const extractPincode = (str) => {
     if (!str) return null;
@@ -359,9 +363,26 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   }
 
-  const handleDownloadInvoice = () => {
-    if (typeof window !== "undefined") {
-      window.print();
+  const handleDownloadInvoice = async () => {
+    if (!invoiceRef.current || isGeneratingInvoice) return;
+    try {
+      setIsGeneratingInvoice(true);
+      const toastId = toast.loading("Generating PDF invoice from database records...");
+      const rawId =
+        orderData?.orderHeader?.rawOrderId ||
+        (orderData?.orderHeader?.orderId
+          ? orderData.orderHeader.orderId.replace("#", "")
+          : "order");
+      await exportInvoicePdf({
+        element: invoiceRef.current,
+        fileName: `Invoice-${rawId}.pdf`,
+      });
+      toast.success("Invoice PDF downloaded successfully!", { id: toastId });
+    } catch (err) {
+      console.error("PDF download error:", err);
+      toast.error("Failed to generate PDF invoice. Please try again.");
+    } finally {
+      setIsGeneratingInvoice(false);
     }
   };
 
@@ -782,10 +803,20 @@ export default function OrderDetailsView({ orderIdProp }) {
                 <button
                   type="button"
                   onClick={handleDownloadInvoice}
-                  className="border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95"
+                  disabled={isGeneratingInvoice}
+                  className="border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <HiOutlineArrowDownTray className="w-4 h-4 text-gray-700" />
-                  Download Invoice
+                  {isGeneratingInvoice ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></span>
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <HiOutlineArrowDownTray className="w-4 h-4 text-gray-700" />
+                      Download Invoice
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -997,6 +1028,11 @@ export default function OrderDetailsView({ orderIdProp }) {
 
         </div>
 
+      </div>
+
+      {/* Hidden Invoice Template container for generating PDF directly from database values */}
+      <div style={{ position: "fixed", top: "-10000px", left: "-10000px", width: "794px", zIndex: -1000, pointerEvents: "none" }}>
+        <InvoiceTemplate ref={invoiceRef} orderData={orderData} />
       </div>
     </div>
   );
