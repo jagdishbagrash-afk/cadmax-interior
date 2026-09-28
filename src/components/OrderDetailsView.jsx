@@ -1,9 +1,11 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
 import { useRole } from "@/context/RoleContext";
 import toast from "react-hot-toast";
+import { InvoiceTemplate } from "@/components/invoice/InvoiceTemplate";
+import { exportInvoicePdf } from "@/components/invoice/exportInvoicePdf";
 import {
   HiCheck,
   HiOutlineShoppingBag,
@@ -165,108 +167,8 @@ export default function OrderDetailsView({ orderIdProp }) {
   }));
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const header = orderData.orderHeader;
-  const stepper = orderData.stepperTimeline;
-  const products = orderData.products;
-  const address = orderData.shippingAddress;
-  const payment = orderData.paymentMethod;
-  const summary = orderData.orderSummary;
-  const shipment = orderData.shipmentDetails;
-  const estDelivery = orderData.estimatedDeliveryInformation;
-  const handleBuyAgain = (product) => {
-    const productSlug =
-      product?.slug ||
-      product?.productSlug ||
-      product?.handle ||
-      product?.seoSlug ||
-      product?.urlSlug ||
-      product?.productUrl?.slug ||
-      product?.url?.slug ||
-      product?.title ||
-      product?.name ||
-      "";
-
-    const toSlug = (text) =>
-      String(text || "")
-        .trim()
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-
-    const finalProductSlug = toSlug(productSlug) || toSlug(product?.productId) || toSlug(product?.title) || "";
-
-    if (finalProductSlug) {
-      router.push(`/product/details/${encodeURIComponent(finalProductSlug)}`);
-      return;
-    }
-
-    router.push("/products");
-  };
-
-  const handleWriteReviewForProduct = (product) => {
-    const toSlug = (text) =>
-      String(text || "")
-        .trim()
-        .toLowerCase()
-        .normalize("NFKD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .replace(/^-|-$/g, "");
-
-    const productSlug =
-      product?.slug ||
-      product?.productSlug ||
-      product?.handle ||
-      product?.seoSlug ||
-      product?.urlSlug ||
-      product?.productUrl?.slug ||
-      product?.url?.slug ||
-      product?.title ||
-      product?.name ||
-      "";
-
-    const finalProductSlug =
-      toSlug(productSlug) ||
-      toSlug(product?.productId) ||
-      toSlug(product?.title) ||
-      "";
-
-    const hasLoggedInUser = !!(
-      user?._id ||
-      user?.id ||
-      user?.email ||
-      (typeof window !== "undefined" && localStorage.getItem("token"))
-    );
-
-    if (!hasLoggedInUser) {
-      toast.error("Please login to write a review");
-      router.push("/login");
-      return;
-    }
-
-    if (user && user.role && user.role !== "customer") {
-      toast.error("Only customers can write product reviews");
-      return;
-    }
-
-    if (!finalProductSlug) {
-      toast.error("Product review is not available for this item right now.");
-      return;
-    }
-
-    router.push({
-      pathname: `/product/details/${encodeURIComponent(finalProductSlug)}`,
-      query: { writeReview: "1" },
-    });
-  };
-  // Replace the activeTrackingStepIndex / truckMarkerLeft block with this:
-
+  const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
+  const invoiceRef = useRef(null);
 
   const extractPincode = (str) => {
     if (!str) return null;
@@ -485,240 +387,25 @@ export default function OrderDetailsView({ orderIdProp }) {
   }
 
   const handleDownloadInvoice = async () => {
-    if (typeof window === "undefined") return;
-
-    const findPdfUrlInObject = (value, visited = new WeakSet()) => {
-      if (!value) return null;
-
-      if (typeof value === "string") {
-        const trimmed = value.trim();
-        if (!trimmed) return null;
-
-        if (trimmed.startsWith("data:application/pdf")) return trimmed;
-        if (trimmed.startsWith("blob:")) return trimmed;
-        if (/^https?:\/\//i.test(trimmed) && /(amazonaws|s3\.|cloudfront|\.pdf(?:\?|$)|\/pdf(?:\/|\?|$)|invoice|download)/i.test(trimmed)) {
-          return trimmed;
-        }
-
-        if (
-          /^https?:\/\//i.test(trimmed) ||
-          trimmed.startsWith("/") ||
-          trimmed.startsWith("./")
-        ) {
-          if (
-            /(\.pdf(?:\?|$)|\/pdf(?:\/|\?|$)|\/invoice(?:\/|\?|$)|invoice|download|amazonaws|s3\.|cloudfront)/i.test(trimmed)
-          ) {
-            return trimmed;
-          }
-        }
-
-        return null;
-      }
-
-      if (typeof value !== "object") return null;
-      if (visited.has(value)) return null;
-      visited.add(value);
-
-      if (Array.isArray(value)) {
-        for (const item of value) {
-          const match = findPdfUrlInObject(item, visited);
-          if (match) return match;
-        }
-        return null;
-      }
-
-      for (const [key, val] of Object.entries(value)) {
-        const lowered = String(key).toLowerCase();
-        const isLikelyPdfKey = /pdf|invoice|download|file|url|document|aws|s3|bucket|signed|blob/.test(lowered);
-
-        if (isLikelyPdfKey || (typeof val === "string" && /(\.pdf|amazonaws|s3\.|cloudfront)/i.test(val))) {
-          const match = findPdfUrlInObject(val, visited);
-          if (match) return match;
-        }
-      }
-
-      for (const val of Object.values(value)) {
-        const match = findPdfUrlInObject(val, visited);
-        if (match) return match;
-      }
-
-      return null;
-    };
-
-    const extractErrorMessage = (error) => {
-      const data = error?.response?.data || error?.data || {};
-      if (typeof data === "string") return data;
-
-      if (typeof data === "object") {
-        return (
-          data.message ||
-          data.Message ||
-          data.error ||
-          data.error_message ||
-          data.errorMessage ||
-          ""
-        );
-      }
-
-      return error?.message || "";
-    };
-
-    const openPdfWindow = (pdfUrl) => {
-      if (!pdfUrl) return false;
-
-      const safeUrl = String(pdfUrl).trim();
-
-      if (!safeUrl) return false;
-
-      // Base64 PDF / Blob PDF
-      if (
-        safeUrl.startsWith("data:application/pdf") ||
-        safeUrl.startsWith("blob:")
-      ) {
-        window.open(safeUrl, "_blank", "noopener,noreferrer");
-        return true;
-      }
-
-      const productionApiUrl =
-        process.env.NEXT_PUBLIC_API_URL ||
-        process.env.NEXT_PUBLIC_BASE_URL ||
-        "";
-
-      if (!productionApiUrl) {
-        if (safeUrl.startsWith("http://") || safeUrl.startsWith("https://") || safeUrl.startsWith("/")) {
-          window.open(safeUrl, "_blank", "noopener,noreferrer");
-          return true;
-        }
-
-        console.error(
-          "NEXT_PUBLIC_API_URL or NEXT_PUBLIC_BASE_URL is missing"
-        );
-        return false;
-      }
-
-      // Remove trailing slash
-      const cleanBase = String(productionApiUrl).replace(/\/+$/, "");
-
-      // Remove /api only for file URLs
-      const serverOrigin = cleanBase.replace(/\/api$/, "");
-
-      let finalUrl = "";
-
-      try {
-        const parsed = new URL(safeUrl);
-
-        const isLocalUrl =
-          parsed.hostname === "localhost" ||
-          parsed.hostname === "127.0.0.1" ||
-          parsed.hostname === "0.0.0.0";
-
-        if (isLocalUrl) {
-          // IMPORTANT:
-          // localhost URL -> LIVE SERVER URL
-
-          finalUrl =
-            `${serverOrigin}${parsed.pathname}${parsed.search}${parsed.hash}`;
-
-          console.log("Original local invoice URL:", safeUrl);
-          console.log("Converted live invoice URL:", finalUrl);
-        } else {
-          // Already production URL
-          finalUrl = safeUrl;
-        }
-      } catch (error) {
-        // Relative URL
-        if (safeUrl.startsWith("/")) {
-          finalUrl = `${serverOrigin}${safeUrl}`;
-        } else {
-          finalUrl = `${serverOrigin}/${safeUrl.replace(/^\.?\//, "")}`;
-        }
-      }
-
-      if (!finalUrl) {
-        return false;
-      }
-
-      console.log("Opening invoice:", finalUrl);
-
-      window.open(
-        finalUrl,
-        "_blank",
-        "noopener,noreferrer"
-      );
-
-      return true;
-    };
-
-    const directPdfUrl =
-      findPdfUrlInObject(orderData) ||
-      findPdfUrlInObject(orderData?.invoice) ||
-      findPdfUrlInObject(orderData?.data) ||
-      findPdfUrlInObject(orderData?.formattedForWeb) ||
-      findPdfUrlInObject(orderData?.shipmentDetails) ||
-      orderData?.shipmentDetails?.actions?.invoiceUrl ||
-      orderData?.shipmentDetails?.actions?.invoiceDownloadUrl ||
-      orderData?.shipmentDetails?.actions?.downloadInvoiceUrl;
-
-    if (directPdfUrl && openPdfWindow(directPdfUrl)) {
-      toast.success("Invoice opened in a new tab.");
-      return;
-    }
-
+    if (!invoiceRef.current || isGeneratingInvoice) return;
     try {
-      const listing = new Listing();
-      const res = await listing.DownloadOrderInvoice(orderId);
-      const responseData = res?.data;
-
-      const pdfUrlFromApi =
-        res?.invoiceUrl ||
-        res?.awsUrl ||
-        res?.pdfUrl ||
-        res?.downloadUrl ||
-        res?.fileUrl ||
-        res?.signedUrl ||
-        res?.url ||
-        responseData?.pdfUrl ||
-        responseData?.downloadUrl ||
-        responseData?.invoiceUrl ||
-        responseData?.awsUrl ||
-        responseData?.fileUrl ||
-        responseData?.signedUrl ||
-        responseData?.url ||
-        responseData?.data?.pdfUrl ||
-        responseData?.data?.downloadUrl ||
-        responseData?.data?.invoiceUrl ||
-        responseData?.data?.awsUrl ||
-        responseData?.data?.fileUrl ||
-        responseData?.data?.signedUrl ||
-        responseData?.data?.url ||
-        findPdfUrlInObject(responseData);
-      if (pdfUrlFromApi && openPdfWindow(pdfUrlFromApi)) {
-        toast.success("Invoice opened in a new tab.");
-        return;
-      }
-
-      toast.error("Invoice PDF URL is not available right nowwww.");
-    } catch (error) {
-      console.warn("Invoice download failed:", error);
-
-      const pdfUrlFromError =
-        error?.response?.data?.pdfUrl ||
-        error?.response?.data?.downloadUrl ||
-        error?.response?.data?.invoiceUrl ||
-        error?.response?.data?.awsUrl ||
-        error?.response?.data?.fileUrl ||
-        error?.response?.data?.signedUrl ||
-        error?.response?.data?.url ||
-        findPdfUrlInObject(error?.response?.data) ||
-        findPdfUrlInObject(error?.data);
-
-      if (pdfUrlFromError && openPdfWindow(pdfUrlFromError)) {
-        toast.success("Invoice opened in a new tab.");
-        return;
-      }
-
-      const msg = extractErrorMessage(error);
-      toast.error(msg || "Invoice PDF URL is not available right now catch.");
+      setIsGeneratingInvoice(true);
+      const toastId = toast.loading("Generating PDF invoice from database records...");
+      const rawId =
+        orderData?.orderHeader?.rawOrderId ||
+        (orderData?.orderHeader?.orderId
+          ? orderData.orderHeader.orderId.replace("#", "")
+          : "order");
+      await exportInvoicePdf({
+        element: invoiceRef.current,
+        fileName: `Invoice-${rawId}.pdf`,
+      });
+      toast.success("Invoice PDF downloaded successfully!", { id: toastId });
+    } catch (err) {
+      console.error("PDF download error:", err);
+      toast.error("Failed to generate PDF invoice. Please try again.");
+    } finally {
+      setIsGeneratingInvoice(false);
     }
   };
 
@@ -1223,10 +910,20 @@ export default function OrderDetailsView({ orderIdProp }) {
                 <button
                   type="button"
                   onClick={handleDownloadInvoice}
-                  className="border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95"
+                  disabled={isGeneratingInvoice}
+                  className="border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <HiOutlineArrowDownTray className="w-4 h-4 text-gray-700" />
-                  Download Invoice
+                  {isGeneratingInvoice ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></span>
+                      Generating PDF...
+                    </>
+                  ) : (
+                    <>
+                      <HiOutlineArrowDownTray className="w-4 h-4 text-gray-700" />
+                      Download Invoice
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -1437,6 +1134,11 @@ export default function OrderDetailsView({ orderIdProp }) {
 
         </div>
 
+      </div>
+
+      {/* Hidden Invoice Template container for generating PDF directly from database values */}
+      <div style={{ position: "fixed", top: "-10000px", left: "-10000px", width: "794px", zIndex: -1000, pointerEvents: "none" }}>
+        <InvoiceTemplate ref={invoiceRef} orderData={orderData} />
       </div>
     </div>
   );
