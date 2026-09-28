@@ -2582,11 +2582,11 @@ export default function Index() {
 
                           {/* COD */}
 
-                          {/* <label
+                          <label
                             className={`block cursor-pointer rounded-2xl border-2 p-5 transition-all ${paymentMethod ===
-                                "COD"
-                                ? "border-black bg-gray-50 shadow-md"
-                                : "border-gray-200 hover:border-gray-400"
+                              "COD"
+                              ? "border-black bg-gray-50 shadow-md"
+                              : "border-gray-200 hover:border-gray-400"
                               }`}
                           >
 
@@ -2637,7 +2637,7 @@ export default function Index() {
 
                             </div>
 
-                          </label> */}
+                          </label>
 
                         </div>
 

@@ -165,6 +165,16 @@ export default function OrderDetailsView({ orderIdProp }) {
       deliveredOn: "--",
     },
   }));
+
+  const header = orderData?.orderHeader ?? DEFAULT_ORDER_DATA.orderHeader;
+  const stepper = orderData?.stepperTimeline ?? DEFAULT_ORDER_DATA.stepperTimeline;
+  const products = orderData?.products ?? DEFAULT_ORDER_DATA.products;
+  const address = orderData?.shippingAddress ?? DEFAULT_ORDER_DATA.shippingAddress;
+  const payment = orderData?.paymentMethod ?? DEFAULT_ORDER_DATA.paymentMethod;
+  const summary = orderData?.orderSummary ?? DEFAULT_ORDER_DATA.orderSummary;
+  const shipment = orderData?.shipmentDetails ?? DEFAULT_ORDER_DATA.shipmentDetails;
+  const estDelivery = orderData?.estimatedDeliveryInformation ?? DEFAULT_ORDER_DATA.estimatedDeliveryInformation;
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isGeneratingInvoice, setIsGeneratingInvoice] = useState(false);
