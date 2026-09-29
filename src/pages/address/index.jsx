@@ -297,11 +297,12 @@ export default function ManageAddress() {
             if (!results.length) throw new Error("No address found");
             const place = results[0];
             fillFormFromPlace(place);
-            toast.success("Location updated");
             fetchNearbyPlaces(lat, lng);
+            return true;
         } catch (error) {
             console.error(error);
-            toast.error("Could not get address for this location");
+            toast.error("Could not get address for this location", { id: "location-toast" });
+            return false;
         }
     };
 
@@ -345,29 +346,103 @@ export default function ManageAddress() {
     };
 
     const getCurrentLocation = () => {
-        if (!navigator.geolocation)
-            return toast.error("Geolocation not supported");
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported by this browser");
+            return;
+        }
+
+        if (!isLoaded || !window.google?.maps) {
+            toast.error("Google Maps is still loading");
+            return;
+        }
+
         setLocationLoading(true);
-        toast.loading("Fetching your location...", { id: "location-toast" });
+
+        toast.loading("Fetching your location...", {
+            id: "location-toast",
+        });
 
         navigator.geolocation.getCurrentPosition(
             async (position) => {
-                const { latitude, longitude } = position.coords;
-                setMarkerPos({ lat: latitude, lng: longitude });
-                setMapCenter({ lat: latitude, lng: longitude });
-                await reverseGeocodeAndFill(latitude, longitude);
-                toast.success("Location fetched!", { id: "location-toast" });
-                setLocationLoading(false);
+                try {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+
+                    console.log("Current Coordinates:", {
+                        latitude,
+                        longitude,
+                        accuracy: position.coords.accuracy,
+                    });
+
+                    setMarkerPos({
+                        lat: latitude,
+                        lng: longitude,
+                    });
+
+                    setMapCenter({
+                        lat: latitude,
+                        lng: longitude,
+                    });
+
+                    const success = await reverseGeocodeAndFill(
+                        latitude,
+                        longitude
+                    );
+
+                    if (success) {
+                        toast.success("Current location fetched!", {
+                            id: "location-toast",
+                        });
+                    }
+                } catch (error) {
+                    console.error("Current location processing error:", error);
+
+                    toast.error("Unable to process current location", {
+                        id: "location-toast",
+                    });
+                } finally {
+                    setLocationLoading(false);
+                }
             },
+
             (error) => {
-                let msg = "Failed to get location";
-                if (error.code === 1) msg = "Permission denied";
-                else if (error.code === 2) msg = "Location unavailable";
-                else if (error.code === 3) msg = "Request timed out";
-                toast.error(msg, { id: "location-toast" });
+                console.error("Geolocation error:", error);
+
+                let message = "Unable to get your current location";
+
+                switch (error.code) {
+                    case error.PERMISSION_DENIED:
+                        message =
+                            "Location permission denied. Please allow location access.";
+                        break;
+
+                    case error.POSITION_UNAVAILABLE:
+                        message =
+                            "Your current location is unavailable.";
+                        break;
+
+                    case error.TIMEOUT:
+                        message =
+                            "Location request timed out. Please try again.";
+                        break;
+
+                    default:
+                        message =
+                            "Unable to get your current location.";
+                }
+
+                toast.error(message, {
+                    id: "location-toast",
+                });
+
                 setLocationLoading(false);
             },
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
+
+            {
+                enableHighAccuracy: true,
+                timeout: 20000,
+                maximumAge: 0,
+            }
         );
     };
 
