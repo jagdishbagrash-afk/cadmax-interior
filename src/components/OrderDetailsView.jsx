@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Listing from "@/pages/api/Listing";
@@ -174,6 +174,113 @@ export default function OrderDetailsView({ orderIdProp }) {
   const summary = orderData?.orderSummary ?? DEFAULT_ORDER_DATA.orderSummary;
   const shipment = orderData?.shipmentDetails ?? DEFAULT_ORDER_DATA.shipmentDetails;
   const estDelivery = orderData?.estimatedDeliveryInformation ?? DEFAULT_ORDER_DATA.estimatedDeliveryInformation;
+
+  const computeTimelineWithBuffer = (stepperList, basePlacedOn) => {
+    if (!Array.isArray(stepperList) || stepperList.length === 0) {
+      return { stepper: stepperList || [], estShippingDateStr: "--", estDeliveryDateStr: "--" };
+    }
+
+    let currentRefDate = null;
+    if (basePlacedOn) {
+      let str = String(basePlacedOn).trim();
+      if (!/\b(20\d\d)\b/.test(str)) {
+        const yr = new Date().getFullYear();
+        str = str.replace(/,/, ` ${yr},`);
+      }
+      const d = new Date(str);
+      if (!isNaN(d.getTime())) {
+        currentRefDate = d;
+      }
+    }
+    if (!currentRefDate) {
+      currentRefDate = new Date();
+    }
+
+    const formatStepTimestamp = (dateObj) => {
+      if (!dateObj || isNaN(dateObj.getTime())) return "--";
+      const day = dateObj.getDate();
+      const month = dateObj.toLocaleDateString("en-IN", { month: "short" });
+
+      let hours = dateObj.getHours();
+      const minutes = dateObj.getMinutes().toString().padStart(2, "0");
+      const ampm = hours >= 12 ? "PM" : "AM";
+      hours = hours % 12;
+      hours = hours ? hours : 12;
+      return `${day} ${month}, ${hours}:${minutes} ${ampm}`;
+    };
+
+    const formatFullDate = (dateObj) => {
+      if (!dateObj || isNaN(dateObj.getTime())) return "--";
+      return dateObj.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    };
+
+    let stepPointer = new Date(currentRefDate.getTime());
+    let estShippingDateStr = "";
+    let estDeliveryDateStr = "";
+
+    const updatedSteps = stepperList.map((item, idx) => {
+      const rawTime = item.timestamp;
+      const hasValidTime = rawTime && rawTime !== "--" && rawTime !== "N/A";
+
+      if (idx === 0) {
+        if (hasValidTime) {
+          let str = String(rawTime).trim();
+          if (!/\b(20\d\d)\b/.test(str)) {
+            const yr = new Date().getFullYear();
+            str = str.replace(/,/, ` ${yr},`);
+          }
+          let parsed = new Date(str);
+          if (!isNaN(parsed.getTime())) stepPointer = parsed;
+        }
+        const timeVal = hasValidTime ? rawTime : formatStepTimestamp(stepPointer);
+        return { ...item, timestamp: timeVal };
+      } else {
+        if (hasValidTime) {
+          let str = String(rawTime).trim();
+          if (!/\b(20\d\d)\b/.test(str)) {
+            const yr = new Date().getFullYear();
+            str = str.replace(/,/, ` ${yr},`);
+          }
+          let parsed = new Date(str);
+          if (!isNaN(parsed.getTime())) stepPointer = parsed;
+
+          const isShippingStep = idx === 2 || item.key === "shipped" || String(item.title).toLowerCase().includes("ship");
+          const isDeliveredStep = idx === stepperList.length - 1 || item.key === "delivered" || String(item.title).toLowerCase().includes("deliver");
+          if (isShippingStep) estShippingDateStr = formatFullDate(stepPointer);
+          if (isDeliveredStep) estDeliveryDateStr = formatFullDate(stepPointer);
+
+          return { ...item, timestamp: rawTime };
+        } else {
+          // Increment 1 day (24 hours) buffer per step
+          stepPointer = new Date(stepPointer.getTime() + 24 * 60 * 60 * 1000);
+          const calculatedVal = formatStepTimestamp(stepPointer);
+
+          const isShippingStep = idx === 2 || item.key === "shipped" || String(item.title).toLowerCase().includes("ship");
+          const isDeliveredStep = idx === stepperList.length - 1 || item.key === "delivered" || String(item.title).toLowerCase().includes("deliver");
+          if (isShippingStep) estShippingDateStr = formatFullDate(stepPointer);
+          if (isDeliveredStep) estDeliveryDateStr = formatFullDate(stepPointer);
+
+          return { ...item, timestamp: calculatedVal };
+        }
+      }
+    });
+
+    return {
+      stepper: updatedSteps,
+      estShippingDateStr: estShippingDateStr || formatFullDate(new Date(currentRefDate.getTime() + 2 * 24 * 60 * 60 * 1000)),
+      estDeliveryDateStr: estDeliveryDateStr || formatFullDate(new Date(currentRefDate.getTime() + 4 * 24 * 60 * 60 * 1000)),
+    };
+  };
+
+  const processedTimeline = useMemo(() => {
+    return computeTimelineWithBuffer(stepper, header.placedOn || estDelivery.orderedOn);
+  }, [stepper, header.placedOn, estDelivery.orderedOn]);
+
+  const finalStepper = processedTimeline.stepper;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -644,8 +751,8 @@ export default function OrderDetailsView({ orderIdProp }) {
                   </div>
                 </div>
                 <div className="grid grid-cols-5 gap-2 relative z-10 pt-8">
-                  {stepper.map((item, idx) => {
-                    const isLast = idx === stepper.length - 1;
+                  {finalStepper.map((item, idx) => {
+                    const isLast = idx === finalStepper.length - 1;
                     const isCompleted = item.completed;
 
                     return (
@@ -666,7 +773,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                           {/* Connecting Line (right side) */}
                           {!isLast && (
                             <div
-                              className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${stepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
+                              className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${finalStepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
                                 }`}
                             />
                           )}
@@ -1046,7 +1153,9 @@ export default function OrderDetailsView({ orderIdProp }) {
                       EST. SHIPPING
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5">
-                      {estDelivery.estShipping || "--"}
+                      {estDelivery.estShipping && estDelivery.estShipping !== "--"
+                        ? estDelivery.estShipping
+                        : processedTimeline.estShippingDateStr}
                     </p>
                   </div>
 
@@ -1055,7 +1164,9 @@ export default function OrderDetailsView({ orderIdProp }) {
                       EST. DELIVERY
                     </p>
                     <p className="text-xs sm:text-sm font-bold text-gray-900 mt-0.5">
-                      {estDelivery.estDelivery || "24 July 2026"}
+                      {estDelivery.estDelivery && estDelivery.estDelivery !== "--" && estDelivery.estDelivery !== "24 July 2026"
+                        ? estDelivery.estDelivery
+                        : processedTimeline.estDeliveryDateStr}
                     </p>
                   </div>
 
