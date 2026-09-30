@@ -47,6 +47,26 @@ const CARRIER_KEYS = [
   "shippingProvider",
 ];
 
+function getBlueDartShipment(source) {
+  const payload = unwrapApiData(source);
+  const shipments =
+    payload?.ShipmentData?.Shipment ||
+    payload?.shipmentData?.Shipment ||
+    payload?.data?.ShipmentData?.Shipment ||
+    payload?.tracking?.ShipmentData?.Shipment;
+
+  return Array.isArray(shipments) ? shipments[0] || null : null;
+}
+
+function getBlueDartScans(source) {
+  const shipment = getBlueDartShipment(source);
+  const scans = Array.isArray(shipment?.Scans) ? shipment.Scans : [];
+
+  return scans
+    .map((scan) => scan?.ScanDetail || scan)
+    .filter(Boolean);
+}
+
 export function unwrapApiData(responseOrPayload) {
   if (!responseOrPayload) {
     return null;
@@ -128,6 +148,11 @@ export function extractTrackingNumber(...sources) {
     if (value) {
       return String(value);
     }
+
+    const blueDartWaybill = getBlueDartShipment(source)?.WaybillNo;
+    if (blueDartWaybill) {
+      return String(blueDartWaybill);
+    }
   }
 
   return null;
@@ -139,6 +164,11 @@ export function extractStatus(...sources) {
 
     if (value) {
       return String(value);
+    }
+
+    const blueDartStatus = getBlueDartShipment(source)?.Status;
+    if (blueDartStatus) {
+      return String(blueDartStatus).trim();
     }
   }
 
@@ -231,6 +261,38 @@ export function formatShipmentStatus(status) {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 }
 
+export function getShipmentStatusStepIndex(status) {
+  const normalized = String(status || "")
+    .trim()
+    .toLowerCase()
+    .replace(/[\s-]+/g, "_");
+
+  if (!normalized) return 0;
+  if (normalized.includes("deliver")) return 4;
+  if (normalized.includes("out_for_delivery")) return 3;
+  if (
+    normalized.includes("picked_up") ||
+    normalized.includes("picked") ||
+    normalized.includes("in_transit") ||
+    normalized.includes("transit") ||
+    normalized.includes("shipped") ||
+    normalized.includes("dispatch") ||
+    normalized.includes("shipment_picked") ||
+    normalized.includes("arriv") ||
+    normalized.includes("reach")
+  ) {
+    return 2;
+  }
+  if (
+    normalized.includes("confirm") ||
+    normalized.includes("booked") ||
+    normalized.includes("manifest")
+  ) {
+    return 1;
+  }
+  return 0;
+}
+
 export function extractOrderAndShipment(responseOrPayload) {
   const payload = unwrapApiData(responseOrPayload);
   const order =
@@ -260,6 +322,17 @@ export function extractOrderAndShipment(responseOrPayload) {
 
 export function extractTrackingEvents(responseOrPayload) {
   const payload = unwrapApiData(responseOrPayload);
+
+  const blueDartScans = getBlueDartScans(payload);
+  if (blueDartScans.length > 0) {
+    return blueDartScans.map((scan) => ({
+      title: String(scan.Scan || scan.Status || "").trim(),
+      status: String(scan.Scan || scan.Status || "").trim(),
+      timestamp: [scan.ScanDate, scan.ScanTime].filter(Boolean).join(" "),
+      location: scan.ScannedLocation || "",
+      scanCode: scan.ScanCode || "",
+    }));
+  }
 
   const candidates = [
     payload?.events,

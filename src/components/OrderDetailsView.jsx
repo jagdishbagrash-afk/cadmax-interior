@@ -7,6 +7,11 @@ import toast from "react-hot-toast";
 import { InvoiceTemplate } from "@/components/invoice/InvoiceTemplate";
 import { exportInvoicePdf } from "@/components/invoice/exportInvoicePdf";
 import {
+  extractStatus,
+  extractTrackingNumber,
+  getShipmentStatusStepIndex,
+} from "@/components/shipmentUtils";
+import {
   HiCheck,
   HiOutlineShoppingBag,
   HiOutlineTruck,
@@ -306,6 +311,8 @@ export default function OrderDetailsView({ orderIdProp }) {
   };
 
   const mergeOrderData = (apiData) => {
+    const liveTrackingStatus = extractStatus(apiData?.trackingResponse);
+    const liveTrackingNumber = extractTrackingNumber(apiData?.trackingResponse);
     const dataShipment = apiData?.shipment || apiData?.data?.shipment || {};
     const dataOrder = apiData?.order || apiData?.data?.order || {};
     const formattedWeb = apiData?.formattedForWeb || apiData?.data?.formattedForWeb || {};
@@ -315,6 +322,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
     // 1. AWB / Tracking Number Hierarchy
     const awbNumber =
+      liveTrackingNumber ||
       dataShipment?.awbNumber ||
       dataShipment?.trackingNumber ||
       dataOrder?.tracking_number ||
@@ -343,6 +351,7 @@ export default function OrderDetailsView({ orderIdProp }) {
 
     // 3. Shipping Status Hierarchy
     const shippingStatus =
+      liveTrackingStatus ||
       dataShipment?.shippingStatus ||
       dataOrder?.shipping_status ||
       rawShipmentDetails?.status ||
@@ -369,6 +378,14 @@ export default function OrderDetailsView({ orderIdProp }) {
           : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
             ? mapLiveTrackingEventsToStepper(dataShipment.syncedTransit.liveTracking.events)
             : DEFAULT_ORDER_DATA.stepperTimeline;
+
+    if (liveTrackingStatus) {
+      const liveStepIndex = getShipmentStatusStepIndex(liveTrackingStatus);
+      stepperEvents = stepperEvents.map((step, index) => ({
+        ...step,
+        completed: index <= liveStepIndex,
+      }));
+    }
 
     // Estimated Delivery Hierarchy
     const estDeliveryVal =
@@ -441,7 +458,14 @@ export default function OrderDetailsView({ orderIdProp }) {
 
         const payload = res?.data?.data || res?.data || {};
         if (payload) {
-          const merged = mergeOrderData(payload);
+          let trackingResponse = null;
+          try {
+            trackingResponse = await listing.GetOrderTracking(orderId);
+          } catch (trackingError) {
+            console.warn("Unable to fetch live shipment tracking:", trackingError?.message);
+          }
+
+          const merged = mergeOrderData({ ...payload, trackingResponse });
           console.log("========== ORDER DATA ==========");
           console.log("Order ID:", orderId);
           console.log("Payload:", payload);
@@ -598,49 +622,17 @@ export default function OrderDetailsView({ orderIdProp }) {
     }
   };
 
-
-
-  const normalizedShipmentStatus = String(shipment?.status || header?.status || "")
+  const shipmentStatus = String(shipment?.status || header?.status || "")
     .trim()
     .toLowerCase();
-
-  const statusToStepIndex = {
-    order_placed: 0,
-    orderplaced: 0,
-    placed: 0,
-    confirmed: 1,
-    shipped: 2,
-    out_for_delivery: 3,
-    outfordelivery: 3,
-    out_for_delivery_pending: 3,
-    delivered: 4,
-  };
+  const canCancelShipment =
+    shipmentStatus !== "cancelled" && getShipmentStatusStepIndex(shipmentStatus) < 2;
 
 
-  const currentStatusStepIndex = (() => {
-    if (!normalizedShipmentStatus) return 0;
+  const normalizedShipmentStatus = shipmentStatus;
 
-    const exactMatch = statusToStepIndex[normalizedShipmentStatus];
-    if (typeof exactMatch === "number") return exactMatch;
-
-    if (normalizedShipmentStatus.includes("confirm")) return 1;
-    if (normalizedShipmentStatus.includes("ship")) return 2;
-    if (normalizedShipmentStatus.includes("out") || normalizedShipmentStatus.includes("delivery")) return 3;
-    if (normalizedShipmentStatus.includes("deliver")) return 4;
-    return 0;
-  })();
-
-  const hasKnownStatusStep = (() => {
-    if (!normalizedShipmentStatus) return false;
-    return (
-      statusToStepIndex[normalizedShipmentStatus] !== undefined ||
-      normalizedShipmentStatus.includes("confirm") ||
-      normalizedShipmentStatus.includes("ship") ||
-      normalizedShipmentStatus.includes("out") ||
-      normalizedShipmentStatus.includes("delivery") ||
-      normalizedShipmentStatus.includes("deliver")
-    );
-  })();
+  const currentStatusStepIndex = getShipmentStatusStepIndex(normalizedShipmentStatus);
+  const hasKnownStatusStep = Boolean(normalizedShipmentStatus);
 
   const activeTrackingStepIndex = (() => {
     if (hasKnownStatusStep) {
@@ -656,24 +648,13 @@ export default function OrderDetailsView({ orderIdProp }) {
     return firstIncomplete;
   })();
 
-  const carMarkerLeft = stepper.length
+  const carMarkerLeft = finalStepper.length
     ? (() => {
-      if (normalizedShipmentStatus === "delivered") {
-        return `${((stepper.length - 1 + 0.96) / stepper.length) * 100}%`;
+      if (normalizedShipmentStatus === "delivered" || activeTrackingStepIndex >= finalStepper.length - 1) {
+        return `${((finalStepper.length - 1 + 0.5) / finalStepper.length) * 100}%`;
       }
 
-      const baseIndex = Math.min(currentStatusStepIndex, stepper.length - 1);
-      const betweenOffset = normalizedShipmentStatus === "placed" || normalizedShipmentStatus === "order_placed" || normalizedShipmentStatus === "orderplaced"
-        ? 0.32
-        : normalizedShipmentStatus.includes("confirm")
-          ? 0.56
-          : normalizedShipmentStatus.includes("ship")
-            ? 0.0
-            : normalizedShipmentStatus.includes("out") || normalizedShipmentStatus.includes("delivery")
-              ? 0.88
-              : 0.96;
-
-      return `${((baseIndex + betweenOffset) / stepper.length) * 100}%`;
+      return `${((activeTrackingStepIndex + 1) / finalStepper.length) * 100}%`;
     })()
     : "50%";
 
@@ -998,23 +979,25 @@ export default function OrderDetailsView({ orderIdProp }) {
               </div>
 
               <div className="flex items-center gap-3 flex-wrap">
-                {String(shipment?.status || header?.status || "").toLowerCase() !== "delivered" && (
-                  <button
-                    type="button"
-                    onClick={handleCancelOrderShipment}
-                    disabled={isCancellingShipment || String(shipment?.status || "").toLowerCase() === "cancelled"}
-                    className="border border-red-200 bg-red-50 hover:bg-red-100 text-red-600 font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isCancellingShipment ? (
-                      <>
-                        <span className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></span>
-                        Cancelling...
-                      </>
-                    ) : (
-                      "Cancel Order Shipment"
-                    )}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={handleCancelOrderShipment}
+                  disabled={!canCancelShipment || isCancellingShipment}
+                  title={canCancelShipment ? "Cancel order shipment" : "Shipment cancellation is unavailable after dispatch"}
+                  className={`border font-bold px-4 py-2 rounded-lg text-sm transition-all inline-flex items-center gap-2 active:scale-95 disabled:cursor-not-allowed ${canCancelShipment
+                    ? "border-red-200 bg-red-50 text-red-600 hover:bg-red-100"
+                    : "border-gray-200 bg-gray-100 text-gray-400"
+                    }`}
+                >
+                  {isCancellingShipment ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></span>
+                      Cancelling...
+                    </>
+                  ) : (
+                    "Cancel Order Shipment"
+                  )}
+                </button>
 
                 <button
                   type="button"
