@@ -253,14 +253,40 @@ export default function OrderTrackingPage() {
   const deliveryCharges = 0;
   const finalTotal = amount || subtotal;
 
-  // ─── BUILD TIMELINE ────────────────────────────────────────
-  const timelineItems = [
-    { status: "Order Placed", date: formatDate(createdAt), active: true },
-    { status: "Confirmed", date: formatDate(createdAt), active: true }, // assuming confirmed same as placed for now
-    { status: "Shipped", date: formatDate(dispatched_at), active: !!dispatched_at },
-    { status: "Out for Delivery", date: formatDate(dispatched_at), active: !!dispatched_at }, // placeholder
-    { status: "Delivered", date: formatDate(delivered_at), active: !!delivered_at },
-  ].filter(item => item.date !== "N/A");
+  // ─── BUILD TIMELINE WITH 1 DAY BUFFER ───────────────────────
+  const timelineItems = useMemo(() => {
+    const baseDate = createdAt ? new Date(createdAt) : new Date();
+    let currentPointer = isNaN(baseDate.getTime()) ? new Date() : new Date(baseDate.getTime());
+
+    const steps = [
+      { status: "Order Placed", rawDate: createdAt },
+      { status: "Confirmed", rawDate: null },
+      { status: "Shipped", rawDate: dispatched_at },
+      { status: "Out for Delivery", rawDate: null },
+      { status: "Delivered", rawDate: delivered_at },
+    ];
+
+    return steps.map((step, idx) => {
+      let stepDateStr = "";
+      if (idx === 0) {
+        stepDateStr = step.rawDate ? formatDate(step.rawDate) : formatDate(currentPointer);
+      } else {
+        if (step.rawDate) {
+          const parsed = new Date(step.rawDate);
+          if (!isNaN(parsed.getTime())) currentPointer = parsed;
+          stepDateStr = formatDate(step.rawDate);
+        } else {
+          currentPointer = new Date(currentPointer.getTime() + 24 * 60 * 60 * 1000);
+          stepDateStr = formatDate(currentPointer);
+        }
+      }
+      return {
+        status: step.status,
+        date: stepDateStr,
+        active: idx === 0 || (idx === 1 && status !== "pending") || Boolean(step.rawDate),
+      };
+    });
+  }, [createdAt, dispatched_at, delivered_at, status]);
 
   // ─── LOADING / ERROR ──────────────────────────────────────
   if (loading) {
