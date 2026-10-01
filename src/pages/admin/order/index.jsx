@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import moment from "moment";
 import ShippingLabel from "@/components/shipping-label/ShippingLabel";
 import { exportShippingLabelPdf } from "@/components/shipping-label/exportShippingLabelPdf";
+import { extractStatus } from "@/components/shipmentUtils";
 import {
     FiHome,
     FiPackage,
@@ -423,7 +424,24 @@ export default function Index() {
                                     <tbody>
                                         {paginatedData?.length > 0 ? (
                                             paginatedData.map((order, idx) => {
-                                                const currentStatus = statusMap[order._id] || order.status || "pending";
+                                                const shipmentStatus = extractStatus(
+                                                    order?.shipment,
+                                                    order?.shipping_response,
+                                                    order?.shipping_meta
+                                                );
+                                                const isShipmentDelivered = [
+                                                    order?.shipping_status,
+                                                    order?.shippingStatus,
+                                                    order?.shipment_status,
+                                                    order?.shipmentStatus,
+                                                    order?.shipment?.shipping_status,
+                                                    order?.shipment?.shippingStatus,
+                                                    order?.shipment?.status,
+                                                    shipmentStatus,
+                                                ].some((status) => String(status || "").toLowerCase().includes("deliver"));
+                                                const currentStatus = isShipmentDelivered
+                                                    ? "delivered"
+                                                    : statusMap[order._id] || order.status || "pending";
                                                 const isShipped = currentStatus === "shipped";
                                                 const isDelivered = currentStatus === "delivered";
                                                 const isCancelled = currentStatus === "cancelled";
@@ -566,6 +584,7 @@ export default function Index() {
                                                                 `}
                                                             >
                                                                 {isPending && <option value="pending">Pending</option>}
+                                                                {isDelivered && <option value="delivered">Completed</option>}
                                                                 <option value="confirmed">Approved</option>
                                                                 <option value="cancelled">Cancelled</option>
                                                             </select>
@@ -582,7 +601,7 @@ export default function Index() {
                                                                         <span className="text-[10px] text-gray-500 font-medium">
                                                                             {resolvedCourier}
                                                                         </span>
-                                                                        {String(resolvedCourier || "").toUpperCase().includes("BLUE") && !isCancelled && (
+                                                                        {String(resolvedCourier || "").toUpperCase().includes("BLUE") && !isCancelled && !isDelivered && (
                                                                             <button
                                                                                 onClick={() => handleCancelWaybill(order, resolvedAwb)}
                                                                                 disabled={cancellingOrderId === order._id}
@@ -619,7 +638,7 @@ export default function Index() {
                                                                         <FiDownload className="w-4 h-4" />
                                                                     </button>
                                                                 )}
-                                                                {String(resolvedCourier || "").toUpperCase().includes("BLUE") && resolvedAwb && !isCancelled && (
+                                                                {String(resolvedCourier || "").toUpperCase().includes("BLUE") && resolvedAwb && !isCancelled && !isDelivered && (
                                                                     <button
                                                                         onClick={() => handleCancelWaybill(order, resolvedAwb)}
                                                                         disabled={cancellingOrderId === order._id}

@@ -156,6 +156,7 @@ export default function OrderDetailsPage() {
     const formatDate = (dateStr) => {
         if (!dateStr) return "N/A";
         const d = new Date(dateStr);
+        if (Number.isNaN(d.getTime())) return "N/A";
         return d.toLocaleDateString("en-IN", {
             day: "2-digit",
             month: "short",
@@ -595,13 +596,20 @@ export default function OrderDetailsPage() {
         null;
 
     const resolvedDeliveryDate =
+        delivered_at ||
+        dataShipment?.deliveredAt ||
+        dataShipment?.deliveryDate ||
         formattedWeb?.estimatedDeliveryInformation?.estDelivery ||
         rawEstDelivery?.estDelivery ||
         rawEstDelivery?.expectedDateDelivery ||
-        delivered_at ||
         dataShipment?.estDelivery ||
         pincodeEstDelivery ||
         null;
+
+    const isOrderCompleted = [status, resolvedShippingStatus].some((value) => {
+        const normalized = String(value || "").toLowerCase();
+        return normalized.includes("deliver") || normalized.includes("complete");
+    });
 
     const isOrderApproved =
         project?.admin_approval_status === "approved" ||
@@ -619,34 +627,75 @@ export default function OrderDetailsPage() {
     const finalTotal = amount || subtotal;
 
     // Build timeline
-    const baseTimelineItems =
-        formattedWeb?.stepperTimeline?.length > 0
-            ? formattedWeb.stepperTimeline.map((item) => ({
-                status: item.title || item.status,
-                message: item.description || item.message || "",
-                date: item.timestamp || "--",
-                active: item.completed ?? true,
-            }))
-            : dataShipment?.syncedTransit?.liveTracking?.events?.length > 0
-            ? dataShipment.syncedTransit.liveTracking.events.map((item) => ({
-                status: item.status || item.title || item.event,
+    const resolveTimelineDate = (item, eventStatus) => {
+        const rawDate = [
+            item?.timestamp,
+            item?.date,
+            item?.time,
+            item?.eventDate,
+            item?.eventTime,
+            item?.scanDate,
+            item?.scanTime,
+            item?.ScanDateTime,
+            item?.dateTime,
+            item?.createdAt,
+            [item?.ScanDate, item?.ScanTime].filter(Boolean).join(" "),
+            [item?.scanDate, item?.scanTime].filter(Boolean).join(" "),
+        ].find((value) => {
+            if (!value || ["n/a", "--", "unknown"].includes(String(value).trim().toLowerCase())) return false;
+            return !Number.isNaN(new Date(value).getTime());
+        });
+
+        if (rawDate) return formatDate(rawDate);
+
+        const normalizedStatus = String(eventStatus || "").toLowerCase();
+        if (normalizedStatus.includes("order placed") || normalizedStatus.includes("payment")) {
+            return formatDate(createdAt);
+        }
+        if (normalizedStatus.includes("deliver")) {
+            return formatDate(delivered_at || dataShipment?.deliveredAt || dataShipment?.deliveryDate || resolvedDeliveryDate || updatedAt);
+        }
+        if (normalizedStatus.includes("ship") || normalizedStatus.includes("dispatch")) {
+            return formatDate(resolvedDispatchDate);
+        }
+        return "Time unavailable";
+    };
+
+    const liveTrackingEvents = dataShipment?.syncedTransit?.liveTracking?.events || [];
+    const stepperTimeline = formattedWeb?.stepperTimeline || [];
+    const baseTimelineItems = liveTrackingEvents.length > 0
+        ? liveTrackingEvents.map((item) => {
+            const eventStatus = item.status || item.title || item.event;
+            return {
+                status: eventStatus,
                 message: item.description || item.location || "",
-                date: item.timestamp || item.date || item.time || "--",
+                date: resolveTimelineDate(item, eventStatus),
                 active: true,
-            }))
+            };
+        })
+        : stepperTimeline.length > 0
+            ? stepperTimeline.map((item) => {
+                const eventStatus = item.title || item.status;
+                return {
+                    status: eventStatus,
+                    message: item.description || item.message || "",
+                    date: resolveTimelineDate(item, eventStatus),
+                    active: item.completed ?? true,
+                };
+            })
             : shipping_timeline.length > 0
-            ? shipping_timeline.map((item) => ({
-                status: item.status,
-                message: item.message || "",
-                date: formatDate(item.date) || item.date,
-                active: true,
-            }))
-            : [
-                { status: "Order Placed", date: formatDate(createdAt), active: true },
-                { status: "Payment Success", date: formatDate(createdAt), active: true },
-                { status: "Shipped", date: formatDate(resolvedDispatchDate), active: !!resolvedDispatchDate && resolvedDispatchDate !== "N/A" },
-                { status: "Delivered", date: formatDate(resolvedDeliveryDate), active: !!resolvedDeliveryDate && resolvedDeliveryDate !== "N/A" },
-            ].filter(item => item.date !== "N/A");
+                ? shipping_timeline.map((item) => ({
+                    status: item.status,
+                    message: item.message || "",
+                    date: resolveTimelineDate(item, item.status),
+                    active: true,
+                }))
+                : [
+                    { status: "Order Placed", date: resolveTimelineDate({}, "Order Placed"), active: true },
+                    { status: "Payment Success", date: resolveTimelineDate({}, "Payment Success"), active: true },
+                    { status: "Shipped", date: resolveTimelineDate({}, "Shipped"), active: !!resolvedDispatchDate },
+                    { status: "Delivered", date: resolveTimelineDate({}, "Delivered"), active: isOrderCompleted },
+                ];
 
     const timelineItems = [...baseTimelineItems, ...extraTimelineEvents];
 
@@ -931,38 +980,40 @@ export default function OrderDetailsPage() {
                                 </div>
 
                                 {/* ─── AWB CANCELLATION SECTION ──────── */}
-                                <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
-                                    <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
-                                        <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
-                                            <FiXCircle className="w-4 h-4 text-red-500" />
-                                            AWB Cancellation
-                                        </h3>
-                                        <span className="text-xs text-gray-400 font-medium">Carrier: {resolvedCourierName}</span>
-                                    </div>
-
-                                    <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                                        <div>
-                                            <p className="text-xs text-gray-500 font-medium">Waybill / Tracking Number</p>
-                                            <p className="text-sm font-bold font-mono text-gray-900 mt-0.5">{resolvedAwbNumber}</p>
-                                            <p className="text-xs text-gray-500 mt-1">
-                                                {status === "cancelled" || resolvedShippingStatus === "cancelled"
-                                                    ? "This shipment/waybill has been marked as cancelled."
-                                                    : "Cancel BlueDart waybill directly via carrier API."}
-                                            </p>
+                                {!isOrderCompleted && (
+                                    <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                                        <div className="flex items-center justify-between flex-wrap gap-3 mb-4">
+                                            <h3 className="text-sm font-bold text-gray-800 flex items-center gap-2">
+                                                <FiXCircle className="w-4 h-4 text-red-500" />
+                                                AWB Cancellation
+                                            </h3>
+                                            <span className="text-xs text-gray-400 font-medium">Carrier: {resolvedCourierName}</span>
                                         </div>
 
-                                        {resolvedAwbNumber && resolvedAwbNumber !== "N/A" && (
-                                            <button
-                                                onClick={() => setCancelModalOpen(true)}
-                                                disabled={status === "cancelled" || resolvedShippingStatus === "cancelled" || isCancellingWaybill}
-                                                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0"
-                                            >
-                                                <FiXCircle className="w-4 h-4" />
-                                                {status === "cancelled" || resolvedShippingStatus === "cancelled" ? "Waybill Cancelled" : "Cancel BlueDart Waybill"}
-                                            </button>
-                                        )}
+                                        <div className="bg-gray-50 border border-gray-100 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                            <div>
+                                                <p className="text-xs text-gray-500 font-medium">Waybill / Tracking Number</p>
+                                                <p className="text-sm font-bold font-mono text-gray-900 mt-0.5">{resolvedAwbNumber}</p>
+                                                <p className="text-xs text-gray-500 mt-1">
+                                                    {status === "cancelled" || resolvedShippingStatus === "cancelled"
+                                                        ? "This shipment/waybill has been marked as cancelled."
+                                                        : "Cancel BlueDart waybill directly via carrier API."}
+                                                </p>
+                                            </div>
+
+                                            {resolvedAwbNumber && resolvedAwbNumber !== "N/A" && (
+                                                <button
+                                                    onClick={() => setCancelModalOpen(true)}
+                                                    disabled={status === "cancelled" || resolvedShippingStatus === "cancelled" || isCancellingWaybill}
+                                                    className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-semibold transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 flex-shrink-0"
+                                                >
+                                                    <FiXCircle className="w-4 h-4" />
+                                                    {status === "cancelled" || resolvedShippingStatus === "cancelled" ? "Waybill Cancelled" : "Cancel BlueDart Waybill"}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
+                                )}
 
                                 {/* ─── PAYMENT INFORMATION ────────── */}
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
@@ -1005,8 +1056,8 @@ export default function OrderDetailsPage() {
                                     <div className="space-y-3">
                                         <div className="flex items-center justify-between p-3 bg-gray-50 rounded-xl">
                                             <span className="text-sm font-medium text-gray-700">Current Status</span>
-                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(shipping_status)}`}>
-                                                {shipping_status}
+                                            <span className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusColor(resolvedShippingStatus)}`}>
+                                                {resolvedShippingStatus}
                                             </span>
                                         </div>
                                         <div className="flex gap-2">
@@ -1025,13 +1076,15 @@ export default function OrderDetailsPage() {
                                                 Download Label
                                             </button>
                                         </div>
-                                        <button
-                                            onClick={() => openModal("cancel")}
-                                            className="w-full px-3 py-2 rounded-xl border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
-                                        >
-                                            <FiXCircle className="w-3.5 h-3.5" />
-                                            Cancel Order
-                                        </button>
+                                        {!isOrderCompleted && (
+                                            <button
+                                                onClick={() => openModal("cancel")}
+                                                className="w-full px-3 py-2 rounded-xl border border-red-200 text-xs font-medium text-red-600 hover:bg-red-50 transition-colors flex items-center justify-center gap-1.5"
+                                            >
+                                                <FiXCircle className="w-3.5 h-3.5" />
+                                                Cancel Order
+                                            </button>
+                                        )}
                                         <button
                                             onClick={() => openModal("note")}
                                             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5"
@@ -1043,7 +1096,7 @@ export default function OrderDetailsPage() {
                                 </div>
 
                                 {/* ─── ADMIN ACTIONS ────────────── */}
-                                {!isOrderApproved && (
+                                {!isOrderApproved && !isOrderCompleted && (
                                     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                                         <h3 className="text-sm font-bold text-gray-800 mb-4 flex items-center gap-2">
                                             <FiClipboard className="w-4 h-4 text-gray-400" />
@@ -1167,7 +1220,7 @@ export default function OrderDetailsPage() {
                                 <FiXCircle className="w-5 h-5 text-gray-400" />
                             </button>
                         </div>
-                        
+
                         <p className="text-sm text-gray-600 leading-relaxed mb-6">
                             Are you sure you want to cancel BlueDart Waybill <span className="font-mono font-bold text-gray-900">{resolvedAwbNumber}</span> for order <span className="font-bold text-gray-900">{orderId || id}</span>? This will submit a cancellation request to the BlueDart API.
                         </p>
