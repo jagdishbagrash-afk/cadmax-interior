@@ -691,8 +691,10 @@ export default function Index() {
 
                   {selectedVariant?.images?.map((img, index) => (
                     <SwiperSlide key={index}>
-                      <div
-                        onMouseEnter={() => setCurrentIndex(index)}
+                      <button
+                        type="button"
+                        onClick={() => setCurrentIndex(index)}
+                        aria-label={`Show product image ${index + 1}`}
                         className={`
       relative w-full h-[120px]
       rounded-xl overflow-hidden
@@ -710,7 +712,7 @@ export default function Index() {
                           fill
                           className="object-cover p-0"
                         />
-                      </div>
+                      </button>
                     </SwiperSlide>
                   ))}
                 </Swiper>
