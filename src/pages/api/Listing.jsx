@@ -11,7 +11,9 @@ class Listing extends Component {
     return Api.post("/user/teacher-register", data);
   }
   async Login(data) {
-    return Api.post("/admin/login", data);
+    return Api.post("/admin/login", data, {
+      validateStatus: (status) => status < 500,
+    });
   }
   async AdminProfileUpdate(data) {
     return Api.post("/user/edit-profile", data);

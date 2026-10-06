@@ -137,7 +137,7 @@ function Index() {
 
                 <Banner
                     Slider1={ProductListBanner}
-                    title={"Discover Luxury Furniture Crafted for Modern Living"}
+                    title={"Discover Premium Furniture Crafted for Modern Living"}
                 />
                 <FeaturedCategories />
 

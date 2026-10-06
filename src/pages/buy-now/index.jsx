@@ -2178,7 +2178,7 @@ export default function Index() {
 
                           {/* COD */}
 
-                          <button
+                          {/* <button
                             type="button"
                             onClick={() =>
                               setPaymentMethod(
@@ -2235,7 +2235,7 @@ export default function Index() {
                                   )}
                               </div>
                             </div>
-                          </button>
+                          </button> */}
                         </div>
 
                         {/* PAYMENT SUMMARY */}

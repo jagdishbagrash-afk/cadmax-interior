@@ -189,16 +189,21 @@ export default function Header() {
                 ref={profileDropdownRef}
                 className="relative"
               >
-                <FiUser
-                  size={24}
-                  className={`cursor-pointer ${textColor}`}
+                <button
+                  type="button"
+                  aria-label="Profile menu"
+                  aria-haspopup="menu"
+                  aria-expanded={dropdownOpen}
                   onClick={() => {
                     setDropdownOpen((prev) => !prev);
                   }}
-                />
+                  className={`flex h-10 w-10 items-center justify-center rounded-full ${textColor}`}
+                >
+                  <FiUser size={24} />
+                </button>
 
                 {dropdownOpen && (
-                  <div className="hidden md:block absolute -right-4 mt-3 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
+                  <div className="absolute right-0 mt-3 w-60 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-50">
 
                     {/* Profile Header */}
                     <div className="px-2 py-2 bg-gradient-to-b from-black via-[#0a0a0a] to-black text-white">

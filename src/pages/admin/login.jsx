@@ -39,35 +39,31 @@ export default function Login() {
     try {
       const main = new Listing();
       const response = await main.Login({
-        email: data?.email,
-        password: data?.password,
+        email: data.email.trim().toLowerCase(),
+        password: data.password,
       });
+      const result = response?.data;
 
-      if (response?.data?.status) {
-        toast.success(response.data.message);
-        localStorage && localStorage.setItem("admintoken", response?.data?.token);
-        if (response?.data?.user?.role === "admin") {
-          router.push("/admin/product");
-
-        } else {
-          router.push("/");
-        }
+      if (!result?.status) {
+        toast.error(result?.message || "Invalid email or password.");
+        return;
       }
-      else {
-        toast.error(response.data.message);
-      }
-      setData({
-        email: "",
-        password: "",
-      });
-      setLoading(false);
 
+      if (result?.user?.role !== "admin" || !result?.token) {
+        toast.error("This account is not authorized to access the admin panel.");
+        return;
+      }
+
+      localStorage.setItem("admintoken", result.token);
+      toast.success(result.message || "Login successful.");
+      setData({ email: "", password: "" });
+      await router.replace("/admin/product");
     } catch (error) {
       console.error("API error:", error);
       toast.error(error?.response?.data?.message || "Something went wrong!");
+    } finally {
       setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -153,7 +149,7 @@ export default function Login() {
           </button>
         </form>
           {/* Register */}
-          <p className="text-center text-base text-[#727272] mt-6 lg:mt-12 tracking-[-0.03em] font-medium">
+          {/* <p className="text-center text-base text-[#727272] mt-6 lg:mt-12 tracking-[-0.03em] font-medium">
             Not registered?{" "}
             <Link
               href="/register"
@@ -161,7 +157,7 @@ export default function Login() {
             >
               Register.
             </Link>
-          </p>
+          </p> */}
         </div>
       </div>
     </div>
