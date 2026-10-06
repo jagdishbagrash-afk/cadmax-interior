@@ -7,9 +7,12 @@ import useWishlist from "@/hooks/useWishlist";
 import { useDispatch } from "react-redux";
 import { clearWishlist } from "@/redux/wishlistSlice";
 import SEOHead from "./SEOHead";
+import { useRouter } from "next/router";
+import { FiArrowLeft } from "react-icons/fi";
 
 export default function Layout({ children , seo}) {
   const { user, setUser } = useRole();
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
   const prevUserIdRef = useRef("__initial__");
@@ -87,6 +90,24 @@ export default function Layout({ children , seo}) {
           <SEOHead {...seo} />
 
       <Header />
+      {router.pathname !== "/" && (
+        <div className="container mx-auto px-4 pt-3 lg:hidden">
+          <button
+            type="button"
+            aria-label="Go back"
+            onClick={() => {
+              if (window.history.length > 1) {
+                router.back();
+              } else {
+                router.push("/");
+              }
+            }}
+            className="flex h-10 w-10 items-center justify-center rounded-full text-gray-800 hover:bg-gray-100"
+          >
+            <FiArrowLeft size={24} />
+          </button>
+        </div>
+      )}
      <main>{children}</main>
 
       <Footer />
