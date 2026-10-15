@@ -10,6 +10,7 @@ import {
   MdLabel,
   MdBookmarks,
   MdTask,
+  MdRefresh,
 } from "react-icons/md";
 import { AiFillProduct } from "react-icons/ai";
 import { BsCartCheckFill } from "react-icons/bs";
@@ -30,6 +31,7 @@ function SideBar() {
     { name: "Reviews", path: "/admin/reviews", icon: <MdLabel /> },
 
     { name: "Orders", path: "/admin/order", icon: <BsCartCheckFill /> },
+    { name: "Returns & Replacements", path: "/admin/returns", icon: <MdRefresh /> },
     { name: "Payments", path: "/admin/payment", icon: <MdBorderAll /> },
 
     { name: "Leads", path: "/admin/lead", icon: <GiLeadPipe /> },

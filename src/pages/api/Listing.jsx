@@ -346,6 +346,54 @@ class Listing extends Component {
     return Api.post(`/order/admin/reject/${orderId}`, payload);
   }
 
+  async createReturnRequest(formData) {
+    return ApiallowFile.post("/returns", formData);
+  }
+
+  async getOrderReturnRequests(orderId) {
+    return Api.get(`/returns/order/${encodeURIComponent(orderId)}`);
+  }
+
+  async getReturnRequest(returnId) {
+    return Api.get(`/returns/${encodeURIComponent(returnId)}`);
+  }
+
+  async cancelReturnRequest(returnId) {
+    return Api.patch(`/returns/${encodeURIComponent(returnId)}/cancel`);
+  }
+
+  async adminGetReturns(params = {}) {
+    return Api.get("/admin/returns", { params });
+  }
+
+  async adminGetReturnDetails(returnId) {
+    return Api.get(`/admin/returns/${encodeURIComponent(returnId)}`);
+  }
+
+  async adminUpdateReturnStatus(returnId, payload) {
+    return Api.patch(`/admin/returns/${encodeURIComponent(returnId)}/status`, payload);
+  }
+
+  async adminApproveReturn(returnId, payload = {}) {
+    return Api.patch(`/admin/returns/${encodeURIComponent(returnId)}/approve`, payload);
+  }
+
+  async adminRejectReturn(returnId, payload) {
+    return Api.patch(`/admin/returns/${encodeURIComponent(returnId)}/reject`, payload);
+  }
+
+  async adminCreateReverseShipment(returnId, payload = {}) {
+    return Api.post(`/admin/returns/${encodeURIComponent(returnId)}/create-reverse-shipment`, payload);
+  }
+
+  async adminInitiateReturnRefund(returnId, payload = {}) {
+    return Api.post(`/admin/returns/${encodeURIComponent(returnId)}/refund`, payload);
+  }
+
+  async adminCreateReplacementOrder(returnId, payload = {}) {
+    return Api.post(`/admin/returns/${encodeURIComponent(returnId)}/create-replacement`, payload);
+  }
+
   async deleteProduct(data) {
     return Api.post(`/product/delete/${data}`);
   }

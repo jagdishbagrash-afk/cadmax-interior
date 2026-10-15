@@ -6,6 +6,9 @@ import { useRole } from "@/context/RoleContext";
 import toast from "react-hot-toast";
 import { InvoiceTemplate } from "@/components/invoice/InvoiceTemplate";
 import { exportInvoicePdf } from "@/components/invoice/exportInvoicePdf";
+import ReviewsSection from "@/components/reviews/ReviewsSection";
+import ReturnReplacementModal from "@/components/ReturnReplacementModal";
+import CustomerReturnRequestDialog from "@/components/CustomerReturnRequestDialog";
 import {
   extractStatus,
   extractTrackingNumber,
@@ -98,6 +101,8 @@ const DEFAULT_ORDER_DATA = {
       },
     },
   ],
+  returnEligibility: null,
+  returnRequests: [],
   shippingAddress: {
     name: "A-12, Sikar Road, Vaishali Nagar,",
     address: "Jaipur, Rajasthan - 302021",
@@ -148,6 +153,21 @@ const DEFAULT_ORDER_DATA = {
   },
 };
 
+function parseDeliveryDate(value, fallbackYear) {
+  if (!value || value === "--" || value === "N/A") return null;
+  if (value instanceof Date) return Number.isNaN(value.getTime()) ? null : value;
+
+  let dateText = String(value).trim();
+  if (!/\b20\d{2}\b/.test(dateText) && fallbackYear) {
+    dateText = dateText.includes(",")
+      ? dateText.replace(",", ` ${fallbackYear},`)
+      : `${dateText} ${fallbackYear}`;
+  }
+
+  const date = new Date(dateText);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
 export default function OrderDetailsView({ orderIdProp }) {
   const router = RouterHook();
   const { user } = useRole();
@@ -170,6 +190,9 @@ export default function OrderDetailsView({ orderIdProp }) {
       deliveredOn: "--",
     },
   }));
+  const [reviewProduct, setReviewProduct] = useState(null);
+  const [returnProduct, setReturnProduct] = useState(null);
+  const [selectedReturnRequest, setSelectedReturnRequest] = useState(null);
 
   const header = orderData?.orderHeader ?? DEFAULT_ORDER_DATA.orderHeader;
   const stepper = orderData?.stepperTimeline ?? DEFAULT_ORDER_DATA.stepperTimeline;
@@ -261,7 +284,7 @@ export default function OrderDetailsView({ orderIdProp }) {
           return { ...item, timestamp: rawTime };
         } else {
           // Increment 1 day (24 hours) buffer per step
-          stepPointer = new Date(stepPointer.getTime() + 24 * 60 * 60 * 1000);
+          stepPointer = new Date(stepPointer.getTime() + 7 * 60 * 60 * 1000);
           const calculatedVal = formatStepTimestamp(stepPointer);
 
           const isShippingStep = idx === 2 || item.key === "shipped" || String(item.title).toLowerCase().includes("ship");
@@ -404,7 +427,29 @@ export default function OrderDetailsView({ orderIdProp }) {
         rawOrderId: dataOrder?.orderId || apiData.orderHeader?.rawOrderId || DEFAULT_ORDER_DATA.orderHeader.rawOrderId,
         status: shippingStatus || apiData.orderHeader?.status || DEFAULT_ORDER_DATA.orderHeader.status,
       },
+      databaseOrderId:
+        dataOrder?._id ||
+        apiData?.order?._id ||
+        apiData?._id ||
+        apiData?.data?._id ||
+        null,
+      returnEligibility:
+        apiData?.returnEligibility ||
+        apiData?.data?.returnEligibility ||
+        formattedWeb?.returnEligibility ||
+        null,
       stepperTimeline: stepperEvents,
+      returnRequests: Array.isArray(apiData.returnRequests)
+        ? apiData.returnRequests
+        : Array.isArray(apiData?.data?.returnRequests)
+          ? apiData.data.returnRequests
+          : apiData?.returnRequest
+            ? [apiData.returnRequest]
+            : apiData?.data?.returnRequest
+              ? [apiData.data.returnRequest]
+              : Array.isArray(dataOrder.returnRequests)
+                ? dataOrder.returnRequests
+                : [],
       products:
         apiData.products?.length > 0
           ? apiData.products
@@ -433,6 +478,13 @@ export default function OrderDetailsView({ orderIdProp }) {
         ...DEFAULT_ORDER_DATA.estimatedDeliveryInformation,
         ...rawEstDelivery,
         estDelivery: estDeliveryVal || DEFAULT_ORDER_DATA.estimatedDeliveryInformation.estDelivery,
+        actualDelivery:
+          rawEstDelivery?.actualDelivery ||
+          rawShipmentDetails?.deliveredOn ||
+          dataShipment?.deliveredOn ||
+          dataOrder?.deliveredOn ||
+          apiData?.deliveredOn ||
+          "--",
         orderedOn: dataOrder?.createdAt
           ? (typeof dataOrder.createdAt === "string" && dataOrder.createdAt.includes("T")
             ? new Date(dataOrder.createdAt).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })
@@ -472,6 +524,36 @@ export default function OrderDetailsView({ orderIdProp }) {
           console.log("Merged Order Data:", merged);
           console.log("================================");
           setOrderData(merged);
+
+          const databaseOrderId =
+            merged.databaseOrderId ||
+            payload?.order?._id ||
+            payload?.data?.order?._id ||
+            payload?._id;
+          if (databaseOrderId) {
+            try {
+              const returnRes = await listing.getOrderReturnRequests(databaseOrderId);
+              const returnPayload = returnRes?.data?.data || returnRes?.data || {};
+              const requests = Array.isArray(returnPayload)
+                ? returnPayload
+                : returnPayload.requests || returnPayload.returnRequests || [];
+              const eligibility =
+                returnPayload.returnEligibility ||
+                returnPayload.eligibility ||
+                merged.returnEligibility;
+              setOrderData((previous) => ({
+                ...previous,
+                returnRequests: requests,
+                returnEligibility: eligibility || previous.returnEligibility,
+              }));
+            } catch (returnError) {
+              console.error("Failed to load return requests:", returnError);
+              toast.error(
+                returnError?.response?.data?.message ||
+                "Unable to load return request status."
+              );
+            }
+          }
 
           // Pincode Transit Tracking fallback hit if estimated delivery is missing
           const currentEst =
@@ -526,6 +608,111 @@ export default function OrderDetailsView({ orderIdProp }) {
       return { query: {} };
     }
   }
+
+  const handleBuyAgain = (product) => {
+    const buyAgainUrl = product?.actions?.buyAgainUrl || product?.buyAgainUrl || "/cart";
+
+    if (!buyAgainUrl || buyAgainUrl === "#") {
+      toast("No buy-again option is available for this item.", { icon: "🛒" });
+      return;
+    }
+
+    if (router?.push) {
+      router.push(buyAgainUrl);
+      return;
+    }
+
+    window.location.assign(buyAgainUrl);
+  };
+
+  const handleWriteReviewForProduct = (product) => {
+    const hasValidLogin = !!(
+      user?._id ||
+      user?.id ||
+      user?.email ||
+      (typeof window !== "undefined" && localStorage.getItem("token"))
+    );
+
+    if (!hasValidLogin) {
+      toast.error("Please login to write a review");
+      router.push("/login");
+      return;
+    }
+
+    if (user?.role && user.role !== "customer") {
+      toast.error("Only customers can write product reviews");
+      return;
+    }
+
+    const rawProductId =
+      product?.productId ??
+      product?._id ??
+      product?.id ??
+      product?.product?._id ??
+      product?.product?.id;
+    const productId =
+      typeof rawProductId === "object"
+        ? rawProductId?._id || rawProductId?.id
+        : rawProductId;
+
+    if (!productId) {
+      toast.error("Unable to identify this product. Please contact support.");
+      return;
+    }
+
+    setReviewProduct({
+      productId: String(productId),
+      productName:
+        product?.title ||
+        product?.name ||
+        product?.productName ||
+        product?.product?.title ||
+        product?.product?.name ||
+        "",
+    });
+  };
+
+  const handleSubmitReturnRequest = async (formData) => {
+    if (!orderData.databaseOrderId) {
+      throw new Error("Order details are missing the required order ID. Please reload the page.");
+    }
+
+    const main = new Listing();
+    const response = await main.createReturnRequest(formData);
+    const result = response?.data;
+    if (result?.success !== true) {
+      throw new Error(result?.message || "Failed to submit return request.");
+    }
+
+    const createdRequest = {
+      ...result.data,
+      productId: returnProduct?.productId,
+      requestType: formData.get("requestType"),
+      productTitle: returnProduct?.title || returnProduct?.name,
+    };
+    toast.success(result.message || "Return request submitted successfully.");
+    if (createdRequest) {
+      setOrderData((previous) => ({
+        ...previous,
+        returnRequests: [...(previous.returnRequests || []), createdRequest],
+      }));
+    }
+    setReturnProduct(null);
+  };
+
+  const refreshReturnRequests = async () => {
+    const returnOrderId = orderData.databaseOrderId;
+    if (!returnOrderId) {
+      throw new Error("Order ID is unavailable. Unable to refresh return requests.");
+    }
+    const main = new Listing();
+    const response = await main.getOrderReturnRequests(returnOrderId);
+    const payload = response?.data?.data || response?.data || {};
+    const requests = Array.isArray(payload)
+      ? payload
+      : payload.requests || payload.returnRequests || [];
+    setOrderData((previous) => ({ ...previous, returnRequests: requests }));
+  };
 
   const handleDownloadInvoice = async () => {
     if (!invoiceRef.current || isGeneratingInvoice) return;
@@ -630,6 +817,40 @@ export default function OrderDetailsView({ orderIdProp }) {
 
 
   const normalizedShipmentStatus = shipmentStatus;
+  const isDelivered =
+    normalizedShipmentStatus.includes("delivered") &&
+    !normalizedShipmentStatus.includes("out_for_delivery");
+  const deliveredStep = stepper.find((item) =>
+    item?.key === "delivered" || String(item?.title || "").toLowerCase().includes("delivered")
+  );
+  const placedYear = String(header.placedOn || "").match(/\b(20\d{2})\b/)?.[1];
+  const derivedDeliveryDate = isDelivered
+    ? parseDeliveryDate(
+      shipment.deliveredOn !== "--"
+        ? shipment.deliveredOn
+        : estDelivery.actualDelivery !== "--"
+          ? estDelivery.actualDelivery
+          : deliveredStep?.timestamp,
+      placedYear
+    )
+    : null;
+  const eligibilityDeadline = parseDeliveryDate(
+    orderData.returnEligibility?.eligibleUntil ||
+    orderData.returnEligibility?.eligible_until,
+    placedYear
+  );
+  const returnDeadline = eligibilityDeadline || (
+    derivedDeliveryDate
+      ? new Date(derivedDeliveryDate.getTime() + 7 * 24 * 60 * 60 * 1000)
+      : null
+  );
+  const canRequestReturn =
+    Boolean(
+      isDelivered &&
+      orderData.returnEligibility?.eligible === true &&
+      returnDeadline &&
+      returnDeadline.getTime() >= Date.now()
+    );
 
   const currentStatusStepIndex = getShipmentStatusStepIndex(normalizedShipmentStatus);
   const hasKnownStatusStep = Boolean(normalizedShipmentStatus);
@@ -734,7 +955,9 @@ export default function OrderDetailsView({ orderIdProp }) {
                 <div className="grid grid-cols-5 gap-2 relative z-10 pt-8">
                   {finalStepper.map((item, idx) => {
                     const isLast = idx === finalStepper.length - 1;
-                    const isCompleted = item.completed;
+                    const isCompleted =
+                      item.completed ||
+                      (hasKnownStatusStep && idx <= activeTrackingStepIndex);
 
                     return (
                       <div
@@ -754,7 +977,7 @@ export default function OrderDetailsView({ orderIdProp }) {
                           {/* Connecting Line (right side) */}
                           {!isLast && (
                             <div
-                              className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${finalStepper[idx + 1]?.completed ? "bg-[#22c55e]" : "bg-gray-200"
+                              className={`absolute right-0 top-1/2 -translate-y-1/2 w-1/2 h-[2px] ${(finalStepper[idx + 1]?.completed || (hasKnownStatusStep && idx + 1 <= activeTrackingStepIndex)) ? "bg-[#22c55e]" : "bg-gray-200"
                                 }`}
                             />
                           )}
@@ -809,7 +1032,7 @@ export default function OrderDetailsView({ orderIdProp }) {
             {products.map((prod, index) => (
               <div
                 key={prod.productId || index}
-                className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+                className="flex flex-col flex-wrap items-start justify-between gap-6 sm:flex-row sm:items-center"
               >
                 {/* Left Product Details */}
                 <div className="flex items-start sm:items-center gap-4 sm:gap-5 w-full sm:w-auto">
@@ -841,23 +1064,89 @@ export default function OrderDetailsView({ orderIdProp }) {
                 </div>
 
                 {/* Right Action Buttons */}
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-end pt-2 sm:pt-0">
-                  <button
-                    type="button"
-                    onClick={() => handleBuyAgain(prod)}
-                    className="flex-1 sm:flex-none border border-gray-300 hover:bg-gray-50 text-gray-800 font-bold px-5 py-2.5 rounded-lg text-sm transition-all active:scale-95 text-center"
-                  >
-                    Buy Again
-                  </button>
+                <div className="flex w-full flex-col items-stretch gap-2 pt-2 sm:w-auto sm:items-end sm:pt-0">
+                  <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+                    <button
+                      type="button"
+                      onClick={() => handleBuyAgain(prod)}
+                      className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-center text-sm font-bold text-gray-800 transition-all hover:bg-gray-50 active:scale-95 sm:flex-none sm:px-5"
+                    >
+                      Buy Again
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleWriteReviewForProduct(prod)}
-                    className="flex-1 sm:flex-none bg-[#111827] hover:bg-slate-800 text-white font-bold px-5 py-2.5 rounded-lg text-sm transition-all shadow-xs active:scale-95 text-center"
-                  >
-                    Write a Review
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => handleWriteReviewForProduct(prod)}
+                      className="flex-1 rounded-lg bg-[#111827] px-4 py-2.5 text-center text-sm font-bold text-white shadow-xs transition-all hover:bg-slate-800 active:scale-95 sm:flex-none sm:px-5"
+                    >
+                      Write a Review
+                    </button>
+                    {(() => {
+                      const productId =
+                        prod?.productId?._id ||
+                        prod?.productId ||
+                        prod?._id ||
+                        prod?.id ||
+                        prod?.product?._id;
+                      const existingRequest = orderData.returnRequests?.find((request) => {
+                        const requestedProductId =
+                          request?.productId?._id ||
+                          request?.productId ||
+                          request?.product?._id ||
+                          request?.product;
+                        return productId && String(requestedProductId) === String(productId);
+                      });
+
+                      if (existingRequest) {
+                        return (
+                          <button
+                            type="button"
+                            onClick={() => setSelectedReturnRequest(existingRequest)}
+                            className="flex-1 rounded-lg border border-blue-600 px-4 py-2.5 text-center text-sm font-bold text-blue-700 transition-all hover:bg-blue-50 sm:flex-none sm:px-5"
+                          >
+                            View Return Request
+                          </button>
+                        );
+                      }
+
+                      return canRequestReturn ? (
+                        <button
+                          type="button"
+                          onClick={() => setReturnProduct({ ...prod, productId })}
+                          className="flex-1 rounded-lg border border-emerald-600 bg-emerald-600 px-4 py-2.5 text-center text-sm font-bold text-white transition-all hover:bg-emerald-700 active:scale-95 sm:flex-none sm:px-5"
+                        >
+                          Return / Replace
+                        </button>
+                      ) : null;
+                    })()}
+                  </div>
+                  {canRequestReturn && (
+                    <p className="text-right text-xs font-medium text-emerald-700">
+                      Return or Replacement available within 7 days of delivery.
+                    </p>
+                  )}
                 </div>
+                {orderData.returnRequests
+                  ?.filter((request) => {
+                    const requestProductId =
+                      request?.productId?._id ||
+                      request?.productId ||
+                      request?.product?._id ||
+                      request?.product;
+                    const currentProductId = prod.productId || prod._id || prod.id;
+                    return requestProductId && String(requestProductId) === String(currentProductId);
+                  })
+                  .map((request) => (
+                    <div
+                      key={request._id || request.id || `${request.type}-${request.status}`}
+                      className="w-full basis-full rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-900"
+                    >
+                      <span className="font-bold">
+                        {request.requestType || request.type || "Return"} request:
+                      </span>{" "}
+                      {request.status || "Status unavailable"}
+                    </div>
+                  ))}
               </div>
             ))}
           </div>
@@ -1200,22 +1489,27 @@ export default function OrderDetailsView({ orderIdProp }) {
                 </div>
               </div>
 
-              {/* Return / Replace */}
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 flex-shrink-0">
-                  <HiOutlineArrowPath className="w-5 h-5" />
+              {isDelivered && (
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gray-50 border border-gray-200 flex items-center justify-center text-gray-700 flex-shrink-0">
+                    <HiOutlineArrowPath className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-gray-500">Return / Replace</p>
+                    <p className={`text-sm font-medium mt-0.5 ${canRequestReturn ? "text-emerald-700" : "text-gray-500"}`}>
+                      {canRequestReturn
+                        ? `Available until ${returnDeadline.toLocaleDateString("en-IN", {
+                          day: "numeric",
+                          month: "short",
+                          year: "numeric",
+                        })}`
+                        : returnDeadline
+                          ? "The 7-day return window has closed."
+                          : "Delivery date unavailable. Please contact support."}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-gray-500">Return / Replace</p>
-                  <button
-                    type="button"
-                    onClick={() => alert("Initiating return request...")}
-                    className="text-sm font-bold text-blue-600 hover:text-blue-700 hover:underline inline-block mt-0.5 text-left"
-                  >
-                    Start a Return
-                  </button>
-                </div>
-              </div>
+              )}
 
               {/* View Details */}
               <div className="flex items-center gap-3">
@@ -1244,6 +1538,42 @@ export default function OrderDetailsView({ orderIdProp }) {
       <div style={{ position: "fixed", top: "-10000px", left: "-10000px", width: "794px", zIndex: -1000, pointerEvents: "none" }}>
         <InvoiceTemplate ref={invoiceRef} orderData={orderData} />
       </div>
+
+      {reviewProduct && (
+        <ReviewsSection
+          key={reviewProduct.productId}
+          productId={reviewProduct.productId}
+          productName={reviewProduct.productName}
+          modalOnly
+          openReviewModal
+          onReviewModalClose={() => setReviewProduct(null)}
+        />
+      )}
+
+      {returnProduct && canRequestReturn && (
+        <ReturnReplacementModal
+          isOpen
+          onClose={() => setReturnProduct(null)}
+          onSubmit={handleSubmitReturnRequest}
+          orderId={orderData.databaseOrderId}
+          product={returnProduct}
+          pickupAddress={{
+            name: address.name,
+            address: [address.address, address.city, address.state, address.pincode]
+              .filter(Boolean)
+              .join(", "),
+            phone: address.phone,
+          }}
+          deliveryDeadline={returnDeadline}
+        />
+      )}
+      {selectedReturnRequest && (
+        <CustomerReturnRequestDialog
+          request={selectedReturnRequest}
+          onClose={() => setSelectedReturnRequest(null)}
+          onCancelled={refreshReturnRequests}
+        />
+      )}
     </div>
   );
 }

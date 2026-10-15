@@ -11,7 +11,13 @@ import { FaStar, FaSpinner } from "react-icons/fa";
 import Loader from "@/components/Loader";
 import ConfirmModal from "@/components/ConfirmModal";
 
-export default function ReviewsSection({ productId, productName = "" }) {
+export default function ReviewsSection({
+  productId,
+  productName = "",
+  modalOnly = false,
+  openReviewModal = false,
+  onReviewModalClose,
+}) {
   const { user } = useRole();
   const router = useRouter();
   const {
@@ -119,6 +125,13 @@ export default function ReviewsSection({ productId, productName = "" }) {
     setEditReviewData(null);
     setShowWriteModal(true);
   }, [router.query?.writeReview, user, productId]);
+
+  useEffect(() => {
+    if (openReviewModal) {
+      setEditReviewData(null);
+      setShowWriteModal(true);
+    }
+  }, [openReviewModal]);
 
   // Update hasMore when pagination changes
   useEffect(() => {
@@ -250,6 +263,22 @@ export default function ReviewsSection({ productId, productName = "" }) {
   ];
 
   const totalReviews = ratingSummary?.totalReviews || 0;
+
+  if (modalOnly) {
+    return (
+      <WriteReviewModal
+        isOpen={showWriteModal}
+        onClose={() => {
+          setShowWriteModal(false);
+          setEditReviewData(null);
+          onReviewModalClose?.();
+        }}
+        onSubmit={handleSubmitReview}
+        initialData={editReviewData}
+        productName={productName}
+      />
+    );
+  }
 
   return (
     <div className="mt-12 md:mt-16 border-t border-gray-200 pt-10 md:pt-14">

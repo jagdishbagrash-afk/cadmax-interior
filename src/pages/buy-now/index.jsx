@@ -559,7 +559,7 @@ export default function Index() {
               "INR",
 
             name:
-              "SR Electronics",
+              "Cadmax Atelier",
 
             description:
               "Product Payment",
